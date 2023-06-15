@@ -1,0 +1,109 @@
+flutterfire configure
+npm install -g firebase-tools
+brew update
+brew install node
+curl -sL https://firebase.tools | bash
+
+flutter pub cache clean
+
+dart run build_runner build --delete-conflicting-outputs
+
+ flutter pub run intl_translation:generate_from_arb \
+    --output-dir=lib/l10n --no-use-deferred-loading \
+    lib/main.dart lib/l10n/intl_*.arb
+
+dart run realm generate
+dart run realm generate --clean
+
+
+flutter build apk --no-tree-shake-icons
+
+
+$ brew update
+$ brew install --HEAD libimobiledevice
+$ brew install ideviceinstaller ios-deploy cocoapods
+$ pod setup
+
+https://stackoverflow.com/questions/65921257/flutter-display-log-in-release-mode-in-ios
+
+Android phones
++27 72 212 6971 - Redmi
++27 71 441 4396 - Samsung
+
+
+//... from plist
+<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>fr</string>
+		<string>es</string>
+		<string>pt</string>
+		<string>sw</string>
+		<string>sn</string>
+		<string>st</string>
+		<string>ts</string>
+		<string>ig</string>
+		<string>xh</string>
+		<string>zu</string>
+		<string>yo</string>
+		<string>af</string>
+		<string>zh_CN</string>
+	</array>
+
+	<key>NSAppTransportSecurity</key>
+    	<dict>
+    		<key>NSAllowsArbitraryLoads</key>
+    		<true/>
+    	</dict>
+
+https://bohatmx-dev-ed.develop.my.salesforce.com user: aubrey.og@geo.com
+khayaAndI#333_geo
+
+zoom client id: ezSg6VF5Rb2gRUS85tnc0w
+zoom : 7SqaMRef45vmqmcBzWlBHMlw9s8GjBot
+
+secret token: e649UgZlQI-rPiy7lk6xNg
+verification token: hAU0P6kVT7qx0oosfM-FIA
+
+dev:
+ezSg6VF5Rb2gRUS85tnc0w
+
+Share your locally developed app with others on your account for further testing.
+
+https://zoom.us/oauth/authorize?client_id=ezSg6VF5Rb2gRUS85tnc0w&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fgeo%2Fv1%2Fredirect
+
+
+# Install custom_lint for all projects
+dart pub global activate custom_lint
+# run custom_lint's command line in a project
+custom_lint
+
+dart pub run build_runner watch
+
+dart run custom_lint
+
+
+// import the package
+import 'package:responsive_builder/responsive_builder.dart';
+
+// Use the widget
+ResponsiveBuilder(
+    builder: (context, sizingInformation) {
+      // Check the sizing information here and return your UI
+          if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
+          return Container(color:Colors.blue);
+        }
+
+        if (sizingInformation.deviceScreenType == DeviceScreenType.tablet) {
+          return Container(color:Colors.red);
+        }
+
+        if (sizingInformation.deviceScreenType == DeviceScreenType.watch) {
+          return Container(color:Colors.yellow);
+        }
+
+        return Container(color:Colors.purple);
+      },
+    },
+  );
+}
