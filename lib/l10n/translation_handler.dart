@@ -2,7 +2,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
-import '../data/settings_model.dart';
+import '../data/schemas.dart';
 import '../utils/functions.dart';
 import 'my_keys.dart';
 

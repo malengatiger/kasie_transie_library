@@ -17,13 +17,12 @@ class _Country {
     return map;
   }
 }
-@RealmModel(ObjectType.embeddedObject)
-class _Position  {
 
+@RealmModel(ObjectType.embeddedObject)
+class _Position {
   String? type = 'Point';
   List<double> coordinates = [];
   double? latitude, longitude;
-
 
   Map<String, dynamic> toJson() {
     var m = [];
@@ -39,6 +38,7 @@ class _Position  {
     return map;
   }
 }
+
 @RealmModel()
 class _City {
   String? cityId;
@@ -50,22 +50,19 @@ class _City {
   String? countryName;
   _Position? position;
 
-
-
-
   Map<String, dynamic> toJson() => <String, dynamic>{
-    'cityId': cityId,
-    'countryId': countryId,
-    'name': name,
-    'stateName': stateName,
-    'latitude': latitude,
-    'longitude': longitude,
-    'countryName': countryName,
-    'position': position == null ? null : position!.toJson(),
-    'distance': distance,
-  };
-
+        'cityId': cityId,
+        'countryId': countryId,
+        'name': name,
+        'stateName': stateName,
+        'latitude': latitude,
+        'longitude': longitude,
+        'countryName': countryName,
+        'position': position == null ? null : position!.toJson(),
+        'distance': distance,
+      };
 }
+
 @RealmModel()
 class _RoutePoint {
   double? latitude;
@@ -75,7 +72,6 @@ class _RoutePoint {
   String? created, routeId;
   String? landmarkId, landmarkName;
   _Position? position;
-
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = Map();
@@ -90,7 +86,6 @@ class _RoutePoint {
     }
     if (position != null) {
       map['position'] = position!.toJson();
-
     }
     if (landmarkId != null) {
       map['landmarkId'] = landmarkId;
@@ -103,6 +98,7 @@ class _RoutePoint {
     return map;
   }
 }
+
 @RealmModel()
 class _Route {
   String? routeId, countryId, countryName, name, routeNumber;
@@ -119,9 +115,7 @@ class _Route {
   String? userUrl;
   List<String> landmarkIds = [];
 
-
   Map<String, dynamic> toJson() {
-    
     var distances = [];
     if (calculatedDistances.isNotEmpty) {
       for (var v in calculatedDistances!) {
@@ -152,13 +146,13 @@ class _Route {
     return map;
   }
 }
+
 @RealmModel(ObjectType.embeddedObject)
 class _CalculatedDistance {
   String? routeName, routeID;
   String? fromLandmark, toLandmark, fromLandmarkID, toLandmarkID;
   double? distanceInMetres, distanceFromStart;
   int? fromRoutePointIndex, toRoutePointIndex;
-
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {
@@ -183,6 +177,7 @@ class _CalculatedDistance {
     return sb;
   }
 }
+
 @RealmModel()
 class _Association {
   String? associationId;
@@ -204,24 +199,22 @@ class _Association {
   String? adminCellphone;
   String? adminEmail;
 
-
   Map<String, dynamic> toJson() => <String, dynamic>{
-    'associationId': associationId,
-    'cityId': cityId,
-    'countryId': countryId,
-    'associationName': associationName,
-    'phone': phone,
-    'status': status,
-    'countryName': countryName,
-    'cityName': cityName,
-    'stringDate': stringDate,
-    'date': date,
-    'path': path,
-    'position': position == null? null: position!.toJson(),
-
-  };
-
+        'associationId': associationId,
+        'cityId': cityId,
+        'countryId': countryId,
+        'associationName': associationName,
+        'phone': phone,
+        'status': status,
+        'countryName': countryName,
+        'cityName': cityName,
+        'stringDate': stringDate,
+        'date': date,
+        'path': path,
+        'position': position == null ? null : position!.toJson(),
+      };
 }
+
 @RealmModel()
 class _AppError {
   String? errorMessage;
@@ -242,8 +235,6 @@ class _AppError {
   String? userUrl;
   String? uploadedDate;
   String? id;
-
-
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {
@@ -281,8 +272,6 @@ class _User {
   String? email;
   String? cellphone, thumbnailUrl, imageUrl;
 
-
-
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {
       'userType': userType,
@@ -301,6 +290,7 @@ class _User {
     };
     return map;
   }
+
   String get name => '$firstName $lastName';
 }
 
@@ -329,8 +319,6 @@ class _Landmark {
   List<String> cityIds = [];
   _Position? position;
   List<String> routePointIds = [];
-
-
 
   Map<String, dynamic> toJson() {
     List names = [];
@@ -370,23 +358,37 @@ class _Landmark {
     this.position = position;
   }
 }
+
 @RealmModel()
 class _SettingsModel {
-  String? associationId, locale;
+  String? associationId, locale, created;
   int? refreshRateInSeconds, themeIndex;
+  int? geofenceRadius, commuterGeofenceRadius;
+  int? vehicleSearchMinutes,
+      heartbeatIntervalSeconds,
+      loiteringDelay,
+      commuterSearchMinutes,
+      commuterGeoQueryRadius,
+      vehicleGeoQueryRadius,
+      numberOfLandmarksToScan;
+  int? distanceFilter;
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {
       'locale': locale,
+      'loiteringDelay': loiteringDelay,
+      'created': created,
       'refreshRateInSeconds': refreshRateInSeconds,
       'themeIndex': themeIndex,
       'associationId': associationId,
+      'geofenceRadius': geofenceRadius,
+      'commuterGeofenceRadius': commuterGeofenceRadius,
+      'vehicleSearchMinutes': vehicleSearchMinutes,
+      'heartbeatIntervalSeconds': heartbeatIntervalSeconds,
+      'commuterGeoQueryRadius': commuterGeoQueryRadius,
+      'vehicleGeoQueryRadius': vehicleGeoQueryRadius,
+      'numberOfLandmarksToScan': numberOfLandmarksToScan,
     };
     return map;
   }
 }
-
-
-
-
-

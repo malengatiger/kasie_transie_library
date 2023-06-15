@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../utils/functions.dart';
+import '../utils/initializer.dart';
 
 class SplashWidget extends StatefulWidget {
   const SplashWidget({Key? key}) : super(key: key);
@@ -21,13 +22,7 @@ class _SplashWidgetState extends State<SplashWidget> {
   String? message;
 
   void _performSetup() async {
-    // await GetStorage.init(cacheName);
-    // prefsOGx = PrefsOGx();
-    // var sett = await prefsOGx.getSettings();
-    // message = await translator.translate('weHelpYou', sett.locale!);
-    // if (mounted) {
-    //   setState(() {});
-    // }
+
   }
 
   @override

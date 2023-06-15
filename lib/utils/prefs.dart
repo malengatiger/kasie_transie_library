@@ -7,8 +7,9 @@ import '../data/schemas.dart';
 import 'functions.dart';
 
 late Prefs prefs;
+
 class Prefs {
-   Future saveUser(User user) async {
+  Future saveUser(User user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     Map mJson = user.toJson();
@@ -18,7 +19,7 @@ class Prefs {
     return null;
   }
 
-   Future<User?> getUser() async {
+  Future<User?> getUser() async {
     var prefs = await SharedPreferences.getInstance();
     var string = prefs.getString('user');
     if (string == null) {
@@ -30,7 +31,33 @@ class Prefs {
     return user;
   }
 
-   Future saveConductor(User user) async {
+  Future saveCountry(Country country) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    Map mJson = country.toJson();
+    var jx = json.encode(mJson);
+    prefs.setString('country', jx);
+    pp("🌽 🌽 🌽 Prefs: saveCountry:  SAVED: 🌽 ${country.toJson()} 🌽 🌽 🌽");
+    return null;
+  }
+
+  Future<Country?> getCountry() async {
+    var prefs = await SharedPreferences.getInstance();
+    var string = prefs.getString('country');
+    if (string == null) {
+      return null;
+    }
+    var jx = json.decode(string);
+    var user = Country(
+      countryId: jx['countryId'],
+      name: jx['name'],
+      iso2: jx['iso2'],
+    );
+    pp("🌽 🌽 🌽 Prefs: getCountry 🧩  ${user.name} retrieved");
+    return user;
+  }
+
+  Future saveConductor(User user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     Map mJson = user.toJson();
@@ -40,7 +67,7 @@ class Prefs {
     return null;
   }
 
-   Future<User?> getConductor() async {
+  Future<User?> getConductor() async {
     var prefs = await SharedPreferences.getInstance();
     var string = prefs.getString('conductor');
     if (string == null) {
@@ -51,32 +78,36 @@ class Prefs {
     pp("🌽 🌽 🌽 Prefs: getConductor: 🧩  ${user.toJson()} retrieved");
     return user;
   }
+
   //
-   Future saveSettings(SettingsModel user) async {
+  Future saveSettings(SettingsModel settings) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    Map mJson = user.toJson();
+    Map mJson = settings.toJson();
     var jx = json.encode(mJson);
     prefs.setString('settings', jx);
-    pp("🌽 🌽 🌽 Prefs: saveSettings:  SAVED: 🌽 ${user.toJson()} 🌽 🌽 🌽");
+    pp("🌽 🌽 🌽 Prefs: saveSettings:  SAVED: 🌽 ${settings.toJson()} 🌽 🌽 🌽");
     return null;
-   }
+  }
 
-   Future<SettingsModel> getSettings() async {
+  Future<SettingsModel> getSettings() async {
     var prefs = await SharedPreferences.getInstance();
     var string = prefs.getString('settings');
     if (string == null) {
-     return SettingsModel(locale: 'en', themeIndex: 0, associationId: null, refreshRateInSeconds: 360);
+      return SettingsModel(
+          locale: 'en',
+          themeIndex: 0,
+          associationId: null,
+          refreshRateInSeconds: 360);
     }
     var jx = json.decode(string);
     var sett = SettingsModel(
-     locale: jx['locale'],
-     themeIndex: jx['themeIndex'],
-     associationId: jx['associationId'],
-     refreshRateInSeconds: jx['refreshRateInSeconds'],
+      locale: jx['locale'],
+      themeIndex: jx['themeIndex'],
+      associationId: jx['associationId'],
+      refreshRateInSeconds: jx['refreshRateInSeconds'],
     );
     pp("🌽 🌽 🌽 Prefs: getSettings 🧩  ${sett.toJson()} retrieved");
     return sett;
-   }
-
+  }
 }

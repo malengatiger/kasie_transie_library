@@ -1381,13 +1381,37 @@ class SettingsModel extends _SettingsModel
   SettingsModel({
     String? associationId,
     String? locale,
+    String? created,
     int? refreshRateInSeconds,
     int? themeIndex,
+    int? geofenceRadius,
+    int? commuterGeofenceRadius,
+    int? vehicleSearchMinutes,
+    int? heartbeatIntervalSeconds,
+    int? loiteringDelay,
+    int? commuterSearchMinutes,
+    int? commuterGeoQueryRadius,
+    int? vehicleGeoQueryRadius,
+    int? numberOfLandmarksToScan,
+    int? distanceFilter,
   }) {
     RealmObjectBase.set(this, 'associationId', associationId);
     RealmObjectBase.set(this, 'locale', locale);
+    RealmObjectBase.set(this, 'created', created);
     RealmObjectBase.set(this, 'refreshRateInSeconds', refreshRateInSeconds);
     RealmObjectBase.set(this, 'themeIndex', themeIndex);
+    RealmObjectBase.set(this, 'geofenceRadius', geofenceRadius);
+    RealmObjectBase.set(this, 'commuterGeofenceRadius', commuterGeofenceRadius);
+    RealmObjectBase.set(this, 'vehicleSearchMinutes', vehicleSearchMinutes);
+    RealmObjectBase.set(
+        this, 'heartbeatIntervalSeconds', heartbeatIntervalSeconds);
+    RealmObjectBase.set(this, 'loiteringDelay', loiteringDelay);
+    RealmObjectBase.set(this, 'commuterSearchMinutes', commuterSearchMinutes);
+    RealmObjectBase.set(this, 'commuterGeoQueryRadius', commuterGeoQueryRadius);
+    RealmObjectBase.set(this, 'vehicleGeoQueryRadius', vehicleGeoQueryRadius);
+    RealmObjectBase.set(
+        this, 'numberOfLandmarksToScan', numberOfLandmarksToScan);
+    RealmObjectBase.set(this, 'distanceFilter', distanceFilter);
   }
 
   SettingsModel._();
@@ -1405,6 +1429,12 @@ class SettingsModel extends _SettingsModel
   set locale(String? value) => RealmObjectBase.set(this, 'locale', value);
 
   @override
+  String? get created =>
+      RealmObjectBase.get<String>(this, 'created') as String?;
+  @override
+  set created(String? value) => RealmObjectBase.set(this, 'created', value);
+
+  @override
   int? get refreshRateInSeconds =>
       RealmObjectBase.get<int>(this, 'refreshRateInSeconds') as int?;
   @override
@@ -1415,6 +1445,76 @@ class SettingsModel extends _SettingsModel
   int? get themeIndex => RealmObjectBase.get<int>(this, 'themeIndex') as int?;
   @override
   set themeIndex(int? value) => RealmObjectBase.set(this, 'themeIndex', value);
+
+  @override
+  int? get geofenceRadius =>
+      RealmObjectBase.get<int>(this, 'geofenceRadius') as int?;
+  @override
+  set geofenceRadius(int? value) =>
+      RealmObjectBase.set(this, 'geofenceRadius', value);
+
+  @override
+  int? get commuterGeofenceRadius =>
+      RealmObjectBase.get<int>(this, 'commuterGeofenceRadius') as int?;
+  @override
+  set commuterGeofenceRadius(int? value) =>
+      RealmObjectBase.set(this, 'commuterGeofenceRadius', value);
+
+  @override
+  int? get vehicleSearchMinutes =>
+      RealmObjectBase.get<int>(this, 'vehicleSearchMinutes') as int?;
+  @override
+  set vehicleSearchMinutes(int? value) =>
+      RealmObjectBase.set(this, 'vehicleSearchMinutes', value);
+
+  @override
+  int? get heartbeatIntervalSeconds =>
+      RealmObjectBase.get<int>(this, 'heartbeatIntervalSeconds') as int?;
+  @override
+  set heartbeatIntervalSeconds(int? value) =>
+      RealmObjectBase.set(this, 'heartbeatIntervalSeconds', value);
+
+  @override
+  int? get loiteringDelay =>
+      RealmObjectBase.get<int>(this, 'loiteringDelay') as int?;
+  @override
+  set loiteringDelay(int? value) =>
+      RealmObjectBase.set(this, 'loiteringDelay', value);
+
+  @override
+  int? get commuterSearchMinutes =>
+      RealmObjectBase.get<int>(this, 'commuterSearchMinutes') as int?;
+  @override
+  set commuterSearchMinutes(int? value) =>
+      RealmObjectBase.set(this, 'commuterSearchMinutes', value);
+
+  @override
+  int? get commuterGeoQueryRadius =>
+      RealmObjectBase.get<int>(this, 'commuterGeoQueryRadius') as int?;
+  @override
+  set commuterGeoQueryRadius(int? value) =>
+      RealmObjectBase.set(this, 'commuterGeoQueryRadius', value);
+
+  @override
+  int? get vehicleGeoQueryRadius =>
+      RealmObjectBase.get<int>(this, 'vehicleGeoQueryRadius') as int?;
+  @override
+  set vehicleGeoQueryRadius(int? value) =>
+      RealmObjectBase.set(this, 'vehicleGeoQueryRadius', value);
+
+  @override
+  int? get numberOfLandmarksToScan =>
+      RealmObjectBase.get<int>(this, 'numberOfLandmarksToScan') as int?;
+  @override
+  set numberOfLandmarksToScan(int? value) =>
+      RealmObjectBase.set(this, 'numberOfLandmarksToScan', value);
+
+  @override
+  int? get distanceFilter =>
+      RealmObjectBase.get<int>(this, 'distanceFilter') as int?;
+  @override
+  set distanceFilter(int? value) =>
+      RealmObjectBase.set(this, 'distanceFilter', value);
 
   @override
   Stream<RealmObjectChanges<SettingsModel>> get changes =>
@@ -1431,9 +1531,27 @@ class SettingsModel extends _SettingsModel
         ObjectType.realmObject, SettingsModel, 'SettingsModel', [
       SchemaProperty('associationId', RealmPropertyType.string, optional: true),
       SchemaProperty('locale', RealmPropertyType.string, optional: true),
+      SchemaProperty('created', RealmPropertyType.string, optional: true),
       SchemaProperty('refreshRateInSeconds', RealmPropertyType.int,
           optional: true),
       SchemaProperty('themeIndex', RealmPropertyType.int, optional: true),
+      SchemaProperty('geofenceRadius', RealmPropertyType.int, optional: true),
+      SchemaProperty('commuterGeofenceRadius', RealmPropertyType.int,
+          optional: true),
+      SchemaProperty('vehicleSearchMinutes', RealmPropertyType.int,
+          optional: true),
+      SchemaProperty('heartbeatIntervalSeconds', RealmPropertyType.int,
+          optional: true),
+      SchemaProperty('loiteringDelay', RealmPropertyType.int, optional: true),
+      SchemaProperty('commuterSearchMinutes', RealmPropertyType.int,
+          optional: true),
+      SchemaProperty('commuterGeoQueryRadius', RealmPropertyType.int,
+          optional: true),
+      SchemaProperty('vehicleGeoQueryRadius', RealmPropertyType.int,
+          optional: true),
+      SchemaProperty('numberOfLandmarksToScan', RealmPropertyType.int,
+          optional: true),
+      SchemaProperty('distanceFilter', RealmPropertyType.int, optional: true),
     ]);
   }
 }

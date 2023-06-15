@@ -94,7 +94,6 @@ class ListApiDog {
     return user;
   }
 
-
   Future<Association> getAssociationById(String associationId) async {
     final cmd = '${url}getAssociationById?associationId=$associationId';
     final resp = await _sendHttpGET(cmd);
@@ -125,6 +124,88 @@ class ListApiDog {
       dateRegistered: map['dateRegistered'],
     );
     return m;
+  }
+
+  Future<List<SettingsModel>> getSettings(String associationId) async {
+    final cmd = '${url}getAssociationSettings?associationId=$associationId';
+    List resp = await _sendHttpGET(cmd);
+    final list = <SettingsModel>[];
+    for (var value in resp) {
+      list.add(buildSettingsModel(value));
+    }
+    realm.write(() {
+      realm.addAll(list);
+    });
+    pp('$mm cached settings: ${list.length}');
+    return list;
+  }
+
+  final StreamController<List<RoutePoint>> _routePointController = StreamController.broadcast();
+  Stream<List<RoutePoint>> get routePointStream => _routePointController.stream;
+  Future<List<RoutePoint>> getRoutePoints(String routeId) async {
+    final cmd = '${url}getRoutePoints?routeId=$routeId';
+    List resp = await _sendHttpGET(cmd);
+    final list = <RoutePoint>[];
+    for (var value in resp) {
+      list.add(RoutePoint(
+        longitude: value['longitude'],
+        routeId: value['routeId'],
+        index: value['index'],
+        latitude: value['userId'],
+        created: value['latitude'],
+        heading: value['heading'],
+        landmarkId: value['landmarkId'],
+        landmarkName: value['landmarkName'],
+        position: Position(
+          type: 'Point',
+          latitude: value['position']['latitude'],
+          longitude: value['position']['longitude'],
+          coordinates: [value['position']['longitude'], value['position']['latitude'],],
+        ),
+
+      ));
+    }
+    realm.write(() {
+      realm.addAll(list);
+    });
+    _routePointController.sink.add(list);
+    pp('$mm cached routePoints: ${list.length}');
+    return list;
+  }
+
+  final StreamController<List<Route>> _routeController = StreamController.broadcast();
+  Stream<List<Route>> get routeStream => _routeController.stream;
+  Future<List<Route>> getRoutes(String associationId) async {
+    final cmd = '${url}getAssociationRoutes?associationId=$associationId';
+    List resp = await _sendHttpGET(cmd);
+    final list = <Route>[];
+    for (var value in resp) {
+      list.add(Route(
+        countryId: value['countryId'],
+        routeId: value['routeId'],
+        associationId: value['countryId'],
+        userId: value['userId'],
+        created: value['created'],
+        heading: value['heading'],
+        name: value['name'],
+        userName: value['userName'],
+        userUrl: value['userUrl'],
+        countryName: value['countryName'],
+        color: value['color'],
+        activationDate: value['activationDate'],
+        associationName: value['associationName'],
+        calculatedDistances: value['calculatedDistances'],
+        landmarkIds: value['landmarkIds'],
+        lengthInMetres: value['lengthInMetres'],
+        routeNumber: value['routeNumber'],
+      ));
+    }
+    realm.write(() {
+      realm.addAll(list);
+    });
+    _routeController.sink.add(list);
+    pp('$mm cached settings: ${list.length}');
+    return list;
   }
 
   Future<List<City>> findCitiesByLocation(
@@ -387,4 +468,12 @@ User buildUser(Map map) {
   );
   return m;
 }
-
+SettingsModel buildSettingsModel(Map map) {
+final m = SettingsModel(
+  associationId: map['associationId'],
+  locale: map['locale'],
+  refreshRateInSeconds: map['associationId'],
+  themeIndex: map['themeIndex']
+);
+return m;
+}

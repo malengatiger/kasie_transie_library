@@ -1,12 +1,21 @@
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:kasie_transie_library/auth/phone_auth_signin.dart';
+import 'package:kasie_transie_library/bloc/data_api_dog.dart';
+import 'package:kasie_transie_library/bloc/list_api_dog.dart';
+import 'package:kasie_transie_library/data/schemas.dart';
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
 import 'intro_page_one.dart';
 
 class KasieIntro extends StatefulWidget {
-  const KasieIntro({Key? key}) : super(key: key);
+  const KasieIntro({Key? key, required this.listApiDog, required this.dataApiDog, required this.prefs, required this.onSuccessfulSignIn}) : super(key: key);
+
+  final ListApiDog listApiDog;
+  final DataApiDog dataApiDog;
+  final Prefs prefs;
+  final Function(User) onSuccessfulSignIn;
 
   @override
   KasieIntroState createState() => KasieIntroState();
@@ -56,7 +65,19 @@ class KasieIntroState extends State<KasieIntro>
     setState(() {});
   }
 
+  void onRegistration() {
+  }
 
+  void onSignIn() {
+    Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => PhoneAuthSignin(
+        prefs: prefs, listApiDog: widget.listApiDog, dataApiDog: widget.dataApiDog,
+        onSuccessfulSignIn: onSuccessfulSignIn)));
+  }
+  void onSuccessfulSignIn(User p1) {
+    widget.onSuccessfulSignIn(p1);
+  }
+  void _onPageChanged(int value) {
+  }
   @override
   void dispose() {
     _controller.dispose();
@@ -197,12 +218,7 @@ class KasieIntroState extends State<KasieIntro>
           ),
         ));
   }
-  void onRegistration() {
-  }
 
-  void onSignIn() {
-  }
 
-  void _onPageChanged(int value) {
-  }
+
 }

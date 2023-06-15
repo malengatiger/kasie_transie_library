@@ -11,6 +11,8 @@ import 'package:realm/realm.dart' as rm;
 
 import '../data/schemas.dart';
 import 'functions.dart';
+
+final Initializer initializer = Initializer();
 class Initializer {
   final mm = '😡😡😡😡😡😡😡 Initializer 😡 ';
   final config = rm.Configuration.local([
@@ -40,7 +42,10 @@ class Initializer {
     listApiDog = ListApiDog(client, appAuth, cacheManager, prefs, errorHandler, realm);
     dataApiDog = DataApiDog(client, appAuth, cacheManager, prefs, errorHandler);
 
-    listApiDog.initializeRealm();
+    await listApiDog.initializeRealm();
+    var list = await listApiDog.getCountries();
+    pp('$mm ... initialization almost complete ... countries found: ${list.length}');
+
 
     pp('$mm ... initialization complete!');
 

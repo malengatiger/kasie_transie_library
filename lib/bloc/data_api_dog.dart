@@ -45,10 +45,40 @@ class DataApiDog {
     }
   }
 
+  Future addLandmark(Landmark landmark) async {
+    final bag = landmark.toJson();
+    final cmd = '${url}addLandmark';
 
-  Future ping() async {
-    var result = await _sendHttpGET('${url!}ping');
+    final res = _callWebAPIPost(cmd, bag);
   }
+  Future addRoutePoints(List<RoutePoint> routePoints) async {
+
+    final list = jsonEncode(routePoints);
+    final bag = {
+      'routePoints': list,
+    };
+
+    final cmd = '${url}addRoutePoints';
+    final res = _callWebAPIPost(cmd, bag);
+  }
+  Future addRoute(Route route) async {
+    final bag = route.toJson();
+    final cmd = '${url}addRoute';
+    final res = _callWebAPIPost(cmd, bag);
+  }
+  Future registerAssociation(Association association) async {
+    final bag = association.toJson();
+    final cmd = '${url}registerAssociation';
+
+    final res = _callWebAPIPost(cmd, bag);
+  }
+  Future addSettings(SettingsModel settings) async {
+    final bag = settings.toJson();
+    final cmd = '${url}addSettingsModel';
+
+    final res = _callWebAPIPost(cmd, bag);
+  }
+
 
   Future _callWebAPIPost(String mUrl, Map? bag) async {
     // pp('$xz http POST call: 🔆 🔆 🔆  calling : 💙  $mUrl  💙 ');
@@ -130,101 +160,4 @@ class DataApiDog {
 
   static const xz = '🌎🌎🌎🌎🌎🌎 DataApiDog: ';
 
-  Future _sendHttpGET(String mUrl) async {
-    pp('$xz _sendHttpGET: 🔆 🔆 🔆 calling : 💙 $mUrl  💙');
-    var start = DateTime.now();
-    var token = await appAuth.getAuthToken();
-    if (token != null) {
-      // pp('$xz _sendHttpGET: 😡😡😡 Firebase Auth Token: 💙️ Token is GOOD! 💙 ');
-    } else {
-      pp('$xz Firebase token missing ${E.redDot}${E.redDot}${E.redDot}${E.redDot}');
-      final gex = KasieException(
-          message: 'Firebase Authentication token missing',
-          url: mUrl,
-          translationKey: 'networkProblem',
-          errorType: KasieException.timeoutException);
-      errorHandler.handleError(exception: gex);
-      //throw gex;
-    }
-    headers['Authorization'] = 'Bearer $token';
-    try {
-      var resp = await client
-          .get(
-            Uri.parse(mUrl),
-            headers: headers,
-          )
-          .timeout(const Duration(seconds: timeOutInSeconds));
-      pp('$xz http GET call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
-      var end = DateTime.now();
-      pp('$xz http GET call: 🔆 elapsed time for http: ${end.difference(start).inSeconds} seconds 🔆 \n\n');
-
-      if (resp.body.contains('not found')) {
-        return false;
-      }
-
-      if (resp.statusCode == 403) {
-        var msg =
-            '😡 😡 status code: ${resp.statusCode}, Request Forbidden 🥪 🥙 🌮  😡 ${resp.body}';
-        pp(msg);
-        final gex = KasieException(
-            message: 'Forbidden call',
-            url: mUrl,
-            translationKey: 'serverProblem',
-            errorType: KasieException.httpException);
-        errorHandler.handleError(exception: gex);
-        throw gex;
-      }
-
-      if (resp.statusCode != 200) {
-        var msg =
-            '😡 😡 The response is not 200; it is ${resp.statusCode}, NOT GOOD, throwing up !! 🥪 🥙 🌮  😡 ${resp.body}';
-        pp(msg);
-        final gex = KasieException(
-            message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
-            url: mUrl,
-            translationKey: 'serverProblem',
-            errorType: KasieException.socketException);
-        errorHandler.handleError(exception: gex);
-        throw gex;
-      }
-      var mJson = json.decode(resp.body);
-      return mJson;
-    } on SocketException {
-      pp('$xz SocketException, really means that server cannot be reached 😑');
-      final gex = KasieException(
-          message: 'Server not available',
-          url: mUrl,
-          translationKey: 'serverProblem',
-          errorType: KasieException.socketException);
-      errorHandler.handleError(exception: gex);
-      throw gex;
-    } on HttpException {
-      pp("$xz HttpException occurred 😱");
-      final gex = KasieException(
-          message: 'Server not available',
-          url: mUrl,
-          translationKey: 'serverProblem',
-          errorType: KasieException.httpException);
-      errorHandler.handleError(exception: gex);
-      throw gex;
-    } on FormatException {
-      pp("$xz Bad response format 👎");
-      final gex = KasieException(
-          message: 'Bad response format',
-          url: mUrl,
-          translationKey: 'serverProblem',
-          errorType: KasieException.formatException);
-      errorHandler.handleError(exception: gex);
-      throw gex;
-    } on TimeoutException {
-      pp("$xz No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
-      final gex = KasieException(
-          message: 'No Internet connection. Request timed out',
-          url: mUrl,
-          translationKey: 'networkProblem',
-          errorType: KasieException.timeoutException);
-      errorHandler.handleError(exception: gex);
-      throw gex;
-    }
-  }
 }
