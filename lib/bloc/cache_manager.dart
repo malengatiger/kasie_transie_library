@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:realm/realm.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/schemas.dart';
@@ -57,7 +58,9 @@ class AppErrorList {
   AppErrorList.fromJson(Map data) {
     List list = data['appErrors'];
     for (var value in list) {
-      final m = AppError(
+      List<int> bytes = utf8.encode(value['id']);
+
+      final m = AppError(ObjectId.fromBytes(bytes),
         created: value['created'],
         userId: value['userId'],
         associationId: value['associationId'],

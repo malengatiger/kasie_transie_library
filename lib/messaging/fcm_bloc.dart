@@ -5,7 +5,7 @@ import '../data/schemas.dart';
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
 
-final FCMBloc fcmBloc = FCMBloc(fb.FirebaseMessaging.instance);
+late FCMBloc fcmBloc;
 class FCMBloc {
   final fb.FirebaseMessaging firebaseMessaging;
   final mm = '🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎 FCMBloc: 🔵🔵 ';
@@ -97,33 +97,34 @@ class FCMBloc {
   static const red = '🍎 🍎';
   Future<void> subscribeToTopics() async {
     var user = await prefs.getUser();
-    user ??= User(userType: 'userType', userId: 'userId',
-        associationId: 'associationId', associationName: 'associationName', fcmToken: null);
+    if (user == null) {
+      return;
+    }
     pp("$mm subscribeToTopics: $red subscribe to all KasieTransie FCM topics ... ");
 
     await firebaseMessaging
         .subscribeToTopic('vehicleArrival_${user!.associationId}');
-    pp('$mm ..... FCM: subscribed to vehicle_arrival_${user!.associationId}');
+    pp('$mm ..... FCM: subscribed to vehicle_arrival_${user.associationId}');
     //
     await firebaseMessaging
         .subscribeToTopic('vehicleDeparture_${user.associationId}');
-    pp('$mm ..... FCM: subscribed to vehicle_departure_${user!.associationId}');
+    pp('$mm ..... FCM: subscribed to vehicle_departure_${user.associationId}');
     //
     await firebaseMessaging
         .subscribeToTopic('dispatchRecord_${user.associationId}');
-    pp('$mm ..... FCM: subscribed to dispatchRecord_${user!.associationId}');
+    pp('$mm ..... FCM: subscribed to dispatchRecord_${user.associationId}');
     //
     await firebaseMessaging
         .subscribeToTopic('locationResponse_${user.associationId}');
-    pp('$mm ..... FCM: subscribed to locationResponse_${user!.associationId}');
+    pp('$mm ..... FCM: subscribed to locationResponse_${user.associationId}');
     //
     await firebaseMessaging
         .subscribeToTopic('locationRequest_${user.associationId}');
-    pp('$mm ..... FCM: subscribed to locationRequest_${user!.associationId}');
+    pp('$mm ..... FCM: subscribed to locationRequest_${user.associationId}');
     //
     await firebaseMessaging
         .subscribeToTopic('userGeofenceEvent_${user.associationId}');
-    pp('$mm ..... FCM: subscribed to userGeofenceEvent_${user!.associationId}');
+    pp('$mm ..... FCM: subscribed to userGeofenceEvent_${user.associationId}');
     //
 
     pp('$mm ..... FCM: subscribed to all KasieTransie FCM topics\n\n');

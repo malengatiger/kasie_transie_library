@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
+import 'package:realm/realm.dart';
 
 import '../bloc/cache_manager.dart';
 import '../data/schemas.dart';
@@ -17,11 +18,11 @@ class ErrorHandler {
   static const mm = '👿👿👿👿👿👿👿ErrorHandler: 👿👿';
 
   final DeviceLocationBloc locationBloc;
-  final Prefs prefsOGx;
+  final Prefs prefs;
 
   ErrorHandler(
     this.locationBloc,
-    this.prefsOGx,
+    this.prefs,
   );
 
   Future handleError({required KasieException exception}) async {
@@ -56,9 +57,9 @@ class ErrorHandler {
         }
       }
       pp('$mm setting up AppError; deviceData: $deviceData}');
-      final user = await prefsOGx.getUser();
+      final user = await prefs.getUser();
       if (user != null) {
-        final ae = AppError(
+        final ae = AppError(ObjectId(),
           errorMessage: exception.toString(),
           model: deviceData['model'],
           created: DateTime.now().toUtc().toIso8601String(),

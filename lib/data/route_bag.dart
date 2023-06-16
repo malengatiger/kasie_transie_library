@@ -1,6 +1,9 @@
 
 
+import 'dart:convert';
+
 import 'package:kasie_transie_library/data/schemas.dart';
+import 'package:realm/realm.dart';
 
 class RouteBag {
   RoutePoint? routePoint;
@@ -12,7 +15,9 @@ class RouteBag {
     routeName = data['routeName'];
     landmarkId = data['landmarkId'];
     if (data['routePoint'] != null) {
-      routePoint = RoutePoint(
+      List<int> bytes = utf8.encode(data['id']);
+
+      routePoint = RoutePoint(ObjectId.fromBytes(bytes),
         latitude: data['routePoint']['latitude'],
         longitude: data['routePoint']['longitude'],
         created: data['routePoint']['created'],

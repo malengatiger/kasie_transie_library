@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:realm/realm.dart' as rm;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../bloc/list_api_dog.dart';
@@ -48,7 +49,9 @@ class Prefs {
       return null;
     }
     var jx = json.decode(string);
-    var user = Country(
+    List<int> bytes = utf8.encode(jx['id']);
+
+    var user = Country(rm.ObjectId.fromBytes(bytes),
       countryId: jx['countryId'],
       name: jx['name'],
       iso2: jx['iso2'],
@@ -94,19 +97,14 @@ class Prefs {
     var prefs = await SharedPreferences.getInstance();
     var string = prefs.getString('settings');
     if (string == null) {
-      return SettingsModel(
+      return SettingsModel(rm.ObjectId(),
           locale: 'en',
           themeIndex: 0,
           associationId: null,
           refreshRateInSeconds: 360);
     }
     var jx = json.decode(string);
-    var sett = SettingsModel(
-      locale: jx['locale'],
-      themeIndex: jx['themeIndex'],
-      associationId: jx['associationId'],
-      refreshRateInSeconds: jx['refreshRateInSeconds'],
-    );
+    var sett = buildSettingsModel(jx);
     pp("🌽 🌽 🌽 Prefs: getSettings 🧩  ${sett.toJson()} retrieved");
     return sett;
   }

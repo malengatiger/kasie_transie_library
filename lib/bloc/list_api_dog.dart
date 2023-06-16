@@ -107,7 +107,9 @@ class ListApiDog {
   }
 
   Association _buildAssociation(Map map) {
-    final m = Association(
+    List<int> bytes = utf8.encode(map['id']);
+
+    final m = Association(rm.ObjectId.fromBytes(bytes),
       userId: map['userId'],
       countryId: map['countryId'],
       countryName: map['countryName'],
@@ -140,6 +142,33 @@ class ListApiDog {
     return list;
   }
 
+  Future<List<Vehicle>> getAssociationVehicles(String associationId) async {
+    final cmd = '${url}getAssociationVehicles?associationId=$associationId';
+    List resp = await _sendHttpGET(cmd);
+    final list = <Vehicle>[];
+    for (var vehicleJson in resp) {
+      List<int> bytes = utf8.encode(vehicleJson['id']);
+      list.add(Vehicle(rm.ObjectId.fromBytes( bytes),
+        vehicleId: vehicleJson['vehicleId'],
+        vehicleReg: vehicleJson['vehicleReg'],
+        associationId: vehicleJson['associationId'],
+        associationName: vehicleJson['associationName'],
+        created: vehicleJson['created'],
+        make: vehicleJson['make'],
+        model: vehicleJson['model'],
+        year: vehicleJson['year'],
+        countryId: vehicleJson['countryId'],
+        dateInstalled: vehicleJson['dateInstalled'],
+        ownerId: vehicleJson['ownerId'],
+        ownerName: vehicleJson['ownerName'],
+      ));
+    }
+    realm.write(() {
+      realm.addAll(list);
+    });
+    pp('$mm cached vehicles: ${list.length}');
+    return list;
+  }
   final StreamController<List<RoutePoint>> _routePointController = StreamController.broadcast();
   Stream<List<RoutePoint>> get routePointStream => _routePointController.stream;
   Future<List<RoutePoint>> getRoutePoints(String routeId) async {
@@ -147,12 +176,14 @@ class ListApiDog {
     List resp = await _sendHttpGET(cmd);
     final list = <RoutePoint>[];
     for (var value in resp) {
-      list.add(RoutePoint(
+      List<int> bytes = utf8.encode(value['id']);
+
+      list.add(RoutePoint(rm.ObjectId.fromBytes(bytes),
         longitude: value['longitude'],
         routeId: value['routeId'],
         index: value['index'],
         latitude: value['userId'],
-        created: value['latitude'],
+        created: value['created'],
         heading: value['heading'],
         landmarkId: value['landmarkId'],
         landmarkName: value['landmarkName'],
@@ -180,7 +211,9 @@ class ListApiDog {
     List resp = await _sendHttpGET(cmd);
     final list = <Route>[];
     for (var value in resp) {
-      list.add(Route(
+      List<int> bytes = utf8.encode(value['id']);
+
+      list.add(Route(rm.ObjectId.fromBytes(bytes),
         countryId: value['countryId'],
         routeId: value['routeId'],
         associationId: value['countryId'],
@@ -228,7 +261,9 @@ class ListApiDog {
   }
 
   City _buildCity(Map map) {
-    final m = City(
+    List<int> bytes = utf8.encode(map['id']);
+
+    final m = City(rm.ObjectId.fromBytes(bytes),
       cityId: map['cityId'],
       name: map['name'],
       countryName: map['countryName'],
@@ -249,12 +284,54 @@ class ListApiDog {
     return m;
   }
 
+  Future<List<City>> getCountryCities(String countryId) async {
+    final cmd = '${url}getCountryCities?countryId=$countryId';
+    List resp = await _sendHttpGET(cmd);
+    final list = <City>[];
+    for (var value in resp) {
+      List<int> bytes = utf8.encode(value['id']);
+
+      list.add(City(rm.ObjectId.fromBytes(bytes),
+        countryId: value['countryId'],
+        name: value['name'],
+        stateName: value['stateName'],
+        cityId: value['cityId'],
+        countryName: value['countryName'],
+        position: Position(
+          type: 'Point',
+          latitude:  value['position']['latitude'],
+          longitude:  value['position']['longitude'],
+          coordinates: [value['position']['longitude'], value['position']['latitude']]
+        ),
+      ));
+    }
+    realm.write(() {
+      realm.addAll(list);
+    });
+    pp('$mm cached countries: ${list.length}');
+    return list;
+  }
+  Future<List<User>> getAssociationUsers(String associationId) async {
+    final cmd = '${url}getAssociationUsers?associationId=$associationId';
+    List resp = await _sendHttpGET(cmd);
+    final list = <User>[];
+    for (var value in resp) {
+      list.add(buildUser(value));
+    }
+    realm.write(() {
+      realm.addAll(list);
+    });
+    pp('$mm cached users: ${list.length}');
+    return list;
+  }
   Future<List<Country>> getCountries() async {
     final cmd = '${url}getCountries';
     List resp = await _sendHttpGET(cmd);
     final list = <Country>[];
     for (var value in resp) {
-      list.add(Country(
+      List<int> bytes = utf8.encode(value['id']);
+
+      list.add(Country(rm.ObjectId.fromBytes(bytes),
         countryId: value['countryId'],
         name: value['name'],
       ));
@@ -451,7 +528,9 @@ class ListApiDog {
 }
 
 User buildUser(Map map) {
-  final m = User(
+  List<int> bytes = utf8.encode(map['id']);
+
+  final m = User(rm.ObjectId.fromBytes(bytes),
     userId: map['userId'],
     firstName: map['firstName'],
     lastName: map['lastName'],
@@ -469,11 +548,24 @@ User buildUser(Map map) {
   return m;
 }
 SettingsModel buildSettingsModel(Map map) {
-final m = SettingsModel(
+  List<int> bytes = utf8.encode(map['id']);
+
+  final m = SettingsModel(rm.ObjectId.fromBytes(bytes),
   associationId: map['associationId'],
   locale: map['locale'],
-  refreshRateInSeconds: map['associationId'],
-  themeIndex: map['themeIndex']
+  refreshRateInSeconds: map['refreshRateInSeconds'],
+  themeIndex: map['themeIndex'],
+  distanceFilter: map['distanceFilter'],
+  created: map['created'],
+  commuterGeofenceRadius: map['commuterGeofenceRadius'],
+  commuterGeoQueryRadius: map['commuterGeoQueryRadius'],
+  commuterSearchMinutes: map['commuterSearchMinutes'],
+  geofenceRadius: map['geofenceRadius'],
+  heartbeatIntervalSeconds: map['heartbeatIntervalSeconds'],
+  loiteringDelay: map['loiteringDelay'],
+  numberOfLandmarksToScan: map['numberOfLandmarksToScan'],
+  vehicleGeoQueryRadius: map['vehicleGeoQueryRadius'],
+  vehicleSearchMinutes: map['vehicleSearchMinutes'],
 );
 return m;
 }

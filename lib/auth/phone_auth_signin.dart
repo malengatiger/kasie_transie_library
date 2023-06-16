@@ -125,15 +125,14 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
           }
         }
         await widget.prefs.saveUser(user!);
-        // await widget.cacheManager.addUser(user: user!);
         var settingsList =
             await widget.listApiDog.getSettings(user!.associationId!);
         settingsList.sort((a, b) => b.created!.compareTo(a.created!));
         await themeBloc.changeToTheme(settingsList.first.themeIndex!);
-
-        await widget.prefs.saveSettings(settingsList.first);
-        await themeBloc.changeToTheme(settingsList.first.themeIndex!);
         await themeBloc.changeToLocale(settingsList.first.locale!);
+        pp('$mm ........ about to save settings ...');
+        await widget.prefs.saveSettings(settingsList.first);
+        pp('$mm ........ settings saved ...');
 
         setState(() {
           busy = false;
@@ -147,11 +146,14 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
               context: context);
         }
         widget.onSuccessfulSignIn(user!);
+        if (mounted) {
+          Navigator.of(context).pop(user!);
+        }
         return;
       }
     } catch (e) {
       pp('\n\n\n .... $e \n\n\n');
-      String msg = 'Unable lo Sign in. Have you registered an organization?';
+      String msg = 'Unable lo Sign in. Have you registered an association?';
       if (msg.contains('dup key')) {
         msg = signInStrings == null
             ? 'Duplicate organization name'

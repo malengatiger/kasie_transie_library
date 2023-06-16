@@ -8,6 +8,9 @@ import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/error_handler.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:realm/realm.dart' as rm;
+import 'package:kasie_transie_library/messaging/fcm_bloc.dart';
+import 'package:firebase_messaging/firebase_messaging.dart' as fb;
+
 
 import '../data/schemas.dart';
 import 'functions.dart';
@@ -30,23 +33,31 @@ class Initializer {
 
   ],);
 
-  Future initialize() async {
-    pp('$mm ... starting ....');
+  Future initializeBasics() async {
+    pp('$mm ... initializeBasics starting ....');
     appAuth = AppAuth(fb.FirebaseAuth.instance);
     final http.Client client = http.Client();
-    locationBloc = DeviceLocationBloc();
     final realm = rm.Realm(config);
     prefs = Prefs();
-    errorHandler = ErrorHandler(locationBloc, prefs);
     cacheManager = CacheManager();
+    locationBloc = DeviceLocationBloc();
+    errorHandler = ErrorHandler(locationBloc, prefs);
     listApiDog = ListApiDog(client, appAuth, cacheManager, prefs, errorHandler, realm);
     dataApiDog = DataApiDog(client, appAuth, cacheManager, prefs, errorHandler);
 
+    fcmBloc = FCMBloc(fb.FirebaseMessaging.instance);
+  }
+  Future initializeHeavyStuff() async {
+    pp('$mm ... initializeHeavyStuff starting ....');
+
+    locationBloc = DeviceLocationBloc();
+    errorHandler = ErrorHandler(locationBloc, prefs);
+
     await listApiDog.initializeRealm();
+    fcmBloc.initialize();
+
     var list = await listApiDog.getCountries();
     pp('$mm ... initialization almost complete ... countries found: ${list.length}');
-
-
     pp('$mm ... initialization complete!');
 
   }

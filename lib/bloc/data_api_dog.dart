@@ -2,12 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
 import 'package:http/http.dart' as http;
 import '../data/schemas.dart';
-import '../utils/emojis.dart';
 import '../utils/error_handler.dart';
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
@@ -17,7 +15,8 @@ import 'cache_manager.dart';
 late DataApiDog dataApiDog;
 
 class DataApiDog {
-  static const mm = '❤️❤️❤️ DataApiDog: ❤️: ';
+  static const mm = '🌎🌎🌎🌎🌎🌎 DataApiDog: 🌎🌎';
+
   Map<String, String> headers = {
     'Content-type': 'application/json',
     'Accept': 'application/json',
@@ -45,11 +44,19 @@ class DataApiDog {
     }
   }
 
+  Future addVehicle(Vehicle vehicle) async {
+    final bag = vehicle.toJson();
+    final cmd = '${url}addVehicle';
+    final res = _callPost(cmd, bag);
+    pp('$mm vehicle added to database: $res');
+  }
+
   Future addLandmark(Landmark landmark) async {
     final bag = landmark.toJson();
     final cmd = '${url}addLandmark';
+    final res = await _callPost(cmd, bag);
+    pp('$mm landmark added to database: $res');
 
-    final res = _callWebAPIPost(cmd, bag);
   }
   Future addRoutePoints(List<RoutePoint> routePoints) async {
 
@@ -59,30 +66,36 @@ class DataApiDog {
     };
 
     final cmd = '${url}addRoutePoints';
-    final res = _callWebAPIPost(cmd, bag);
+    List res = await _callPost(cmd, bag);
+    pp('$mm routePoints added to database: ${res.length}');
+
   }
   Future addRoute(Route route) async {
     final bag = route.toJson();
     final cmd = '${url}addRoute';
-    final res = _callWebAPIPost(cmd, bag);
+    final res = _callPost(cmd, bag);
+    pp('$mm route added to database: $res');
+
   }
   Future registerAssociation(Association association) async {
     final bag = association.toJson();
     final cmd = '${url}registerAssociation';
 
-    final res = _callWebAPIPost(cmd, bag);
+    final res = _callPost(cmd, bag);
+    pp('$mm association registration added to database: $res');
+
   }
   Future addSettings(SettingsModel settings) async {
     final bag = settings.toJson();
     final cmd = '${url}addSettingsModel';
 
-    final res = _callWebAPIPost(cmd, bag);
+    final res = _callPost(cmd, bag);
+    pp('$mm settings added to database: $res');
+
   }
 
 
-  Future _callWebAPIPost(String mUrl, Map? bag) async {
-    // pp('$xz http POST call: 🔆 🔆 🔆  calling : 💙  $mUrl  💙 ');
-
+  Future _callPost(String mUrl, Map? bag) async {
     String? mBag;
     if (bag != null) {
       mBag = json.encode(bag);
@@ -100,9 +113,9 @@ class DataApiDog {
           )
           .timeout(const Duration(seconds: timeOutInSeconds));
       if (resp.statusCode == 200) {
-        pp('$xz _callWebAPIPost RESPONSE: 💙💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
+        pp('$mm  _callWebAPIPost RESPONSE: 💙💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
       } else {
-        pp('👿👿👿_callWebAPIPost: 🔆 statusCode: 👿👿👿 ${resp.statusCode} 🔆🔆🔆 for $mUrl');
+        pp('$mm  👿👿👿_callWebAPIPost: 🔆 statusCode: 👿👿👿 ${resp.statusCode} 🔆🔆🔆 for $mUrl');
         pp(resp.body);
         throw KasieException(
             message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
@@ -111,16 +124,16 @@ class DataApiDog {
             errorType: KasieException.socketException);
       }
       var end = DateTime.now();
-      pp('$xz _callWebAPIPost: 🔆 elapsed time: ${end.difference(start).inSeconds} seconds 🔆');
+      pp('$mm  _callWebAPIPost: 🔆 elapsed time: ${end.difference(start).inSeconds} seconds 🔆');
       try {
         var mJson = json.decode(resp.body);
         return mJson;
       } catch (e) {
-        pp("👿👿👿👿👿👿👿 json.decode failed, returning response body");
+        pp("$mm 👿👿👿👿👿👿👿 json.decode failed, returning response body");
         return resp.body;
       }
     } on SocketException {
-      pp('$xz SocketException: really means that server cannot be reached 😑');
+      pp('$mm  SocketException: really means that server cannot be reached 😑');
       final gex = KasieException(
           message: 'Server not available',
           url: mUrl,
@@ -129,7 +142,7 @@ class DataApiDog {
       errorHandler.handleError(exception: gex);
       throw gex;
     } on HttpException {
-      pp("$xz HttpException occurred 😱");
+      pp("$mm  HttpException occurred 😱");
       final gex = KasieException(
           message: 'Server not available',
           url: mUrl,
@@ -138,7 +151,7 @@ class DataApiDog {
       errorHandler.handleError(exception: gex);
       throw gex;
     } on FormatException {
-      pp("$xz Bad response format 👎");
+      pp("$mm  Bad response format 👎");
       final gex = KasieException(
           message: 'Bad response format',
           url: mUrl,
@@ -147,7 +160,7 @@ class DataApiDog {
       errorHandler.handleError(exception: gex);
       throw gex;
     } on TimeoutException {
-      pp("$xz No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
+      pp("$mm  No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
       final gex = KasieException(
           message: 'Request timed out. No Internet connection',
           url: mUrl,
@@ -158,6 +171,5 @@ class DataApiDog {
     }
   }
 
-  static const xz = '🌎🌎🌎🌎🌎🌎 DataApiDog: ';
 
 }

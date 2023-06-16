@@ -42,8 +42,7 @@ dependencies:
   geolocator: ^9.0.2
   maps_toolkit: ^2.0.1
   realm: ^1.2.0
-
-
+  flutter_riverpod: ^2.3.6
   dots_indicator:
   google_fonts:
   shared_preferences:

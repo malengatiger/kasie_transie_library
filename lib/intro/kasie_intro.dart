@@ -10,12 +10,16 @@ import '../utils/prefs.dart';
 import 'intro_page_one.dart';
 
 class KasieIntro extends StatefulWidget {
-  const KasieIntro({Key? key, required this.listApiDog, required this.dataApiDog, required this.prefs, required this.onSuccessfulSignIn}) : super(key: key);
+  const KasieIntro(
+      {Key? key,
+      required this.listApiDog,
+      required this.dataApiDog,
+      required this.prefs})
+      : super(key: key);
 
   final ListApiDog listApiDog;
   final DataApiDog dataApiDog;
   final Prefs prefs;
-  final Function(User) onSuccessfulSignIn;
 
   @override
   KasieIntroState createState() => KasieIntroState();
@@ -31,7 +35,6 @@ class KasieIntroState extends State<KasieIntro>
   fb.FirebaseAuth firebaseAuth = fb.FirebaseAuth.instance;
   // mrm.User? user;
   String? signInFailed;
-
 
   @override
   void initState() {
@@ -65,19 +68,31 @@ class KasieIntroState extends State<KasieIntro>
     setState(() {});
   }
 
-  void onRegistration() {
+  void onRegistration() {}
+
+  void onSignIn() async {
+    var res = await Navigator.of(context).push(MaterialPageRoute(
+        builder: (ctx) => PhoneAuthSignin(
+            prefs: prefs,
+            listApiDog: widget.listApiDog,
+            dataApiDog: widget.dataApiDog,
+            onSuccessfulSignIn: onSuccessfulSignIn)));
+    pp('$mm ... returned from sign in .... $res');
+    if (res is User) {
+      pp('$mm ... returned from sign in .... $res');
+      pp('$mm ... User is fine to this point');
+
+      onSuccessfulSignIn(res);
+    }
   }
 
-  void onSignIn() {
-    Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => PhoneAuthSignin(
-        prefs: prefs, listApiDog: widget.listApiDog, dataApiDog: widget.dataApiDog,
-        onSuccessfulSignIn: onSuccessfulSignIn)));
-  }
   void onSuccessfulSignIn(User p1) {
-    widget.onSuccessfulSignIn(p1);
+    pp('$mm ... onSuccessfulSignIn .... ${p1.name}');
+
+    Navigator.of(context).pop(p1);
   }
-  void _onPageChanged(int value) {
-  }
+
+  void _onPageChanged(int value) {}
   @override
   void dispose() {
     _controller.dispose();
@@ -95,130 +110,126 @@ class KasieIntroState extends State<KasieIntro>
     }
     return SafeArea(
         child: Scaffold(
-          appBar: AppBar(
-            title: Text('KasieTransie',
-              style: myTextStyleLargeWithColor(context, color),
-            ),
-            bottom: PreferredSize(
-                preferredSize: Size.fromHeight(authed ? 80 : 124),
-                child: Column(
-                  children: [
-                    Card(
-                      elevation: 4,
-                      color: Colors.black26,
-                      // shape: getRoundedBorder(radius: 16),
-                      child: Column(
+      appBar: AppBar(
+        title: Text(
+          'KasieTransie',
+          style: myTextStyleLargeWithColor(context, color),
+        ),
+        bottom: PreferredSize(
+            preferredSize: Size.fromHeight(authed ? 80 : 124),
+            child: Column(
+              children: [
+                Card(
+                  elevation: 4,
+                  color: Colors.black26,
+                  // shape: getRoundedBorder(radius: 16),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              TextButton(
-                                  onPressed: onSignIn,
-                                  child: Text( 'Sign In',
-                                    style: myTextStyleMediumWithColor(
-                                        context, color),
-                                  )),
-                              TextButton(
-                                  onPressed: onRegistration,
-                                  child: Text( 'Register Organization',
-                                    style: myTextStyleMediumWithColor(
-                                        context, color),
-                                  )),
-                            ],
-                          ),
-                          // Row(
-                          //   mainAxisAlignment: MainAxisAlignment.end,
-                          //   children: [
-                          //     LocaleChooser(
-                          //         onSelected: onLanguageSelected,
-                          //         color: color,
-                          //         hint: introStrings == null
-                          //             ? 'Select Language'
-                          //             : introStrings!.hint),
-                          //   ],
-                          // )
+                          TextButton(
+                              onPressed: onSignIn,
+                              child: Text(
+                                'Sign In',
+                                style:
+                                    myTextStyleMediumWithColor(context, color),
+                              )),
+                          TextButton(
+                              onPressed: onRegistration,
+                              child: Text(
+                                'Register Organization',
+                                style:
+                                    myTextStyleMediumWithColor(context, color),
+                              )),
                         ],
                       ),
-                    ),
-                    const SizedBox(
-                      height: 12,
-                    ),
-                  ],
-                )),
-          ),
-          body: Stack(
-            children: [
-              PageView(
-                controller: _pageController,
-                onPageChanged: _onPageChanged,
-                children: const [
-                  IntroPage(
-                    title: 'KasieTransie',
-                    assetPath: 'assets/intro/pic2.jpg',
-                    text:
-                    lorem ,
-                  ),
-                  IntroPage(
-                    title:  'Organizations',
-                    assetPath: 'assets/intro/pic5.jpg',
-                    text: lorem
-                  ),
-                  IntroPage(
-                    title: 'People',
-                    assetPath: 'assets/intro/pic1.jpg',
-                    text: lorem
-                  ),
-                  IntroPage(
-                    title:  'Field Monitors',
-                    assetPath: 'assets/intro/pic5.jpg',
-                    text: lorem,
-                  ),
-                  IntroPage(
-                    title:
-                    'Thank You',
-                    assetPath: 'assets/intro/pic3.webp',
-                    text:  lorem,
-                  ),
-                ],
-              ),
-              Positioned(
-                bottom: 2,
-                left: 48,
-                right: 40,
-                child: SizedBox(
-                  width: 200,
-                  height: 48,
-                  child: Card(
-                    color: Colors.black12,
-                    shape: getRoundedBorder(radius: 8),
-                    child: DotsIndicator(
-                      dotsCount: 5,
-                      position: currentIndexPage,
-                      decorator: const DotsDecorator(
-                        colors: [
-                          Colors.grey,
-                          Colors.grey,
-                          Colors.grey,
-                          Colors.grey,
-                          Colors.grey,
-                        ], // Inactive dot colors
-                        activeColors: [
-                          Colors.pink,
-                          Colors.blue,
-                          Colors.teal,
-                          Colors.indigo,
-                          Colors.deepOrange,
-                        ], // Àctive dot colors
-                      ),
-                    ),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.end,
+                      //   children: [
+                      //     LocaleChooser(
+                      //         onSelected: onLanguageSelected,
+                      //         color: color,
+                      //         hint: introStrings == null
+                      //             ? 'Select Language'
+                      //             : introStrings!.hint),
+                      //   ],
+                      // )
+                    ],
                   ),
                 ),
+                const SizedBox(
+                  height: 12,
+                ),
+              ],
+            )),
+      ),
+      body: Stack(
+        children: [
+          PageView(
+            controller: _pageController,
+            onPageChanged: _onPageChanged,
+            children: const [
+              IntroPage(
+                title: 'KasieTransie',
+                assetPath: 'assets/intro/pic2.jpg',
+                text: lorem,
+              ),
+              IntroPage(
+                  title: 'Organizations',
+                  assetPath: 'assets/intro/pic5.jpg',
+                  text: lorem),
+              IntroPage(
+                  title: 'People',
+                  assetPath: 'assets/intro/pic1.jpg',
+                  text: lorem),
+              IntroPage(
+                title: 'Field Monitors',
+                assetPath: 'assets/intro/pic5.jpg',
+                text: lorem,
+              ),
+              IntroPage(
+                title: 'Thank You',
+                assetPath: 'assets/intro/pic3.webp',
+                text: lorem,
               ),
             ],
           ),
-        ));
+          Positioned(
+            bottom: 2,
+            left: 48,
+            right: 40,
+            child: SizedBox(
+              width: 200,
+              height: 48,
+              child: Card(
+                color: Colors.black12,
+                shape: getRoundedBorder(radius: 8),
+                child: DotsIndicator(
+                  dotsCount: 5,
+                  position: currentIndexPage,
+                  decorator: const DotsDecorator(
+                    colors: [
+                      Colors.grey,
+                      Colors.grey,
+                      Colors.grey,
+                      Colors.grey,
+                      Colors.grey,
+                    ], // Inactive dot colors
+                    activeColors: [
+                      Colors.pink,
+                      Colors.blue,
+                      Colors.teal,
+                      Colors.indigo,
+                      Colors.deepOrange,
+                    ], // Àctive dot colors
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ));
   }
-
-
-
 }

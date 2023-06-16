@@ -1,9 +1,14 @@
 import 'package:realm/realm.dart';
 
+import '../utils/functions.dart';
+
 part 'schemas.g.dart';
 
 @RealmModel()
 class _Country {
+  @PrimaryKey()
+  late ObjectId id;
+  @Indexed()
   String? countryId;
   String? name;
   String? iso2;
@@ -41,6 +46,9 @@ class _Position {
 
 @RealmModel()
 class _City {
+  @PrimaryKey()
+  late ObjectId id;
+  @Indexed()
   String? cityId;
   String? countryId;
   String? name, distance;
@@ -65,11 +73,16 @@ class _City {
 
 @RealmModel()
 class _RoutePoint {
+  @PrimaryKey()
+  late ObjectId id;
+  String? routePointId;
   double? latitude;
   double? longitude;
   double? heading;
   int? index;
-  String? created, routeId;
+  String? created;
+  @Indexed()
+  String? routeId;
   String? landmarkId, landmarkName;
   _Position? position;
 
@@ -101,7 +114,11 @@ class _RoutePoint {
 
 @RealmModel()
 class _Route {
-  String? routeId, countryId, countryName, name, routeNumber;
+  @PrimaryKey()
+  late ObjectId id;
+  @Indexed()
+  String? routeId;
+  String? countryId, countryName, name, routeNumber;
   String? created, updated;
   String? color;
   bool? isActive;
@@ -147,6 +164,42 @@ class _Route {
   }
 }
 
+//
+@RealmModel()
+class _Vehicle {
+  @PrimaryKey()
+  late ObjectId id;
+  @Indexed()
+  String? vehicleId;
+  String? countryId, ownerName, ownerId;
+  String? created, dateInstalled;
+  String? vehicleReg;
+  String? make;
+  String? model;
+  String? year;
+  int? passengerCapacity;
+  String? associationId, associationName;
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {
+      'vehicleId': vehicleId,
+      'countryId': countryId,
+      'ownerName': ownerName,
+      'vehicleReg': vehicleReg,
+      'ownerId': ownerId,
+      'created': created,
+      'dateInstalled': dateInstalled,
+      'make': make,
+      'model': model,
+      'year': year,
+      'passengerCapacity': passengerCapacity,
+      'associationId': associationId,
+      'associationName': associationName,
+    };
+    return map;
+  }
+}
+
 @RealmModel(ObjectType.embeddedObject)
 class _CalculatedDistance {
   String? routeName, routeID;
@@ -157,7 +210,7 @@ class _CalculatedDistance {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {
       'routeID': routeID,
-      'name': routeName,
+      'routeName': routeName,
       'fromLandmark': fromLandmark,
       'toLandmark': toLandmark,
       'fromLandmarkID': fromLandmarkID,
@@ -180,6 +233,9 @@ class _CalculatedDistance {
 
 @RealmModel()
 class _Association {
+  @PrimaryKey()
+  late ObjectId id;
+  @Indexed()
   String? associationId;
   String? cityId;
   String? countryId;
@@ -217,6 +273,10 @@ class _Association {
 
 @RealmModel()
 class _AppError {
+  @PrimaryKey()
+  late ObjectId id;
+  @Indexed()
+  String? appErrorId;
   String? errorMessage;
   String? manufacturer;
   String? model;
@@ -234,7 +294,7 @@ class _AppError {
   String? iosSystemName;
   String? userUrl;
   String? uploadedDate;
-  String? id;
+
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {
@@ -251,7 +311,6 @@ class _AppError {
       'uploadedDate': uploadedDate,
       'userName': userName,
       'iosName': iosName,
-      'id': id,
       'versionCodeName': versionCodeName,
       'manufacturer': manufacturer,
       'errorPosition': errorPosition == null ? null : errorPosition!.toJson()
@@ -263,6 +322,9 @@ class _AppError {
 @RealmModel()
 class _User {
   String? userType;
+  @PrimaryKey()
+  late ObjectId id;
+  @Indexed()
   String? userId;
   String? firstName, lastName, gender;
   String? countryId;
@@ -310,6 +372,9 @@ class _RouteInfo {
 
 @RealmModel()
 class _Landmark {
+  @PrimaryKey()
+  late ObjectId id;
+  @Indexed()
   String? landmarkID;
   double? latitude;
   double? longitude;
@@ -361,7 +426,11 @@ class _Landmark {
 
 @RealmModel()
 class _SettingsModel {
-  String? associationId, locale, created;
+  @PrimaryKey()
+  late ObjectId id;
+  @Indexed()
+  String? associationId;
+  String? locale, created;
   int? refreshRateInSeconds, themeIndex;
   int? geofenceRadius, commuterGeofenceRadius;
   int? vehicleSearchMinutes,
@@ -374,12 +443,14 @@ class _SettingsModel {
   int? distanceFilter;
 
   Map<String, dynamic> toJson() {
+    pp('....... inside  to JSON ....');
     Map<String, dynamic> map = {
       'locale': locale,
       'loiteringDelay': loiteringDelay,
       'created': created,
       'refreshRateInSeconds': refreshRateInSeconds,
       'themeIndex': themeIndex,
+      'distanceFilter': distanceFilter,
       'associationId': associationId,
       'geofenceRadius': geofenceRadius,
       'commuterGeofenceRadius': commuterGeofenceRadius,
@@ -389,6 +460,7 @@ class _SettingsModel {
       'vehicleGeoQueryRadius': vehicleGeoQueryRadius,
       'numberOfLandmarksToScan': numberOfLandmarksToScan,
     };
+    pp('....... returning map: $map  ....');
     return map;
   }
 }
