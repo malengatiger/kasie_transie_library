@@ -4,7 +4,7 @@ import '../utils/emojis.dart';
 import '../utils/functions.dart';
 
 
-late AppAuth appAuth;
+final AppAuth appAuth = AppAuth(FirebaseAuth.instance);
 class AppAuth {
   static const locks = '🔐🔐🔐🔐🔐🔐🔐🔐 AppAuth: ';
   final FirebaseAuth? firebaseAuth;

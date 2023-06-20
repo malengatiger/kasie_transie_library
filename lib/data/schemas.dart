@@ -1,7 +1,6 @@
 import 'package:realm/realm.dart';
 
 import '../utils/functions.dart';
-
 part 'schemas.g.dart';
 
 @RealmModel()
@@ -12,12 +11,35 @@ class _Country {
   String? countryId;
   String? name;
   String? iso2;
+  String? iso3;
+  String? capital;
+  String? currency;
+  String? region;
+  String? subregion;
+  String? emoji;
+  String? phone_code;
+  String? currency_name;
+  String? currency_symbol;
+  double? latitude, longitude;
+  _Position? position;
+  String? geoHash;
 
   Map<String, dynamic> toJson() {
     var map = {
+      '_id': id.hexString,
       'countryId': countryId,
       'name': name,
       'iso2': iso2,
+      'iso3': iso3,
+      'capital': capital,
+      'region': region,
+      'subregion': subregion,
+      'emoji': emoji,
+      'phone_code': phone_code,
+      'currency_name': currency_name,
+      'currency_symbol': currency_symbol,
+      'latitude': latitude,
+      'longitude': longitude,
     };
     return map;
   }
@@ -28,6 +50,7 @@ class _Position {
   String? type = 'Point';
   List<double> coordinates = [];
   double? latitude, longitude;
+  String? geoHash;
 
   Map<String, dynamic> toJson() {
     var m = [];
@@ -57,8 +80,10 @@ class _City {
   double? longitude;
   String? countryName;
   _Position? position;
+  String? geoHash;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
+        '_id': id.hexString,
         'cityId': cityId,
         'countryId': countryId,
         'name': name,
@@ -85,12 +110,14 @@ class _RoutePoint {
   String? routeId;
   String? landmarkId, landmarkName;
   _Position? position;
+  String? geoHash;
 
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> map = Map();
+    Map<String, dynamic> map = {};
+    map['routePointId'] = routePointId;
     map['created'] = created;
     map['index'] = index;
-
+    map['_id'] = id.hexString;
     map['latitude'] = latitude;
     map['longitude'] = longitude;
 
@@ -107,7 +134,7 @@ class _RoutePoint {
       map['landmarkName'] = landmarkName;
     }
     map['heading'] = heading;
-
+    map['geoHash'] = geoHash;
     return map;
   }
 }
@@ -124,12 +151,15 @@ class _Route {
   bool? isActive;
   String? activationDate;
   String? associationId, associationName;
-  List<_CalculatedDistance> calculatedDistances = [];
   double? heading;
   int? lengthInMetres;
   String? userId;
   String? userName;
   String? userUrl;
+  _RouteStartEnd? routeStartEnd;
+
+  List<_CalculatedDistance> calculatedDistances = [];
+  List<String> geoHashes = [];
   List<String> landmarkIds = [];
 
   Map<String, dynamic> toJson() {
@@ -139,8 +169,27 @@ class _Route {
         distances.add(v.toJson());
       }
     }
+    var se = {};
+    if (routeStartEnd != null) {
+      final pos1 = {
+        'type': 'Point',
+        'coordinates': routeStartEnd!.startCityPosition!.coordinates,
+      };
+      final pos2 = {
+        'type': 'Point',
+        'coordinates': routeStartEnd!.endCityPosition!.coordinates,
 
+      };
+      se['startCityId'] = routeStartEnd!.startCityId!;
+      se['startCityName'] = routeStartEnd!.startCityName!;
+      se['endCityId'] = routeStartEnd!.endCityId!;
+      se['endCityName'] = routeStartEnd!.endCityName!;
+      se['startCityPosition'] = pos1;
+      se['endCityPosition'] = pos2;
+
+    }
     Map<String, dynamic> map = {
+      '_id': id.hexString,
       'routeId': routeId,
       'countryId': countryId,
       'name': name,
@@ -159,7 +208,9 @@ class _Route {
       'userId': userId,
       'userName': userName,
       'userUrl': userUrl,
+      'routeStartEnd': se,
     };
+
     return map;
   }
 }
@@ -182,6 +233,7 @@ class _Vehicle {
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {
+      '_id': id.hexString,
       'vehicleId': vehicleId,
       'countryId': countryId,
       'ownerName': ownerName,
@@ -202,19 +254,19 @@ class _Vehicle {
 
 @RealmModel(ObjectType.embeddedObject)
 class _CalculatedDistance {
-  String? routeName, routeID;
-  String? fromLandmark, toLandmark, fromLandmarkID, toLandmarkID;
+  String? routeName, routeId;
+  String? fromLandmark, toLandmark, fromLandmarkId, toLandmarkId;
   double? distanceInMetres, distanceFromStart;
   int? fromRoutePointIndex, toRoutePointIndex;
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {
-      'routeID': routeID,
+      'routeId': routeId,
       'routeName': routeName,
       'fromLandmark': fromLandmark,
       'toLandmark': toLandmark,
-      'fromLandmarkID': fromLandmarkID,
-      'toLandmarkID': toLandmarkID,
+      'fromLandmarkId': fromLandmarkId,
+      'toLandmarkId': toLandmarkId,
       'distanceInMetres': distanceInMetres,
       'distanceFromStart': distanceFromStart,
       'fromRoutePointIndex': fromRoutePointIndex,
@@ -249,6 +301,7 @@ class _Association {
   String? path;
   String? dateRegistered;
   _Position? position;
+  String? geoHash;
   String? adminUserFirstName;
   String? adminUserLastName;
   String? userId;
@@ -256,6 +309,7 @@ class _Association {
   String? adminEmail;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
+        '_id': id.hexString,
         'associationId': associationId,
         'cityId': cityId,
         'countryId': countryId,
@@ -286,18 +340,18 @@ class _AppError {
   String? associationId;
   String? userName;
   _Position? errorPosition;
+  String? geoHash;
   String? iosName;
   String? versionCodeName;
-
   String? baseOS;
   String? deviceType;
   String? iosSystemName;
   String? userUrl;
   String? uploadedDate;
 
-
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {
+      '_id': id.hexString,
       'errorMessage': errorMessage,
       'userUrl': userUrl,
       'iosSystemName': iosSystemName,
@@ -336,6 +390,7 @@ class _User {
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {
+      '_id': id.hexString,
       'userType': userType,
       'userId': userId,
       'lastName': lastName,
@@ -358,12 +413,17 @@ class _User {
 
 @RealmModel(ObjectType.embeddedObject)
 class _RouteInfo {
-  String? name, routeID, associationID, associationName;
+  String? name, routeId, associationId, associationName;
+  String? number;
+  String? color;
+
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {
-      'routeID': routeID,
+      'routeId': routeId,
       'name': name,
-      'associationID': associationID,
+      'number': number,
+      'color': color,
+      'associationId': associationId,
       'associationName': associationName,
     };
     return map;
@@ -375,7 +435,7 @@ class _Landmark {
   @PrimaryKey()
   late ObjectId id;
   @Indexed()
-  String? landmarkID;
+  String? landmarkId;
   double? latitude;
   double? longitude;
   double? distance;
@@ -383,7 +443,7 @@ class _Landmark {
   List<_RouteInfo> routeDetails = [];
   List<String> cityIds = [];
   _Position? position;
-  List<String> routePointIds = [];
+  String? geoHash;
 
   Map<String, dynamic> toJson() {
     List names = [];
@@ -398,15 +458,10 @@ class _Landmark {
         mCities.add(v);
       }
     }
-    List mPoints = [];
-    if (routePointIds.isNotEmpty) {
-      for (var v in routePointIds) {
-        mPoints.add(v);
-      }
-    }
 
     Map<String, dynamic> map = {
-      'landmarkID': landmarkID,
+      '_id': id.hexString,
+      'landmarkId': landmarkId,
       'latitude': position != null ? position!.coordinates![1] : null,
       'longitude': position != null ? position!.coordinates![0] : null,
       'distance': distance ?? 0.0,
@@ -414,7 +469,6 @@ class _Landmark {
       'position': position != null ? position!.toJson() : null,
       'routeDetails': names,
       'cities': mCities,
-      'routePoints': mPoints,
     };
     return map;
   }
@@ -443,8 +497,8 @@ class _SettingsModel {
   int? distanceFilter;
 
   Map<String, dynamic> toJson() {
-    pp('....... inside  to JSON ....');
     Map<String, dynamic> map = {
+      '_id': id.hexString,
       'locale': locale,
       'loiteringDelay': loiteringDelay,
       'created': created,
@@ -460,7 +514,147 @@ class _SettingsModel {
       'vehicleGeoQueryRadius': vehicleGeoQueryRadius,
       'numberOfLandmarksToScan': numberOfLandmarksToScan,
     };
-    pp('....... returning map: $map  ....');
+    return map;
+  }
+}
+
+// @RealmModel()
+// class _RouteNew {
+//   @PrimaryKey()
+//   late ObjectId id;
+//   @Indexed()
+//   String? routeId;
+//   String? countryId, countryName, name, routeNumber;
+//   String? created, updated;
+//   String? color;
+//   bool? isActive;
+//   String? activationDate;
+//   String? associationId, associationName;
+//   double? heading;
+//   int? lengthInMetres;
+//   String? userId;
+//   String? userName;
+//   String? userUrl;
+//   _RouteStartEnd? routeStartEnd;
+//
+//   List<_CalculatedDistance> calculatedDistances = [];
+//   List<String> geoHashes = [];
+//   List<String> landmarkIds = [];
+//
+//   Map<String, dynamic> toJson() {
+//     var distances = [];
+//     if (calculatedDistances.isNotEmpty) {
+//       for (var v in calculatedDistances!) {
+//         distances.add(v.toJson());
+//       }
+//     }
+//     var se = {};
+//     if (routeStartEnd != null) {
+//       se['startCityId'] = routeStartEnd!.startCityId!;
+//       se['startCityName'] = routeStartEnd!.startCityName!;
+//       se['endCityId'] = routeStartEnd!.endCityId!;
+//       se['endCityName'] = routeStartEnd!.endCityName!;
+//       se['startLatitude'] = routeStartEnd!.startLatitude!;
+//       se['startLongitude'] = routeStartEnd!.startLongitude!;
+//       se['endLatitude'] = routeStartEnd!.endLatitude!;
+//       se['endLongitude'] = routeStartEnd!.endLongitude!;
+//     }
+//
+//     Map<String, dynamic> map = {
+//       '_id': id.hexString,
+//       'routeId': routeId,
+//       'countryId': countryId,
+//       'name': name,
+//       'lengthInMetres': lengthInMetres,
+//       'countryName': countryName,
+//       'routeNumber': routeNumber,
+//       'created': created,
+//       'updated': updated,
+//       'color': color,
+//       'routeStartEnd': se,
+//       'activationDate': activationDate,
+//       'isActive': isActive,
+//       'heading': heading ?? 0.0,
+//       'associationId': associationId,
+//       'associationName': associationName,
+//       'calculatedDistances': distances,
+//       'userId': userId,
+//       'userName': userName,
+//       'userUrl': userUrl,
+//     };
+//     return map;
+//   }
+// }
+//
+// @RealmModel()
+// class _RoutePointNew {
+//   @PrimaryKey()
+//   late ObjectId id;
+//   String? routePointId;
+//   double? latitude;
+//   double? longitude;
+//   double? heading;
+//   int? index;
+//   String? created;
+//   @Indexed()
+//   String? routeId;
+//   String? landmarkId, landmarkName;
+//   _Position? position;
+//   String? geoHash;
+//
+//   Map<String, dynamic> toJson() {
+//     Map<String, dynamic> map = Map();
+//     map['created'] = created;
+//     map['index'] = index;
+//     map['_id'] = id.hexString;
+//     map['latitude'] = latitude;
+//     map['longitude'] = longitude;
+//
+//     if (routeId != null) {
+//       map['routeId'] = routeId;
+//     }
+//     if (position != null) {
+//       map['position'] = position!.toJson();
+//     }
+//     if (landmarkId != null) {
+//       map['landmarkId'] = landmarkId;
+//     }
+//     if (landmarkName != null) {
+//       map['landmarkName'] = landmarkName;
+//     }
+//     map['heading'] = heading;
+//
+//     return map;
+//   }
+// }
+
+@RealmModel(ObjectType.embeddedObject)
+class _RouteStartEnd {
+  String? startCityId, startCityName;
+  String? endCityId, endCityName;
+
+  _Position? startCityPosition;
+  _Position? endCityPosition;
+
+  Map<String, dynamic> toJson() {
+    var sp = {};
+    var ep = {};
+    if (endCityPosition != null) {
+      ep['coordinates'] = endCityPosition!.coordinates;
+      ep['type'] = 'Point';
+    }
+    if (startCityPosition != null) {
+      sp['coordinates'] = startCityPosition!.coordinates;
+      sp['type'] = 'Point';
+    }
+    Map<String, dynamic> map = {
+      'startCityPosition': sp,
+      'endCityPosition': ep,
+      'startCityId': startCityId,
+      'startCityName': startCityName,
+      'endCityId': endCityId,
+      'endCityName': endCityName,
+    };
     return map;
   }
 }

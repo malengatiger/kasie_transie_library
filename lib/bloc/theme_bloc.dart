@@ -32,6 +32,9 @@ class ThemeBloc {
 
   _initialize() async {
     settings = await prefs.getSettings();
+    if (settings == null) {
+      return;
+    }
     pp('$mm initialize: acquired settings: ....theme index: ${settings!.themeIndex}');
     Locale newLocale = Locale(settings!.locale!);
     final m =
@@ -61,18 +64,19 @@ class ThemeBloc {
   Future<void> changeToTheme(int index) async {
     pp('\n\n$mm changing to theme index: $index, adding index to stream');
     settings = await prefs.getSettings();
-    await _dance(index, settings!.locale!, settings!);
-    pp('$mm changed theme index: $index, locale: ${settings!.locale} update current cached settings');
+    await setLocaleAndTheme(index, settings!.locale!, settings!);
+    pp('$mm changed theme index: $index, locale: ${settings!.locale} updated current cached settings');
   }
 
   Future<void> changeToLocale(String locale) async {
-    // pp('\n\n$mm changing to locale: $locale, adding locale to stream');
     var settings = await prefs.getSettings();
-    await _dance(settings!.themeIndex!, locale, settings);
-    // pp('$mm changing locale: ${settings!.locale} updated cached settings');
+    if (settings == null) {
+      return;
+    }
+    await setLocaleAndTheme(settings.themeIndex!, locale, settings);
   }
 
-  Future<void> _dance(int index, String locale, SettingsModel settings) async {
+  Future<void> setLocaleAndTheme(int index, String locale, SettingsModel settings) async {
     settings.themeIndex = index;
     settings.locale = locale;
     await prefs.saveSettings(settings);
@@ -81,6 +85,8 @@ class ThemeBloc {
     final m =
         LocaleAndTheme(themeIndex: settings.themeIndex!, locale: newLocale);
     themeStreamController.sink.add(m);
+    pp('$mm setLocaleAndTheme has put a locale on the themeStreamController');
+
   }
 
   int getThemeCount() {

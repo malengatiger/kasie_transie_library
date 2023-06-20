@@ -12,7 +12,7 @@ import '../data/schemas.dart';
 import 'device_location_bloc.dart';
 import 'functions.dart';
 
-late ErrorHandler errorHandler;
+final ErrorHandler errorHandler = ErrorHandler(locationBloc, prefs);
 
 class ErrorHandler {
   static const mm = '👿👿👿👿👿👿👿ErrorHandler: 👿👿';
@@ -56,10 +56,11 @@ class ErrorHandler {
           deviceData = _readMacOsDeviceInfo(await deviceInfoPlugin.macOsInfo);
         }
       }
-      pp('$mm setting up AppError; deviceData: $deviceData}');
+      pp('$mm setting up AppError: ${exception.toString()}}');
       final user = await prefs.getUser();
       if (user != null) {
         final ae = AppError(ObjectId(),
+          appErrorId: Uuid.v4().toString(),
           errorMessage: exception.toString(),
           model: deviceData['model'],
           created: DateTime.now().toUtc().toIso8601String(),

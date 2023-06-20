@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/schemas.dart';
 import '../utils/functions.dart';
 
-late CacheManager cacheManager;
+final CacheManager cacheManager = CacheManager();
 class CacheManager {
   static const mm = '☕️☕️☕️☕️☕️ CacheManager: ☕️☕️';
 

@@ -43,6 +43,12 @@ dependencies:
   maps_toolkit: ^2.0.1
   realm: ^1.2.0
   flutter_riverpod: ^2.3.6
+  pretty_json: ^2.0.0
+  dart_geohash: ^2.0.2
+  proximity_hash: ^2.0.0
+  fluttertoast: ^8.2.2
+  equatable: ^2.0.5
+
   dots_indicator:
   google_fonts:
   shared_preferences:

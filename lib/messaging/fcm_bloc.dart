@@ -1,16 +1,17 @@
 import 'package:firebase_messaging/firebase_messaging.dart' as fb;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-import '../data/schemas.dart';
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
 
-late FCMBloc fcmBloc;
+final FCMBloc fcmBloc = FCMBloc(fb.FirebaseMessaging.instance);
 class FCMBloc {
   final fb.FirebaseMessaging firebaseMessaging;
   final mm = '🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎 FCMBloc: 🔵🔵 ';
 
-  FCMBloc(this.firebaseMessaging);
+  FCMBloc(this.firebaseMessaging) {
+    initialize();
+  }
 
   Future initialize() async {
     pp('$mm ... FirebaseMessaging initialize starting ...');
