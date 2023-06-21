@@ -543,8 +543,6 @@ class Route extends _Route with RealmEntity, RealmObjectBase, RealmObject {
     String? userUrl,
     RouteStartEnd? routeStartEnd,
     Iterable<CalculatedDistance> calculatedDistances = const [],
-    Iterable<String> geoHashes = const [],
-    Iterable<String> landmarkIds = const [],
   }) {
     RealmObjectBase.set(this, 'id', id);
     RealmObjectBase.set(this, 'routeId', routeId);
@@ -569,10 +567,6 @@ class Route extends _Route with RealmEntity, RealmObjectBase, RealmObject {
         this,
         'calculatedDistances',
         RealmList<CalculatedDistance>(calculatedDistances));
-    RealmObjectBase.set<RealmList<String>>(
-        this, 'geoHashes', RealmList<String>(geoHashes));
-    RealmObjectBase.set<RealmList<String>>(
-        this, 'landmarkIds', RealmList<String>(landmarkIds));
   }
 
   Route._();
@@ -703,20 +697,6 @@ class Route extends _Route with RealmEntity, RealmObjectBase, RealmObject {
       throw RealmUnsupportedSetError();
 
   @override
-  RealmList<String> get geoHashes =>
-      RealmObjectBase.get<String>(this, 'geoHashes') as RealmList<String>;
-  @override
-  set geoHashes(covariant RealmList<String> value) =>
-      throw RealmUnsupportedSetError();
-
-  @override
-  RealmList<String> get landmarkIds =>
-      RealmObjectBase.get<String>(this, 'landmarkIds') as RealmList<String>;
-  @override
-  set landmarkIds(covariant RealmList<String> value) =>
-      throw RealmUnsupportedSetError();
-
-  @override
   Stream<RealmObjectChanges<Route>> get changes =>
       RealmObjectBase.getChanges<Route>(this);
 
@@ -753,10 +733,6 @@ class Route extends _Route with RealmEntity, RealmObjectBase, RealmObject {
           optional: true, linkTarget: 'RouteStartEnd'),
       SchemaProperty('calculatedDistances', RealmPropertyType.object,
           linkTarget: 'CalculatedDistance',
-          collectionType: RealmCollectionType.list),
-      SchemaProperty('geoHashes', RealmPropertyType.string,
-          collectionType: RealmCollectionType.list),
-      SchemaProperty('landmarkIds', RealmPropertyType.string,
           collectionType: RealmCollectionType.list),
     ]);
   }
@@ -1614,57 +1590,26 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
 class RouteInfo extends _RouteInfo
     with RealmEntity, RealmObjectBase, EmbeddedObject {
   RouteInfo({
-    String? name,
+    String? routeName,
     String? routeId,
-    String? associationId,
-    String? associationName,
-    String? number,
-    String? color,
   }) {
-    RealmObjectBase.set(this, 'name', name);
+    RealmObjectBase.set(this, 'routeName', routeName);
     RealmObjectBase.set(this, 'routeId', routeId);
-    RealmObjectBase.set(this, 'associationId', associationId);
-    RealmObjectBase.set(this, 'associationName', associationName);
-    RealmObjectBase.set(this, 'number', number);
-    RealmObjectBase.set(this, 'color', color);
   }
 
   RouteInfo._();
 
   @override
-  String? get name => RealmObjectBase.get<String>(this, 'name') as String?;
+  String? get routeName =>
+      RealmObjectBase.get<String>(this, 'routeName') as String?;
   @override
-  set name(String? value) => RealmObjectBase.set(this, 'name', value);
+  set routeName(String? value) => RealmObjectBase.set(this, 'routeName', value);
 
   @override
   String? get routeId =>
       RealmObjectBase.get<String>(this, 'routeId') as String?;
   @override
   set routeId(String? value) => RealmObjectBase.set(this, 'routeId', value);
-
-  @override
-  String? get associationId =>
-      RealmObjectBase.get<String>(this, 'associationId') as String?;
-  @override
-  set associationId(String? value) =>
-      RealmObjectBase.set(this, 'associationId', value);
-
-  @override
-  String? get associationName =>
-      RealmObjectBase.get<String>(this, 'associationName') as String?;
-  @override
-  set associationName(String? value) =>
-      RealmObjectBase.set(this, 'associationName', value);
-
-  @override
-  String? get number => RealmObjectBase.get<String>(this, 'number') as String?;
-  @override
-  set number(String? value) => RealmObjectBase.set(this, 'number', value);
-
-  @override
-  String? get color => RealmObjectBase.get<String>(this, 'color') as String?;
-  @override
-  set color(String? value) => RealmObjectBase.set(this, 'color', value);
 
   @override
   Stream<RealmObjectChanges<RouteInfo>> get changes =>
@@ -1679,13 +1624,208 @@ class RouteInfo extends _RouteInfo
     RealmObjectBase.registerFactory(RouteInfo._);
     return const SchemaObject(
         ObjectType.embeddedObject, RouteInfo, 'RouteInfo', [
-      SchemaProperty('name', RealmPropertyType.string, optional: true),
+      SchemaProperty('routeName', RealmPropertyType.string, optional: true),
       SchemaProperty('routeId', RealmPropertyType.string, optional: true),
+    ]);
+  }
+}
+
+class RouteLandmark extends _RouteLandmark
+    with RealmEntity, RealmObjectBase, RealmObject {
+  RouteLandmark(
+    ObjectId id, {
+    String? routeId,
+    String? routeName,
+    String? landmarkId,
+    String? landmarkName,
+    String? created,
+    String? associationId,
+    Position? position,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'routeId', routeId);
+    RealmObjectBase.set(this, 'routeName', routeName);
+    RealmObjectBase.set(this, 'landmarkId', landmarkId);
+    RealmObjectBase.set(this, 'landmarkName', landmarkName);
+    RealmObjectBase.set(this, 'created', created);
+    RealmObjectBase.set(this, 'associationId', associationId);
+    RealmObjectBase.set(this, 'position', position);
+  }
+
+  RouteLandmark._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get routeId =>
+      RealmObjectBase.get<String>(this, 'routeId') as String?;
+  @override
+  set routeId(String? value) => RealmObjectBase.set(this, 'routeId', value);
+
+  @override
+  String? get routeName =>
+      RealmObjectBase.get<String>(this, 'routeName') as String?;
+  @override
+  set routeName(String? value) => RealmObjectBase.set(this, 'routeName', value);
+
+  @override
+  String? get landmarkId =>
+      RealmObjectBase.get<String>(this, 'landmarkId') as String?;
+  @override
+  set landmarkId(String? value) =>
+      RealmObjectBase.set(this, 'landmarkId', value);
+
+  @override
+  String? get landmarkName =>
+      RealmObjectBase.get<String>(this, 'landmarkName') as String?;
+  @override
+  set landmarkName(String? value) =>
+      RealmObjectBase.set(this, 'landmarkName', value);
+
+  @override
+  String? get created =>
+      RealmObjectBase.get<String>(this, 'created') as String?;
+  @override
+  set created(String? value) => RealmObjectBase.set(this, 'created', value);
+
+  @override
+  String? get associationId =>
+      RealmObjectBase.get<String>(this, 'associationId') as String?;
+  @override
+  set associationId(String? value) =>
+      RealmObjectBase.set(this, 'associationId', value);
+
+  @override
+  Position? get position =>
+      RealmObjectBase.get<Position>(this, 'position') as Position?;
+  @override
+  set position(covariant Position? value) =>
+      RealmObjectBase.set(this, 'position', value);
+
+  @override
+  Stream<RealmObjectChanges<RouteLandmark>> get changes =>
+      RealmObjectBase.getChanges<RouteLandmark>(this);
+
+  @override
+  RouteLandmark freeze() => RealmObjectBase.freezeObject<RouteLandmark>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(RouteLandmark._);
+    return const SchemaObject(
+        ObjectType.realmObject, RouteLandmark, 'RouteLandmark', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('routeId', RealmPropertyType.string,
+          optional: true, indexType: RealmIndexType.regular),
+      SchemaProperty('routeName', RealmPropertyType.string, optional: true),
+      SchemaProperty('landmarkId', RealmPropertyType.string, optional: true),
+      SchemaProperty('landmarkName', RealmPropertyType.string, optional: true),
+      SchemaProperty('created', RealmPropertyType.string, optional: true),
       SchemaProperty('associationId', RealmPropertyType.string, optional: true),
-      SchemaProperty('associationName', RealmPropertyType.string,
-          optional: true),
-      SchemaProperty('number', RealmPropertyType.string, optional: true),
-      SchemaProperty('color', RealmPropertyType.string, optional: true),
+      SchemaProperty('position', RealmPropertyType.object,
+          optional: true, linkTarget: 'Position'),
+    ]);
+  }
+}
+
+class RouteCity extends _RouteCity
+    with RealmEntity, RealmObjectBase, RealmObject {
+  RouteCity(
+    ObjectId id, {
+    String? routeId,
+    String? routeName,
+    String? cityId,
+    String? cityName,
+    String? created,
+    String? associationId,
+    Position? position,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'routeId', routeId);
+    RealmObjectBase.set(this, 'routeName', routeName);
+    RealmObjectBase.set(this, 'cityId', cityId);
+    RealmObjectBase.set(this, 'cityName', cityName);
+    RealmObjectBase.set(this, 'created', created);
+    RealmObjectBase.set(this, 'associationId', associationId);
+    RealmObjectBase.set(this, 'position', position);
+  }
+
+  RouteCity._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get routeId =>
+      RealmObjectBase.get<String>(this, 'routeId') as String?;
+  @override
+  set routeId(String? value) => RealmObjectBase.set(this, 'routeId', value);
+
+  @override
+  String? get routeName =>
+      RealmObjectBase.get<String>(this, 'routeName') as String?;
+  @override
+  set routeName(String? value) => RealmObjectBase.set(this, 'routeName', value);
+
+  @override
+  String? get cityId => RealmObjectBase.get<String>(this, 'cityId') as String?;
+  @override
+  set cityId(String? value) => RealmObjectBase.set(this, 'cityId', value);
+
+  @override
+  String? get cityName =>
+      RealmObjectBase.get<String>(this, 'cityName') as String?;
+  @override
+  set cityName(String? value) => RealmObjectBase.set(this, 'cityName', value);
+
+  @override
+  String? get created =>
+      RealmObjectBase.get<String>(this, 'created') as String?;
+  @override
+  set created(String? value) => RealmObjectBase.set(this, 'created', value);
+
+  @override
+  String? get associationId =>
+      RealmObjectBase.get<String>(this, 'associationId') as String?;
+  @override
+  set associationId(String? value) =>
+      RealmObjectBase.set(this, 'associationId', value);
+
+  @override
+  Position? get position =>
+      RealmObjectBase.get<Position>(this, 'position') as Position?;
+  @override
+  set position(covariant Position? value) =>
+      RealmObjectBase.set(this, 'position', value);
+
+  @override
+  Stream<RealmObjectChanges<RouteCity>> get changes =>
+      RealmObjectBase.getChanges<RouteCity>(this);
+
+  @override
+  RouteCity freeze() => RealmObjectBase.freezeObject<RouteCity>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(RouteCity._);
+    return const SchemaObject(ObjectType.realmObject, RouteCity, 'RouteCity', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('routeId', RealmPropertyType.string,
+          optional: true, indexType: RealmIndexType.regular),
+      SchemaProperty('routeName', RealmPropertyType.string, optional: true),
+      SchemaProperty('cityId', RealmPropertyType.string, optional: true),
+      SchemaProperty('cityName', RealmPropertyType.string, optional: true),
+      SchemaProperty('created', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationId', RealmPropertyType.string, optional: true),
+      SchemaProperty('position', RealmPropertyType.object,
+          optional: true, linkTarget: 'Position'),
     ]);
   }
 }
@@ -1702,7 +1842,6 @@ class Landmark extends _Landmark
     Position? position,
     String? geoHash,
     Iterable<RouteInfo> routeDetails = const [],
-    Iterable<String> cityIds = const [],
   }) {
     RealmObjectBase.set(this, 'id', id);
     RealmObjectBase.set(this, 'landmarkId', landmarkId);
@@ -1714,8 +1853,6 @@ class Landmark extends _Landmark
     RealmObjectBase.set(this, 'geoHash', geoHash);
     RealmObjectBase.set<RealmList<RouteInfo>>(
         this, 'routeDetails', RealmList<RouteInfo>(routeDetails));
-    RealmObjectBase.set<RealmList<String>>(
-        this, 'cityIds', RealmList<String>(cityIds));
   }
 
   Landmark._();
@@ -1766,13 +1903,6 @@ class Landmark extends _Landmark
       throw RealmUnsupportedSetError();
 
   @override
-  RealmList<String> get cityIds =>
-      RealmObjectBase.get<String>(this, 'cityIds') as RealmList<String>;
-  @override
-  set cityIds(covariant RealmList<String> value) =>
-      throw RealmUnsupportedSetError();
-
-  @override
   Position? get position =>
       RealmObjectBase.get<Position>(this, 'position') as Position?;
   @override
@@ -1806,8 +1936,6 @@ class Landmark extends _Landmark
       SchemaProperty('landmarkName', RealmPropertyType.string, optional: true),
       SchemaProperty('routeDetails', RealmPropertyType.object,
           linkTarget: 'RouteInfo', collectionType: RealmCollectionType.list),
-      SchemaProperty('cityIds', RealmPropertyType.string,
-          collectionType: RealmCollectionType.list),
       SchemaProperty('position', RealmPropertyType.object,
           optional: true, linkTarget: 'Position'),
       SchemaProperty('geoHash', RealmPropertyType.string, optional: true),

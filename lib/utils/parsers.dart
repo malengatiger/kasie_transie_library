@@ -105,15 +105,76 @@ City buildCity(Map map) {
     stateName: map['stateName'],
     longitude: map['longitude'],
     latitude: map['latitude'],
-    position: Position(
-        type: 'Point',
-        latitude: map['position']['latitude'],
-        longitude: map['position']['longitude'],
-        coordinates: [
-          map['position']['longitude'],
-          map['position']['latitude']
-        ]),
+    position: buildPosition(map['position']),
     distance: map['distance'],
+  );
+  return m;
+}
+Position buildPosition(Map map) {
+  List st = map['coordinates'];
+  var lat = st.last as double;
+  var lng = st.first as double;
+  final m = Position(
+    type: point,
+    coordinates: [lng,lat],
+    latitude: lat,
+    longitude: lng
+  );
+
+  return m;
+}
+Landmark buildLandmark(Map map) {
+  var id = rm.ObjectId.fromHexString(map['_id'] as String);
+  List details = map['routeDetails'];
+  var info = <RouteInfo>[];
+  for (var e in details) {
+    info.add(RouteInfo(
+      routeId: e['routeId'],
+      routeName: e['routeName'],
+
+    ));
+  }
+  final m = Landmark(id,
+    landmarkId: map['landmarkId'],
+    landmarkName: map['landmarkName'],
+    routeDetails: info,
+    longitude: map['longitude'],
+    latitude: map['latitude'],
+    position: buildPosition(map['position']),
+
+    distance: map['distance'],
+  );
+  return m;
+}
+
+RouteLandmark buildRouteLandmark(Map value) {
+  var id = rm.ObjectId.fromHexString(value['_id'] as String);
+  var m = RouteLandmark(id,
+    routeName: value['routeName'],
+    routeId: value['routeId'],
+    associationId: value['associationId'],
+    landmarkId: value['landmarkId'],
+    created: value['created'],
+    landmarkName: value['landmarkName'],
+    position: buildPosition(value['position']),
+
+
+  );
+  return m;
+}
+RouteCity buildRouteCity(Map value) {
+  var id = rm.ObjectId.fromHexString(value['_id'] as String);
+
+  var m = RouteCity(id,
+    routeName: value['routeName'],
+    routeId: value['routeId'],
+    associationId: value['associationId'],
+    cityId: value['cityId'],
+    created: value['created'],
+    cityName: value['cityName'],
+    position: buildPosition(value['position']),
+
+
   );
   return m;
 }
@@ -125,38 +186,28 @@ Route buildRoute(Map value) {
   for (var d in list) {
     distances.add(buildCalculatedDistance(d));
   }
-  var ids = <String>[];
-  List mList = value['landmarkIds'];
-  for (var element in mList) {
-    ids.add(element as String);
-  }
-
-  var dd = value['routeStartEnd'];
-
-  // pp('🔵🔵🔵 buildRoute: check startCityPosition:  ${dd['startCityPosition']}');
-
-  List st = dd['startCityPosition']['coordinates'];
+  var startEnd = value['routeStartEnd'];
+  List st = startEnd['startCityPosition']['coordinates'];
   var lat = st.last as double;
   var lng = st.first as double;
-  List st2 = dd['endCityPosition']['coordinates'];
-  var lat2 = st.last as double;
-  var lng2 = st.first as double;
+  List st2 = startEnd['endCityPosition']['coordinates'];
+  var lat2 = st2.last as double;
+  var lng2 = st2.first as double;
 
   final startCityPosition = Position(
-    type: 'Point',
+    type: point,
     coordinates: [lng, lat],
   );
-  // pp('🔵🔵🔵 buildRoute: check endCityPosition:  ${dd['endCityPosition']}');
 
   final endCityPosition = Position(
-    type: 'Point',
+    type: point,
     coordinates: [lng2, lat2],
   );
   var se = RouteStartEnd(
-    startCityId: dd['startCityId'],
-    startCityName: dd['startCityName'],
-    endCityId: dd['endCityId'],
-    endCityName: dd['endCityName'],
+    startCityId: startEnd['startCityId'],
+    startCityName: startEnd['startCityName'],
+    endCityId: startEnd['endCityId'],
+    endCityName: startEnd['endCityName'],
     startCityPosition: startCityPosition,
     endCityPosition: endCityPosition,
   );
@@ -177,7 +228,6 @@ Route buildRoute(Map value) {
     activationDate: value['activationDate'],
     associationName: value['associationName'],
     calculatedDistances: distances,
-    landmarkIds: ids,
     lengthInMetres: value['lengthInMetres'],
     routeNumber: value['routeNumber'],
   );
@@ -198,16 +248,7 @@ RoutePoint buildRoutePoint(Map value) {
     landmarkId: value['landmarkId'],
     landmarkName: value['landmarkName'],
     geoHash: value['geoHash'],
-
-    position: Position(
-      type: 'Point',
-      latitude: value['position']['latitude'],
-      longitude: value['position']['longitude'],
-      coordinates: [
-        value['position']['longitude'],
-        value['position']['latitude'],
-      ],
-    ),
+    position: buildPosition(value['position']),
   );
   return m;
 }
@@ -246,4 +287,6 @@ CalculatedDistance buildCalculatedDistance(Map map) {
   );
   return m;
 }
+
+const point = 'Point';
 

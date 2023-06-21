@@ -159,8 +159,6 @@ class _Route {
   _RouteStartEnd? routeStartEnd;
 
   List<_CalculatedDistance> calculatedDistances = [];
-  List<String> geoHashes = [];
-  List<String> landmarkIds = [];
 
   Map<String, dynamic> toJson() {
     var distances = [];
@@ -413,23 +411,86 @@ class _User {
 
 @RealmModel(ObjectType.embeddedObject)
 class _RouteInfo {
-  String? name, routeId, associationId, associationName;
-  String? number;
-  String? color;
+  String? routeName, routeId;
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {
       'routeId': routeId,
-      'name': name,
-      'number': number,
-      'color': color,
-      'associationId': associationId,
-      'associationName': associationName,
+      'routeName': routeName,
     };
     return map;
   }
 }
+/*
+public class RouteLandmark {
+    private String _partitionKey;
+    @Id
+    private String _id;
+    String routeId;
+    String routeName;
+    String landmarkId;
+    String landmarkName;
+    String created;
+    String associationId;
+    Position position;
 
+ */
+@RealmModel()
+class _RouteLandmark {
+  @PrimaryKey()
+  late ObjectId id;
+  @Indexed()
+  String?  routeId;
+  String?  routeName;
+  String?  landmarkId;
+  String?  landmarkName;
+  String?  created;
+  String? associationId;
+  _Position? position;
+
+  Map<String, dynamic> toJson() {
+
+    Map<String, dynamic> map = {
+      '_id': id.hexString,
+      'landmarkId': landmarkId,
+      'routeId': routeId,
+      'position': position == null ? null: position!.toJson(),
+      'routeName': routeName,
+      'landmarkName': landmarkName,
+      'created': created,
+      'associationId': associationId,
+    };
+    return map;
+  }
+}
+@RealmModel()
+class _RouteCity {
+  @PrimaryKey()
+  late ObjectId id;
+  @Indexed()
+  String?  routeId;
+  String?  routeName;
+  String?  cityId;
+  String?  cityName;
+  String?  created;
+  String? associationId;
+  _Position? position;
+
+  Map<String, dynamic> toJson() {
+
+    Map<String, dynamic> map = {
+      '_id': id.hexString,
+      'cityId': cityId,
+      'routeId': routeId,
+      'position': position == null ? null: position!.toJson(),
+      'routeName': routeName,
+      'cityName': cityName,
+      'created': created,
+      'associationId': associationId,
+    };
+    return map;
+  }
+}
 @RealmModel()
 class _Landmark {
   @PrimaryKey()
@@ -441,7 +502,6 @@ class _Landmark {
   double? distance;
   String? landmarkName;
   List<_RouteInfo> routeDetails = [];
-  List<String> cityIds = [];
   _Position? position;
   String? geoHash;
 
@@ -450,12 +510,6 @@ class _Landmark {
     if (routeDetails.isNotEmpty) {
       for (var v in routeDetails) {
         names.add(v.toJson());
-      }
-    }
-    List mCities = [];
-    if (cityIds.isNotEmpty) {
-      for (var v in cityIds) {
-        mCities.add(v);
       }
     }
 
@@ -468,7 +522,6 @@ class _Landmark {
       'landmarkName': landmarkName,
       'position': position != null ? position!.toJson() : null,
       'routeDetails': names,
-      'cities': mCities,
     };
     return map;
   }
@@ -517,116 +570,6 @@ class _SettingsModel {
     return map;
   }
 }
-
-// @RealmModel()
-// class _RouteNew {
-//   @PrimaryKey()
-//   late ObjectId id;
-//   @Indexed()
-//   String? routeId;
-//   String? countryId, countryName, name, routeNumber;
-//   String? created, updated;
-//   String? color;
-//   bool? isActive;
-//   String? activationDate;
-//   String? associationId, associationName;
-//   double? heading;
-//   int? lengthInMetres;
-//   String? userId;
-//   String? userName;
-//   String? userUrl;
-//   _RouteStartEnd? routeStartEnd;
-//
-//   List<_CalculatedDistance> calculatedDistances = [];
-//   List<String> geoHashes = [];
-//   List<String> landmarkIds = [];
-//
-//   Map<String, dynamic> toJson() {
-//     var distances = [];
-//     if (calculatedDistances.isNotEmpty) {
-//       for (var v in calculatedDistances!) {
-//         distances.add(v.toJson());
-//       }
-//     }
-//     var se = {};
-//     if (routeStartEnd != null) {
-//       se['startCityId'] = routeStartEnd!.startCityId!;
-//       se['startCityName'] = routeStartEnd!.startCityName!;
-//       se['endCityId'] = routeStartEnd!.endCityId!;
-//       se['endCityName'] = routeStartEnd!.endCityName!;
-//       se['startLatitude'] = routeStartEnd!.startLatitude!;
-//       se['startLongitude'] = routeStartEnd!.startLongitude!;
-//       se['endLatitude'] = routeStartEnd!.endLatitude!;
-//       se['endLongitude'] = routeStartEnd!.endLongitude!;
-//     }
-//
-//     Map<String, dynamic> map = {
-//       '_id': id.hexString,
-//       'routeId': routeId,
-//       'countryId': countryId,
-//       'name': name,
-//       'lengthInMetres': lengthInMetres,
-//       'countryName': countryName,
-//       'routeNumber': routeNumber,
-//       'created': created,
-//       'updated': updated,
-//       'color': color,
-//       'routeStartEnd': se,
-//       'activationDate': activationDate,
-//       'isActive': isActive,
-//       'heading': heading ?? 0.0,
-//       'associationId': associationId,
-//       'associationName': associationName,
-//       'calculatedDistances': distances,
-//       'userId': userId,
-//       'userName': userName,
-//       'userUrl': userUrl,
-//     };
-//     return map;
-//   }
-// }
-//
-// @RealmModel()
-// class _RoutePointNew {
-//   @PrimaryKey()
-//   late ObjectId id;
-//   String? routePointId;
-//   double? latitude;
-//   double? longitude;
-//   double? heading;
-//   int? index;
-//   String? created;
-//   @Indexed()
-//   String? routeId;
-//   String? landmarkId, landmarkName;
-//   _Position? position;
-//   String? geoHash;
-//
-//   Map<String, dynamic> toJson() {
-//     Map<String, dynamic> map = Map();
-//     map['created'] = created;
-//     map['index'] = index;
-//     map['_id'] = id.hexString;
-//     map['latitude'] = latitude;
-//     map['longitude'] = longitude;
-//
-//     if (routeId != null) {
-//       map['routeId'] = routeId;
-//     }
-//     if (position != null) {
-//       map['position'] = position!.toJson();
-//     }
-//     if (landmarkId != null) {
-//       map['landmarkId'] = landmarkId;
-//     }
-//     if (landmarkName != null) {
-//       map['landmarkName'] = landmarkName;
-//     }
-//     map['heading'] = heading;
-//
-//     return map;
-//   }
-// }
 
 @RealmModel(ObjectType.embeddedObject)
 class _RouteStartEnd {

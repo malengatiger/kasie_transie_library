@@ -13,19 +13,25 @@ final countryProvider = FutureProvider<List<Country>>((ref) async {
   return res;
 });
 //
-final countryCitiesProvider = FutureProvider.family<List<City>, String >((ref, countryId) async {
+final countryCitiesProvider = FutureProvider.family<List<City>, String>((ref,
+    countryId) async {
   final res = await listApiDog.getCountryCities(countryId);
-  pp('$bb countryCitiesProvider did the job: ${res.length} country cities found.');
+  pp('$bb countryCitiesProvider did the job: ${res
+      .length} country cities found.');
   return res;
 });
 //
-final nearbyCitiesProvider = FutureProvider.family<List<City>, LocationFinderParameter >((ref, cityFinderParam) async {
+final nearbyCitiesProvider = FutureProvider.family<
+    List<City>,
+    LocationFinderParameter>((ref, cityFinderParam) async {
   final res = await listApiDog.findCitiesByLocation(cityFinderParam);
-  pp('$bb nearbyCitiesProvider did the job: ${res.length} country cities found.');
+  pp('$bb nearbyCitiesProvider did the job: ${res
+      .length} country cities found.');
   return res;
 });
 //
-final routesProvider = FutureProvider.family<List<Route>, AssociationParameter >((ref, associationParameter) async {
+final routesProvider = FutureProvider.family<List<Route>,
+    AssociationParameter>((ref, associationParameter) async {
   final res = await listApiDog.getRoutes(associationParameter);
   pp('$bb routesProvider did the job: ${res.length} routes found.');
   for (var r in res) {
@@ -34,26 +40,29 @@ final routesProvider = FutureProvider.family<List<Route>, AssociationParameter >
   return res;
 });
 //
-final routePointProvider = FutureProvider.family<List<RoutePoint>, String >((ref, routeId) async {
+final routePointProvider = FutureProvider.family<List<RoutePoint>, String>((ref,
+    routeId) async {
   final res = await listApiDog.getRoutePoints(routeId, false);
   pp('$bb routePointProvider did the job: ${res.length} routePoints found.');
   return res;
 });
 //
-final usersProvider = FutureProvider.family<List<User>, String >((ref, associationId) async {
+final usersProvider = FutureProvider.family<List<User>, String>((ref,
+    associationId) async {
   final res = await listApiDog.getAssociationUsers(associationId);
   pp('$bb usersProvider did the job: ${res.length} users found.');
   return res;
 });
 
-final vehicleProvider = FutureProvider.family<List<Vehicle>, String >((ref, associationId) async {
+final vehicleProvider = FutureProvider.family<List<Vehicle>, String>((ref,
+    associationId) async {
   final res = await listApiDog.getAssociationVehicles(associationId);
   pp('$bb vehicleProvider did the job: ${res.length} cars found.');
   return res;
 });
 
 ///Helper class for Providers
-class AssociationParameter extends Equatable{
+class AssociationParameter extends Equatable {
   final String associationId;
   final bool refresh;
 
@@ -62,11 +71,16 @@ class AssociationParameter extends Equatable{
   @override
   List<Object?> get props => [associationId, refresh];
 }
+
 ///Helper class for location based queries
 class LocationFinderParameter {
   String? associationId;
+  late int limit;
   late double latitude, longitude, radiusInKM;
 
+
   LocationFinderParameter({
-    this.associationId, required this.latitude, required this.longitude, required this.radiusInKM});
+    this.associationId, required this.latitude,
+    required this.limit,
+    required this.longitude, required this.radiusInKM});
 }

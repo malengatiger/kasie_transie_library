@@ -2,11 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
-import 'package:http/http.dart' as http;
+
 import '../data/route_point_list.dart';
 import '../data/schemas.dart';
 import '../utils/emojis.dart';
@@ -18,7 +19,8 @@ import 'app_auth.dart';
 import 'cache_manager.dart';
 
 final http.Client client = http.Client();
-final DataApiDog dataApiDog = DataApiDog(client, appAuth, cacheManager, prefs, errorHandler);
+final DataApiDog dataApiDog =
+    DataApiDog(client, appAuth, cacheManager, prefs, errorHandler);
 
 class DataApiDog {
   static const mm = '🌎🌎🌎🌎🌎🌎 DataApiDog: 🌎🌎';
@@ -57,13 +59,17 @@ class DataApiDog {
     pp('$mm vehicle added to database: $res');
   }
 
-  Future addLandmark(Landmark landmark) async {
+  Future<Landmark> addLandmark(Landmark landmark) async {
+    pp('$mm landmark to BE added to database ...');
     final bag = landmark.toJson();
-    final cmd = '${url}addLandmark';
+    final cmd = '${url}addBasicLandmark';
     final res = await _callPost(cmd, bag);
-    pp('$mm landmark added to database: $res');
-
+    pp('$mm landmark added to database ...');
+    myPrettyJsonPrint(res);
+    final m = buildLandmark(res);
+    return m;
   }
+
   Future addRoutePoints(RoutePointList routePointList) async {
     pp('$mm ... adding routePoints to database ...');
 
@@ -74,6 +80,7 @@ class DataApiDog {
     pp('$mm routePoints added to database: $res');
     return res as int;
   }
+
   Future<Route> addRoute(Route route) async {
     final bag = route.toJson();
     final cmd = '${url}addRoute';
@@ -84,8 +91,34 @@ class DataApiDog {
     listApiDog.getRoutes(AssociationParameter(route.associationId!, true));
     return r;
   }
-  Future deleteRoutePoint(String routePointId) async {
 
+  Future<RouteLandmark> addRouteLandmark(RouteLandmark route) async {
+    final bag = route.toJson();
+    final cmd = '${url}addRouteLandmark';
+    final res = await _callPost(cmd, bag);
+    pp('$mm RouteLandmark added to database ...');
+    myPrettyJsonPrint(res);
+    final r = buildRouteLandmark(res);
+    return r;
+  }
+
+  Future<RouteCity> addRouteCity(RouteCity routeCity) async {
+    final bag = routeCity.toJson();
+    final cmd = '${url}addRouteCity';
+    try {
+      final res = await _callPost(cmd, bag);
+      pp('$mm RouteCity added to database ...');
+      myPrettyJsonPrint(res);
+      final r = buildRouteCity(res);
+      return r;
+    } catch (e) {
+      pp('$mm error writing route city, probable dup key error; ignoring!');
+
+      return routeCity;
+    }
+  }
+
+  Future deleteRoutePoint(String routePointId) async {
     final cmd = '${url}deleteRoutePoint?routePointId=$routePointId';
     final res = await _sendHttpGET(cmd);
     pp('$mm deleteRoutePoint happened ...');
@@ -93,30 +126,43 @@ class DataApiDog {
     try {
       listApiDog.removeRoutePoint(routePointId);
       pp('$mm deleteRoutePoint for Realm happened ...');
-
     } catch (e) {
       pp(e);
     }
 
     return res;
   }
+
+  Future deleteLandmark(String landmarkId) async {
+    final cmd = '${url}deleteLandmark?landmarkId=$landmarkId';
+    final res = await _sendHttpGET(cmd);
+    pp('$mm deleteLandmark happened ...');
+
+    try {
+      //listApiDog.removeRoutePoint(routePointId);
+      pp('$mm deleteRoutePoint for Realm happened ...');
+    } catch (e) {
+      pp(e);
+    }
+
+    return res;
+  }
+
   Future registerAssociation(Association association) async {
     final bag = association.toJson();
     final cmd = '${url}registerAssociation';
 
     final res = _callPost(cmd, bag);
     pp('$mm association registration added to database: $res');
-
   }
+
   Future addSettings(SettingsModel settings) async {
     final bag = settings.toJson();
     final cmd = '${url}addSettingsModel';
 
     final res = _callPost(cmd, bag);
     pp('$mm settings added to database: $res');
-
   }
-
 
   Future _callPost(String mUrl, Map? bag) async {
     String? mBag;
@@ -214,9 +260,9 @@ class DataApiDog {
     try {
       var resp = await client
           .get(
-        Uri.parse(mUrl),
-        headers: headers,
-      )
+            Uri.parse(mUrl),
+            headers: headers,
+          )
           .timeout(const Duration(seconds: timeOutInSeconds));
       pp('$mm http GET call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
       var end = DateTime.now();
@@ -291,5 +337,4 @@ class DataApiDog {
       throw gex;
     }
   }
-
 }

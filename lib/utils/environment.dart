@@ -8,4 +8,12 @@ class KasieEnvironment {
 
   static const prodUrl='https://geo-umrjnxdnuq-ew.a.run.app/';
 
+  static getUrl() {
+    if (currentStatus == 'dev') {
+      return devUrl;
+    } else {
+      return prodUrl;
+    }
+  }
+
 }

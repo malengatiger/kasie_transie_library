@@ -32,6 +32,8 @@ final config = rm.Configuration.local(
     CalculatedDistance.schema,
     SettingsModel.schema,
     RouteStartEnd.schema,
+    RouteLandmark.schema,
+    RouteCity.schema,
   ],
 );
 final ListApiDog listApiDog = ListApiDog(
@@ -74,6 +76,11 @@ class ListApiDog {
       url = KasieEnvironment.prodUrl;
     }
     initializeRealm();
+    getAuthToken();
+  }
+
+  Future getAuthToken() async {
+    token = (await appAuth.getAuthToken())!;
   }
 
   Future<bool> initializeRealm() async {
@@ -173,45 +180,56 @@ class ListApiDog {
 
   Future<List<RoutePoint>> getRoutePoints(String routeId, bool refresh) async {
     //todo - get points from realm
-    var list = <RoutePoint>[];
-    if (refresh) {
-      final cmd = '${url}getRoutePoints?routeId=$routeId';
-      List resp = await _sendHttpGET(cmd);
-      for (var value in resp) {
-        list.add(buildRoutePoint(value));
-      }
-      pp('$mm getRoutePoints call returned  ${E.blueDot} ${list.length} routePoints .');
-      final results = realm.query<RoutePoint>('routeId == \$0',[routeId]);
-      final mList = results.toList();
-      realm.write(() {
-        realm.deleteMany<RoutePoint>(mList);
-      });
-      pp('$mm deleted from realm  ${E.redDot} ${mList.length} routePoints .');
-
-      try {
-        realm.write(() {
-          realm.addAll<RoutePoint>(list, update: true);
-        });
-      } catch (e) {
-        pp('$mm  ${E.redDot} Realm does not like something? ${E.redDot} $e ${E.redDot} ');
-      }
-      if (list.isNotEmpty) {
-        myPrettyJsonPrint(list.last.toJson());
-      }
-      pp('$mm cached routePoints returned from Realm : ${E.blueDot} ${list.length}');
-
-    } else {
-      pp('$mm getting cached routePoints from realm ...');
-      final b = realm.query<RoutePoint>('routeId == \$0', [routeId]);
-      list = b.toList();
-      pp('$mm cached routePoints returned from Realm : ${E.blueDot} ${list.length}');
-      if (list.isNotEmpty) {
-        myPrettyJsonPrint(list.last.toJson());
-      }
-
+    var list = _getPointsFromRealm(routeId);
+    if (refresh || list.isEmpty) {
+      list = await _getPointsFromBackend(routeId);
     }
     _routePointController.sink.add(list);
     pp('$mm cached routePoints inside Realm : ${E.leaf2} ${list.length}');
+    return list;
+  }
+
+  List<RoutePoint> _getPointsFromRealm(String routeId) {
+    pp('$mm getting cached routePoints from realm ...');
+    var list = <RoutePoint>[];
+    final b = realm.query<RoutePoint>('routeId == \$0', [routeId]);
+    list = b.toList();
+    pp('$mm cached routePoints returned from Realm : ${E.blueDot} ${list.length}');
+    if (list.isNotEmpty) {
+      myPrettyJsonPrint(list.last.toJson());
+    }
+    return list;
+  }
+
+  Future<List<RoutePoint>> _getPointsFromBackend(String routeId) async {
+    var list = <RoutePoint>[];
+    final cmd = '${url}getRoutePoints?routeId=$routeId';
+
+    List resp = await _sendHttpGET(cmd);
+    pp('$mm getRoutePoints call returned; before build ...  ${E.blueDot} ${resp.length} routePoints .');
+
+    for (var value in resp) {
+      list.add(buildRoutePoint(value));
+    }
+    pp('$mm getRoutePoints call returned  ${E.blueDot} ${list.length} routePoints .');
+    final results = realm.query<RoutePoint>('routeId == \$0', [routeId]);
+    final mList = results.toList();
+    realm.write(() {
+      realm.deleteMany<RoutePoint>(mList);
+    });
+    pp('$mm deleted from realm  ${E.redDot} ${mList.length} routePoints .');
+    
+    try {
+      realm.write(() {
+        realm.addAll<RoutePoint>(list, update: true);
+      });
+    } catch (e) {
+      pp('$mm  ${E.redDot} Realm does not like something? ${E.redDot} $e ${E.redDot} ');
+    }
+    if (list.isNotEmpty) {
+      myPrettyJsonPrint(list.last.toJson());
+    }
+    pp('$mm cached routePoints returned from Realm : ${E.blueDot} ${list.length}');
     return list;
   }
 
@@ -224,44 +242,117 @@ class ListApiDog {
       StreamController.broadcast();
 
   Stream<List<City>> get cityStream => _cityController.stream;
+  Future<List<RouteLandmark>> getRouteLandmarks(
+      String routeId, bool refresh) async {
+    pp('$mm .................. getRouteLandmarks refresh: $refresh');
 
-  Future<List<Route>> getRoutes(AssociationParameter p) async {
-    pp('$mm .................. getRoutes refresh: ${p.refresh}');
-
-    final list = <Route>[];
-    if (p.refresh) {
-      final cmd = '${url}getAssociationRoutes?associationId=${p.associationId}';
-      List resp = await _sendHttpGET(cmd);
-      for (var value in resp) {
-        var r = buildRoute(value);
-        list.add(r);
+    final localList = <RouteLandmark>[];
+    rm.RealmResults<RouteLandmark> results =
+        realm.query<RouteLandmark>("routeId == \$0", [routeId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        localList.add(element);
       }
+    }
+    pp('$mm RouteLandmarks from realm:: ${localList.length}');
+    if (localList.isNotEmpty && !refresh) {
+      return localList;
+    }
+    //
+    final remoteList = await _getRouteLandmarksFromBackend(routeId: routeId);
+    pp('$mm RouteLandmarks from backend:: ${remoteList.length}');
+    return remoteList;
+  }
+
+  Future<List<Route>> getRoutes(AssociationParameter param) async {
+    pp('$mm .................. getRoutes refresh: ${param.refresh}');
+
+    final localList = <Route>[];
+    rm.RealmResults<Route> results = realm.all<Route>();
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        localList.add(element);
+      }
+    }
+    pp('$mm Routes from realm:: ${localList.length}');
+    if (!param.refresh && localList.isNotEmpty) {
+      _routeController.sink.add(localList);
+      return localList;
+    }
+
+    final remoteList = await _getRoutesFromBackend(param);
+    pp('$mm Routes from backend:: ${remoteList.length}');
+    return remoteList;
+  }
+
+  Future<List<Landmark>> findLandmarksByLocation(
+      {required double latitude,
+      required double longitude,
+      required double radiusInKM}) async {
+    pp('$mm .................. findLandmarksByLocation; radius: $radiusInKM');
+
+    final list = <Landmark>[];
+    final cmd =
+        '${url}findLandmarksByLocation?latitude=$latitude&longitude=$longitude&radiusInKM=$radiusInKM';
+    List resp = await _sendHttpGET(cmd);
+    for (var value in resp) {
+      var r = buildLandmark(value);
+      list.add(r);
+    }
+
+    pp('$mm Landmarks found by location search: ${list.length}');
+    return list;
+  }
+
+  Future<List<RouteLandmark>> _getRouteLandmarksFromBackend(
+      {required String routeId}) async {
+    pp('$mm .................. getRouteLandmarks; routeId: $routeId');
+
+    final list = <RouteLandmark>[];
+    final cmd = '${url}getRouteLandmarks?routeId=$routeId';
+    List resp = await _sendHttpGET(cmd);
+    for (var value in resp) {
+      var r = buildRouteLandmark(value);
+      list.add(r);
+    }
+
+    pp('$mm Route Landmarks found: ${list.length}');
+    return list;
+  }
+
+  Future<List<Route>> _getRoutesFromBackend(
+      AssociationParameter p) async {
+    final cmd = '${url}getAssociationRoutes?associationId=${p.associationId}';
+    var list = <Route>[];
+    List resp = await _sendHttpGET(cmd);
+    pp('$mm routes from backend: $resp');
+
+    for (var value in resp) {
+      pp('$mm route from backend: ${value['name']}');
+      var r = buildRoute(value);
+      list.add(r);
+    }
+    try {
       realm.write(() {
         realm.deleteAll<Route>();
       });
-      pp('$mm routes have been deleted from local realm db ');
-      pp('$mm routes from backend : ${list.length}');
-      for (var route in list) {
-        try {
-          realm.write(() {
-            realm.add(route);
-          });
-        } catch (e) {
-          pp('$mm ... REALM ERROR: ${E.redDot} $e');
-        }
-      }
-      pp('$mm cached routes: ${list.length}');
-    } else {
-      rm.RealmResults<Route> results = realm.all<Route>();
-      if (results.isNotEmpty) {
-        for (var element in results) {
-          list.add(element);
-        }
+    } catch (e) {
+      pp(e);
+    }
+
+    pp('$mm routes have been deleted from local realm db ');
+    pp('$mm routes from backend : ${list.length}');
+
+    for (var route in list) {
+      try {
+        realm.write(() {
+          realm.add(route);
+        });
+      } catch (e) {
+        pp('$mm ... REALM ERROR: ${E.redDot} $e');
       }
     }
-    _routeController.sink.add(list);
-    pp('$mm getRoutes resulted in: ${list.length} routes');
-
+    pp('$mm ......... cached routes: ${list.length}');
     return list;
   }
 
@@ -305,22 +396,13 @@ class ListApiDog {
   Future<List<City>> findCitiesByLocation(LocationFinderParameter p) async {
     var list = <City>[];
     final user = await prefs.getUser();
-    // list = await geoHashUtil.findCities(countryId: user!.countryId!,
-    //     latitude: p.latitude,
-    //     longitude: p.longitude, radiusInKM: p.radiusInKM);
-    // if (list.isNotEmpty) {
-    //   return list;
-    // }
-    //
     final cmd = '${url}findCitiesByLocation?latitude=${p.latitude}'
-        '&longitude=${p.longitude}&radiusInKM=${p.radiusInKM}';
+        '&longitude=${p.longitude}&radiusInKM=${p.radiusInKM}&limit=10';
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
       list.add(buildCity(value));
     }
-    // realm.write(() {
-    //   realm.addAll(list);
-    // });
+
     pp('$mm findCitiesByLocation;  ${E.appleRed} cities found: ${list.length}');
 
     return list;
@@ -360,9 +442,9 @@ class ListApiDog {
   }
 
   Future removeRoutePoint(String routePointId) async {
-
     realm.write(() {
-      rm.RealmResults list = realm.query<RoutePoint>('routePointId == \$0',[routePointId]);
+      rm.RealmResults list =
+          realm.query<RoutePoint>('routePointId == \$0', [routePointId]);
       RoutePoint? point;
       if (list.isNotEmpty) {
         point = list.toList().first as RoutePoint;
@@ -372,8 +454,8 @@ class ListApiDog {
     });
     //
     getRoutePoints(routePointId, true);
-
   }
+
   Future<List<User>> getAssociationUsers(String associationId) async {
     final list = <User>[];
     rm.RealmResults<User> results = realm.all<User>();
@@ -431,22 +513,10 @@ class ListApiDog {
 
   static const xz = '🌎🌎🌎🌎🌎🌎 ListApiDog: ';
 
+  late String token;
   Future _sendHttpGET(String mUrl) async {
     pp('$xz _sendHttpGET: 🔆 🔆 🔆 calling : 💙 $mUrl  💙');
     var start = DateTime.now();
-    var token = await appAuth.getAuthToken();
-    if (token != null) {
-      // pp('$xz _sendHttpGET: 😡😡😡 Firebase Auth Token: 💙️ Token is GOOD! 💙 ');
-    } else {
-      pp('$xz Firebase token missing ${E.redDot}${E.redDot}${E.redDot}${E.redDot}');
-      final gex = KasieException(
-          message: 'Firebase Authentication token missing',
-          url: mUrl,
-          translationKey: 'networkProblem',
-          errorType: KasieException.timeoutException);
-      errorHandler.handleError(exception: gex);
-      //throw gex;
-    }
     headers['Authorization'] = 'Bearer $token';
     try {
       var resp = await client
