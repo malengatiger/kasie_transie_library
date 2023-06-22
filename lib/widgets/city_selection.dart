@@ -2,7 +2,7 @@ import 'package:badges/badges.dart' as bd;
 import 'package:flutter/material.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/providers/kasie_providers.dart';
-import 'package:responsive_builder/responsive_builder.dart';
+import 'package:responsive_builder/responsive_builder.dart' as responsive;
 
 import '../../../l10n/translation_handler.dart';
 import '../data/schemas.dart';
@@ -199,212 +199,82 @@ class _CitySearchState extends State<CitySearch> {
     if (isDarkMode) {
       color = Theme.of(context).primaryColor;
     }
-
-    if (widget.showScaffold) {
-      Scaffold(
-        appBar: AppBar(
-          title: Text(
-            countriesText == null ? 'Cities & Towns & Places' : countriesText!,
-            style: myTextStyleMediumBoldWithColor(
-                context, Theme.of(context).primaryColor),
-          ),
-          bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(160),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 300,
-                          child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 20.0, horizontal: 12.0),
-                              child: TextField(
-                                controller: _textEditingController,
-                                onChanged: (text) {
-                                  pp(' ........... changing to: $text');
-                                  _runFilter(text);
-                                },
-                                decoration: InputDecoration(
-                                    label: Text(
-                                      search == null ? 'Search' : search!,
-                                      style: myTextStyleSmall(
-                                        context,
-                                      ),
-                                    ),
-                                    icon: Icon(
-                                      Icons.search,
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                                    border: const OutlineInputBorder(),
-                                    hintText: searchCountries == null
-                                        ? 'Search Cities'
-                                        : searchCountries!,
-                                    hintStyle: myTextStyleSmallWithColor(
-                                        context, color)),
-                              )),
-                        ),
-                        const SizedBox(
-                          width: 12,
-                        ),
-                        bd.Badge(
-                          position: bd.BadgePosition.topEnd(),
-                          badgeContent: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text('${_citiesToDisplay.length}',
-                                style: myTextStyleSmallWithColor(
-                                    context, Colors.white)),
-                          ),
-                        )
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Search Radius'),
-                        const SizedBox(
-                          width: 24,
-                        ),
-                        DropdownButton<int>(
-                            hint: Text("Radius Control"),
-                            items: const [
-                              DropdownMenuItem(
-                                value: 10,
-                                child: Text('10'),
-                              ),
-                              DropdownMenuItem(
-                                value: 20,
-                                child: Text('20'),
-                              ),
-                              DropdownMenuItem(
-                                value: 30,
-                                child: Text('30'),
-                              ),
-                              DropdownMenuItem(
-                                value: 50,
-                                child: Text('50'),
-                              ),
-                              DropdownMenuItem(
-                                value: 100,
-                                child: Text('10'),
-                              ),
-                              DropdownMenuItem(
-                                value: 150,
-                                child: Text('150'),
-                              ),
-                              DropdownMenuItem(
-                                value: 200,
-                                child: Text('200'),
-                              ),
-                              DropdownMenuItem(
-                                value: 250,
-                                child: Text('250'),
-                              ),
-                              DropdownMenuItem(
-                                value: 300,
-                                child: Text('300'),
-                              ),
-                              DropdownMenuItem(
-                                value: 500,
-                                child: Text('500'),
-                              ),
-                              DropdownMenuItem(
-                                value: 600,
-                                child: Text('600'),
-                              ),
-                            ],
-                            onChanged: (i) {
-                              pp('$mm drop down search radius: $i');
-                              if (i == null) {
-                                //_getData(i.toDouble());
-                              } else {
-                                //_getCurrentLocation(i.toDouble());
-                              }
-                            }),
-                      ],
-                    )
-                  ],
-                ),
-              )),
-          actions: [
-            IconButton(
-                onPressed: () {
-                  //_getCurrentLocation(50.0);
-                },
-                icon: const Icon(Icons.refresh)),
-          ],
-        ),
-        backgroundColor: isDarkMode
-            ? Theme.of(context).dialogBackgroundColor
-            : Colors.brown[50],
-        body: busy
-            ? const Center(
-                child: CircularProgressIndicator(
-                  backgroundColor: Colors.purple,
-                ),
-              )
-            : Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ListView.builder(
-                    itemCount: _citiesToDisplay.length,
-                    itemBuilder: (ctx, index) {
-                      var cntry = _citiesToDisplay.elementAt(index);
-                      return GestureDetector(
-                        onTap: () {
-                          _close(cntry);
-                        },
-                        child: Card(
-                          elevation: 2,
-                          shape: getRoundedBorder(radius: 16),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text('${cntry.name}'),
-                          ),
-                        ),
-                      );
-                    }),
-              ),
-      );
+    var leftPadding = 16.0;
+    final type = getDeviceType();
+    if (type == 'phone') {
+      leftPadding = 2.0;
     }
 
     return Card(
       shape: getRoundedBorder(radius: 16),
-      elevation: 4,
+      elevation: 6,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: bd.Badge(
-          badgeContent: Text('${_citiesToDisplay.length}'),
-          badgeStyle: const bd.BadgeStyle(padding: EdgeInsets.all(8.0)),
-          child: Column(
-            children: [
-              Text(widget.title, style: myTextStyleMediumBoldPrimaryColor(context),),
-              const SizedBox(
-                height: 24,
+        padding:  EdgeInsets.all(leftPadding),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.title,
+                    style: myTextStyleMediumBoldPrimaryColor(context),
+                  ),
+                ],
               ),
-              Expanded(
-                child: ListView.builder(
-                    itemCount: _citiesToDisplay.length,
-                    itemBuilder: (ctx, index) {
-                      var cntry = _citiesToDisplay.elementAt(index);
-                      return GestureDetector(
-                        onTap: () {
-                          _close(cntry);
-                        },
-                        child: Card(
-                          elevation: 2,
-                          shape: getRoundedBorder(radius: 16),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text('${cntry.name}'),
-                          ),
+            ),
+            const SizedBox(
+              height: 24,
+            ),
+            Row(mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(width: 300,
+                  child: SearchBar(
+                    controller: _textEditingController,
+                    leading: IconButton(
+                      onPressed: () {
+                        pp('$mm search icon tapped .... ${_textEditingController.text}');
+                      },
+                      icon: const Icon(Icons.search),
+                    ),
+
+                    onChanged: (s){
+                      pp('$mm search onChanged: .... ${_textEditingController.text}');
+                        _runFilter(_textEditingController.text);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 24,),
+                bd.Badge(
+                  badgeContent: Text('${_citiesToDisplay.length}'),
+                  badgeStyle: const bd.BadgeStyle(padding: EdgeInsets.all(8.0)),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 24,
+            ),
+            Expanded(
+              child: ListView.builder(
+                  itemCount: _citiesToDisplay.length,
+                  itemBuilder: (ctx, index) {
+                    var city = _citiesToDisplay.elementAt(index);
+                    return GestureDetector(
+                      onTap: () {
+                        _close(city);
+                      },
+                      child: Card(
+                        elevation: 2,
+                        shape: getRoundedBorder(radius: 16),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text('${city.name}'),
                         ),
-                      );
-                    }),
-              ),
-            ],
-          ),
+                      ),
+                    );
+                  }),
+            ),
+          ],
         ),
       ),
     );

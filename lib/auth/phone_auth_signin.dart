@@ -100,7 +100,7 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
       userCred = await firebaseAuth.signInWithCredential(authCredential);
       pp('\n$mm user signed in to firebase? userCred: $userCred');
       pp(
-          '$mm seeking to acquire this user from the Geo database by their id: 🌀🌀🌀${userCred
+          '$mm seeking to acquire this user from the Kasie database by their id: 🌀🌀🌀${userCred
               .user?.uid}');
       user = await listApiDog.getUserById(userCred.user!.uid);
 

@@ -135,9 +135,9 @@ Future<int> _processNewLandmark({required lib.Landmark landmark,
     cnt++;
 
     //sleep; for avoiding rate limit on backend
-    pp('$xyz ....... sleeping for 5 seconds ... ${DateTime.now()
+    pp('$xyz ....... sleeping for 3 seconds ... ${DateTime.now()
         .toIso8601String()}');
-    sleep(Duration(seconds: 5));
+    sleep(Duration(seconds: 3));
     pp('$xyz ....... woke up from my slumber: ... ${DateTime.now()
         .toIso8601String()}');
   }

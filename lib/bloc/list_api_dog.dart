@@ -80,7 +80,15 @@ class ListApiDog {
   }
 
   Future getAuthToken() async {
-    token = (await appAuth.getAuthToken())!;
+    pp('$mm getAuthToken: ...... Getting Firebase token ......');
+    var m = await appAuth.getAuthToken();
+    if (m == null) {
+      pp('$mm Unable to get Firebase token');
+      token = 'NoToken';
+    } else {
+      pp('$mm Firebase token retrieved OK');
+      token = m;
+    }
   }
 
   Future<bool> initializeRealm() async {
@@ -282,6 +290,7 @@ class ListApiDog {
 
     final remoteList = await _getRoutesFromBackend(param);
     pp('$mm Routes from backend:: ${remoteList.length}');
+    _routeController.sink.add(remoteList);
     return remoteList;
   }
 
@@ -325,7 +334,6 @@ class ListApiDog {
     final cmd = '${url}getAssociationRoutes?associationId=${p.associationId}';
     var list = <Route>[];
     List resp = await _sendHttpGET(cmd);
-    pp('$mm routes from backend: $resp');
 
     for (var value in resp) {
       pp('$mm route from backend: ${value['name']}');
@@ -397,7 +405,7 @@ class ListApiDog {
     var list = <City>[];
     final user = await prefs.getUser();
     final cmd = '${url}findCitiesByLocation?latitude=${p.latitude}'
-        '&longitude=${p.longitude}&radiusInKM=${p.radiusInKM}&limit=10';
+        '&longitude=${p.longitude}&radiusInKM=${p.radiusInKM}&limit=${p.limit}';
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
       list.add(buildCity(value));
@@ -513,7 +521,7 @@ class ListApiDog {
 
   static const xz = '🌎🌎🌎🌎🌎🌎 ListApiDog: ';
 
-  late String token;
+   String token = 'NoTokenYet';
   Future _sendHttpGET(String mUrl) async {
     pp('$xz _sendHttpGET: 🔆 🔆 🔆 calling : 💙 $mUrl  💙');
     var start = DateTime.now();

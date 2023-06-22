@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/date_symbol_data_file.dart';
 import 'package:intl/intl.dart';
 import 'package:pretty_json/pretty_json.dart';
 import 'dart:ui' as ui;
+import 'package:intl/intl.dart';
 
 
 pp(dynamic msg) {
@@ -24,6 +26,92 @@ pp(dynamic msg) {
     }
   }
 }
+
+String getFmtDate(String date, String locale) {
+  initializeDateFormatting("en","somefile");
+  String mLocale = getValidLocale(locale);
+  Future.delayed(const Duration(milliseconds: 10));
+
+  DateTime now = DateTime.parse(date).toLocal();
+  final format = DateFormat("EEEE dd MMMM yyyy  HH:mm:ss", mLocale);
+  final formatUS = DateFormat("EEEE MMMM dd yyyy  HH:mm:ss", mLocale);
+  if (mLocale.contains('en_US')) {
+    final String result = formatUS.format(now);
+    return result;
+  } else {
+    final String result = format.format(now);
+    return result;
+  }
+}
+String getFormattedDate(String date) {
+  try {
+    DateTime d = DateTime.parse(date);
+    var format = DateFormat.yMMMd();
+    return format.format(d);
+  } catch (e) {
+    return date;
+  }
+}
+String getFormattedDateLong(String date) {
+  try {
+    DateTime d = DateTime.parse(date);
+    var format = DateFormat("EEEE, dd MMMM yyyy HH:mm");
+    return format.format(d);
+  } catch (e) {
+    return date;
+  }
+}
+String getDeviceType() {
+  final data = MediaQueryData.fromView(WidgetsBinding.instance.window);
+  return data.size.shortestSide < 600 ? 'phone' : 'tablet';
+}
+
+String getFormattedDateHour(String date) {
+  try {
+    DateTime d = DateTime.parse(date);
+    var format = DateFormat.Hms();
+    return format.format(d.toUtc());
+  } catch (e) {
+    DateTime d = DateTime.now();
+    var format = DateFormat.Hm();
+    return format.format(d);
+  }
+}
+String getValidLocale(String locale) {
+  switch (locale) {
+    case 'af':
+      return 'af_ZA';
+    case 'en':
+      return 'en';
+    case 'es':
+      return 'es';
+    case 'pt':
+      return 'pt';
+    case 'fr':
+      return 'fr';
+    case 'st':
+      return 'en_ZA';
+    case 'ts':
+      return 'en_ZA';
+    case 'xh':
+      return 'en_ZA';
+    case 'zu':
+      return 'zu_ZA';
+    case 'sn':
+      return 'en_GB';
+    case 'yo':
+      return 'en_NG';
+    case 'sw':
+      return 'sw_KE';
+    case 'de':
+      return 'de';
+    case 'zh':
+      return 'zh';
+    default:
+      return 'en_US';
+  }
+}
+
 
 Color getTextColorForBackground(Color backgroundColor) {
   if (ThemeData.estimateBrightnessForColor(backgroundColor) ==
@@ -243,6 +331,12 @@ TextStyle myTextStyleMediumLarge(BuildContext context) {
       fontSize: 24);
 }
 
+TextStyle myTextStyleMediumLargeWithSize(BuildContext context, double size) {
+  return GoogleFonts.roboto(
+      textStyle: Theme.of(context).textTheme.headlineLarge,
+      fontWeight: FontWeight.w900,
+      fontSize: size);
+}
 TextStyle myTextStyleMediumLargeWithColor(BuildContext context, Color color) {
   return GoogleFonts.roboto(
       textStyle: Theme.of(context).textTheme.headlineLarge,

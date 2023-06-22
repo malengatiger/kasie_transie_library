@@ -47,6 +47,14 @@ final routePointProvider = FutureProvider.family<List<RoutePoint>, String>((ref,
   return res;
 });
 //
+final routeLandmarkProvider = FutureProvider.family<List<RouteLandmark>, String>((ref,
+    routeId) async {
+  final res = await listApiDog.getRouteLandmarks(routeId, false);
+  pp('$bb landmarkProvider did the job: ${res.length} routeLandmarks found.');
+  return res;
+});
+
+//
 final usersProvider = FutureProvider.family<List<User>, String>((ref,
     associationId) async {
   final res = await listApiDog.getAssociationUsers(associationId);

@@ -67,8 +67,6 @@ G
 lib/data/route_bag.dart,2/0/204f51ea209b239b34c4c12539e8e22a0a8a27f1
 N
 lib/data/route_point_list.dart,5/4/54a444dc3014bf4246be841fe332300f8c8a3df1
-<
-pubspec.yaml,e/8/e8e045469170189f1d6ef12576bd01af132b1018
 L
 lib/utils/error_handler.dart,1/0/10a99e756989f9692ff3b288cdfdb0dc6a40787b
 S
@@ -85,5 +83,3 @@ S
 #.idea/libraries/Flutter_Plugins.xml,e/8/e8bbc0fdfcefee9aa7b463c83a8a480b92333860
 K
 lib/bloc/geo_hash_util.dart,6/1/619ee1d07194d8979c54731c227d110998dea3e6
-H
-lib/utils/functions.dart,b/0/b0a619b39b8dd6d9cb3842f9eccbadb6212c8b3f
