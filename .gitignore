@@ -13,7 +13,7 @@ doc/api/
 
 # dotenv environment variables file
 .env*
-
+.idea/
 # Avoid committing generated Javascript files:
 *.dart.js
 *.info.json      # Produced by the --dump-info flag.
@@ -25,3 +25,4 @@ doc/api/
 
 .flutter-plugins
 .flutter-plugins-dependencies
+/.idea/
