@@ -8,7 +8,7 @@ import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 import '../bloc/theme_bloc.dart';
-import '../data/schemas.dart';
+import '../data/schemas.dart' as lib;
 import '../l10n/translation_handler.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
@@ -24,7 +24,7 @@ class PhoneAuthSignin extends StatefulWidget {
   // final Prefs prefs;
   // final ListApiDog listApiDog;
   final DataApiDog dataApiDog;
-  final Function(User) onSuccessfulSignIn;
+  final Function(lib.User) onSuccessfulSignIn;
 
   @override
   PhoneAuthSigninState createState() => PhoneAuthSigninState();
@@ -49,7 +49,7 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
   bool verificationFailed = false;
   bool verificationCompleted = false;
   bool busy = false;
-  User? user;
+  lib.User? user;
   SignInStrings? signInStrings;
 
   @override
@@ -67,7 +67,7 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
     setState(() {});
   }
 
-  void onSuccessfulSignIn(User user) {}
+  void onSuccessfulSignIn(lib.User user) {}
 
   void _processSignIn() async {
     pp('\n\n$mm _processSignIn ... sign in the user using code: ${codeController
@@ -110,7 +110,7 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
         final users =
         await listApiDog.getAssociationUsers(user!.associationId!);
         final countries = await listApiDog.getCountries();
-        Country? myCountry;
+        lib.Country? myCountry;
         for (var country in countries) {
           if (country.countryId == ass.countryId!) {
             myCountry = country;
@@ -549,7 +549,7 @@ class SignInStrings {
     required this.password,
     required this.emailAddress});
 
-  static Future<SignInStrings> getTranslated(SettingsModel sett) async {
+  static Future<SignInStrings> getTranslated(lib.SettingsModel sett) async {
     var signIn = await translator.translate('signIn', sett!.locale!);
     var memberNotExist =
     await translator.translate('memberNotExist', sett.locale!);

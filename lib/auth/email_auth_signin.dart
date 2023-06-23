@@ -5,7 +5,7 @@ import 'package:kasie_transie_library/utils/functions.dart';
 
 import '../bloc/list_api_dog.dart';
 import '../bloc/theme_bloc.dart';
-import '../data/schemas.dart';
+import '../data/schemas.dart' as lib;
 import '../utils/emojis.dart';
 import '../utils/prefs.dart';
 
@@ -47,7 +47,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
 
   var formKey = GlobalKey<FormState>();
   bool busy = false;
-  User? user;
+  lib.User? user;
   SignInStrings? signInStrings;
 
   @override
@@ -81,7 +81,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
           final users =
               await listApiDog.getAssociationUsers(user!.associationId!);
           final countries = await listApiDog.getCountries();
-          Country? myCountry;
+          lib.Country? myCountry;
           for (var country in countries) {
             if (country.countryId == ass.countryId!) {
               myCountry = country;
@@ -181,7 +181,9 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
         body: Stack(
           children: [
             Center(
-              child: SizedBox(width: 480, height: 640,
+              child: SizedBox(
+                width: 480,
+                height: 640,
                 child: Card(
                   shape: getRoundedBorder(radius: 16),
                   elevation: 8,
@@ -192,7 +194,10 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
                         const SizedBox(
                           height: 48,
                         ),
-                        Text('Email Authentication', style: myTextStyleMediumLarge(context),),
+                        Text(
+                          'Email Authentication',
+                          style: myTextStyleMediumLarge(context),
+                        ),
                         const SizedBox(
                           height: 48,
                         ),
@@ -228,27 +233,36 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
                                     label: const Text('Password'),
                                     hintText: 'Enter your password',
                                     icon: const Icon(Icons.lock),
-
                                     iconColor: Theme.of(context).primaryColor,
                                   ),
                                 ),
                               ),
                               const SizedBox(
-                                height: 100,
+                                height: 80,
                               ),
-                              SizedBox( width: 300, height: 60,
-                                child: busy? const SizedBox(width: 24, height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 12, backgroundColor: Colors.amber,
-                                ),): ElevatedButton(
-                                   style: const ButtonStyle(
-                                     elevation: MaterialStatePropertyAll<double>(8.0),
-                                   ),
-                                    onPressed: () {
-                                      _signIn();
-                                    },
-                                    child: const Text('Send Sign In Credentials')),
-                              )
+                              busy
+                                  ? const SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 12,
+                                        backgroundColor: Colors.amber,
+                                      ),
+                                    )
+                                  : SizedBox(
+                                      width: 300,
+                                      height: 60,
+                                      child: ElevatedButton(
+                                          style: const ButtonStyle(
+                                            elevation: MaterialStatePropertyAll<
+                                                double>(8.0),
+                                          ),
+                                          onPressed: () {
+                                            _signIn();
+                                          },
+                                          child: const Text(
+                                              'Send Sign In Credentials')),
+                                    )
                             ],
                           ),
                         ))

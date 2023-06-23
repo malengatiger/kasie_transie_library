@@ -28,7 +28,18 @@ Association buildAssociation(Map map) {
   );
   return m;
 }
+State buildState(Map map) {
+  var id = rm.ObjectId.fromHexString(map['_id'] as String);
 
+  final m = State(id,
+    stateId: map['stateId'],
+    countryId: map['countryId'],
+    countryName: map['countryName'],
+    name: map['name'],
+
+  );
+  return m;
+}
 User buildUser(Map map) {
   // pp('${E.broc}  json for User, check _id .......');
   // myPrettyJsonPrint(map);
@@ -103,6 +114,7 @@ City buildCity(Map map) {
     countryName: map['countryName'],
     countryId: map['countryId'],
     stateName: map['stateName'],
+    stateId: map['stateId'],
     longitude: map['longitude'],
     latitude: map['latitude'],
     position: buildPosition(map['position']),

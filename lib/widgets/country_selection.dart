@@ -3,7 +3,7 @@ import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:badges/badges.dart' as bd;
 import '../../../l10n/translation_handler.dart';
-import '../data/schemas.dart';
+import '../data/schemas.dart' as lib;
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
 
@@ -16,7 +16,7 @@ class CountryChooser extends StatefulWidget {
         required this.refreshCountries})
       : super(key: key);
 
-  final Function(Country) onSelected;
+  final Function(lib.Country) onSelected;
   final String hint;
   final bool refreshCountries;
 
@@ -25,9 +25,9 @@ class CountryChooser extends StatefulWidget {
 }
 
 class CountryChooserState extends State<CountryChooser> {
-  List<Country> countries = <Country>[];
+  List<lib.Country> countries = <lib.Country>[];
   bool loading = false;
-  SettingsModel? settings;
+  lib.SettingsModel? settings;
   final mm = '😡 😡 😡 😡 CountryChooser 🍎';
 
   @override
@@ -61,7 +61,7 @@ class CountryChooserState extends State<CountryChooser> {
       await translator.translate('${entry.name}', settings!.locale!);
       var m = translated.replaceAll('UNAVAILABLE KEY:', '');
       if (mounted) {
-        list.add(DropdownMenuItem<Country>(
+        list.add(DropdownMenuItem<lib.Country>(
           value: entry,
           child: Text(
             m,
@@ -102,15 +102,15 @@ class CountrySearch extends StatefulWidget {
   const CountrySearch({Key? key, required this.onCountrySelected})
       : super(key: key);
 
-  final Function(Country) onCountrySelected;
+  final Function(lib.Country) onCountrySelected;
   @override
   State<CountrySearch> createState() => _CountrySearchState();
 }
 
 class _CountrySearchState extends State<CountrySearch> {
   final mm = '🌀🌀🌀🌀CountrySearch: ';
-  var _countries = <Country>[];
-  final _countriesToDisplay = <Country>[];
+  var _countries = <lib.Country>[];
+  final _countriesToDisplay = <lib.Country>[];
   final _countryNames = <String>[];
 
   void _runFilter(String text) {
@@ -139,7 +139,7 @@ class _CountrySearchState extends State<CountrySearch> {
     setState(() {});
   }
 
-  Country? _findCountry(String name) {
+  lib.Country? _findCountry(String name) {
     pp('$mm ... find country by name $name from ${_countries.length}');
     for (var country in _countries) {
       if (country.name!.toLowerCase() == name.toLowerCase()) {
@@ -148,7 +148,7 @@ class _CountrySearchState extends State<CountrySearch> {
     }
     return null;
   }
-  void _close(Country country) {
+  void _close(lib.Country country) {
 
     pp('$mm country selected: ${country.name}, popping out');
     widget.onCountrySelected(country);

@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riv;
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 
 import '../data/schemas.dart';
@@ -7,13 +7,13 @@ import '../utils/functions.dart';
 
 const bb = '🌀🌀🌀🌀🌀🌀RiverPod Provider 🌀🌀🌀';
 //
-final countryProvider = FutureProvider<List<Country>>((ref) async {
+final countryProvider = riv.FutureProvider<List<Country>>((ref) async {
   final res = await listApiDog.getCountries();
   pp('$bb countryProvider did the job: ${res.length} countries found.');
   return res;
 });
 //
-final countryCitiesProvider = FutureProvider.family<List<City>, String>((ref,
+final countryCitiesProvider = riv.FutureProvider.family<List<City>, String>((ref,
     countryId) async {
   final res = await listApiDog.getCountryCities(countryId);
   pp('$bb countryCitiesProvider did the job: ${res
@@ -21,7 +21,7 @@ final countryCitiesProvider = FutureProvider.family<List<City>, String>((ref,
   return res;
 });
 //
-final nearbyCitiesProvider = FutureProvider.family<
+final nearbyCitiesProvider = riv.FutureProvider.family<
     List<City>,
     LocationFinderParameter>((ref, cityFinderParam) async {
   final res = await listApiDog.findCitiesByLocation(cityFinderParam);
@@ -30,7 +30,7 @@ final nearbyCitiesProvider = FutureProvider.family<
   return res;
 });
 //
-final routesProvider = FutureProvider.family<List<Route>,
+final routesProvider = riv.FutureProvider.family<List<Route>,
     AssociationParameter>((ref, associationParameter) async {
   final res = await listApiDog.getRoutes(associationParameter);
   pp('$bb routesProvider did the job: ${res.length} routes found.');
@@ -40,14 +40,14 @@ final routesProvider = FutureProvider.family<List<Route>,
   return res;
 });
 //
-final routePointProvider = FutureProvider.family<List<RoutePoint>, String>((ref,
+final routePointProvider = riv.FutureProvider.family<List<RoutePoint>, String>((ref,
     routeId) async {
   final res = await listApiDog.getRoutePoints(routeId, false);
   pp('$bb routePointProvider did the job: ${res.length} routePoints found.');
   return res;
 });
 //
-final routeLandmarkProvider = FutureProvider.family<List<RouteLandmark>, String>((ref,
+final routeLandmarkProvider = riv.FutureProvider.family<List<RouteLandmark>, String>((ref,
     routeId) async {
   final res = await listApiDog.getRouteLandmarks(routeId, false);
   pp('$bb landmarkProvider did the job: ${res.length} routeLandmarks found.');
@@ -55,14 +55,21 @@ final routeLandmarkProvider = FutureProvider.family<List<RouteLandmark>, String>
 });
 
 //
-final usersProvider = FutureProvider.family<List<User>, String>((ref,
+final usersProvider = riv.FutureProvider.family<List<User>, String>((ref,
     associationId) async {
   final res = await listApiDog.getAssociationUsers(associationId);
   pp('$bb usersProvider did the job: ${res.length} users found.');
   return res;
 });
 
-final vehicleProvider = FutureProvider.family<List<Vehicle>, String>((ref,
+final statesProvider = riv.FutureProvider.family<List<State>, String>((ref,
+    countryId) async {
+  final res = await listApiDog.getCountryStates(countryId);
+  pp('$bb statesProvider did the job: ${res.length} states/provinces found.');
+  return res;
+});
+
+final vehicleProvider = riv.FutureProvider.family<List<Vehicle>, String>((ref,
     associationId) async {
   final res = await listApiDog.getAssociationVehicles(associationId);
   pp('$bb vehicleProvider did the job: ${res.length} cars found.');

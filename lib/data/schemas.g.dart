@@ -272,6 +272,7 @@ class City extends _City with RealmEntity, RealmObjectBase, RealmObject {
     double? latitude,
     double? longitude,
     String? countryName,
+    String? stateId,
     Position? position,
     String? geoHash,
   }) {
@@ -284,6 +285,7 @@ class City extends _City with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'latitude', latitude);
     RealmObjectBase.set(this, 'longitude', longitude);
     RealmObjectBase.set(this, 'countryName', countryName);
+    RealmObjectBase.set(this, 'stateId', stateId);
     RealmObjectBase.set(this, 'position', position);
     RealmObjectBase.set(this, 'geoHash', geoHash);
   }
@@ -343,6 +345,12 @@ class City extends _City with RealmEntity, RealmObjectBase, RealmObject {
       RealmObjectBase.set(this, 'countryName', value);
 
   @override
+  String? get stateId =>
+      RealmObjectBase.get<String>(this, 'stateId') as String?;
+  @override
+  set stateId(String? value) => RealmObjectBase.set(this, 'stateId', value);
+
+  @override
   Position? get position =>
       RealmObjectBase.get<Position>(this, 'position') as Position?;
   @override
@@ -377,6 +385,7 @@ class City extends _City with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('latitude', RealmPropertyType.double, optional: true),
       SchemaProperty('longitude', RealmPropertyType.double, optional: true),
       SchemaProperty('countryName', RealmPropertyType.string, optional: true),
+      SchemaProperty('stateId', RealmPropertyType.string, optional: true),
       SchemaProperty('position', RealmPropertyType.object,
           optional: true, linkTarget: 'Position'),
       SchemaProperty('geoHash', RealmPropertyType.string, optional: true),
@@ -1826,6 +1835,74 @@ class RouteCity extends _RouteCity
       SchemaProperty('associationId', RealmPropertyType.string, optional: true),
       SchemaProperty('position', RealmPropertyType.object,
           optional: true, linkTarget: 'Position'),
+    ]);
+  }
+}
+
+class State extends _State with RealmEntity, RealmObjectBase, RealmObject {
+  State(
+    ObjectId id, {
+    String? stateId,
+    String? name,
+    String? countryId,
+    String? countryName,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'stateId', stateId);
+    RealmObjectBase.set(this, 'name', name);
+    RealmObjectBase.set(this, 'countryId', countryId);
+    RealmObjectBase.set(this, 'countryName', countryName);
+  }
+
+  State._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get stateId =>
+      RealmObjectBase.get<String>(this, 'stateId') as String?;
+  @override
+  set stateId(String? value) => RealmObjectBase.set(this, 'stateId', value);
+
+  @override
+  String? get name => RealmObjectBase.get<String>(this, 'name') as String?;
+  @override
+  set name(String? value) => RealmObjectBase.set(this, 'name', value);
+
+  @override
+  String? get countryId =>
+      RealmObjectBase.get<String>(this, 'countryId') as String?;
+  @override
+  set countryId(String? value) => RealmObjectBase.set(this, 'countryId', value);
+
+  @override
+  String? get countryName =>
+      RealmObjectBase.get<String>(this, 'countryName') as String?;
+  @override
+  set countryName(String? value) =>
+      RealmObjectBase.set(this, 'countryName', value);
+
+  @override
+  Stream<RealmObjectChanges<State>> get changes =>
+      RealmObjectBase.getChanges<State>(this);
+
+  @override
+  State freeze() => RealmObjectBase.freezeObject<State>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(State._);
+    return const SchemaObject(ObjectType.realmObject, State, 'State', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('stateId', RealmPropertyType.string,
+          optional: true, indexType: RealmIndexType.regular),
+      SchemaProperty('name', RealmPropertyType.string, optional: true),
+      SchemaProperty('countryId', RealmPropertyType.string, optional: true),
+      SchemaProperty('countryName', RealmPropertyType.string, optional: true),
     ]);
   }
 }

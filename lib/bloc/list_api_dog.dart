@@ -34,6 +34,7 @@ final config = rm.Configuration.local(
     RouteStartEnd.schema,
     RouteLandmark.schema,
     RouteCity.schema,
+    State.schema,
   ],
 );
 final ListApiDog listApiDog = ListApiDog(
@@ -136,6 +137,32 @@ class ListApiDog {
     pp('$mm cached association: ${ass.associationName}');
 
     return ass;
+  }
+
+  Future<List<State>> getCountryStates(String countryId) async {
+    var mList = <State>[];
+
+    final res = realm.all<State>();
+    if (res.isNotEmpty) {
+      for (var value in res) {
+        mList.add(value);
+      }
+    }
+    if (mList.isNotEmpty) {
+      return mList;
+    }
+    final cmd = '${url}getCountryStates?countryId=$countryId';
+    List resp = await _sendHttpGET(cmd);
+    for (var value in resp) {
+      mList.add(buildState(value));
+    }
+
+    realm.write(() {
+      realm.addAll(mList);
+    });
+    pp('$mm cached states: ${mList.length}');
+
+    return mList;
   }
 
   Future<List<SettingsModel>> getSettings(String associationId) async {

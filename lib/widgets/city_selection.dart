@@ -5,7 +5,7 @@ import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:responsive_builder/responsive_builder.dart' as responsive;
 
 import '../../../l10n/translation_handler.dart';
-import '../data/schemas.dart';
+import '../data/schemas.dart' as lib;
 import '../utils/device_location_bloc.dart';
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
@@ -18,7 +18,7 @@ class CityChooser extends StatefulWidget {
       required this.refreshCountries})
       : super(key: key);
 
-  final Function(Country) onSelected;
+  final Function(lib.Country) onSelected;
   final String hint;
   final bool refreshCountries;
 
@@ -27,9 +27,9 @@ class CityChooser extends StatefulWidget {
 }
 
 class CityChooserState extends State<CityChooser> {
-  List<Country> countries = <Country>[];
+  List<lib.Country> countries = <lib.Country>[];
   bool loading = false;
-  SettingsModel? settings;
+  lib.SettingsModel? settings;
   final mm = '😡 😡 😡 😡 CityChooser 🍎';
 
   @override
@@ -64,7 +64,7 @@ class CityChooserState extends State<CityChooser> {
           await translator.translate('${entry.name}', settings!.locale!);
       var m = translated.replaceAll('UNAVAILABLE KEY:', '');
       if (mounted) {
-        list.add(DropdownMenuItem<Country>(
+        list.add(DropdownMenuItem<lib.Country>(
           value: entry,
           child: Text(
             m,
@@ -111,8 +111,8 @@ class CitySearch extends StatefulWidget {
   }) : super(key: key);
 
   final bool showScaffold;
-  final List<City> cities;
-  final Function(City) onCitySelected;
+  final List<lib.City> cities;
+  final Function(lib.City) onCitySelected;
   final String title;
 
   @override
@@ -121,11 +121,11 @@ class CitySearch extends StatefulWidget {
 
 class _CitySearchState extends State<CitySearch> {
   final mm = '🌀🌀🌀🌀CitySearch: ';
-  final _citiesToDisplay = <City>[];
+  final _citiesToDisplay = <lib.City>[];
   final _cityNames = <String>[];
   final _formKey = GlobalKey<FormState>();
   bool busy = false;
-  User? user;
+  lib.User? user;
 
   String? countriesText, search, searchCountries;
   final _textEditingController = TextEditingController();
@@ -156,7 +156,7 @@ class _CitySearchState extends State<CitySearch> {
     setState(() {});
   }
 
-  City? _findCity(String name) {
+  lib.City? _findCity(String name) {
     pp('$mm ... find city by name $name from ${widget.cities.length}');
     for (var city in widget.cities) {
       if (city.name!.toLowerCase() == name.toLowerCase()) {
@@ -166,7 +166,7 @@ class _CitySearchState extends State<CitySearch> {
     return null;
   }
 
-  void _close(City city) {
+  void _close(lib.City city) {
     pp('$mm city selected: ${city.name}, widget.onCitySelected ...');
     widget.onCitySelected(city);
   }

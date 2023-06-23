@@ -79,6 +79,7 @@ class _City {
   double? latitude;
   double? longitude;
   String? countryName;
+  String? stateId;
   _Position? position;
   String? geoHash;
 
@@ -87,6 +88,7 @@ class _City {
         'cityId': cityId,
         'countryId': countryId,
         'name': name,
+        'stateId': stateId,
         'stateName': stateName,
         'latitude': latitude,
         'longitude': longitude,
@@ -176,7 +178,6 @@ class _Route {
       final pos2 = {
         'type': 'Point',
         'coordinates': routeStartEnd!.endCityPosition!.coordinates,
-
       };
       se['startCityId'] = routeStartEnd!.startCityId!;
       se['startCityName'] = routeStartEnd!.startCityName!;
@@ -184,7 +185,6 @@ class _Route {
       se['endCityName'] = routeStartEnd!.endCityName!;
       se['startCityPosition'] = pos1;
       se['endCityPosition'] = pos2;
-
     }
     Map<String, dynamic> map = {
       '_id': id.hexString,
@@ -421,6 +421,7 @@ class _RouteInfo {
     return map;
   }
 }
+
 /*
 public class RouteLandmark {
     private String _partitionKey;
@@ -440,21 +441,20 @@ class _RouteLandmark {
   @PrimaryKey()
   late ObjectId id;
   @Indexed()
-  String?  routeId;
-  String?  routeName;
-  String?  landmarkId;
-  String?  landmarkName;
-  String?  created;
+  String? routeId;
+  String? routeName;
+  String? landmarkId;
+  String? landmarkName;
+  String? created;
   String? associationId;
   _Position? position;
 
   Map<String, dynamic> toJson() {
-
     Map<String, dynamic> map = {
       '_id': id.hexString,
       'landmarkId': landmarkId,
       'routeId': routeId,
-      'position': position == null ? null: position!.toJson(),
+      'position': position == null ? null : position!.toJson(),
       'routeName': routeName,
       'landmarkName': landmarkName,
       'created': created,
@@ -463,26 +463,26 @@ class _RouteLandmark {
     return map;
   }
 }
+
 @RealmModel()
 class _RouteCity {
   @PrimaryKey()
   late ObjectId id;
   @Indexed()
-  String?  routeId;
-  String?  routeName;
-  String?  cityId;
-  String?  cityName;
-  String?  created;
+  String? routeId;
+  String? routeName;
+  String? cityId;
+  String? cityName;
+  String? created;
   String? associationId;
   _Position? position;
 
   Map<String, dynamic> toJson() {
-
     Map<String, dynamic> map = {
       '_id': id.hexString,
       'cityId': cityId,
       'routeId': routeId,
-      'position': position == null ? null: position!.toJson(),
+      'position': position == null ? null : position!.toJson(),
       'routeName': routeName,
       'cityName': cityName,
       'created': created,
@@ -491,6 +491,29 @@ class _RouteCity {
     return map;
   }
 }
+
+@RealmModel()
+class _State {
+  @PrimaryKey()
+  late ObjectId id;
+  @Indexed()
+  String? stateId;
+  String? name;
+  String? countryId;
+  String? countryName;
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {
+      '_id': id.hexString,
+      'countryId': countryId,
+      'stateId': stateId,
+      'name': name,
+      'countryName': countryName,
+    };
+    return map;
+  }
+}
+
 @RealmModel()
 class _Landmark {
   @PrimaryKey()

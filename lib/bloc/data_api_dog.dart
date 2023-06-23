@@ -91,6 +91,20 @@ class DataApiDog {
     listApiDog.getRoutes(AssociationParameter(route.associationId!, true));
     return r;
   }
+  Future<City> addCity(City city) async {
+    final bag = city.toJson();
+    final cmd = '${url}addCity';
+    final res = await _callPost(cmd, bag);
+    pp('$mm City added to database ...');
+    myPrettyJsonPrint(res);
+    final r = buildCity(res);
+    listApiDog.realm.write(() {
+      listApiDog.realm.add<City>(r);
+      pp('$mm new city cached in Realm ... ${r.name}');
+    });
+
+    return r;
+  }
 
   Future<RouteLandmark> addRouteLandmark(RouteLandmark route) async {
     final bag = route.toJson();
