@@ -25,6 +25,9 @@ final DataApiDog dataApiDog =
 class DataApiDog {
   static const mm = '🌎🌎🌎🌎🌎🌎 DataApiDog: 🌎🌎';
 
+  StreamController<RouteLandmark> _routeLandmarkController = StreamController.broadcast();
+  Stream<RouteLandmark> get routeLandmarkStream  => _routeLandmarkController.stream;
+
   Map<String, String> headers = {
     'Content-type': 'application/json',
     'Accept': 'application/json',
@@ -106,13 +109,35 @@ class DataApiDog {
     return r;
   }
 
-  Future<RouteLandmark> addRouteLandmark(RouteLandmark route) async {
+  Future<int> updateRouteColor({required String routeId, required String color}) async {
+    final cmd = '${url}updateRouteColor?routeId=$routeId&color=$color';
+    var res = await _sendHttpGET(cmd);
+    //final route = buildRoute(res);
+    // listApiDog.realm.write(() {
+    //   route.color = color;
+    //   listApiDog.realm.add<Route>(route, update: true);
+    //   pp('$mm Route with updated color: $color updated in cache');
+    // });
+    // final user = await prefs.getUser();
+    // if (user != null) {
+    //   listApiDog.getRoutes(AssociationParameter(user.associationId!, true));
+    // }
+    myPrettyJsonPrint(res);
+    return 0;
+  }
+
+  void addRouteLandmarkToStream(RouteLandmark route) async {
+    _routeLandmarkController.sink.add(route);
+  }
+
+    Future<RouteLandmark> addRouteLandmark(RouteLandmark route) async {
     final bag = route.toJson();
     final cmd = '${url}addRouteLandmark';
     final res = await _callPost(cmd, bag);
     pp('$mm RouteLandmark added to database ...');
     myPrettyJsonPrint(res);
     final r = buildRouteLandmark(res);
+    _routeLandmarkController.sink.add(r);
     return r;
   }
 

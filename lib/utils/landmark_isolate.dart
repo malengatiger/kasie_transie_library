@@ -5,6 +5,7 @@ import 'dart:isolate';
 
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/app_auth.dart';
+import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/parsers.dart';
@@ -24,15 +25,16 @@ class LandmarkParameters {
   late String routeName, routeId, authToken;
   late int limit;
 
-  LandmarkParameters({required this.radius,
-    required this.latitude,
-    required this.longitude,
-    required this.landmarkName,
-    required this.associationId,
-    required this.routeName,
-    required this.routeId,
-    required this.limit,
-    required this.authToken});
+  LandmarkParameters(
+      {required this.radius,
+      required this.latitude,
+      required this.longitude,
+      required this.landmarkName,
+      required this.associationId,
+      required this.routeName,
+      required this.routeId,
+      required this.limit,
+      required this.authToken});
 }
 
 class LandmarkIsolate {
@@ -44,7 +46,13 @@ class LandmarkIsolate {
       return;
     }
     parameters.authToken = token;
-    await Isolate.run(() async => _heavyTaskInsideIsolate(parameters));
+
+    ///build the async isolate and run it
+    final res =
+        await Isolate.run(() async => _heavyTaskInsideIsolate(parameters));
+
+    dataApiDog.addRouteLandmarkToStream(res.$2);
+    pp('$xyz LandmarkIsolate results are 🌀🌀landmarkName: ${res.$2.landmarkName} route: ${res.$2.routeName}  🔷🔷🔷🔷 Yay!\n\n');
     pp('$xyz LandmarkIsolate completed the job. 🔷🔷🔷🔷 Yay!\n\n');
   }
 }
@@ -52,7 +60,8 @@ class LandmarkIsolate {
 /// Landmark processing isolate
 ///
 
-Future<int> _heavyTaskInsideIsolate(LandmarkParameters parameters) async {
+Future<(lib.Landmark, lib.RouteLandmark)> _heavyTaskInsideIsolate(
+    LandmarkParameters parameters) async {
   pp('\n$xyz ............ _heavyTaskInsideIsolate starting ...');
   final url = KasieEnvironment.getUrl();
   final finderParams = LocationFinderParameter(
@@ -61,8 +70,8 @@ Future<int> _heavyTaskInsideIsolate(LandmarkParameters parameters) async {
     limit: parameters.limit,
     radiusInKM: parameters.radius.toDouble(),
   );
-  final cities = await _findCitiesByLocation(
-      finderParams, url, parameters.authToken);
+  final cities =
+      await _findCitiesByLocation(finderParams, url, parameters.authToken);
   pp('$xyz _heavyTaskInsideIsolate found ${cities.length} by location ...');
 
   final routeInfo = lib.RouteInfo(
@@ -95,18 +104,20 @@ Future<int> _heavyTaskInsideIsolate(LandmarkParameters parameters) async {
         longitude: parameters.longitude,
       ));
   //
-  final res = await _processNewLandmark(
+  await _processNewLandmark(
       landmark: landmark,
       routeLandmark: routeLandmark,
       cities: cities,
       token: parameters.authToken);
-  return res;
+
+  return (landmark, routeLandmark);
 }
 
-Future<int> _processNewLandmark({required lib.Landmark landmark,
-  required lib.RouteLandmark routeLandmark,
-  required List<lib.City> cities,
-  required token}) async {
+Future<int> _processNewLandmark(
+    {required lib.Landmark landmark,
+    required lib.RouteLandmark routeLandmark,
+    required List<lib.City> cities,
+    required token}) async {
   pp('\n\n$xyz _processNewLandmark: landmark and routeLandmark '
       'and ${cities.length} routeCity 🔆 🔆 🔆records to be sent to backend');
 
@@ -129,23 +140,20 @@ Future<int> _processNewLandmark({required lib.Landmark landmark,
         position: city.position);
 
     final result = await _addRouteCity(rc, url, token);
-    pp('$xyz routeCity #$cnt added? ${result.cityName} added to ${result
-        .routeName}');
+    pp('$xyz routeCity #$cnt added? ${result.cityName} added to ${result.routeName}');
     myPrettyJsonPrint(result.toJson());
     cnt++;
 
-    //sleep; for avoiding rate limit on backend
-    pp('$xyz ....... sleeping for 3 seconds ... ${DateTime.now()
-        .toIso8601String()}');
-    sleep(Duration(seconds: 3));
-    pp('$xyz ....... woke up from my slumber: ... ${DateTime.now()
-        .toIso8601String()}');
+    ///sleep; for avoiding rate limit on backend
+    pp('$xyz ....... sleeping for 2 seconds ... ${DateTime.now().toIso8601String()}');
+    sleep(const Duration(seconds: 2));
+    pp('$xyz ....... woke up from my slumber: ... ${DateTime.now().toIso8601String()}');
   }
   return 0;
 }
 
-Future<List<lib.City>> _findCitiesByLocation(LocationFinderParameter p,
-    String url, String token) async {
+Future<List<lib.City>> _findCitiesByLocation(
+    LocationFinderParameter p, String url, String token) async {
   pp('$xyz _findCitiesByLocation looking for places ... limit: ${p.limit}');
   final cmd = '${url}findCitiesByLocation?latitude=${p.latitude}'
       '&longitude=${p.longitude}'
@@ -162,8 +170,8 @@ Future<List<lib.City>> _findCitiesByLocation(LocationFinderParameter p,
   return list;
 }
 
-Future<lib.RouteLandmark> _addRouteLandmark(lib.RouteLandmark routeLandmark,
-    url, token) async {
+Future<lib.RouteLandmark> _addRouteLandmark(
+    lib.RouteLandmark routeLandmark, url, token) async {
   final bag = routeLandmark.toJson();
   final cmd = '${url}addRouteLandmark';
   final res = await _httpPost(cmd, bag, token);
@@ -220,16 +228,13 @@ Future _httpGet(String mUrl, String token) async {
     final http.Client client = http.Client();
     var resp = await client
         .get(
-      Uri.parse(mUrl),
-      headers: headers,
-    )
+          Uri.parse(mUrl),
+          headers: headers,
+        )
         .timeout(const Duration(seconds: 120));
-    pp('$xyz _httpGet call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp
-        .statusCode} 👌👌👌 💙 for $mUrl');
+    pp('$xyz _httpGet call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
     var end = DateTime.now();
-    pp('$xyz _httpGet call: 🔆 elapsed time for http: ${end
-        .difference(start)
-        .inSeconds} seconds 🔆 \n\n');
+    pp('$xyz _httpGet call: 🔆 elapsed time for http: ${end.difference(start).inSeconds} seconds 🔆 \n\n');
 
     if (resp.body.contains('not found')) {
       return false;
@@ -237,8 +242,7 @@ Future _httpGet(String mUrl, String token) async {
 
     if (resp.statusCode == 403) {
       var msg =
-          '😡 😡 status code: ${resp
-          .statusCode}, Request Forbidden 🥪 🥙 🌮  😡 ${resp.body}';
+          '😡 😡 status code: ${resp.statusCode}, Request Forbidden 🥪 🥙 🌮  😡 ${resp.body}';
       pp(msg);
       // final gex = KasieException(
       //     message: 'Forbidden call',
@@ -251,8 +255,7 @@ Future _httpGet(String mUrl, String token) async {
 
     if (resp.statusCode != 200) {
       var msg =
-          '😡 😡 The response is not 200; it is ${resp
-          .statusCode}, NOT GOOD, throwing up !! 🥪 🥙 🌮  😡 ${resp.body}';
+          '😡 😡 The response is not 200; it is ${resp.statusCode}, NOT GOOD, throwing up !! 🥪 🥙 🌮  😡 ${resp.body}';
       pp(msg);
       final gex = KasieException(
           message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
@@ -315,10 +318,10 @@ Future _httpPost(String mUrl, Map? bag, String token) async {
   try {
     var resp = await client
         .post(
-      Uri.parse(mUrl),
-      body: mBag,
-      headers: headers,
-    )
+          Uri.parse(mUrl),
+          body: mBag,
+          headers: headers,
+        )
         .timeout(const Duration(seconds: 120));
     if (resp.statusCode == 200) {
       pp('$xyz  _httpPost RESPONSE: 💙💙 statusCode: 👌👌👌 '
@@ -334,9 +337,7 @@ Future _httpPost(String mUrl, Map? bag, String token) async {
           errorType: KasieException.socketException);
     }
     var end = DateTime.now();
-    pp('$xyz  _httpPost: 🔆 elapsed time: ${end
-        .difference(start)
-        .inSeconds} seconds 🔆');
+    pp('$xyz  _httpPost: 🔆 elapsed time: ${end.difference(start).inSeconds} seconds 🔆');
     try {
       var mJson = json.decode(resp.body);
       return mJson;
