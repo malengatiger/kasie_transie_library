@@ -35,6 +35,7 @@ final config = rm.Configuration.local(
     RouteLandmark.schema,
     RouteCity.schema,
     State.schema,
+    Vehicle.schema,
   ],
 );
 final ListApiDog listApiDog = ListApiDog(
@@ -108,11 +109,13 @@ class ListApiDog {
       for (final schema in realm.schema) {
         pp('$mm RealmApp configured; schema : 🍎🍎${schema.name}');
       }
-      pp('\n$mm RealmApp configured OK  🥬 🥬 🥬 🥬: 🔵 ${realm.schema.length} Realm schemas \n\n');
+      pp('\n$mm RealmApp configured OK  🥬 🥬 🥬 🥬: 🔵 ${realm.schema
+          .length} Realm schemas \n\n');
       initialized = true;
       return initialized;
     } catch (e) {
-      pp('$mm ${E.redDot}${E.redDot}${E.redDot}${E.redDot} Problem initializing Realm: $e');
+      pp('$mm ${E.redDot}${E.redDot}${E.redDot}${E
+          .redDot} Problem initializing Realm: $e');
     }
     return false;
   }
@@ -128,15 +131,28 @@ class ListApiDog {
   }
 
   Future<Association> getAssociationById(String associationId) async {
+    final res = realm.query<Association>('associationId == \$0',[associationId]);
+    if (res.isNotEmpty) {
+      return res.first;
+    }
     final cmd = '${url}getAssociationById?associationId=$associationId';
     final resp = await _sendHttpGET(cmd);
     final ass = buildAssociation(resp);
     realm.write(() {
-      realm.add(ass);
+      realm.add(ass, update: true);
     });
-    pp('$mm cached association: ${ass.associationName}');
-
+    pp('$mm ... cached association: ${ass.associationName}');
+    await prefs.saveAssociation(ass);
     return ass;
+  }
+
+  Country? getCountryById(String countryId)  {
+    final res = realm.query<Country>('countryId == \$0 ',[countryId]);
+    if (res.isNotEmpty) {
+      prefs.saveCountry(res.first);
+      return res.first;
+    }
+    return null;
   }
 
   Future<List<State>> getCountryStates(String countryId) async {
@@ -187,29 +203,74 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<Vehicle>> getAssociationVehicles(String associationId) async {
+  Future<Vehicle?> getVehicle(String vehicleId) async {
+    rm.RealmResults<Vehicle> results = realm.query<Vehicle>(
+        "vehicleId == \$0", [vehicleId]);
+    final list = <Vehicle>[];
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        list.add(element);
+      }
+      return list.first;
+    }
+    return null;
+  }
+
+  Future<List<Vehicle>> getAssociationVehicles(String associationId,
+      bool refresh) async {
     rm.RealmResults<Vehicle> results = realm.all<Vehicle>();
     final list = <Vehicle>[];
+    if (refresh || results.isEmpty) {
+      return await getCarsFromBackend(associationId);
+    }
+
+    for (var element in results) {
+      list.add(element);
+    }
+    pp('$mm cached association vehicles from realm: ${list.length}');
+
+    return list;
+  }
+
+  Future<List<Vehicle>> getCarsFromBackend(String associationId) async {
+    final cmd = '${url}getAssociationVehicles?associationId=$associationId';
+    List resp = await _sendHttpGET(cmd);
+    var list = <Vehicle>[];
+    for (var vehicleJson in resp) {
+      list.add(buildVehicle(vehicleJson));
+    }
+
+    realm.write(() {
+      realm.deleteAll<Vehicle>();
+      realm.addAll<Vehicle>(list, update: true);
+    });
+    pp('$mm cached association vehicles from backend: ${list.length}');
+    return list;
+  }
+
+  Future<List<Association>> getAssociations() async {
+    rm.RealmResults<Association> results = realm.all<Association>();
+    final list = <Association>[];
     if (results.isNotEmpty) {
       for (var element in results) {
         list.add(element);
       }
       return list;
     }
-    final cmd = '${url}getAssociationVehicles?associationId=$associationId';
+    final cmd = '${url}getAssociations';
     List resp = await _sendHttpGET(cmd);
-    for (var vehicleJson in resp) {
-      list.add(buildVehicle(vehicleJson));
+    for (var m in resp) {
+      list.add(buildAssociation(m));
     }
     realm.write(() {
-      realm.addAll(list);
+      realm.addAll(list, update: true);
     });
-    pp('$mm cached vehicles: ${list.length}');
+    pp('$mm cached associations: ${list.length}');
     return list;
   }
 
   final StreamController<List<RoutePoint>> _routePointController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   Stream<List<RoutePoint>> get routePointStream => _routePointController.stream;
 
@@ -229,7 +290,8 @@ class ListApiDog {
     var list = <RoutePoint>[];
     final b = realm.query<RoutePoint>('routeId == \$0', [routeId]);
     list = b.toList();
-    pp('$mm cached routePoints returned from Realm : ${E.blueDot} ${list.length}');
+    pp('$mm cached routePoints returned from Realm : ${E.blueDot} ${list
+        .length}');
     if (list.isNotEmpty) {
       myPrettyJsonPrint(list.last.toJson());
     }
@@ -241,49 +303,54 @@ class ListApiDog {
     final cmd = '${url}getRoutePoints?routeId=$routeId';
 
     List resp = await _sendHttpGET(cmd);
-    pp('$mm getRoutePoints call returned; before build ...  ${E.blueDot} ${resp.length} routePoints .');
+    pp('$mm getRoutePoints call returned; before build ...  ${E.blueDot} ${resp
+        .length} routePoints .');
 
     for (var value in resp) {
       list.add(buildRoutePoint(value));
     }
-    pp('$mm getRoutePoints call returned  ${E.blueDot} ${list.length} routePoints .');
+    pp('$mm getRoutePoints call returned  ${E.blueDot} ${list
+        .length} routePoints .');
     final results = realm.query<RoutePoint>('routeId == \$0', [routeId]);
     final mList = results.toList();
     realm.write(() {
       realm.deleteMany<RoutePoint>(mList);
     });
     pp('$mm deleted from realm  ${E.redDot} ${mList.length} routePoints .');
-    
+
     try {
       realm.write(() {
         realm.addAll<RoutePoint>(list, update: true);
       });
     } catch (e) {
-      pp('$mm  ${E.redDot} Realm does not like something? ${E.redDot} $e ${E.redDot} ');
+      pp('$mm  ${E.redDot} Realm does not like something? ${E.redDot} $e ${E
+          .redDot} ');
     }
     if (list.isNotEmpty) {
       myPrettyJsonPrint(list.last.toJson());
     }
-    pp('$mm cached routePoints returned from Realm : ${E.blueDot} ${list.length}');
+    pp('$mm cached routePoints returned from Realm : ${E.blueDot} ${list
+        .length}');
     return list;
   }
 
   final StreamController<List<Route>> _routeController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   Stream<List<Route>> get routeStream => _routeController.stream;
 
   final StreamController<List<City>> _cityController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   Stream<List<City>> get cityStream => _cityController.stream;
-  Future<List<RouteLandmark>> getRouteLandmarks(
-      String routeId, bool refresh) async {
+
+  Future<List<RouteLandmark>> getRouteLandmarks(String routeId,
+      bool refresh) async {
     pp('$mm .................. getRouteLandmarks refresh: $refresh');
 
     final localList = <RouteLandmark>[];
     rm.RealmResults<RouteLandmark> results =
-        realm.query<RouteLandmark>("routeId == \$0", [routeId]);
+    realm.query<RouteLandmark>("routeId == \$0", [routeId]);
     if (results.isNotEmpty) {
       for (var element in results) {
         localList.add(element);
@@ -296,6 +363,9 @@ class ListApiDog {
     //
     final remoteList = await _getRouteLandmarksFromBackend(routeId: routeId);
     pp('$mm RouteLandmarks from backend:: ${remoteList.length}');
+    realm.write(() {
+      realm.addAll<RouteLandmark>(remoteList, update: true);
+    });
     return remoteList;
   }
 
@@ -321,10 +391,9 @@ class ListApiDog {
     return remoteList;
   }
 
-  Future<List<Landmark>> findLandmarksByLocation(
-      {required double latitude,
-      required double longitude,
-      required double radiusInKM}) async {
+  Future<List<Landmark>> findLandmarksByLocation({required double latitude,
+    required double longitude,
+    required double radiusInKM}) async {
     pp('$mm .................. findLandmarksByLocation; radius: $radiusInKM');
 
     final list = <Landmark>[];
@@ -356,8 +425,7 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<Route>> _getRoutesFromBackend(
-      AssociationParameter p) async {
+  Future<List<Route>> _getRoutesFromBackend(AssociationParameter p) async {
     final cmd = '${url}getAssociationRoutes?associationId=${p.associationId}';
     var list = <Route>[];
     List resp = await _sendHttpGET(cmd);
@@ -423,7 +491,8 @@ class ListApiDog {
       list.add(buildRoute(value));
     }
 
-    pp('$mm findAssociationRoutesByLocation;  ${E.appleRed} routes found: ${list.length}');
+    pp('$mm findAssociationRoutesByLocation;  ${E.appleRed} routes found: ${list
+        .length}');
 
     return list;
   }
@@ -457,7 +526,9 @@ class ListApiDog {
     realmResults = realm.query('countryId == \$0', [countryId]);
     final list1 = realmResults.toList();
     //todo remove after test
-    if (realmResults.toList().isNotEmpty) {
+    if (realmResults
+        .toList()
+        .isNotEmpty) {
       pp('$mm country cities found in local Realm: ${list1.length}');
       final c = list1.last;
       // myPrettyJsonPrint(c.toJson());
@@ -479,10 +550,12 @@ class ListApiDog {
   Future removeRoutePoint(String routePointId) async {
     realm.write(() {
       rm.RealmResults list =
-          realm.query<RoutePoint>('routePointId == \$0', [routePointId]);
+      realm.query<RoutePoint>('routePointId == \$0', [routePointId]);
       RoutePoint? point;
       if (list.isNotEmpty) {
-        point = list.toList().first as RoutePoint;
+        point = list
+            .toList()
+            .first as RoutePoint;
         realm.delete<RoutePoint>(point);
         pp('$mm ... routePoint deleted from Realm ...');
       }
@@ -512,12 +585,15 @@ class ListApiDog {
     return list;
   }
 
+
   Future<List<Country>> getCountries() async {
     rm.RealmResults<Country>? realmResults;
     realmResults = realm.all<Country>();
     final list1 = realmResults.toList();
     //todo remove after test
-    if (realmResults.toList().isNotEmpty) {
+    if (realmResults
+        .toList()
+        .isNotEmpty) {
       pp('$mm countries found in local Realm: ${list1.length}');
       final c = list1.last;
       myPrettyJsonPrint(c.toJson());
@@ -548,7 +624,8 @@ class ListApiDog {
 
   static const xz = '🌎🌎🌎🌎🌎🌎 ListApiDog: ';
 
-   String token = 'NoTokenYet';
+  String token = 'NoTokenYet';
+
   Future _sendHttpGET(String mUrl) async {
     pp('$xz _sendHttpGET: 🔆 🔆 🔆 calling : 💙 $mUrl  💙');
     var start = DateTime.now();
@@ -556,13 +633,16 @@ class ListApiDog {
     try {
       var resp = await client
           .get(
-            Uri.parse(mUrl),
-            headers: headers,
-          )
+        Uri.parse(mUrl),
+        headers: headers,
+      )
           .timeout(const Duration(seconds: timeOutInSeconds));
-      pp('$xz http GET call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
+      pp('$xz http GET call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp
+          .statusCode} 👌👌👌 💙 for $mUrl');
       var end = DateTime.now();
-      pp('$xz http GET call: 🔆 elapsed time for http: ${end.difference(start).inSeconds} seconds 🔆 \n\n');
+      pp('$xz http GET call: 🔆 elapsed time for http: ${end
+          .difference(start)
+          .inSeconds} seconds 🔆 \n\n');
 
       if (resp.body.contains('not found')) {
         return false;
@@ -570,7 +650,8 @@ class ListApiDog {
 
       if (resp.statusCode == 403) {
         var msg =
-            '😡 😡 status code: ${resp.statusCode}, Request Forbidden 🥪 🥙 🌮  😡 ${resp.body}';
+            '😡 😡 status code: ${resp
+            .statusCode}, Request Forbidden 🥪 🥙 🌮  😡 ${resp.body}';
         pp(msg);
         final gex = KasieException(
             message: 'Forbidden call',
@@ -583,7 +664,8 @@ class ListApiDog {
 
       if (resp.statusCode != 200) {
         var msg =
-            '😡 😡 The response is not 200; it is ${resp.statusCode}, NOT GOOD, throwing up !! 🥪 🥙 🌮  😡 ${resp.body}';
+            '😡 😡 The response is not 200; it is ${resp
+            .statusCode}, NOT GOOD, throwing up !! 🥪 🥙 🌮  😡 ${resp.body}';
         pp(msg);
         final gex = KasieException(
             message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
@@ -623,7 +705,8 @@ class ListApiDog {
       errorHandler.handleError(exception: gex);
       throw gex;
     } on TimeoutException {
-      pp("$xz No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
+      pp(
+          "$xz No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
       final gex = KasieException(
           message: 'No Internet connection. Request timed out',
           url: mUrl,

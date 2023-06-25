@@ -99,6 +99,267 @@ class _City {
 }
 
 @RealmModel()
+class _DispatchRecord {
+  @PrimaryKey()
+  late ObjectId id;
+  String?  dispatchRecordId;
+  String?  landmarkId;
+  String?  marshalId;
+  int? passengers;
+  String?  ownerId;
+  String?  created;
+  _Position? position;
+  String?  geoHash;
+  String?  landmarkName;
+  String?  marshalName;
+  String?  routeName;
+  String?  routeId;
+  String?  vehicleId;
+  String?  vehicleArrivalId;
+  String?  vehicleReg;
+  String?  associationId;
+  String? associationName;
+  bool? dispatched;
+
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {};
+    map['dispatchRecordId'] = dispatchRecordId;
+    map['landmarkId'] = landmarkId;
+    map['passengers'] = passengers;
+    map['vehicleId'] = vehicleId;
+    map['ownerId'] = ownerId;
+    map['marshalId'] = marshalId;
+    map['created'] = created;
+    map['geoHash'] = geoHash;
+    map['landmarkName'] = landmarkName;
+    map['marshalName'] = marshalName;
+    map['routeName'] = routeName;
+    map['vehicleArrivalId'] = vehicleArrivalId;
+    map['vehicleReg'] = vehicleReg;
+    map['associationId'] = associationId;
+    map['associationName'] = associationName;
+    map['dispatched'] = dispatched;
+    map['position'] = position == null ? null : position!.toJson();
+    return map;
+  }
+
+}
+/*
+ String associationId;
+    String cityId;
+    String countryId;
+    String associationName;
+    int active;
+    String countryName;
+    String cityName;
+    String dateRegistered;
+    Position position;
+    String geoHash;
+    String adminUserFirstName;
+    String adminUserLastName;
+    String userId;
+    String adminCellphone;
+    String adminEmail;
+ */
+@RealmModel()
+class _Association {
+  @PrimaryKey()
+  late ObjectId id;
+  String?  cityId;
+  String?  countryId;
+  String?  cityName, associationName,associationId;
+  int? active;
+  String?  countryName;
+  String?  dateRegistered;
+  _Position? position;
+  String?  geoHash;
+  String?  adminUserFirstName;
+  String?  adminUserLastName;
+  String?  userId;
+  String?  adminCellphone;
+  String?  adminEmail;
+
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {};
+    map['cityId'] = cityId;
+    map['countryId'] = countryId;
+    map['associationName'] = associationName;
+    map['cityName'] = cityName;
+    map['active'] = active;
+    map['countryName'] = countryName;
+    map['dateRegistered'] = dateRegistered;
+    map['geoHash'] = geoHash;
+    map['adminUserFirstName'] = adminUserFirstName;
+    map['adminUserLastName'] = adminUserLastName;
+    map['userId'] = userId;
+    map['adminCellphone'] = adminCellphone;
+    map['adminEmail'] = adminEmail;
+    map['position'] = position == null ? null : position!.toJson();
+    return map;
+  }
+
+}
+
+@RealmModel()
+class _VehicleArrival {
+  @PrimaryKey()
+  late ObjectId id;
+  String?  vehicleArrivalId;
+  String?  landmarkId;
+  String?  landmarkName;
+  _Position? position;
+  String?  geoHash;
+  String?  created;
+  String?  vehicleId;
+  String?  associationId;
+  String?  associationName;
+  String?  vehicleReg;
+  String?  make;
+  String?  model;
+  String? ownerId, ownerName;
+  bool? dispatched;
+
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {};
+    map['landmarkId'] = landmarkId;
+    map['ownerId'] = ownerId;
+    map['vehicleId'] = vehicleId;
+    map['ownerId'] = ownerId;
+    map['ownerName'] = ownerName;
+    map['created'] = created;
+    map['geoHash'] = geoHash;
+    map['landmarkName'] = landmarkName;
+    map['vehicleArrivalId'] = vehicleArrivalId;
+    map['vehicleReg'] = vehicleReg;
+    map['associationId'] = associationId;
+    map['associationName'] = associationName;
+    map['dispatched'] = dispatched;
+    map['position'] = position == null ? null : position!.toJson();
+    return map;
+  }
+
+}
+
+@RealmModel()
+class _VehicleDeparture {
+  @PrimaryKey()
+  late ObjectId id;
+  String?  vehicleDepartureId;
+  String?  landmarkId;
+  String?  landmarkName;
+  _Position? position;
+  String?  geoHash;
+  String?  created;
+  String?  vehicleId;
+  String?  associationId;
+  String?  associationName;
+  String?  vehicleReg;
+  String?  make;
+  String?  model;
+  String? ownerId, ownerName;
+  bool? dispatched;
+
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {};
+    map['landmarkId'] = landmarkId;
+    map['ownerId'] = ownerId;
+    map['vehicleId'] = vehicleId;
+    map['ownerId'] = ownerId;
+    map['ownerName'] = ownerName;
+    map['created'] = created;
+    map['geoHash'] = geoHash;
+    map['landmarkName'] = landmarkName;
+    map['vehicleDepartureId'] = vehicleDepartureId;
+    map['vehicleReg'] = vehicleReg;
+    map['associationId'] = associationId;
+    map['associationName'] = associationName;
+    map['dispatched'] = dispatched;
+    map['position'] = position == null ? null : position!.toJson();
+    return map;
+  }
+
+}
+
+@RealmModel()
+class _UserGeofenceEvent {
+  @PrimaryKey()
+  late ObjectId id;
+  String? userGeofenceId;
+  String?  activityType;
+  String?  landmarkId;
+  String?  landmarkName;
+  _Position? position;
+  String?  geoHash;
+  String?  created;
+  String?  action;
+  String?  associationId;
+  String?  associationName;
+  String?  userId;
+  int?  confidence;
+  double?  odometer;
+
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {};
+    map['userGeofenceId'] = userGeofenceId;
+    map['landmarkId'] = landmarkId;
+    map['action'] = action;
+    map['userId'] = userId;
+    map['confidence'] = confidence;
+    map['created'] = created;
+    map['geoHash'] = geoHash;
+    map['landmarkName'] = landmarkName;
+    map['activityType'] = activityType;
+    map['associationId'] = associationId;
+    map['associationName'] = associationName;
+    map['position'] = position == null ? null : position!.toJson();
+    return map;
+  }
+
+}
+
+@RealmModel()
+class _VehicleHeartbeat {
+  @PrimaryKey()
+  late ObjectId id;
+  String?  vehicleHeartbeatId;
+
+  _Position? position;
+  String?  geoHash;
+  String?  created;
+  String?  vehicleId;
+  String?  associationId;
+  String?  vehicleReg;
+  String?  make;
+  String?  model;
+  String? ownerId, ownerName;
+  int? longDate;
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {};
+    map['ownerId'] = ownerId;
+    map['vehicleId'] = vehicleId;
+    map['ownerName'] = ownerName;
+    map['created'] = created;
+    map['geoHash'] = geoHash;
+    map['longDate'] = longDate;
+    map['vehicleReg'] = vehicleReg;
+    map['vehicleHeartbeatId'] = vehicleHeartbeatId;
+
+    map['associationId'] = associationId;
+    map['make'] = make;
+    map['model'] = model;
+    map['position'] = position == null ? null : position!.toJson();
+    return map;
+  }
+
+}
+
+@RealmModel()
 class _RoutePoint {
   @PrimaryKey()
   late ObjectId id;
@@ -279,48 +540,6 @@ class _CalculatedDistance {
     //p('${sb.toString()}');
     return sb;
   }
-}
-
-@RealmModel()
-class _Association {
-  @PrimaryKey()
-  late ObjectId id;
-  @Indexed()
-  String? associationId;
-  String? cityId;
-  String? countryId;
-  String? associationName;
-  String? phone;
-  String? status;
-  String? countryName;
-  String? cityName;
-  String? stringDate;
-  int? date;
-  String? path;
-  String? dateRegistered;
-  _Position? position;
-  String? geoHash;
-  String? adminUserFirstName;
-  String? adminUserLastName;
-  String? userId;
-  String? adminCellphone;
-  String? adminEmail;
-
-  Map<String, dynamic> toJson() => <String, dynamic>{
-        '_id': id.hexString,
-        'associationId': associationId,
-        'cityId': cityId,
-        'countryId': countryId,
-        'associationName': associationName,
-        'phone': phone,
-        'status': status,
-        'countryName': countryName,
-        'cityName': cityName,
-        'stringDate': stringDate,
-        'date': date,
-        'path': path,
-        'position': position == null ? null : position!.toJson(),
-      };
 }
 
 @RealmModel()

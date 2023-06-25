@@ -48,6 +48,12 @@ dependencies:
   proximity_hash: ^2.0.0
   fluttertoast: ^8.2.2
   equatable: ^2.0.5
+  permission_handler: ^10.3.0
+  qr_code_scanner: ^1.0.1
+  workmanager: ^0.5.1
+  flutter_dotenv:
+
+
   dots_indicator:
   google_fonts:
   shared_preferences:

@@ -56,6 +56,9 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/image_picker_linux-0.2.0" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/realm-1.2.0" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/fluttertoast-8.2.2" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/permission_handler-10.3.0" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/qr_code_scanner-1.0.1" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/workmanager-0.5.1" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

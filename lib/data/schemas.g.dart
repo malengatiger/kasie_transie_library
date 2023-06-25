@@ -393,6 +393,1049 @@ class City extends _City with RealmEntity, RealmObjectBase, RealmObject {
   }
 }
 
+class DispatchRecord extends _DispatchRecord
+    with RealmEntity, RealmObjectBase, RealmObject {
+  DispatchRecord(
+    ObjectId id, {
+    String? dispatchRecordId,
+    String? landmarkId,
+    String? marshalId,
+    int? passengers,
+    String? ownerId,
+    String? created,
+    Position? position,
+    String? geoHash,
+    String? landmarkName,
+    String? marshalName,
+    String? routeName,
+    String? routeId,
+    String? vehicleId,
+    String? vehicleArrivalId,
+    String? vehicleReg,
+    String? associationId,
+    String? associationName,
+    bool? dispatched,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'dispatchRecordId', dispatchRecordId);
+    RealmObjectBase.set(this, 'landmarkId', landmarkId);
+    RealmObjectBase.set(this, 'marshalId', marshalId);
+    RealmObjectBase.set(this, 'passengers', passengers);
+    RealmObjectBase.set(this, 'ownerId', ownerId);
+    RealmObjectBase.set(this, 'created', created);
+    RealmObjectBase.set(this, 'position', position);
+    RealmObjectBase.set(this, 'geoHash', geoHash);
+    RealmObjectBase.set(this, 'landmarkName', landmarkName);
+    RealmObjectBase.set(this, 'marshalName', marshalName);
+    RealmObjectBase.set(this, 'routeName', routeName);
+    RealmObjectBase.set(this, 'routeId', routeId);
+    RealmObjectBase.set(this, 'vehicleId', vehicleId);
+    RealmObjectBase.set(this, 'vehicleArrivalId', vehicleArrivalId);
+    RealmObjectBase.set(this, 'vehicleReg', vehicleReg);
+    RealmObjectBase.set(this, 'associationId', associationId);
+    RealmObjectBase.set(this, 'associationName', associationName);
+    RealmObjectBase.set(this, 'dispatched', dispatched);
+  }
+
+  DispatchRecord._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get dispatchRecordId =>
+      RealmObjectBase.get<String>(this, 'dispatchRecordId') as String?;
+  @override
+  set dispatchRecordId(String? value) =>
+      RealmObjectBase.set(this, 'dispatchRecordId', value);
+
+  @override
+  String? get landmarkId =>
+      RealmObjectBase.get<String>(this, 'landmarkId') as String?;
+  @override
+  set landmarkId(String? value) =>
+      RealmObjectBase.set(this, 'landmarkId', value);
+
+  @override
+  String? get marshalId =>
+      RealmObjectBase.get<String>(this, 'marshalId') as String?;
+  @override
+  set marshalId(String? value) => RealmObjectBase.set(this, 'marshalId', value);
+
+  @override
+  int? get passengers => RealmObjectBase.get<int>(this, 'passengers') as int?;
+  @override
+  set passengers(int? value) => RealmObjectBase.set(this, 'passengers', value);
+
+  @override
+  String? get ownerId =>
+      RealmObjectBase.get<String>(this, 'ownerId') as String?;
+  @override
+  set ownerId(String? value) => RealmObjectBase.set(this, 'ownerId', value);
+
+  @override
+  String? get created =>
+      RealmObjectBase.get<String>(this, 'created') as String?;
+  @override
+  set created(String? value) => RealmObjectBase.set(this, 'created', value);
+
+  @override
+  Position? get position =>
+      RealmObjectBase.get<Position>(this, 'position') as Position?;
+  @override
+  set position(covariant Position? value) =>
+      RealmObjectBase.set(this, 'position', value);
+
+  @override
+  String? get geoHash =>
+      RealmObjectBase.get<String>(this, 'geoHash') as String?;
+  @override
+  set geoHash(String? value) => RealmObjectBase.set(this, 'geoHash', value);
+
+  @override
+  String? get landmarkName =>
+      RealmObjectBase.get<String>(this, 'landmarkName') as String?;
+  @override
+  set landmarkName(String? value) =>
+      RealmObjectBase.set(this, 'landmarkName', value);
+
+  @override
+  String? get marshalName =>
+      RealmObjectBase.get<String>(this, 'marshalName') as String?;
+  @override
+  set marshalName(String? value) =>
+      RealmObjectBase.set(this, 'marshalName', value);
+
+  @override
+  String? get routeName =>
+      RealmObjectBase.get<String>(this, 'routeName') as String?;
+  @override
+  set routeName(String? value) => RealmObjectBase.set(this, 'routeName', value);
+
+  @override
+  String? get routeId =>
+      RealmObjectBase.get<String>(this, 'routeId') as String?;
+  @override
+  set routeId(String? value) => RealmObjectBase.set(this, 'routeId', value);
+
+  @override
+  String? get vehicleId =>
+      RealmObjectBase.get<String>(this, 'vehicleId') as String?;
+  @override
+  set vehicleId(String? value) => RealmObjectBase.set(this, 'vehicleId', value);
+
+  @override
+  String? get vehicleArrivalId =>
+      RealmObjectBase.get<String>(this, 'vehicleArrivalId') as String?;
+  @override
+  set vehicleArrivalId(String? value) =>
+      RealmObjectBase.set(this, 'vehicleArrivalId', value);
+
+  @override
+  String? get vehicleReg =>
+      RealmObjectBase.get<String>(this, 'vehicleReg') as String?;
+  @override
+  set vehicleReg(String? value) =>
+      RealmObjectBase.set(this, 'vehicleReg', value);
+
+  @override
+  String? get associationId =>
+      RealmObjectBase.get<String>(this, 'associationId') as String?;
+  @override
+  set associationId(String? value) =>
+      RealmObjectBase.set(this, 'associationId', value);
+
+  @override
+  String? get associationName =>
+      RealmObjectBase.get<String>(this, 'associationName') as String?;
+  @override
+  set associationName(String? value) =>
+      RealmObjectBase.set(this, 'associationName', value);
+
+  @override
+  bool? get dispatched =>
+      RealmObjectBase.get<bool>(this, 'dispatched') as bool?;
+  @override
+  set dispatched(bool? value) => RealmObjectBase.set(this, 'dispatched', value);
+
+  @override
+  Stream<RealmObjectChanges<DispatchRecord>> get changes =>
+      RealmObjectBase.getChanges<DispatchRecord>(this);
+
+  @override
+  DispatchRecord freeze() => RealmObjectBase.freezeObject<DispatchRecord>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(DispatchRecord._);
+    return const SchemaObject(
+        ObjectType.realmObject, DispatchRecord, 'DispatchRecord', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('dispatchRecordId', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('landmarkId', RealmPropertyType.string, optional: true),
+      SchemaProperty('marshalId', RealmPropertyType.string, optional: true),
+      SchemaProperty('passengers', RealmPropertyType.int, optional: true),
+      SchemaProperty('ownerId', RealmPropertyType.string, optional: true),
+      SchemaProperty('created', RealmPropertyType.string, optional: true),
+      SchemaProperty('position', RealmPropertyType.object,
+          optional: true, linkTarget: 'Position'),
+      SchemaProperty('geoHash', RealmPropertyType.string, optional: true),
+      SchemaProperty('landmarkName', RealmPropertyType.string, optional: true),
+      SchemaProperty('marshalName', RealmPropertyType.string, optional: true),
+      SchemaProperty('routeName', RealmPropertyType.string, optional: true),
+      SchemaProperty('routeId', RealmPropertyType.string, optional: true),
+      SchemaProperty('vehicleId', RealmPropertyType.string, optional: true),
+      SchemaProperty('vehicleArrivalId', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('vehicleReg', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationId', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationName', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('dispatched', RealmPropertyType.bool, optional: true),
+    ]);
+  }
+}
+
+class Association extends _Association
+    with RealmEntity, RealmObjectBase, RealmObject {
+  Association(
+    ObjectId id, {
+    String? cityId,
+    String? countryId,
+    String? cityName,
+    String? associationName,
+    String? associationId,
+    int? active,
+    String? countryName,
+    String? dateRegistered,
+    Position? position,
+    String? geoHash,
+    String? adminUserFirstName,
+    String? adminUserLastName,
+    String? userId,
+    String? adminCellphone,
+    String? adminEmail,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'cityId', cityId);
+    RealmObjectBase.set(this, 'countryId', countryId);
+    RealmObjectBase.set(this, 'cityName', cityName);
+    RealmObjectBase.set(this, 'associationName', associationName);
+    RealmObjectBase.set(this, 'associationId', associationId);
+    RealmObjectBase.set(this, 'active', active);
+    RealmObjectBase.set(this, 'countryName', countryName);
+    RealmObjectBase.set(this, 'dateRegistered', dateRegistered);
+    RealmObjectBase.set(this, 'position', position);
+    RealmObjectBase.set(this, 'geoHash', geoHash);
+    RealmObjectBase.set(this, 'adminUserFirstName', adminUserFirstName);
+    RealmObjectBase.set(this, 'adminUserLastName', adminUserLastName);
+    RealmObjectBase.set(this, 'userId', userId);
+    RealmObjectBase.set(this, 'adminCellphone', adminCellphone);
+    RealmObjectBase.set(this, 'adminEmail', adminEmail);
+  }
+
+  Association._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get cityId => RealmObjectBase.get<String>(this, 'cityId') as String?;
+  @override
+  set cityId(String? value) => RealmObjectBase.set(this, 'cityId', value);
+
+  @override
+  String? get countryId =>
+      RealmObjectBase.get<String>(this, 'countryId') as String?;
+  @override
+  set countryId(String? value) => RealmObjectBase.set(this, 'countryId', value);
+
+  @override
+  String? get cityName =>
+      RealmObjectBase.get<String>(this, 'cityName') as String?;
+  @override
+  set cityName(String? value) => RealmObjectBase.set(this, 'cityName', value);
+
+  @override
+  String? get associationName =>
+      RealmObjectBase.get<String>(this, 'associationName') as String?;
+  @override
+  set associationName(String? value) =>
+      RealmObjectBase.set(this, 'associationName', value);
+
+  @override
+  String? get associationId =>
+      RealmObjectBase.get<String>(this, 'associationId') as String?;
+  @override
+  set associationId(String? value) =>
+      RealmObjectBase.set(this, 'associationId', value);
+
+  @override
+  int? get active => RealmObjectBase.get<int>(this, 'active') as int?;
+  @override
+  set active(int? value) => RealmObjectBase.set(this, 'active', value);
+
+  @override
+  String? get countryName =>
+      RealmObjectBase.get<String>(this, 'countryName') as String?;
+  @override
+  set countryName(String? value) =>
+      RealmObjectBase.set(this, 'countryName', value);
+
+  @override
+  String? get dateRegistered =>
+      RealmObjectBase.get<String>(this, 'dateRegistered') as String?;
+  @override
+  set dateRegistered(String? value) =>
+      RealmObjectBase.set(this, 'dateRegistered', value);
+
+  @override
+  Position? get position =>
+      RealmObjectBase.get<Position>(this, 'position') as Position?;
+  @override
+  set position(covariant Position? value) =>
+      RealmObjectBase.set(this, 'position', value);
+
+  @override
+  String? get geoHash =>
+      RealmObjectBase.get<String>(this, 'geoHash') as String?;
+  @override
+  set geoHash(String? value) => RealmObjectBase.set(this, 'geoHash', value);
+
+  @override
+  String? get adminUserFirstName =>
+      RealmObjectBase.get<String>(this, 'adminUserFirstName') as String?;
+  @override
+  set adminUserFirstName(String? value) =>
+      RealmObjectBase.set(this, 'adminUserFirstName', value);
+
+  @override
+  String? get adminUserLastName =>
+      RealmObjectBase.get<String>(this, 'adminUserLastName') as String?;
+  @override
+  set adminUserLastName(String? value) =>
+      RealmObjectBase.set(this, 'adminUserLastName', value);
+
+  @override
+  String? get userId => RealmObjectBase.get<String>(this, 'userId') as String?;
+  @override
+  set userId(String? value) => RealmObjectBase.set(this, 'userId', value);
+
+  @override
+  String? get adminCellphone =>
+      RealmObjectBase.get<String>(this, 'adminCellphone') as String?;
+  @override
+  set adminCellphone(String? value) =>
+      RealmObjectBase.set(this, 'adminCellphone', value);
+
+  @override
+  String? get adminEmail =>
+      RealmObjectBase.get<String>(this, 'adminEmail') as String?;
+  @override
+  set adminEmail(String? value) =>
+      RealmObjectBase.set(this, 'adminEmail', value);
+
+  @override
+  Stream<RealmObjectChanges<Association>> get changes =>
+      RealmObjectBase.getChanges<Association>(this);
+
+  @override
+  Association freeze() => RealmObjectBase.freezeObject<Association>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(Association._);
+    return const SchemaObject(
+        ObjectType.realmObject, Association, 'Association', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('cityId', RealmPropertyType.string, optional: true),
+      SchemaProperty('countryId', RealmPropertyType.string, optional: true),
+      SchemaProperty('cityName', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationName', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('associationId', RealmPropertyType.string, optional: true),
+      SchemaProperty('active', RealmPropertyType.int, optional: true),
+      SchemaProperty('countryName', RealmPropertyType.string, optional: true),
+      SchemaProperty('dateRegistered', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('position', RealmPropertyType.object,
+          optional: true, linkTarget: 'Position'),
+      SchemaProperty('geoHash', RealmPropertyType.string, optional: true),
+      SchemaProperty('adminUserFirstName', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('adminUserLastName', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('userId', RealmPropertyType.string, optional: true),
+      SchemaProperty('adminCellphone', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('adminEmail', RealmPropertyType.string, optional: true),
+    ]);
+  }
+}
+
+class VehicleArrival extends _VehicleArrival
+    with RealmEntity, RealmObjectBase, RealmObject {
+  VehicleArrival(
+    ObjectId id, {
+    String? vehicleArrivalId,
+    String? landmarkId,
+    String? landmarkName,
+    Position? position,
+    String? geoHash,
+    String? created,
+    String? vehicleId,
+    String? associationId,
+    String? associationName,
+    String? vehicleReg,
+    String? make,
+    String? model,
+    String? ownerId,
+    String? ownerName,
+    bool? dispatched,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'vehicleArrivalId', vehicleArrivalId);
+    RealmObjectBase.set(this, 'landmarkId', landmarkId);
+    RealmObjectBase.set(this, 'landmarkName', landmarkName);
+    RealmObjectBase.set(this, 'position', position);
+    RealmObjectBase.set(this, 'geoHash', geoHash);
+    RealmObjectBase.set(this, 'created', created);
+    RealmObjectBase.set(this, 'vehicleId', vehicleId);
+    RealmObjectBase.set(this, 'associationId', associationId);
+    RealmObjectBase.set(this, 'associationName', associationName);
+    RealmObjectBase.set(this, 'vehicleReg', vehicleReg);
+    RealmObjectBase.set(this, 'make', make);
+    RealmObjectBase.set(this, 'model', model);
+    RealmObjectBase.set(this, 'ownerId', ownerId);
+    RealmObjectBase.set(this, 'ownerName', ownerName);
+    RealmObjectBase.set(this, 'dispatched', dispatched);
+  }
+
+  VehicleArrival._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get vehicleArrivalId =>
+      RealmObjectBase.get<String>(this, 'vehicleArrivalId') as String?;
+  @override
+  set vehicleArrivalId(String? value) =>
+      RealmObjectBase.set(this, 'vehicleArrivalId', value);
+
+  @override
+  String? get landmarkId =>
+      RealmObjectBase.get<String>(this, 'landmarkId') as String?;
+  @override
+  set landmarkId(String? value) =>
+      RealmObjectBase.set(this, 'landmarkId', value);
+
+  @override
+  String? get landmarkName =>
+      RealmObjectBase.get<String>(this, 'landmarkName') as String?;
+  @override
+  set landmarkName(String? value) =>
+      RealmObjectBase.set(this, 'landmarkName', value);
+
+  @override
+  Position? get position =>
+      RealmObjectBase.get<Position>(this, 'position') as Position?;
+  @override
+  set position(covariant Position? value) =>
+      RealmObjectBase.set(this, 'position', value);
+
+  @override
+  String? get geoHash =>
+      RealmObjectBase.get<String>(this, 'geoHash') as String?;
+  @override
+  set geoHash(String? value) => RealmObjectBase.set(this, 'geoHash', value);
+
+  @override
+  String? get created =>
+      RealmObjectBase.get<String>(this, 'created') as String?;
+  @override
+  set created(String? value) => RealmObjectBase.set(this, 'created', value);
+
+  @override
+  String? get vehicleId =>
+      RealmObjectBase.get<String>(this, 'vehicleId') as String?;
+  @override
+  set vehicleId(String? value) => RealmObjectBase.set(this, 'vehicleId', value);
+
+  @override
+  String? get associationId =>
+      RealmObjectBase.get<String>(this, 'associationId') as String?;
+  @override
+  set associationId(String? value) =>
+      RealmObjectBase.set(this, 'associationId', value);
+
+  @override
+  String? get associationName =>
+      RealmObjectBase.get<String>(this, 'associationName') as String?;
+  @override
+  set associationName(String? value) =>
+      RealmObjectBase.set(this, 'associationName', value);
+
+  @override
+  String? get vehicleReg =>
+      RealmObjectBase.get<String>(this, 'vehicleReg') as String?;
+  @override
+  set vehicleReg(String? value) =>
+      RealmObjectBase.set(this, 'vehicleReg', value);
+
+  @override
+  String? get make => RealmObjectBase.get<String>(this, 'make') as String?;
+  @override
+  set make(String? value) => RealmObjectBase.set(this, 'make', value);
+
+  @override
+  String? get model => RealmObjectBase.get<String>(this, 'model') as String?;
+  @override
+  set model(String? value) => RealmObjectBase.set(this, 'model', value);
+
+  @override
+  String? get ownerId =>
+      RealmObjectBase.get<String>(this, 'ownerId') as String?;
+  @override
+  set ownerId(String? value) => RealmObjectBase.set(this, 'ownerId', value);
+
+  @override
+  String? get ownerName =>
+      RealmObjectBase.get<String>(this, 'ownerName') as String?;
+  @override
+  set ownerName(String? value) => RealmObjectBase.set(this, 'ownerName', value);
+
+  @override
+  bool? get dispatched =>
+      RealmObjectBase.get<bool>(this, 'dispatched') as bool?;
+  @override
+  set dispatched(bool? value) => RealmObjectBase.set(this, 'dispatched', value);
+
+  @override
+  Stream<RealmObjectChanges<VehicleArrival>> get changes =>
+      RealmObjectBase.getChanges<VehicleArrival>(this);
+
+  @override
+  VehicleArrival freeze() => RealmObjectBase.freezeObject<VehicleArrival>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(VehicleArrival._);
+    return const SchemaObject(
+        ObjectType.realmObject, VehicleArrival, 'VehicleArrival', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('vehicleArrivalId', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('landmarkId', RealmPropertyType.string, optional: true),
+      SchemaProperty('landmarkName', RealmPropertyType.string, optional: true),
+      SchemaProperty('position', RealmPropertyType.object,
+          optional: true, linkTarget: 'Position'),
+      SchemaProperty('geoHash', RealmPropertyType.string, optional: true),
+      SchemaProperty('created', RealmPropertyType.string, optional: true),
+      SchemaProperty('vehicleId', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationId', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationName', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('vehicleReg', RealmPropertyType.string, optional: true),
+      SchemaProperty('make', RealmPropertyType.string, optional: true),
+      SchemaProperty('model', RealmPropertyType.string, optional: true),
+      SchemaProperty('ownerId', RealmPropertyType.string, optional: true),
+      SchemaProperty('ownerName', RealmPropertyType.string, optional: true),
+      SchemaProperty('dispatched', RealmPropertyType.bool, optional: true),
+    ]);
+  }
+}
+
+class VehicleDeparture extends _VehicleDeparture
+    with RealmEntity, RealmObjectBase, RealmObject {
+  VehicleDeparture(
+    ObjectId id, {
+    String? vehicleDepartureId,
+    String? landmarkId,
+    String? landmarkName,
+    Position? position,
+    String? geoHash,
+    String? created,
+    String? vehicleId,
+    String? associationId,
+    String? associationName,
+    String? vehicleReg,
+    String? make,
+    String? model,
+    String? ownerId,
+    String? ownerName,
+    bool? dispatched,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'vehicleDepartureId', vehicleDepartureId);
+    RealmObjectBase.set(this, 'landmarkId', landmarkId);
+    RealmObjectBase.set(this, 'landmarkName', landmarkName);
+    RealmObjectBase.set(this, 'position', position);
+    RealmObjectBase.set(this, 'geoHash', geoHash);
+    RealmObjectBase.set(this, 'created', created);
+    RealmObjectBase.set(this, 'vehicleId', vehicleId);
+    RealmObjectBase.set(this, 'associationId', associationId);
+    RealmObjectBase.set(this, 'associationName', associationName);
+    RealmObjectBase.set(this, 'vehicleReg', vehicleReg);
+    RealmObjectBase.set(this, 'make', make);
+    RealmObjectBase.set(this, 'model', model);
+    RealmObjectBase.set(this, 'ownerId', ownerId);
+    RealmObjectBase.set(this, 'ownerName', ownerName);
+    RealmObjectBase.set(this, 'dispatched', dispatched);
+  }
+
+  VehicleDeparture._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get vehicleDepartureId =>
+      RealmObjectBase.get<String>(this, 'vehicleDepartureId') as String?;
+  @override
+  set vehicleDepartureId(String? value) =>
+      RealmObjectBase.set(this, 'vehicleDepartureId', value);
+
+  @override
+  String? get landmarkId =>
+      RealmObjectBase.get<String>(this, 'landmarkId') as String?;
+  @override
+  set landmarkId(String? value) =>
+      RealmObjectBase.set(this, 'landmarkId', value);
+
+  @override
+  String? get landmarkName =>
+      RealmObjectBase.get<String>(this, 'landmarkName') as String?;
+  @override
+  set landmarkName(String? value) =>
+      RealmObjectBase.set(this, 'landmarkName', value);
+
+  @override
+  Position? get position =>
+      RealmObjectBase.get<Position>(this, 'position') as Position?;
+  @override
+  set position(covariant Position? value) =>
+      RealmObjectBase.set(this, 'position', value);
+
+  @override
+  String? get geoHash =>
+      RealmObjectBase.get<String>(this, 'geoHash') as String?;
+  @override
+  set geoHash(String? value) => RealmObjectBase.set(this, 'geoHash', value);
+
+  @override
+  String? get created =>
+      RealmObjectBase.get<String>(this, 'created') as String?;
+  @override
+  set created(String? value) => RealmObjectBase.set(this, 'created', value);
+
+  @override
+  String? get vehicleId =>
+      RealmObjectBase.get<String>(this, 'vehicleId') as String?;
+  @override
+  set vehicleId(String? value) => RealmObjectBase.set(this, 'vehicleId', value);
+
+  @override
+  String? get associationId =>
+      RealmObjectBase.get<String>(this, 'associationId') as String?;
+  @override
+  set associationId(String? value) =>
+      RealmObjectBase.set(this, 'associationId', value);
+
+  @override
+  String? get associationName =>
+      RealmObjectBase.get<String>(this, 'associationName') as String?;
+  @override
+  set associationName(String? value) =>
+      RealmObjectBase.set(this, 'associationName', value);
+
+  @override
+  String? get vehicleReg =>
+      RealmObjectBase.get<String>(this, 'vehicleReg') as String?;
+  @override
+  set vehicleReg(String? value) =>
+      RealmObjectBase.set(this, 'vehicleReg', value);
+
+  @override
+  String? get make => RealmObjectBase.get<String>(this, 'make') as String?;
+  @override
+  set make(String? value) => RealmObjectBase.set(this, 'make', value);
+
+  @override
+  String? get model => RealmObjectBase.get<String>(this, 'model') as String?;
+  @override
+  set model(String? value) => RealmObjectBase.set(this, 'model', value);
+
+  @override
+  String? get ownerId =>
+      RealmObjectBase.get<String>(this, 'ownerId') as String?;
+  @override
+  set ownerId(String? value) => RealmObjectBase.set(this, 'ownerId', value);
+
+  @override
+  String? get ownerName =>
+      RealmObjectBase.get<String>(this, 'ownerName') as String?;
+  @override
+  set ownerName(String? value) => RealmObjectBase.set(this, 'ownerName', value);
+
+  @override
+  bool? get dispatched =>
+      RealmObjectBase.get<bool>(this, 'dispatched') as bool?;
+  @override
+  set dispatched(bool? value) => RealmObjectBase.set(this, 'dispatched', value);
+
+  @override
+  Stream<RealmObjectChanges<VehicleDeparture>> get changes =>
+      RealmObjectBase.getChanges<VehicleDeparture>(this);
+
+  @override
+  VehicleDeparture freeze() =>
+      RealmObjectBase.freezeObject<VehicleDeparture>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(VehicleDeparture._);
+    return const SchemaObject(
+        ObjectType.realmObject, VehicleDeparture, 'VehicleDeparture', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('vehicleDepartureId', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('landmarkId', RealmPropertyType.string, optional: true),
+      SchemaProperty('landmarkName', RealmPropertyType.string, optional: true),
+      SchemaProperty('position', RealmPropertyType.object,
+          optional: true, linkTarget: 'Position'),
+      SchemaProperty('geoHash', RealmPropertyType.string, optional: true),
+      SchemaProperty('created', RealmPropertyType.string, optional: true),
+      SchemaProperty('vehicleId', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationId', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationName', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('vehicleReg', RealmPropertyType.string, optional: true),
+      SchemaProperty('make', RealmPropertyType.string, optional: true),
+      SchemaProperty('model', RealmPropertyType.string, optional: true),
+      SchemaProperty('ownerId', RealmPropertyType.string, optional: true),
+      SchemaProperty('ownerName', RealmPropertyType.string, optional: true),
+      SchemaProperty('dispatched', RealmPropertyType.bool, optional: true),
+    ]);
+  }
+}
+
+class UserGeofenceEvent extends _UserGeofenceEvent
+    with RealmEntity, RealmObjectBase, RealmObject {
+  UserGeofenceEvent(
+    ObjectId id, {
+    String? userGeofenceId,
+    String? activityType,
+    String? landmarkId,
+    String? landmarkName,
+    Position? position,
+    String? geoHash,
+    String? created,
+    String? action,
+    String? associationId,
+    String? associationName,
+    String? userId,
+    int? confidence,
+    double? odometer,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'userGeofenceId', userGeofenceId);
+    RealmObjectBase.set(this, 'activityType', activityType);
+    RealmObjectBase.set(this, 'landmarkId', landmarkId);
+    RealmObjectBase.set(this, 'landmarkName', landmarkName);
+    RealmObjectBase.set(this, 'position', position);
+    RealmObjectBase.set(this, 'geoHash', geoHash);
+    RealmObjectBase.set(this, 'created', created);
+    RealmObjectBase.set(this, 'action', action);
+    RealmObjectBase.set(this, 'associationId', associationId);
+    RealmObjectBase.set(this, 'associationName', associationName);
+    RealmObjectBase.set(this, 'userId', userId);
+    RealmObjectBase.set(this, 'confidence', confidence);
+    RealmObjectBase.set(this, 'odometer', odometer);
+  }
+
+  UserGeofenceEvent._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get userGeofenceId =>
+      RealmObjectBase.get<String>(this, 'userGeofenceId') as String?;
+  @override
+  set userGeofenceId(String? value) =>
+      RealmObjectBase.set(this, 'userGeofenceId', value);
+
+  @override
+  String? get activityType =>
+      RealmObjectBase.get<String>(this, 'activityType') as String?;
+  @override
+  set activityType(String? value) =>
+      RealmObjectBase.set(this, 'activityType', value);
+
+  @override
+  String? get landmarkId =>
+      RealmObjectBase.get<String>(this, 'landmarkId') as String?;
+  @override
+  set landmarkId(String? value) =>
+      RealmObjectBase.set(this, 'landmarkId', value);
+
+  @override
+  String? get landmarkName =>
+      RealmObjectBase.get<String>(this, 'landmarkName') as String?;
+  @override
+  set landmarkName(String? value) =>
+      RealmObjectBase.set(this, 'landmarkName', value);
+
+  @override
+  Position? get position =>
+      RealmObjectBase.get<Position>(this, 'position') as Position?;
+  @override
+  set position(covariant Position? value) =>
+      RealmObjectBase.set(this, 'position', value);
+
+  @override
+  String? get geoHash =>
+      RealmObjectBase.get<String>(this, 'geoHash') as String?;
+  @override
+  set geoHash(String? value) => RealmObjectBase.set(this, 'geoHash', value);
+
+  @override
+  String? get created =>
+      RealmObjectBase.get<String>(this, 'created') as String?;
+  @override
+  set created(String? value) => RealmObjectBase.set(this, 'created', value);
+
+  @override
+  String? get action => RealmObjectBase.get<String>(this, 'action') as String?;
+  @override
+  set action(String? value) => RealmObjectBase.set(this, 'action', value);
+
+  @override
+  String? get associationId =>
+      RealmObjectBase.get<String>(this, 'associationId') as String?;
+  @override
+  set associationId(String? value) =>
+      RealmObjectBase.set(this, 'associationId', value);
+
+  @override
+  String? get associationName =>
+      RealmObjectBase.get<String>(this, 'associationName') as String?;
+  @override
+  set associationName(String? value) =>
+      RealmObjectBase.set(this, 'associationName', value);
+
+  @override
+  String? get userId => RealmObjectBase.get<String>(this, 'userId') as String?;
+  @override
+  set userId(String? value) => RealmObjectBase.set(this, 'userId', value);
+
+  @override
+  int? get confidence => RealmObjectBase.get<int>(this, 'confidence') as int?;
+  @override
+  set confidence(int? value) => RealmObjectBase.set(this, 'confidence', value);
+
+  @override
+  double? get odometer =>
+      RealmObjectBase.get<double>(this, 'odometer') as double?;
+  @override
+  set odometer(double? value) => RealmObjectBase.set(this, 'odometer', value);
+
+  @override
+  Stream<RealmObjectChanges<UserGeofenceEvent>> get changes =>
+      RealmObjectBase.getChanges<UserGeofenceEvent>(this);
+
+  @override
+  UserGeofenceEvent freeze() =>
+      RealmObjectBase.freezeObject<UserGeofenceEvent>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(UserGeofenceEvent._);
+    return const SchemaObject(
+        ObjectType.realmObject, UserGeofenceEvent, 'UserGeofenceEvent', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('userGeofenceId', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('activityType', RealmPropertyType.string, optional: true),
+      SchemaProperty('landmarkId', RealmPropertyType.string, optional: true),
+      SchemaProperty('landmarkName', RealmPropertyType.string, optional: true),
+      SchemaProperty('position', RealmPropertyType.object,
+          optional: true, linkTarget: 'Position'),
+      SchemaProperty('geoHash', RealmPropertyType.string, optional: true),
+      SchemaProperty('created', RealmPropertyType.string, optional: true),
+      SchemaProperty('action', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationId', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationName', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('userId', RealmPropertyType.string, optional: true),
+      SchemaProperty('confidence', RealmPropertyType.int, optional: true),
+      SchemaProperty('odometer', RealmPropertyType.double, optional: true),
+    ]);
+  }
+}
+
+class VehicleHeartbeat extends _VehicleHeartbeat
+    with RealmEntity, RealmObjectBase, RealmObject {
+  VehicleHeartbeat(
+    ObjectId id, {
+    String? vehicleHeartbeatId,
+    Position? position,
+    String? geoHash,
+    String? created,
+    String? vehicleId,
+    String? associationId,
+    String? vehicleReg,
+    String? make,
+    String? model,
+    String? ownerId,
+    String? ownerName,
+    int? longDate,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'vehicleHeartbeatId', vehicleHeartbeatId);
+    RealmObjectBase.set(this, 'position', position);
+    RealmObjectBase.set(this, 'geoHash', geoHash);
+    RealmObjectBase.set(this, 'created', created);
+    RealmObjectBase.set(this, 'vehicleId', vehicleId);
+    RealmObjectBase.set(this, 'associationId', associationId);
+    RealmObjectBase.set(this, 'vehicleReg', vehicleReg);
+    RealmObjectBase.set(this, 'make', make);
+    RealmObjectBase.set(this, 'model', model);
+    RealmObjectBase.set(this, 'ownerId', ownerId);
+    RealmObjectBase.set(this, 'ownerName', ownerName);
+    RealmObjectBase.set(this, 'longDate', longDate);
+  }
+
+  VehicleHeartbeat._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get vehicleHeartbeatId =>
+      RealmObjectBase.get<String>(this, 'vehicleHeartbeatId') as String?;
+  @override
+  set vehicleHeartbeatId(String? value) =>
+      RealmObjectBase.set(this, 'vehicleHeartbeatId', value);
+
+  @override
+  Position? get position =>
+      RealmObjectBase.get<Position>(this, 'position') as Position?;
+  @override
+  set position(covariant Position? value) =>
+      RealmObjectBase.set(this, 'position', value);
+
+  @override
+  String? get geoHash =>
+      RealmObjectBase.get<String>(this, 'geoHash') as String?;
+  @override
+  set geoHash(String? value) => RealmObjectBase.set(this, 'geoHash', value);
+
+  @override
+  String? get created =>
+      RealmObjectBase.get<String>(this, 'created') as String?;
+  @override
+  set created(String? value) => RealmObjectBase.set(this, 'created', value);
+
+  @override
+  String? get vehicleId =>
+      RealmObjectBase.get<String>(this, 'vehicleId') as String?;
+  @override
+  set vehicleId(String? value) => RealmObjectBase.set(this, 'vehicleId', value);
+
+  @override
+  String? get associationId =>
+      RealmObjectBase.get<String>(this, 'associationId') as String?;
+  @override
+  set associationId(String? value) =>
+      RealmObjectBase.set(this, 'associationId', value);
+
+  @override
+  String? get vehicleReg =>
+      RealmObjectBase.get<String>(this, 'vehicleReg') as String?;
+  @override
+  set vehicleReg(String? value) =>
+      RealmObjectBase.set(this, 'vehicleReg', value);
+
+  @override
+  String? get make => RealmObjectBase.get<String>(this, 'make') as String?;
+  @override
+  set make(String? value) => RealmObjectBase.set(this, 'make', value);
+
+  @override
+  String? get model => RealmObjectBase.get<String>(this, 'model') as String?;
+  @override
+  set model(String? value) => RealmObjectBase.set(this, 'model', value);
+
+  @override
+  String? get ownerId =>
+      RealmObjectBase.get<String>(this, 'ownerId') as String?;
+  @override
+  set ownerId(String? value) => RealmObjectBase.set(this, 'ownerId', value);
+
+  @override
+  String? get ownerName =>
+      RealmObjectBase.get<String>(this, 'ownerName') as String?;
+  @override
+  set ownerName(String? value) => RealmObjectBase.set(this, 'ownerName', value);
+
+  @override
+  int? get longDate => RealmObjectBase.get<int>(this, 'longDate') as int?;
+  @override
+  set longDate(int? value) => RealmObjectBase.set(this, 'longDate', value);
+
+  @override
+  Stream<RealmObjectChanges<VehicleHeartbeat>> get changes =>
+      RealmObjectBase.getChanges<VehicleHeartbeat>(this);
+
+  @override
+  VehicleHeartbeat freeze() =>
+      RealmObjectBase.freezeObject<VehicleHeartbeat>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(VehicleHeartbeat._);
+    return const SchemaObject(
+        ObjectType.realmObject, VehicleHeartbeat, 'VehicleHeartbeat', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('vehicleHeartbeatId', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('position', RealmPropertyType.object,
+          optional: true, linkTarget: 'Position'),
+      SchemaProperty('geoHash', RealmPropertyType.string, optional: true),
+      SchemaProperty('created', RealmPropertyType.string, optional: true),
+      SchemaProperty('vehicleId', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationId', RealmPropertyType.string, optional: true),
+      SchemaProperty('vehicleReg', RealmPropertyType.string, optional: true),
+      SchemaProperty('make', RealmPropertyType.string, optional: true),
+      SchemaProperty('model', RealmPropertyType.string, optional: true),
+      SchemaProperty('ownerId', RealmPropertyType.string, optional: true),
+      SchemaProperty('ownerName', RealmPropertyType.string, optional: true),
+      SchemaProperty('longDate', RealmPropertyType.int, optional: true),
+    ]);
+  }
+}
+
 class RoutePoint extends _RoutePoint
     with RealmEntity, RealmObjectBase, RealmObject {
   RoutePoint(
@@ -1025,221 +2068,6 @@ class CalculatedDistance extends _CalculatedDistance
           optional: true),
       SchemaProperty('toRoutePointIndex', RealmPropertyType.int,
           optional: true),
-    ]);
-  }
-}
-
-class Association extends _Association
-    with RealmEntity, RealmObjectBase, RealmObject {
-  Association(
-    ObjectId id, {
-    String? associationId,
-    String? cityId,
-    String? countryId,
-    String? associationName,
-    String? phone,
-    String? status,
-    String? countryName,
-    String? cityName,
-    String? stringDate,
-    int? date,
-    String? path,
-    String? dateRegistered,
-    Position? position,
-    String? geoHash,
-    String? adminUserFirstName,
-    String? adminUserLastName,
-    String? userId,
-    String? adminCellphone,
-    String? adminEmail,
-  }) {
-    RealmObjectBase.set(this, 'id', id);
-    RealmObjectBase.set(this, 'associationId', associationId);
-    RealmObjectBase.set(this, 'cityId', cityId);
-    RealmObjectBase.set(this, 'countryId', countryId);
-    RealmObjectBase.set(this, 'associationName', associationName);
-    RealmObjectBase.set(this, 'phone', phone);
-    RealmObjectBase.set(this, 'status', status);
-    RealmObjectBase.set(this, 'countryName', countryName);
-    RealmObjectBase.set(this, 'cityName', cityName);
-    RealmObjectBase.set(this, 'stringDate', stringDate);
-    RealmObjectBase.set(this, 'date', date);
-    RealmObjectBase.set(this, 'path', path);
-    RealmObjectBase.set(this, 'dateRegistered', dateRegistered);
-    RealmObjectBase.set(this, 'position', position);
-    RealmObjectBase.set(this, 'geoHash', geoHash);
-    RealmObjectBase.set(this, 'adminUserFirstName', adminUserFirstName);
-    RealmObjectBase.set(this, 'adminUserLastName', adminUserLastName);
-    RealmObjectBase.set(this, 'userId', userId);
-    RealmObjectBase.set(this, 'adminCellphone', adminCellphone);
-    RealmObjectBase.set(this, 'adminEmail', adminEmail);
-  }
-
-  Association._();
-
-  @override
-  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
-  @override
-  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
-
-  @override
-  String? get associationId =>
-      RealmObjectBase.get<String>(this, 'associationId') as String?;
-  @override
-  set associationId(String? value) =>
-      RealmObjectBase.set(this, 'associationId', value);
-
-  @override
-  String? get cityId => RealmObjectBase.get<String>(this, 'cityId') as String?;
-  @override
-  set cityId(String? value) => RealmObjectBase.set(this, 'cityId', value);
-
-  @override
-  String? get countryId =>
-      RealmObjectBase.get<String>(this, 'countryId') as String?;
-  @override
-  set countryId(String? value) => RealmObjectBase.set(this, 'countryId', value);
-
-  @override
-  String? get associationName =>
-      RealmObjectBase.get<String>(this, 'associationName') as String?;
-  @override
-  set associationName(String? value) =>
-      RealmObjectBase.set(this, 'associationName', value);
-
-  @override
-  String? get phone => RealmObjectBase.get<String>(this, 'phone') as String?;
-  @override
-  set phone(String? value) => RealmObjectBase.set(this, 'phone', value);
-
-  @override
-  String? get status => RealmObjectBase.get<String>(this, 'status') as String?;
-  @override
-  set status(String? value) => RealmObjectBase.set(this, 'status', value);
-
-  @override
-  String? get countryName =>
-      RealmObjectBase.get<String>(this, 'countryName') as String?;
-  @override
-  set countryName(String? value) =>
-      RealmObjectBase.set(this, 'countryName', value);
-
-  @override
-  String? get cityName =>
-      RealmObjectBase.get<String>(this, 'cityName') as String?;
-  @override
-  set cityName(String? value) => RealmObjectBase.set(this, 'cityName', value);
-
-  @override
-  String? get stringDate =>
-      RealmObjectBase.get<String>(this, 'stringDate') as String?;
-  @override
-  set stringDate(String? value) =>
-      RealmObjectBase.set(this, 'stringDate', value);
-
-  @override
-  int? get date => RealmObjectBase.get<int>(this, 'date') as int?;
-  @override
-  set date(int? value) => RealmObjectBase.set(this, 'date', value);
-
-  @override
-  String? get path => RealmObjectBase.get<String>(this, 'path') as String?;
-  @override
-  set path(String? value) => RealmObjectBase.set(this, 'path', value);
-
-  @override
-  String? get dateRegistered =>
-      RealmObjectBase.get<String>(this, 'dateRegistered') as String?;
-  @override
-  set dateRegistered(String? value) =>
-      RealmObjectBase.set(this, 'dateRegistered', value);
-
-  @override
-  Position? get position =>
-      RealmObjectBase.get<Position>(this, 'position') as Position?;
-  @override
-  set position(covariant Position? value) =>
-      RealmObjectBase.set(this, 'position', value);
-
-  @override
-  String? get geoHash =>
-      RealmObjectBase.get<String>(this, 'geoHash') as String?;
-  @override
-  set geoHash(String? value) => RealmObjectBase.set(this, 'geoHash', value);
-
-  @override
-  String? get adminUserFirstName =>
-      RealmObjectBase.get<String>(this, 'adminUserFirstName') as String?;
-  @override
-  set adminUserFirstName(String? value) =>
-      RealmObjectBase.set(this, 'adminUserFirstName', value);
-
-  @override
-  String? get adminUserLastName =>
-      RealmObjectBase.get<String>(this, 'adminUserLastName') as String?;
-  @override
-  set adminUserLastName(String? value) =>
-      RealmObjectBase.set(this, 'adminUserLastName', value);
-
-  @override
-  String? get userId => RealmObjectBase.get<String>(this, 'userId') as String?;
-  @override
-  set userId(String? value) => RealmObjectBase.set(this, 'userId', value);
-
-  @override
-  String? get adminCellphone =>
-      RealmObjectBase.get<String>(this, 'adminCellphone') as String?;
-  @override
-  set adminCellphone(String? value) =>
-      RealmObjectBase.set(this, 'adminCellphone', value);
-
-  @override
-  String? get adminEmail =>
-      RealmObjectBase.get<String>(this, 'adminEmail') as String?;
-  @override
-  set adminEmail(String? value) =>
-      RealmObjectBase.set(this, 'adminEmail', value);
-
-  @override
-  Stream<RealmObjectChanges<Association>> get changes =>
-      RealmObjectBase.getChanges<Association>(this);
-
-  @override
-  Association freeze() => RealmObjectBase.freezeObject<Association>(this);
-
-  static SchemaObject get schema => _schema ??= _initSchema();
-  static SchemaObject? _schema;
-  static SchemaObject _initSchema() {
-    RealmObjectBase.registerFactory(Association._);
-    return const SchemaObject(
-        ObjectType.realmObject, Association, 'Association', [
-      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
-      SchemaProperty('associationId', RealmPropertyType.string,
-          optional: true, indexType: RealmIndexType.regular),
-      SchemaProperty('cityId', RealmPropertyType.string, optional: true),
-      SchemaProperty('countryId', RealmPropertyType.string, optional: true),
-      SchemaProperty('associationName', RealmPropertyType.string,
-          optional: true),
-      SchemaProperty('phone', RealmPropertyType.string, optional: true),
-      SchemaProperty('status', RealmPropertyType.string, optional: true),
-      SchemaProperty('countryName', RealmPropertyType.string, optional: true),
-      SchemaProperty('cityName', RealmPropertyType.string, optional: true),
-      SchemaProperty('stringDate', RealmPropertyType.string, optional: true),
-      SchemaProperty('date', RealmPropertyType.int, optional: true),
-      SchemaProperty('path', RealmPropertyType.string, optional: true),
-      SchemaProperty('dateRegistered', RealmPropertyType.string,
-          optional: true),
-      SchemaProperty('position', RealmPropertyType.object,
-          optional: true, linkTarget: 'Position'),
-      SchemaProperty('geoHash', RealmPropertyType.string, optional: true),
-      SchemaProperty('adminUserFirstName', RealmPropertyType.string,
-          optional: true),
-      SchemaProperty('adminUserLastName', RealmPropertyType.string,
-          optional: true),
-      SchemaProperty('userId', RealmPropertyType.string, optional: true),
-      SchemaProperty('adminCellphone', RealmPropertyType.string,
-          optional: true),
-      SchemaProperty('adminEmail', RealmPropertyType.string, optional: true),
     ]);
   }
 }

@@ -71,7 +71,7 @@ final statesProvider = riv.FutureProvider.family<List<State>, String>((ref,
 
 final vehicleProvider = riv.FutureProvider.family<List<Vehicle>, String>((ref,
     associationId) async {
-  final res = await listApiDog.getAssociationVehicles(associationId);
+  final res = await listApiDog.getAssociationVehicles(associationId,false);
   pp('$bb vehicleProvider did the job: ${res.length} cars found.');
   return res;
 });

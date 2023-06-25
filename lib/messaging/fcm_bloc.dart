@@ -93,39 +93,47 @@ class FCMBloc {
       processFCMMessage(event);
     });
 
-    subscribeToTopics();
+    // subscribeToTopics();
   }
   static const red = '🍎 🍎';
   Future<void> subscribeToTopics() async {
     var user = await prefs.getUser();
-    if (user == null) {
+    var car = await prefs.getCar();
+    String? associationId;
+    if (user != null) {
+      associationId = user.associationId!;
+    }
+    if (car != null) {
+      associationId = car.associationId!;
+    }
+    if (associationId == null) {
       return;
     }
     pp("$mm subscribeToTopics: $red subscribe to all KasieTransie FCM topics ... ");
 
     await firebaseMessaging
-        .subscribeToTopic('vehicleArrival_${user!.associationId}');
-    pp('$mm ..... FCM: subscribed to vehicle_arrival_${user.associationId}');
+        .subscribeToTopic('vehicleArrival_$associationId');
+    pp('$mm ..... FCM: subscribed to vehicle_arrival_$associationId');
     //
     await firebaseMessaging
-        .subscribeToTopic('vehicleDeparture_${user.associationId}');
-    pp('$mm ..... FCM: subscribed to vehicle_departure_${user.associationId}');
+        .subscribeToTopic('vehicleDeparture_$associationId');
+    pp('$mm ..... FCM: subscribed to vehicle_departure_$associationId');
     //
     await firebaseMessaging
-        .subscribeToTopic('dispatchRecord_${user.associationId}');
-    pp('$mm ..... FCM: subscribed to dispatchRecord_${user.associationId}');
+        .subscribeToTopic('dispatchRecord_$associationId');
+    pp('$mm ..... FCM: subscribed to dispatchRecord_$associationId');
     //
     await firebaseMessaging
-        .subscribeToTopic('locationResponse_${user.associationId}');
-    pp('$mm ..... FCM: subscribed to locationResponse_${user.associationId}');
+        .subscribeToTopic('locationResponse_$associationId');
+    pp('$mm ..... FCM: subscribed to locationResponse_$associationId');
     //
     await firebaseMessaging
-        .subscribeToTopic('locationRequest_${user.associationId}');
-    pp('$mm ..... FCM: subscribed to locationRequest_${user.associationId}');
+        .subscribeToTopic('locationRequest_$associationId');
+    pp('$mm ..... FCM: subscribed to locationRequest_$associationId');
     //
     await firebaseMessaging
-        .subscribeToTopic('userGeofenceEvent_${user.associationId}');
-    pp('$mm ..... FCM: subscribed to userGeofenceEvent_${user.associationId}');
+        .subscribeToTopic('userGeofenceEvent_$associationId');
+    pp('$mm ..... FCM: subscribed to userGeofenceEvent_$associationId');
     //
 
     pp('$mm ..... FCM: subscribed to all KasieTransie FCM topics\n\n');

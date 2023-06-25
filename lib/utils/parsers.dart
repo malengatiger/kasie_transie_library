@@ -10,41 +10,44 @@ import 'functions.dart';
 Association buildAssociation(Map map) {
   var id = rm.ObjectId.fromHexString(map['_id'] as String);
 
-  final m = Association(id,
+  final m = Association(
+    id,
     userId: map['userId'],
     countryId: map['countryId'],
     countryName: map['countryName'],
     cityId: map['cityId'],
     associationId: map['associationId'],
     associationName: map['associationName'],
-    status: map['status'],
+    active: map['active'],
     adminCellphone: map['adminCellphone'],
     adminEmail: map['adminEmail'],
     adminUserFirstName: map['adminUserFirstName'],
     adminUserLastName: map['adminUserLastName'],
     cityName: map['cityName'],
-    date: map['date'],
     dateRegistered: map['dateRegistered'],
   );
   return m;
 }
+
 State buildState(Map map) {
   var id = rm.ObjectId.fromHexString(map['_id'] as String);
 
-  final m = State(id,
+  final m = State(
+    id,
     stateId: map['stateId'],
     countryId: map['countryId'],
     countryName: map['countryName'],
     name: map['name'],
-
   );
   return m;
 }
+
 User buildUser(Map map) {
   // pp('${E.broc}  json for User, check _id .......');
   // myPrettyJsonPrint(map);
   var id = rm.ObjectId.fromHexString(map['_id'] as String);
-  final m = User(id,
+  final m = User(
+    id,
     userId: map['userId'],
     firstName: map['firstName'],
     lastName: map['lastName'],
@@ -64,7 +67,8 @@ User buildUser(Map map) {
 
 SettingsModel buildSettingsModel(Map map) {
   var id = rm.ObjectId.fromHexString(map['_id'] as String);
-  final m = SettingsModel(id,
+  final m = SettingsModel(
+    id,
     associationId: map['associationId'],
     locale: map['locale'],
     refreshRateInSeconds: map['refreshRateInSeconds'],
@@ -104,11 +108,13 @@ Country buildCountry(Map value) {
 
   return m;
 }
+
 //
 City buildCity(Map map) {
   var id = rm.ObjectId.fromHexString(map['_id'] as String);
 
-  final m = City(id,
+  final m = City(
+    id,
     cityId: map['cityId'],
     name: map['name'],
     countryName: map['countryName'],
@@ -122,19 +128,17 @@ City buildCity(Map map) {
   );
   return m;
 }
+
 Position buildPosition(Map map) {
   List st = map['coordinates'];
   var lat = st.last as double;
   var lng = st.first as double;
   final m = Position(
-    type: point,
-    coordinates: [lng,lat],
-    latitude: lat,
-    longitude: lng
-  );
+      type: point, coordinates: [lng, lat], latitude: lat, longitude: lng);
 
   return m;
 }
+
 Landmark buildLandmark(Map map) {
   var id = rm.ObjectId.fromHexString(map['_id'] as String);
   List details = map['routeDetails'];
@@ -143,17 +147,16 @@ Landmark buildLandmark(Map map) {
     info.add(RouteInfo(
       routeId: e['routeId'],
       routeName: e['routeName'],
-
     ));
   }
-  final m = Landmark(id,
+  final m = Landmark(
+    id,
     landmarkId: map['landmarkId'],
     landmarkName: map['landmarkName'],
     routeDetails: info,
     longitude: map['longitude'],
     latitude: map['latitude'],
     position: buildPosition(map['position']),
-
     distance: map['distance'],
   );
   return m;
@@ -161,7 +164,8 @@ Landmark buildLandmark(Map map) {
 
 RouteLandmark buildRouteLandmark(Map value) {
   var id = rm.ObjectId.fromHexString(value['_id'] as String);
-  var m = RouteLandmark(id,
+  var m = RouteLandmark(
+    id,
     routeName: value['routeName'],
     routeId: value['routeId'],
     associationId: value['associationId'],
@@ -169,15 +173,15 @@ RouteLandmark buildRouteLandmark(Map value) {
     created: value['created'],
     landmarkName: value['landmarkName'],
     position: buildPosition(value['position']),
-
-
   );
   return m;
 }
+
 RouteCity buildRouteCity(Map value) {
   var id = rm.ObjectId.fromHexString(value['_id'] as String);
 
-  var m = RouteCity(id,
+  var m = RouteCity(
+    id,
     routeName: value['routeName'],
     routeId: value['routeId'],
     associationId: value['associationId'],
@@ -185,8 +189,6 @@ RouteCity buildRouteCity(Map value) {
     created: value['created'],
     cityName: value['cityName'],
     position: buildPosition(value['position']),
-
-
   );
   return m;
 }
@@ -223,8 +225,9 @@ Route buildRoute(Map value) {
     startCityPosition: startCityPosition,
     endCityPosition: endCityPosition,
   );
-  
-  var m = Route(id,
+
+  var m = Route(
+    id,
     countryId: value['countryId'],
     routeId: value['routeId'],
     associationId: value['associationId'],
@@ -249,7 +252,8 @@ Route buildRoute(Map value) {
 RoutePoint buildRoutePoint(Map value) {
   var id = rm.ObjectId.fromHexString(value['_id'] as String);
 
-  var m = RoutePoint(id,
+  var m = RoutePoint(
+    id,
     routePointId: value['routePointId'],
     longitude: value['longitude'],
     routeId: value['routeId'],
@@ -267,7 +271,8 @@ RoutePoint buildRoutePoint(Map value) {
 
 Vehicle buildVehicle(Map vehicleJson) {
   var id = rm.ObjectId.fromHexString(vehicleJson['_id'] as String);
-  var m = Vehicle(id,
+  var m = Vehicle(
+    id,
     vehicleId: vehicleJson['vehicleId'],
     vehicleReg: vehicleJson['vehicleReg'],
     associationId: vehicleJson['associationId'],
@@ -280,6 +285,95 @@ Vehicle buildVehicle(Map vehicleJson) {
     dateInstalled: vehicleJson['dateInstalled'],
     ownerId: vehicleJson['ownerId'],
     ownerName: vehicleJson['ownerName'],
+  );
+  return m;
+}
+DispatchRecord buildDispatchRecord(Map j) {
+  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  var m = DispatchRecord(
+    id,
+    vehicleId: j['vehicleId'],
+    vehicleReg: j['vehicleReg'],
+    associationId: j['associationId'],
+    associationName: j['associationName'],
+    created: j['created'],
+    dispatchRecordId: j['dispatchRecordId'],
+    passengers: j['passengers'],
+    ownerId: j['ownerId'],
+    marshalId: j['marshalId'],
+    marshalName: j['marshalName'],
+    vehicleArrivalId: j['vehicleArrivalId'],
+    dispatched: j['dispatched'],
+    geoHash: j['geoHash'],
+    routeName: j['routeName'],
+    landmarkId: j['landmarkId'],
+    position: buildPosition(j['position']),
+  );
+  return m;
+}
+
+VehicleArrival buildVehicleArrival(Map j) {
+  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  var m = VehicleArrival(
+    id,
+    vehicleId: j['vehicleId'],
+    vehicleReg: j['vehicleReg'],
+    associationId: j['associationId'],
+    associationName: j['associationName'],
+    created: j['created'],
+    vehicleArrivalId: j['vehicleArrivalId'],
+    landmarkName: j['landmarkName'],
+    ownerId: j['ownerId'],
+    make: j['make'],
+    model: j['model'],
+    ownerName: j['ownerName'],
+    dispatched: j['dispatched'],
+    geoHash: j['geoHash'],
+    landmarkId: j['landmarkId'],
+    position: buildPosition(j['position']),
+  );
+  return m;
+}
+
+VehicleDeparture buildVehicleDeparture(Map j) {
+  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  var m = VehicleDeparture(
+    id,
+    vehicleId: j['vehicleId'],
+    vehicleReg: j['vehicleReg'],
+    associationId: j['associationId'],
+    associationName: j['associationName'],
+    created: j['created'],
+    vehicleDepartureId: j['vehicleDepartureId'],
+    landmarkName: j['landmarkName'],
+    ownerId: j['ownerId'],
+    make: j['make'],
+    model: j['model'],
+    ownerName: j['ownerName'],
+    dispatched: j['dispatched'],
+    geoHash: j['geoHash'],
+    landmarkId: j['landmarkId'],
+    position: buildPosition(j['position']),
+  );
+  return m;
+}
+
+VehicleHeartbeat buildVehicleHeartbeat(Map j) {
+  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  var m = VehicleHeartbeat(
+    id,
+    vehicleId: j['vehicleId'],
+    vehicleHeartbeatId: j['vehicleHeartbeatId'],
+    vehicleReg: j['vehicleReg'],
+    associationId: j['associationId'],
+    created: j['created'],
+    ownerId: j['ownerId'],
+    make: j['make'],
+    model: j['model'],
+    ownerName: j['ownerName'],
+    geoHash: j['geoHash'],
+    position: buildPosition(j['position']),
+    longDate: j['longDate'],
   );
   return m;
 }
@@ -299,6 +393,24 @@ CalculatedDistance buildCalculatedDistance(Map map) {
   );
   return m;
 }
+UserGeofenceEvent buildUserGeofenceEvent(Map j) {
+  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  var m = UserGeofenceEvent(
+    id,
+    userId: j['userId'],
+    action: j['action'],
+    associationId: j['associationId'],
+    associationName: j['associationName'],
+    created: j['created'],
+    activityType: j['activityType'],
+    landmarkName: j['landmarkName'],
+    confidence: j['confidence'],
+    odometer: j['odometer'],
+    geoHash: j['geoHash'],
+    landmarkId: j['landmarkId'],
+    position: buildPosition(j['position']),
+  );
+  return m;
+}
 
 const point = 'Point';
-

@@ -3,8 +3,6 @@
 	README.md,8/e/8ec9a00bfd09b3190ac6b22251dbb1aa95a0579d
 H
 lib/data/route_pair.dart,6/8/68ac186f202a24cbf6967001ce5244b5d870d833
-8
-cmds.txt,9/6/96aabe83f58456692f5d448a6988674171d63b89
 9
 	.metadata,5/a/5adbcffabbc7cc6a2701af40c04edc2b3ff65fcb
 N
@@ -71,15 +69,15 @@ L
 lib/utils/error_handler.dart,1/0/10a99e756989f9692ff3b288cdfdb0dc6a40787b
 S
 #lib/utils/device_location_bloc.dart,1/3/13a8f93355b4fa0cd766d700b3b7cfe868e22c17
-F
-lib/bloc/app_auth.dart,2/e/2e8ace8db1fde91611d0c739cd6d716a3f5ac924
-K
-lib/messaging/fcm_bloc.dart,a/b/abc3ce0d0007de42374e4acee2f4babe2f6f7f47
-Q
-!.idea/libraries/Dart_Packages.xml,f/c/fc67c2d2441e33af1dbd1e910281523d1ce74b4a
-J
-lib/utils/initializer.dart,0/5/0508e09f255e04bf41621c065dbb59e0df1465a8
-S
-#.idea/libraries/Flutter_Plugins.xml,e/8/e8bbc0fdfcefee9aa7b463c83a8a480b92333860
 K
 lib/bloc/geo_hash_util.dart,6/1/619ee1d07194d8979c54731c227d110998dea3e6
+O
+lib/widgets/city_selection.dart,b/a/bae87fc0f3dabeb2d125869428ea939f930b31ea
+R
+"lib/widgets/country_selection.dart,1/2/1278c7470502218cccfe944c4647fb9824c7ff6f
+O
+lib/auth/email_auth_signin.dart,2/a/2a121924df2544ed1851a2a61b5ca978703d1370
+O
+lib/auth/phone_auth_signin.dart,e/d/ed017848211d6cf1bb53695f5d95a2b3310634cf
+8
+cmds.txt,9/6/96aabe83f58456692f5d448a6988674171d63b89

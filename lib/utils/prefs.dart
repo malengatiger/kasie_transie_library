@@ -1,10 +1,8 @@
 import 'dart:convert';
 
 import 'package:kasie_transie_library/utils/parsers.dart';
-import 'package:realm/realm.dart' as rm;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../bloc/list_api_dog.dart';
 import '../data/schemas.dart';
 import 'functions.dart';
 
@@ -97,5 +95,49 @@ class Prefs {
     var sett = buildSettingsModel(jx);
     pp("🌽 🌽 🌽 Prefs: getSettings 🧩  ${sett.toJson()} retrieved");
     return sett;
+  }
+
+  Future saveCar(Vehicle car) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    Map mJson = car.toJson();
+    var jx = json.encode(mJson);
+    prefs.setString('car', jx);
+    pp("🌽 🌽 🌽 Prefs: saveCar:  SAVED: 🌽 ${car.toJson()} 🌽 🌽 🌽");
+    return null;
+  }
+
+  Future<Vehicle?> getCar() async {
+    var prefs = await SharedPreferences.getInstance();
+    var string = prefs.getString('car');
+    if (string == null) {
+      return null;
+    }
+    var jx = json.decode(string);
+    var car = buildVehicle(jx);
+    pp("🌽 🌽 🌽 Prefs: getCar 🧩  ${car.vehicleReg} retrieved");
+    return car;
+  }
+
+  Future saveAssociation(Association association) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    Map mJson = association.toJson();
+    var jx = json.encode(mJson);
+    prefs.setString('ass', jx);
+    pp("🌽 🌽 🌽 Prefs: saveAssociation:  SAVED: 🌽 ${association.toJson()} 🌽 🌽 🌽");
+    return null;
+  }
+
+  Future<Association?> getAssociation() async {
+    var prefs = await SharedPreferences.getInstance();
+    var string = prefs.getString('ass');
+    if (string == null) {
+      return null;
+    }
+    var jx = json.decode(string);
+    var car = buildAssociation(jx);
+    pp("🌽 🌽 🌽 Prefs: getAssociation 🧩  ${car.associationName} retrieved");
+    return car;
   }
 }

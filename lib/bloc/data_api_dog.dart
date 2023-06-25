@@ -58,9 +58,43 @@ class DataApiDog {
   Future addVehicle(Vehicle vehicle) async {
     final bag = vehicle.toJson();
     final cmd = '${url}addVehicle';
-    final res = _callPost(cmd, bag);
+    final res = await _callPost(cmd, bag);
     pp('$mm vehicle added to database: $res');
   }
+
+  Future addUserGeofenceEvent(UserGeofenceEvent event) async {
+    final bag = event.toJson();
+    final cmd = '${url}addUserGeofenceEvent';
+    final res = await _callPost(cmd, bag);
+    pp('$mm UserGeofenceEvent added to database: $res');
+  }
+  Future addDispatchRecord(DispatchRecord event) async {
+    final bag = event.toJson();
+    final cmd = '${url}addDispatchRecord';
+    final res = await _callPost(cmd, bag);
+    pp('$mm DispatchRecord added to database: $res');
+  }
+
+  Future addVehicleArrival(VehicleArrival event) async {
+    final bag = event.toJson();
+    final cmd = '${url}addVehicleArrival';
+    final res = await _callPost(cmd, bag);
+    pp('$mm VehicleArrival added to database: $res');
+  }
+  Future addVehicleDeparture(VehicleDeparture event) async {
+    final bag = event.toJson();
+    final cmd = '${url}addVehicleDeparture';
+    final res = await _callPost(cmd, bag);
+    pp('$mm VehicleDeparture added to database: $res');
+  }
+
+  Future addVehicleHeartbeat(VehicleHeartbeat event) async {
+    final bag = event.toJson();
+    final cmd = '${url}addVehicleHeartbeat';
+    final res = await _callPost(cmd, bag);
+    pp('$mm VehicleHeartbeat added to database: $res');
+  }
+
 
   Future<Landmark> addLandmark(Landmark landmark) async {
     pp('$mm landmark to BE added to database ...');
@@ -94,6 +128,7 @@ class DataApiDog {
     listApiDog.getRoutes(AssociationParameter(route.associationId!, true));
     return r;
   }
+
   Future<City> addCity(City city) async {
     final bag = city.toJson();
     final cmd = '${url}addCity';
