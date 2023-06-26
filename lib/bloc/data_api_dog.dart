@@ -25,7 +25,7 @@ final DataApiDog dataApiDog =
 class DataApiDog {
   static const mm = '🌎🌎🌎🌎🌎🌎 DataApiDog: 🌎🌎';
 
-  StreamController<RouteLandmark> _routeLandmarkController = StreamController.broadcast();
+  final StreamController<RouteLandmark> _routeLandmarkController = StreamController.broadcast();
   Stream<RouteLandmark> get routeLandmarkStream  => _routeLandmarkController.stream;
 
   Map<String, String> headers = {
@@ -55,6 +55,18 @@ class DataApiDog {
     }
   }
 
+  Future addLocationRequest(LocationRequest request) async {
+    final bag = request.toJson();
+    final cmd = '${url}addLocationRequest';
+    final res = await _callPost(cmd, bag);
+    pp('$mm LocationRequest added to database: $res');
+  }
+  Future addLocationResponse(LocationResponse response) async {
+    final bag = response.toJson();
+    final cmd = '${url}addLocationResponse';
+    final res = await _callPost(cmd, bag);
+    pp('$mm LocationResponse added to database: $res');
+  }
   Future addVehicle(Vehicle vehicle) async {
     final bag = vehicle.toJson();
     final cmd = '${url}addVehicle';
@@ -92,9 +104,14 @@ class DataApiDog {
     final bag = event.toJson();
     final cmd = '${url}addVehicleHeartbeat';
     final res = await _callPost(cmd, bag);
-    pp('$mm VehicleHeartbeat added to database: $res');
+    pp('$mm .......... VehicleHeartbeat added to database: $res');
   }
 
+  Future sendRouteUpdateMessage(String associationId, String routeId) async {
+    final cmd = '${url}sendRouteUpdateMessage?associationId=$associationId&routeId=$routeId';
+    final res = await _sendHttpGET(cmd);
+    pp('$mm .......... Route Update Message sent: $res, response 0 means GOOD!');
+  }
 
   Future<Landmark> addLandmark(Landmark landmark) async {
     pp('$mm landmark to BE added to database ...');

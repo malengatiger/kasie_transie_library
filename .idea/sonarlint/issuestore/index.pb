@@ -67,8 +67,6 @@ K
 lib/bloc/geo_hash_util.dart,6/1/619ee1d07194d8979c54731c227d110998dea3e6
 N
 lib/data/route_point_list.dart,5/4/54a444dc3014bf4246be841fe332300f8c8a3df1
-G
-lib/data/route_bag.dart,2/0/204f51ea209b239b34c4c12539e8e22a0a8a27f1
 H
 lib/data/route_pair.dart,6/8/68ac186f202a24cbf6967001ce5244b5d870d833
 O
@@ -81,3 +79,13 @@ O
 cmds.txt,9/6/96aabe83f58456692f5d448a6988674171d63b89
 O
 lib/auth/email_auth_signin.dart,2/a/2a121924df2544ed1851a2a61b5ca978703d1370
+O
+lib/utils/landmark_isolate.dart,e/8/e8aeda6a0603858c5e756e5a46dea6d0b2c67819
+Q
+!.idea/libraries/Dart_Packages.xml,f/c/fc67c2d2441e33af1dbd1e910281523d1ce74b4a
+S
+#.idea/libraries/Flutter_Plugins.xml,e/8/e8bbc0fdfcefee9aa7b463c83a8a480b92333860
+O
+lib/widgets/vehicle_detail.dart,c/d/cdfbce6e4a2c2931b70a6f3690263a67d48c9b61
+R
+"lib/providers/kasie_providers.dart,4/4/444f3d43023add5c821968865c0b4250a3a678a2

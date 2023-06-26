@@ -7,6 +7,7 @@ import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
 import 'package:realm/realm.dart' as rm;
 
+import '../data/route_bag.dart';
 import '../data/schemas.dart';
 import '../providers/kasie_providers.dart';
 import '../utils/emojis.dart';
@@ -36,6 +37,8 @@ final config = rm.Configuration.local(
     RouteCity.schema,
     State.schema,
     Vehicle.schema,
+    LocationResponse.schema,
+    LocationRequest.schema,
   ],
 );
 final ListApiDog listApiDog = ListApiDog(
@@ -368,7 +371,29 @@ class ListApiDog {
     });
     return remoteList;
   }
+  Future<RouteBag> refreshRoute(String  routeId) async {
+    pp('$mm .................. refreshRoute routeId: $routeId');
 
+    final cmd = '${url}refreshRoute?routeId=$routeId';
+    final bagMap = await _sendHttpGET(cmd);
+    final bag = RouteBag.fromJson(bagMap);
+
+    pp('$mm ... refreshing route and all it\'s babies to realm');
+    pp('$mm ... route: ${bag.route!.name!} from ${bag.route!.associationName}');
+    pp('$mm ... routePoints: ${bag.routePoints.length}');
+    pp('$mm ... routeLandmarks: ${bag.routeLandmarks.length}');
+    pp('$mm ... routeCities: ${bag.routeCities.length}');
+
+    realm.write(() {
+      realm.add<Route>(bag.route!, update: true);
+      realm.addAll(bag.routePoints, update: true);
+      realm.addAll(bag.routeLandmarks, update: true);
+      realm.addAll(bag.routeCities, update: true);
+    });
+
+    pp('\n$mm ... route has been refreshed!\n');
+    return bag;
+  }
   Future<List<Route>> getRoutes(AssociationParameter param) async {
     pp('$mm .................. getRoutes refresh: ${param.refresh}');
 

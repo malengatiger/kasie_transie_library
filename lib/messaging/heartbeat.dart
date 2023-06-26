@@ -21,7 +21,7 @@ class Heartbeat {
   void startHeartbeat() async {
     pp('$mm start Heartbeat ....');
     final sett = await prefs.getSettings();
-    int seconds = 180;
+    int seconds = 30;
     if (sett != null) {
       seconds = sett.heartbeatIntervalSeconds!;
     }
@@ -29,21 +29,21 @@ class Heartbeat {
     pp('$mm Heartbeat ......... tick duration of ${E.leaf} $seconds seconds  ${E.leaf}');
 
     timer = Timer.periodic(Duration(seconds: seconds), (timer) {
-      pp('\n\n$mm .... on Heartbeat timer tick: ${timer.tick} ${E.leaf} ${E.leaf}');
+      pp('\n\n$mm .... on Heartbeat timer tick:'
+          ' ${timer.tick} ${E.leaf} ${E.leaf} ... add another heartbeat!');
       addHeartbeat();
     });
   }
 
   Future addHeartbeat() async {
-    pp('$mm VehicleHeartbeat to be added ....');
+    pp('$mm addHeartbeat: VehicleHeartbeat to be added ....');
     final loc = await locationBloc.getLocation();
     final car = await prefs.getCar();
     if (car == null) {
       return;
     }
-    myPrettyJsonPrint(car!.toJson());
 
-    final m = VehicleHeartbeat(ObjectId(),
+    final heartbeat = VehicleHeartbeat(ObjectId(),
         ownerName: car.ownerName,
         ownerId: car.ownerId,
         associationId: car.associationId,
@@ -60,7 +60,11 @@ class Heartbeat {
           latitude: loc.latitude,
           longitude: loc.longitude,
         ));
-    await dataApiDog.addVehicleHeartbeat(m);
+
+    pp('$mm VehicleHeartbeat to be written to the db ...... see record below.');
+    await dataApiDog.addVehicleHeartbeat(heartbeat);
+    myPrettyJsonPrint(heartbeat.toJson());
+    pp('$mm VehicleHeartbeat to be written to the db ...... see below.');
     pp('$mm VehicleHeartbeat added to database, registration: ${car.vehicleReg} '
         'at ${DateTime.now().toIso8601String()}');
   }
@@ -70,7 +74,6 @@ const cc = '🔴🔴🔴🔴🔴🔴🌀🌀 Workmanager Heartbeat:  🌀🌀�
 @pragma('vm:entry-point') // Mandatory if the App is obfuscated or using Flutter 3.1+
 void callbackDispatcher() {
   pp("$cc callbackDispatcher ....");
-
   Workmanager().executeTask((task, inputData) {
     pp("$cc Native called background task ..... addHeartbeat: $inputData");
     heartbeat.addHeartbeat();

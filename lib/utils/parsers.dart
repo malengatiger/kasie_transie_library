@@ -413,4 +413,32 @@ UserGeofenceEvent buildUserGeofenceEvent(Map j) {
   return m;
 }
 
+LocationRequest buildLocationRequest(Map j) {
+  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  var m = LocationRequest(
+    id,
+    userId: j['userId'],
+    vehicleId: j['vehicleId'],
+    associationId: j['associationId'],
+    userName: j['userName'],
+    created: j['created'],
+  );
+  return m;
+}
+LocationResponse buildLocationResponse(Map j) {
+  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  var m = LocationResponse(
+    id,
+    userId: j['userId'],
+    vehicleId: j['vehicleId'],
+    associationId: j['associationId'],
+    userName: j['userName'],
+    created: j['created'],
+    geoHash: j['geoHash'],
+    position: buildPosition(j['position']),
+  );
+  return m;
+}
+
+
 const point = 'Point';

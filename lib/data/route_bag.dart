@@ -1,46 +1,30 @@
-
-
 import 'dart:convert';
 
 import 'package:kasie_transie_library/data/schemas.dart';
-import 'package:realm/realm.dart';
+import 'package:kasie_transie_library/utils/parsers.dart';
 
 class RouteBag {
-  RoutePoint? routePoint;
-  String? routeName, landmarkId;
+  Route? route;
+  List<RoutePoint> routePoints = [];
+  List<RouteLandmark> routeLandmarks = [];
+  List<RouteCity> routeCities = [];
 
-  RouteBag({this.routePoint, this.routeName, this.landmarkId});
+  RouteBag(this.route, this.routePoints, this.routeLandmarks, this.routeCities);
 
   RouteBag.fromJson(Map data) {
-    routeName = data['routeName'];
-    landmarkId = data['landmarkId'];
-    if (data['routePoint'] != null) {
-      List<int> bytes = utf8.encode(data['id']);
-
-      routePoint = RoutePoint(ObjectId.fromBytes(bytes),
-        latitude: data['routePoint']['latitude'],
-        longitude: data['routePoint']['longitude'],
-        created: data['routePoint']['created'],
-        heading: data['routePoint']['heading'],
-        index: data['routePoint']['index'],
-        landmarkId: data['routePoint']['landmarkId'],
-        landmarkName: data['routePoint']['landmarkName'],
-        routeId: data['routePoint']['routeId'],
-        position: Position(
-          type: 'Point',
-          latitude: data['routePoint']['position']['latitude'],
-          longitude: data['routePoint']['position']['longitude'],
-          coordinates: [
-            data['routePoint']['position']['longitude'],
-            data['routePoint']['position']['latitude'],
-          ]
-        )
-      );
+    route = buildRoute(data['route']);
+    List rpList = data['routePoints'];
+    for (var value in rpList) {
+      routePoints.add(buildRoutePoint(value));
+    }
+    List rlList = data['routeLandmarks'];
+    for (var value in rlList) {
+      routeLandmarks.add(buildRouteLandmark(value));
+    }
+    List rcList = data['routeCities'];
+    for (var value in rcList) {
+      routeCities.add(buildRouteCity(value));
     }
   }
-  Map<String, dynamic> toJson() => <String, dynamic>{
-        'routeName': routeName,
-        'landmarkId': landmarkId,
-        'routePoint': routePoint == null ? null : routePoint!.toJson(),
-      };
 }
+
