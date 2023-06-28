@@ -61,6 +61,85 @@ String getFormattedDateLong(String date) {
     return date;
   }
 }
+String getStringColor(Color color) {
+  var stringColor = 'black';
+  switch (color) {
+    case Colors.white:
+      stringColor = 'white';
+      break;
+    case Colors.red:
+      stringColor = 'red';
+      break;
+    case Colors.black:
+      stringColor = 'black';
+      break;
+    case Colors.amber:
+      stringColor = 'amber';
+      break;
+    case Colors.yellow:
+      stringColor = 'yellow';
+      break;
+    case Colors.pink:
+      stringColor = 'pink';
+      break;
+    case Colors.purple:
+      stringColor = 'purple';
+      break;
+    case Colors.green:
+      stringColor = 'green';
+      break;
+    case Colors.teal:
+      stringColor = 'teal';
+      break;
+    case Colors.indigo:
+      stringColor = 'indigo';
+      break;
+    case Colors.blue:
+      stringColor = 'blue';
+      break;
+    case Colors.orange:
+      stringColor = 'orange';
+      break;
+
+    default:
+      stringColor = 'black';
+      break;
+  }
+  return stringColor;
+}
+
+Color getColor(String stringColor) {
+  switch (stringColor) {
+    case 'white':
+      return Colors.white;
+    case 'red':
+      return Colors.red;
+    case 'black':
+      return Colors.black;
+    case 'amber':
+      return Colors.amber;
+    case 'yellow':
+      return Colors.yellow;
+    case 'pink':
+      return Colors.pink;
+    case 'purple':
+      return Colors.purple;
+    case 'green':
+      return Colors.green;
+    case 'teal':
+      return Colors.teal;
+    case 'indigo':
+      return Colors.indigo;
+    case 'blue':
+      return Colors.blue;
+    case 'orange':
+      return Colors.orange;
+    default:
+      return Colors.black;
+  }
+}
+
+
 String getDeviceType() {
   final data = MediaQueryData.fromView(WidgetsBinding.instance.window);
   return data.size.shortestSide < 600 ? 'phone' : 'tablet';

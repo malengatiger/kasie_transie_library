@@ -3,8 +3,9 @@ import 'dart:async';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart';
 import 'package:kasie_transie_library/utils/country_cities_isolate.dart';
+import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:kasie_transie_library/utils/routes_isolate.dart';
+import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'functions.dart';
 
 final Initializer initializer = Initializer();
@@ -27,27 +28,27 @@ class Initializer {
     await _getUsers();
     await _getRoutes();
 
+    pp('$mm sending completion flag to stream .... ${E.nice}');
     _streamController.sink.add(true);
+
+    countryCitiesIsolate.getCountryCities(user!.countryId!);
+
     pp('$mm ... initialization done! \n\n');
-
-  }
-
-  Future _getCountries() async {
-    pp('$mm ... getCountries starting ....');
-    var list = await listApiDog.getCountries();
-    pp('$mm ... initialization complete ... countries found: ${list.length}');
-
-    final country = await prefs.getCountry();
-    if (country != null) {
-      await _getCities(country.countryId!);
-    }
+    return 'We are done, Boss!';
   }
 
   Future _getVehicles() async {
+    if (user != null) {
+      pp('$mm ... getting association cars ............ ');
+      var list = await listApiDog.getAssociationVehicles(user!.associationId!, false);
+      pp('$mm ... cached: ${list.length} taxis');
+      return;
+    }
     if (car != null) {
       pp('$mm ... getting association cars ............ ');
       var list = await listApiDog.getAssociationVehicles(car!.associationId!, false);
       pp('$mm ... cached: ${list.length} taxis');
+      return;
     }
   }
 
@@ -56,20 +57,26 @@ class Initializer {
       pp('$mm ... getting association users ............ ');
       var list = await listApiDog.getAssociationUsers(car!.associationId!);
       pp('$mm ... cached: ${list.length} users');
+      return;
+    }
+    if (user != null) {
+      pp('$mm ... getting association users ............ ');
+      var list = await listApiDog.getAssociationUsers(user!.associationId!);
+      pp('$mm ... cached: ${list.length} users');
     }
   }
 
-  Future _getCities(String countryId) async {
-      pp('$mm ... getting country cities ............ ');
-      countryCitiesIsolate.getCountryCities(countryId);
-  }
-
   Future _getRoutes() async {
-    final car = await prefs.getCar();
-
     if (car != null) {
-      pp('$mm ... getting association routes ............ ');
-      routesIsolate.getRoutes(car.associationId!);
+      pp('\n\n$mm ... getting association routes in isolate ............ ');
+      await routesIsolate.getRoutes(car!.associationId!);
+      return;
+    }
+
+    if (user != null) {
+      pp('\n\n$mm ... getting association routes in isolate ............ ');
+      await routesIsolate.getRoutes(user!.associationId!);
+      return;
     }
   }
 

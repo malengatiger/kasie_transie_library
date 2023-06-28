@@ -15,36 +15,40 @@ import 'kasie_exception.dart';
 
 final CountryCitiesIsolate countryCitiesIsolate = CountryCitiesIsolate();
 class CountryCitiesIsolate {
-  final xy = '🌀🌀🌀🌀🌀🌀🌀🌀🌀 Country Cities Isolated Functions: 🍎🍎';
+  final xy = '💦💦💦💦💦💦💦💦 Country Cities Isolated Functions: 🍎🍎';
 
-  Future getCountryCities(String countryId) async {
+  Future<int> getCountryCities(String countryId) async {
     pp('\n\n\n$xy ..... getting country cities ....');
     final start = DateTime.now();
     final token = await appAuth.getAuthToken();
+    int count = 0;
     if (token != null) {
       final bag = CharlieBag(countryId, KasieEnvironment.getUrl(), token);
-      final s =
-      await Isolate.run(() async => _heavyTaskForCities(bag));
-      final list = jsonDecode(s);
+      final jsonList =
+      await Isolate.run(() async => _heavyTaskForCountryCities(bag));
+      final list = jsonDecode(jsonList);
       var mCities = <City>[];
       for (var value in list) {
         mCities.add(buildCity(value));
       }
-      pp('$xy cities from backend : 💙 ${mCities.length}  💙');
+      pp('$xy before caching, cities from backend : 💙 ${mCities.length}  💙');
 
       listApiDog.realm.write(() {
         listApiDog.realm.addAll<City>(mCities, update: true);
       });
+
       final end = DateTime.now();
-      pp('$xy should have cached ${mCities.length} cities in realm; elapsed time: '
-          '${end.difference(start).inSeconds} seconds');
+      pp('\n\n$xy should have cached ${mCities.length} cities in Realm; elapsed time: '
+          '${end.difference(start).inSeconds} seconds\n\n');
     }
+
+    return 0;
   }
 }
 ///Isolate to get country cities
-const xyz = '🌀🌀🌀🌀🌀🌀🌀🌀🌀 _heavyTaskForCities: 🍎🍎';
+const xyz = '💦💦💦💦💦💦💦💦 CountryCitiesIsolate: _heavyTaskForCities: 🍎🍎';
 
-Future<String> _heavyTaskForCities(CharlieBag bag) async {
+Future<String> _heavyTaskForCountryCities(CharlieBag bag) async {
   var mUrl = '${bag.url}getCountryCities?countryId=${bag.countryId}';
   final List list = await _httpGet(mUrl, bag.token);
   var s = jsonEncode(list);

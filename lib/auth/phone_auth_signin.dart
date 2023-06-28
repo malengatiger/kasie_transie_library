@@ -12,6 +12,9 @@ import '../data/schemas.dart' as lib;
 import '../l10n/translation_handler.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
+import '../utils/initialiazer_cover.dart';
+import '../utils/initializer.dart';
+import '../utils/navigator_utils.dart';
 
 class PhoneAuthSignin extends StatefulWidget {
   const PhoneAuthSignin({Key? key,
@@ -118,27 +121,19 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
             break;
           }
         }
-        var cities = await listApiDog.getCountryCities(user!.countryId!);
         pp('$mm KasieTransie users found on database:  🍎 ${users.length} 🍎');
         pp('$mm KasieTransie my country:  🍎 ${myCountry!.name!} 🍎');
-        pp('$mm KasieTransie my cities:  🍎 ${cities.length} 🍎');
 
-        try {
-          await prefs.saveUser(user!);
-          var settingsList = await listApiDog.getSettings(user!.associationId!);
-          if (settingsList.isNotEmpty) {
-            settingsList.sort((a, b) => b.created!.compareTo(a.created!));
-            await themeBloc.changeToTheme(settingsList.first.themeIndex!);
-            pp('$mm KasieTransie theme has been set to:  🍎 ${settingsList.first
-                .themeIndex!} 🍎');
-            await themeBloc.changeToLocale(settingsList.first.locale!);
-            await prefs.saveSettings(settingsList.first);
-            pp('$mm ........ settings should be saved by now ...');
+        await _doSettings();
+
+        if (mounted) {
+          var ok = await navigateWithScale(const InitializerCover(), context);
+          pp('$mm initialization should be complete! : $ok');
+          pp('$mm every check is cool. about to pop!');
+          if (mounted) {
+            Navigator.of(context).pop(user!);
           }
-        } catch (e) {
-          pp('$mm ${E.redDot} We are fucked, Jack! The problem: $e');
         }
-
         setState(() {
           busy = false;
         });
@@ -195,6 +190,24 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
         });
       }
       return;
+    }
+  }
+
+  Future<void> _doSettings() async {
+    try {
+      await prefs.saveUser(user!);
+      var settingsList = await listApiDog.getSettings(user!.associationId!);
+      if (settingsList.isNotEmpty) {
+        settingsList.sort((a, b) => b.created!.compareTo(a.created!));
+        await themeBloc.changeToTheme(settingsList.first.themeIndex!);
+        pp('$mm KasieTransie theme has been set to:  🍎 ${settingsList.first
+            .themeIndex!} 🍎');
+        await themeBloc.changeToLocale(settingsList.first.locale!);
+        await prefs.saveSettings(settingsList.first);
+        pp('$mm ........ settings should be saved by now ...');
+      }
+    } catch (e) {
+      pp('$mm ${E.redDot} We are fucked, Jack! The problem: $e');
     }
   }
 

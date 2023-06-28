@@ -8,6 +8,7 @@ import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
 
+import '../data/calculated_distance_list.dart';
 import '../data/route_point_list.dart';
 import '../data/schemas.dart';
 import '../utils/emojis.dart';
@@ -25,8 +26,10 @@ final DataApiDog dataApiDog =
 class DataApiDog {
   static const mm = '🌎🌎🌎🌎🌎🌎 DataApiDog: 🌎🌎';
 
-  final StreamController<RouteLandmark> _routeLandmarkController = StreamController.broadcast();
-  Stream<RouteLandmark> get routeLandmarkStream  => _routeLandmarkController.stream;
+  final StreamController<RouteLandmark> _routeLandmarkController =
+      StreamController.broadcast();
+  Stream<RouteLandmark> get routeLandmarkStream =>
+      _routeLandmarkController.stream;
 
   Map<String, String> headers = {
     'Content-type': 'application/json',
@@ -61,12 +64,14 @@ class DataApiDog {
     final res = await _callPost(cmd, bag);
     pp('$mm LocationRequest added to database: $res');
   }
+
   Future addLocationResponse(LocationResponse response) async {
     final bag = response.toJson();
     final cmd = '${url}addLocationResponse';
     final res = await _callPost(cmd, bag);
     pp('$mm LocationResponse added to database: $res');
   }
+
   Future addVehicle(Vehicle vehicle) async {
     final bag = vehicle.toJson();
     final cmd = '${url}addVehicle';
@@ -80,6 +85,7 @@ class DataApiDog {
     final res = await _callPost(cmd, bag);
     pp('$mm UserGeofenceEvent added to database: $res');
   }
+
   Future addDispatchRecord(DispatchRecord event) async {
     final bag = event.toJson();
     final cmd = '${url}addDispatchRecord';
@@ -93,6 +99,7 @@ class DataApiDog {
     final res = await _callPost(cmd, bag);
     pp('$mm VehicleArrival added to database: $res');
   }
+
   Future addVehicleDeparture(VehicleDeparture event) async {
     final bag = event.toJson();
     final cmd = '${url}addVehicleDeparture';
@@ -108,7 +115,8 @@ class DataApiDog {
   }
 
   Future sendRouteUpdateMessage(String associationId, String routeId) async {
-    final cmd = '${url}sendRouteUpdateMessage?associationId=$associationId&routeId=$routeId';
+    final cmd =
+        '${url}sendRouteUpdateMessage?associationId=$associationId&routeId=$routeId';
     final res = await _sendHttpGET(cmd);
     pp('$mm .......... Route Update Message sent: $res, response 0 means GOOD!');
   }
@@ -132,6 +140,18 @@ class DataApiDog {
     final cmd = '${url}addRoutePoints';
     var res = await _callPost(cmd, pointsJson);
     pp('$mm routePoints added to database: $res');
+    return res as int;
+  }
+
+  Future addCalculatedDistances(
+      CalculatedDistanceList calculatedDistanceList) async {
+    pp('$mm ... adding routePoints to database ...');
+
+    final pointsJson = calculatedDistanceList.toJson();
+
+    final cmd = '${url}addCalculatedDistances';
+    var res = await _callPost(cmd, pointsJson);
+    pp('$mm CalculatedDistances added to database: $res');
     return res as int;
   }
 
@@ -161,19 +181,10 @@ class DataApiDog {
     return r;
   }
 
-  Future<int> updateRouteColor({required String routeId, required String color}) async {
+  Future<int> updateRouteColor(
+      {required String routeId, required String color}) async {
     final cmd = '${url}updateRouteColor?routeId=$routeId&color=$color';
     var res = await _sendHttpGET(cmd);
-    //final route = buildRoute(res);
-    // listApiDog.realm.write(() {
-    //   route.color = color;
-    //   listApiDog.realm.add<Route>(route, update: true);
-    //   pp('$mm Route with updated color: $color updated in cache');
-    // });
-    // final user = await prefs.getUser();
-    // if (user != null) {
-    //   listApiDog.getRoutes(AssociationParameter(user.associationId!, true));
-    // }
     myPrettyJsonPrint(res);
     return 0;
   }
@@ -182,7 +193,7 @@ class DataApiDog {
     _routeLandmarkController.sink.add(route);
   }
 
-    Future<RouteLandmark> addRouteLandmark(RouteLandmark route) async {
+  Future<RouteLandmark> addRouteLandmark(RouteLandmark route) async {
     final bag = route.toJson();
     final cmd = '${url}addRouteLandmark';
     final res = await _callPost(cmd, bag);
@@ -191,6 +202,35 @@ class DataApiDog {
     final r = buildRouteLandmark(res);
     _routeLandmarkController.sink.add(r);
     return r;
+  }
+
+  Future<List<RouteLandmark>> updateAssociationRouteLandmarks(String associationId) async {
+    final cmd = '${url}updateAssociationRouteLandmarks?associationId=$associationId';
+    List res = await _sendHttpGET(cmd);
+    var list = <RouteLandmark>[];
+    for (var mJson in res) {
+      list.add(buildRouteLandmark(mJson));
+    }
+    listApiDog.realm.write(() {
+      listApiDog.realm.addAll(list, update: true);
+    });
+
+    pp('$mm Association RouteLandmarks: ${list.length} updated and cached ${E.leaf}${E.leaf}');
+    return list;
+  }
+
+  Future<List<RouteLandmark>> updateRouteLandmarks(String routeId) async {
+    final cmd = '${url}updateRouteLandmarks?routeId=$routeId';
+    List res = await _sendHttpGET(cmd);
+    var list = <RouteLandmark>[];
+    for (var mJson in res) {
+      list.add(buildRouteLandmark(mJson));
+    }
+    listApiDog.realm.write(() {
+      listApiDog.realm.addAll(list, update: true);
+    });
+    pp('$mm Route Landmarks ${list.length} updated and cached ${E.leaf}${E.leaf}');
+    return list;
   }
 
   Future<RouteCity> addRouteCity(RouteCity routeCity) async {

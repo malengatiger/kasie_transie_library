@@ -2,6 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/material.dart';
 import 'package:kasie_transie_library/auth/phone_auth_signin.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
+import 'package:kasie_transie_library/utils/initialiazer_cover.dart';
+import 'package:kasie_transie_library/utils/initializer.dart';
+import 'package:kasie_transie_library/utils/navigator_utils.dart';
 
 import '../bloc/list_api_dog.dart';
 import '../bloc/theme_bloc.dart';
@@ -71,41 +74,35 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
           .signInWithEmailAndPassword(
               email: emailController.value.text,
               password: pswdController.value.text);
-      pp('$mm Firebase user creds: ${userCred.user}');
+
+      pp('\n\n$mm ... Firebase user creds after signin: ${userCred.user} - ${E.leaf}');
 
       if (userCred.user != null) {
         user = await listApiDog.getUserById(userCred.user!.uid);
         if (user != null) {
           pp('$mm KasieTransie user found on database:  🍎 ${user!.toJson()} 🍎');
-          final ass = await listApiDog.getAssociationById(user!.associationId!);
+          final association = await listApiDog.getAssociationById(user!.associationId!);
           final users =
               await listApiDog.getAssociationUsers(user!.associationId!);
           final countries = await listApiDog.getCountries();
           lib.Country? myCountry;
           for (var country in countries) {
-            if (country.countryId == ass.countryId!) {
+            if (country.countryId == association.countryId!) {
               myCountry = country;
               await prefs.saveCountry(myCountry);
+              pp('$mm KasieTransie user country: ${myCountry.name}');
               break;
             }
           }
-          var cities = await listApiDog.getCountryCities(user!.countryId!);
           pp('$mm KasieTransie users found on database:  🍎 ${users.length} 🍎');
           pp('$mm KasieTransie my country:  🍎 ${myCountry!.name!} 🍎');
-          pp('$mm KasieTransie my cities:  🍎 ${cities.length} 🍎');
 
           try {
             await prefs.saveUser(user!);
-            var settingsList =
-                await listApiDog.getSettings(user!.associationId!);
-            if (settingsList.isNotEmpty) {
-              settingsList.sort((a, b) => b.created!.compareTo(a.created!));
-              await themeBloc.changeToTheme(settingsList.first.themeIndex!);
-              pp('$mm KasieTransie theme has been set to:  🍎 ${settingsList.first.themeIndex!} 🍎');
-              await themeBloc.changeToLocale(settingsList.first.locale!);
-              await prefs.saveSettings(settingsList.first);
-              pp('$mm ........ settings should be saved by now ...');
-            }
+            pp('\n\n\n$mm ... about to initialize KasieTransie data ..... ');
+
+            await _doSettings();
+
             if (mounted) {
               showSnackBar(
                   duration: const Duration(seconds: 2),
@@ -114,26 +111,20 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
                   textStyle: myTextStyleMedium(context),
                   message: 'You have been signed in OK. Welcome!',
                   context: context);
+
+              var ok = await navigateWithScale(const InitializerCover(), context);
+              pp('$mm initialization should be complete! : $ok');
+              pp('$mm every check is cool. about to pop!');
+              if (mounted) {
+                Navigator.of(context).pop(user!);
+              }
             }
           } catch (e) {
             pp('$mm ${E.redDot} We are fucked, Jack! The problem: $e');
           }
-
           setState(() {
             busy = false;
           });
-          if (mounted) {
-            showSnackBar(
-                message: signInStrings == null
-                    ? '${user!.name} has been signed in'
-                    : signInStrings!.memberSignedIn,
-                backgroundColor: Theme.of(context).primaryColorDark,
-                context: context);
-          }
-          pp('$mm every check is cool. about to pop!');
-          if (mounted) {
-            Navigator.of(context).pop(user!);
-          }
           return;
         }
       } else {
@@ -162,6 +153,24 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
     });
     if (mounted) {
       Navigator.of(context).pop();
+    }
+  }
+
+  Future<void> _doSettings() async {
+    try {
+    var settingsList =
+        await listApiDog.getSettings(user!.associationId!);
+    if (settingsList.isNotEmpty) {
+      settingsList.sort((a, b) => b.created!.compareTo(a.created!));
+      await themeBloc.changeToTheme(settingsList.first.themeIndex!);
+      pp('$mm KasieTransie theme has been set to:  🍎 ${settingsList.first.themeIndex!} 🍎');
+      await themeBloc.changeToLocale(settingsList.first.locale!);
+      await prefs.saveSettings(settingsList.first);
+      pp('$mm ........ settings should be saved by now ...');
+    }
+    } catch (e) {
+      pp('$mm ... settings fucking up! ${E.redDot}');
+      pp(e);
     }
   }
 

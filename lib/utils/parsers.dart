@@ -171,6 +171,9 @@ RouteLandmark buildRouteLandmark(Map value) {
     associationId: value['associationId'],
     landmarkId: value['landmarkId'],
     created: value['created'],
+    routePointId: value['routePointId'],
+    index: value['index'],
+    routePointIndex: value['routePointIndex'],
     landmarkName: value['landmarkName'],
     position: buildPosition(value['position']),
   );
@@ -195,11 +198,7 @@ RouteCity buildRouteCity(Map value) {
 
 Route buildRoute(Map value) {
   var id = rm.ObjectId.fromHexString(value['_id'] as String);
-  var distances = <CalculatedDistance>[];
-  List list = value['calculatedDistances'];
-  for (var d in list) {
-    distances.add(buildCalculatedDistance(d));
-  }
+
   var startEnd = value['routeStartEnd'];
   List st = startEnd['startCityPosition']['coordinates'];
   var lat = st.last as double;
@@ -242,7 +241,6 @@ Route buildRoute(Map value) {
     color: value['color'],
     activationDate: value['activationDate'],
     associationName: value['associationName'],
-    calculatedDistances: distances,
     lengthInMetres: value['lengthInMetres'],
     routeNumber: value['routeNumber'],
   );
@@ -252,21 +250,22 @@ Route buildRoute(Map value) {
 RoutePoint buildRoutePoint(Map value) {
   var id = rm.ObjectId.fromHexString(value['_id'] as String);
 
-  var m = RoutePoint(
+  final routePointId = value['routePointId'];
+  var routePoint = RoutePoint(
     id,
-    routePointId: value['routePointId'],
+    routePointId: routePointId,
     longitude: value['longitude'],
     routeId: value['routeId'],
     index: value['index'],
-    latitude: value['userId'],
+    latitude: value['latitude'],
     created: value['created'],
     heading: value['heading'],
-    landmarkId: value['landmarkId'],
-    landmarkName: value['landmarkName'],
+    routeName: value['routeName'],
     geoHash: value['geoHash'],
     position: buildPosition(value['position']),
   );
-  return m;
+
+  return routePoint;
 }
 
 Vehicle buildVehicle(Map vehicleJson) {
@@ -288,6 +287,7 @@ Vehicle buildVehicle(Map vehicleJson) {
   );
   return m;
 }
+
 DispatchRecord buildDispatchRecord(Map j) {
   var id = rm.ObjectId.fromHexString(j['_id'] as String);
   var m = DispatchRecord(
@@ -379,8 +379,11 @@ VehicleHeartbeat buildVehicleHeartbeat(Map j) {
 }
 
 CalculatedDistance buildCalculatedDistance(Map map) {
-  final m = CalculatedDistance(
+  var id = rm.ObjectId.fromHexString(map['_id'] as String);
+
+  final m = CalculatedDistance(id,
     routeId: map['routeId'],
+    index: map['index'],
     distanceFromStart: map['distanceFromStart'],
     fromLandmark: map['fromLandmark'],
     toLandmarkId: map['toLandmarkId'],

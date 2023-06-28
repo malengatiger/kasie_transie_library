@@ -10,23 +10,22 @@ import 'package:kasie_transie_library/data/schemas.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/parsers.dart';
 
-import 'emojis.dart';
-import 'functions.dart';
-import 'kasie_exception.dart';
+import '../utils/emojis.dart';
+import '../utils/functions.dart';
+import '../utils/kasie_exception.dart';
 
 final RoutesIsolate routesIsolate = RoutesIsolate();
 
 class RoutesIsolate {
   final xy = '☕️☕️☕️☕️☕️☕️☕️☕️☕️ Routes Isolate Functions: 🍎🍎';
 
-  Future getRoutes(String associationId) async {
-    pp('\n\n\n$xy ..... getting routes ....');
+  Future<int> getRoutes(String associationId) async {
+    pp('\n\n\n$xy ............................ getting routes ....');
     final token = await appAuth.getAuthToken();
 
     if (token != null) {
       final bag = DonkeyBag(associationId, KasieEnvironment.getUrl(), token);
       List mRoutes = await _handleRoutes(bag);
-
       pp('$xy hey Joe, do yo know where you are? ${E.redDot} ');
 
       final routeIds = <String>[];
@@ -37,14 +36,17 @@ class RoutesIsolate {
 
       await _handleRouteLandmarks(routeIds, bag);
       await _handleRoutePoints(routeIds, bag);
+      await _handleRouteCities(routeIds, bag);
 
-      pp('\n\n\n$xy ..... done getting routes ....\n');
-
+      pp('\n\n\n$xy ..... done getting routes ....\n\n');
+    } else {
+      pp('$xy ${E.redDot}${E.redDot}${E.redDot}${E.redDot} no Firebase token found!!!! ${E.redDot}');
     }
+    return 0;
   }
 
   Future<List<Route>> _handleRoutes(DonkeyBag bag) async {
-    pp('$xy _handleRoutes .... ');
+    pp('$xy ................ _handleRoutes .... ');
     final start = DateTime.now();
 
     final s = await Isolate.run(() async => _heavyTaskForRoutes(bag));
@@ -64,19 +66,20 @@ class RoutesIsolate {
     return mRoutes;
   }
 
-  Future<List<RouteLandmark>> _handleRouteLandmarks(List<String> routeIds, DonkeyBag bag) async {
+  Future<List<RouteLandmark>> _handleRouteLandmarks(
+      List<String> routeIds, DonkeyBag bag) async {
     //get all route landmarks
-    pp('$xy _handleRouteLandmarks .... ');
+    pp('$xy ......... _handleRouteLandmarks .... ');
     final start = DateTime.now();
-    var bunny = BunnyBag(routeIds, bag.url, bag.token);
+    var bunny = BunnyBag(bag.associationId, bag.url, bag.token);
     final st =
-    await Isolate.run(() async => _heavyTaskForRouteLandmarks(bunny));
+        await Isolate.run(() async => _heavyTaskForRouteLandmarks(bunny));
     var mRouteLandmarks = <RouteLandmark>[];
     final list3 = jsonDecode(st);
     for (var value in list3) {
       mRouteLandmarks.add(buildRouteLandmark(value));
     }
-    pp('$xy _handleRoutePoints attempting to cache ${mRouteLandmarks.length} routeLandmarks.... ');
+    pp('$xy _handleRouteLandmarks attempting to cache ${mRouteLandmarks.length} routeLandmarks.... ');
 
     listApiDog.realm.write(() {
       listApiDog.realm.addAll<RouteLandmark>(mRouteLandmarks, update: true);
@@ -87,11 +90,13 @@ class RoutesIsolate {
         '💙 ${mRouteLandmarks.length}  elapsed rime: ${end.difference(start).inSeconds} seconds 💙');
     return mRouteLandmarks;
   }
-  Future<List<RoutePoint>> _handleRoutePoints(List<String> routeIds, DonkeyBag bag) async {
-    pp('$xy _handleRoutePoints .... ');
+
+  Future<List<RoutePoint>> _handleRoutePoints(
+      List<String> routeIds, DonkeyBag bag) async {
+    pp('$xy ................ _handleRoutePoints .... ');
     final start = DateTime.now();
 
-    var bunny = BunnyBag(routeIds, bag.url, bag.token);
+    var bunny = BunnyBag(bag.associationId, bag.url, bag.token);
     final sx = await Isolate.run(() async => _heavyTaskForRoutePoints(bunny));
     var mRoutePoints = <RoutePoint>[];
     final list2 = jsonDecode(sx);
@@ -109,6 +114,30 @@ class RoutesIsolate {
         '💙 ${mRoutePoints.length}  💙 time elapsed: ${end2.difference(start).inSeconds} seconds');
     return mRoutePoints;
   }
+
+  Future<List<RouteCity>> _handleRouteCities(
+      List<String> routeIds, DonkeyBag bag) async {
+    pp('$xy .............. _handleRouteCities .... ');
+    final start = DateTime.now();
+
+    var bunny = BunnyBag(bag.associationId, bag.url, bag.token);
+    final sx = await Isolate.run(() async => _heavyTaskForRouteCities(bunny));
+    var mRouteCities = <RouteCity>[];
+    final list2 = jsonDecode(sx);
+    for (var value in list2) {
+      mRouteCities.add(buildRouteCity(value));
+    }
+    pp('$xy _handleRouteCities attempting to cache ${mRouteCities.length} routePoints.... ');
+
+    listApiDog.realm.write(() {
+      listApiDog.realm.addAll<RouteCity>(mRouteCities, update: true);
+    });
+
+    final end2 = DateTime.now();
+    pp('$xy RouteCities cached in realm : '
+        '💙 ${mRouteCities.length}  💙 time elapsed: ${end2.difference(start).inSeconds} seconds');
+    return mRouteCities;
+  }
 }
 
 ///Isolate to get association routes
@@ -120,48 +149,56 @@ Future<String> _heavyTaskForRoutes(DonkeyBag bag) async {
   final cmd =
       '${bag.url}getAssociationRoutes?associationId=${bag.associationId}';
   List resp = await _httpGet(cmd, bag.token);
-  final s = jsonEncode(resp);
+  final jsonList = jsonEncode(resp);
   pp('$xyz _heavyTaskForRoutes returning raw string .................');
 
-  return s;
+  return jsonList;
 }
 
 Future<String> _heavyTaskForRoutePoints(BunnyBag bag) async {
-  pp('$xyz _heavyTaskForRoutePoints starting ................ ${bag.routeIds.length} routeIds.');
+  pp('$xyz _heavyTaskForRoutePoints starting ................associationId:  ${bag.associationId} .');
 
   final points = [];
   final token = bag.token;
-  for (var routeId in bag.routeIds) {
-    final cmd = '${bag.url}getRoutePoints?routeId=$routeId';
-    List resp = await _httpGet(cmd, token);
-    points.addAll(resp);
-    pp('$xyz sleep for 1 second - ${E.appleRed} ${E.appleRed} current points: ${points.length}');
-    await Future.delayed(const Duration(seconds: 1));
-  }
-  final s = jsonEncode(points);
-  pp('$xyz RoutePoints for all routes: ${points.length}');
+  final cmd =
+      '${bag.url}getAssociationRoutePoints?associationId=${bag.associationId}';
+  List resp = await _httpGet(cmd, token);
+  points.addAll(resp);
+  final jsonList = jsonEncode(points);
+  pp('$xyz Association RoutePoints for all routes: ${points.length}');
   pp('$xyz _heavyTaskForRoutePoints returning raw string .................');
 
-  return s;
+  return jsonList;
 }
 
 Future<String> _heavyTaskForRouteLandmarks(BunnyBag bag) async {
-  pp('$xyz _heavyTaskForRouteLandmarks starting ................. ${bag.routeIds.length} routeIds.');
+  pp('$xyz _heavyTaskForRouteLandmarks starting .................associationId: ${bag.associationId} .');
 
   final routeLandmarks = [];
   final token = bag.token;
 
-  for (var routeId in bag.routeIds) {
-    final cmd = '${bag.url}getRouteLandmarks?routeId=$routeId';
-    List resp = await _httpGet(cmd, token);
-    routeLandmarks.addAll(resp);
-    pp('$xyz sleep for 1 second - ${E.appleRed} ${E.appleRed} '
-        'current routeLandmarks: ${routeLandmarks.length}');
-    await Future.delayed(const Duration(seconds: 1));
-  }
-  final s = jsonEncode(routeLandmarks);
-  pp('$xyz RouteLandmarks for all routes: ${routeLandmarks.length}');
-  return s;
+  final cmd =
+      '${bag.url}getAssociationRouteLandmarks?associationId=${bag.associationId}';
+  List resp = await _httpGet(cmd, token);
+  routeLandmarks.addAll(resp);
+  final jsonList = jsonEncode(routeLandmarks);
+  pp('$xyz Association RouteLandmarks for all routes: ${routeLandmarks.length}');
+  return jsonList;
+}
+
+Future<String> _heavyTaskForRouteCities(BunnyBag bag) async {
+  pp('$xyz _heavyTaskForRouteCities starting ................. associationId; ${bag.associationId} .');
+
+  final routeCities = [];
+  final token = bag.token;
+
+  final cmd =
+      '${bag.url}getAssociationRouteCities?associationId=${bag.associationId}';
+  List resp = await _httpGet(cmd, token);
+  routeCities.addAll(resp);
+  final jsonList = jsonEncode(routeCities);
+  pp('$xyz Association RouteCities for all routes: ${routeCities.length}');
+  return jsonList;
 }
 
 Future _httpGet(String mUrl, String token) async {
@@ -263,8 +300,8 @@ class DonkeyBag {
 }
 
 class BunnyBag {
-  late List<String> routeIds;
+  late String associationId;
   late String url, token;
 
-  BunnyBag(this.routeIds, this.url, this.token);
+  BunnyBag(this.associationId, this.url, this.token);
 }

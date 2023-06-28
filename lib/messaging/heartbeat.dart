@@ -21,7 +21,7 @@ class Heartbeat {
   void startHeartbeat() async {
     pp('$mm start Heartbeat ....');
     final sett = await prefs.getSettings();
-    int seconds = 30;
+    int seconds = 300; //5 minutes
     if (sett != null) {
       seconds = sett.heartbeatIntervalSeconds!;
     }

@@ -361,7 +361,7 @@ class _RoutePoint {
   String? created;
   @Indexed()
   String? routeId;
-  String? landmarkId, landmarkName;
+  String? routeName;
   _Position? position;
   String? geoHash;
 
@@ -376,16 +376,13 @@ class _RoutePoint {
 
     if (routeId != null) {
       map['routeId'] = routeId;
+      map['routeName'] = routeName;
+
     }
     if (position != null) {
       map['position'] = position!.toJson();
     }
-    if (landmarkId != null) {
-      map['landmarkId'] = landmarkId;
-    }
-    if (landmarkName != null) {
-      map['landmarkName'] = landmarkName;
-    }
+
     map['heading'] = heading;
     map['geoHash'] = geoHash;
     return map;
@@ -411,15 +408,8 @@ class _Route {
   String? userUrl;
   _RouteStartEnd? routeStartEnd;
 
-  List<_CalculatedDistance> calculatedDistances = [];
 
   Map<String, dynamic> toJson() {
-    var distances = [];
-    if (calculatedDistances.isNotEmpty) {
-      for (var v in calculatedDistances!) {
-        distances.add(v.toJson());
-      }
-    }
     var se = {};
     if (routeStartEnd != null) {
       final pos1 = {
@@ -453,7 +443,6 @@ class _Route {
       'heading': heading ?? 0.0,
       'associationId': associationId,
       'associationName': associationName,
-      'calculatedDistances': distances,
       'userId': userId,
       'userName': userName,
       'userUrl': userUrl,
@@ -501,16 +490,20 @@ class _Vehicle {
   }
 }
 
-@RealmModel(ObjectType.embeddedObject)
+@RealmModel()
 class _CalculatedDistance {
+  @PrimaryKey()
+  late ObjectId id;
+
   String? routeName, routeId;
   String? fromLandmark, toLandmark, fromLandmarkId, toLandmarkId;
   double? distanceInMetres, distanceFromStart;
-  int? fromRoutePointIndex, toRoutePointIndex;
+  int? fromRoutePointIndex, toRoutePointIndex, index;
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {
       'routeId': routeId,
+      'index': index,
       'routeName': routeName,
       'fromLandmark': fromLandmark,
       'toLandmark': toLandmark,
@@ -522,13 +515,6 @@ class _CalculatedDistance {
       'toRoutePointIndex': toRoutePointIndex,
     };
     return map;
-  }
-
-  String getPrintOut() {
-    String sb = '${(distanceInMetres! / 1000).toStringAsFixed(1)} km '
-        'from $fromLandmark to $toLandmark ';
-    //p('${sb.toString()}');
-    return sb;
   }
 }
 
@@ -694,6 +680,9 @@ class _RouteLandmark {
   String? landmarkName;
   String? created;
   String? associationId;
+  String? routePointId;
+  int? routePointIndex;
+  int? index;
   _Position? position;
 
   Map<String, dynamic> toJson() {
@@ -701,6 +690,9 @@ class _RouteLandmark {
       '_id': id.hexString,
       'landmarkId': landmarkId,
       'routeId': routeId,
+      'routePointId': routePointId,
+      'index': index,
+      'routePointIndex': routePointIndex,
       'position': position == null ? null : position!.toJson(),
       'routeName': routeName,
       'landmarkName': landmarkName,

@@ -61,8 +61,6 @@ N
 lib/utils/navigator_utils.dart,e/2/e23a49c7f56ad4b570f6167926139edd864f4804
 N
 binary/macos/realm_version.txt,d/0/d01c4d5c5d010952ec1bad64a385b230d7bc5943
-N
-lib/data/route_point_list.dart,5/4/54a444dc3014bf4246be841fe332300f8c8a3df1
 L
 lib/utils/error_handler.dart,1/0/10a99e756989f9692ff3b288cdfdb0dc6a40787b
 S
@@ -73,19 +71,9 @@ O
 lib/widgets/city_selection.dart,b/a/bae87fc0f3dabeb2d125869428ea939f930b31ea
 R
 "lib/widgets/country_selection.dart,1/2/1278c7470502218cccfe944c4647fb9824c7ff6f
-O
-lib/auth/email_auth_signin.dart,2/a/2a121924df2544ed1851a2a61b5ca978703d1370
-O
-lib/auth/phone_auth_signin.dart,e/d/ed017848211d6cf1bb53695f5d95a2b3310634cf
 8
 cmds.txt,9/6/96aabe83f58456692f5d448a6988674171d63b89
-O
-lib/utils/landmark_isolate.dart,e/8/e8aeda6a0603858c5e756e5a46dea6d0b2c67819
-Q
-!.idea/libraries/Dart_Packages.xml,f/c/fc67c2d2441e33af1dbd1e910281523d1ce74b4a
 S
 #.idea/libraries/Flutter_Plugins.xml,e/8/e8bbc0fdfcefee9aa7b463c83a8a480b92333860
-R
-"lib/providers/kasie_providers.dart,4/4/444f3d43023add5c821968865c0b4250a3a678a2
 O
 lib/widgets/vehicle_detail.dart,c/d/cdfbce6e4a2c2931b70a6f3690263a67d48c9b61
