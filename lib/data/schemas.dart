@@ -1,6 +1,5 @@
 import 'package:realm/realm.dart';
 
-import '../utils/functions.dart';
 part 'schemas.g.dart';
 
 @RealmModel()
@@ -377,7 +376,6 @@ class _RoutePoint {
     if (routeId != null) {
       map['routeId'] = routeId;
       map['routeName'] = routeName;
-
     }
     if (position != null) {
       map['position'] = position!.toJson();
@@ -407,7 +405,6 @@ class _Route {
   String? userName;
   String? userUrl;
   _RouteStartEnd? routeStartEnd;
-
 
   Map<String, dynamic> toJson() {
     var se = {};
@@ -496,7 +493,7 @@ class _CalculatedDistance {
   late ObjectId id;
 
   String? routeName, routeId;
-  String? fromLandmark, toLandmark, fromLandmarkId, toLandmarkId;
+  String? fromLandmark, toLandmark, fromLandmarkId, toLandmarkId, associationId;
   double? distanceInMetres, distanceFromStart;
   int? fromRoutePointIndex, toRoutePointIndex, index;
 
@@ -504,6 +501,8 @@ class _CalculatedDistance {
     Map<String, dynamic> map = {
       'routeId': routeId,
       'index': index,
+      '_id': id.hexString,
+      'associationId': associationId,
       'routeName': routeName,
       'fromLandmark': fromLandmark,
       'toLandmark': toLandmark,

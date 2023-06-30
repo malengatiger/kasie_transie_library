@@ -392,7 +392,7 @@ class ListApiDog {
       String routeId, bool refresh) async {
     pp('$mm .................. getRouteLandmarks refresh: $refresh');
 
-    final localList = <RouteLandmark>[];
+    var localList = <RouteLandmark>[];
     rm.RealmResults<RouteLandmark> results =
         realm.query<RouteLandmark>("routeId == \$0", [routeId]);
     if (results.isNotEmpty) {
@@ -405,19 +405,42 @@ class ListApiDog {
       return localList;
     }
     //
-    final remoteList = await _getRouteLandmarksFromBackend(routeId: routeId);
-    pp('$mm RouteLandmarks from backend:: ${remoteList.length}');
-    realm.write(() {
-      realm.addAll<RouteLandmark>(remoteList, update: true);
-    });
-    return remoteList;
+    try {
+      localList = await _getRouteLandmarksFromBackend(routeId: routeId);
+      pp('$mm RouteLandmarks from backend:: ${localList.length}');
+      realm.write(() {
+        realm.addAll<RouteLandmark>(localList, update: true);
+      });
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
+
+  Future<Route?> getRoute(String routeId) async {
+    pp('$mm .................. getRoute');
+
+    var localList = <Route>[];
+    rm.RealmResults<Route> results =
+        realm.query<Route>("routeId == \$0", [routeId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        localList.add(element);
+      }
+    }
+    pp('$mm Routes from realm:: ${localList.length}, should be 1');
+    if (localList.isNotEmpty) {
+      return localList.first;
+    }
+
+    return null;
   }
 
   Future<List<CalculatedDistance>> getCalculatedDistances(
       String routeId, bool refresh) async {
     pp('$mm .................. getCalculatedDistances refresh: $refresh');
 
-    final localList = <CalculatedDistance>[];
+    var localList = <CalculatedDistance>[];
     rm.RealmResults<CalculatedDistance> results =
         realm.query<CalculatedDistance>("routeId == \$0", [routeId]);
     if (results.isNotEmpty) {
@@ -430,13 +453,16 @@ class ListApiDog {
       return localList;
     }
     //
-    final remoteList =
-        await _getCalculatedDistancesFromBackend(routeId: routeId);
-    pp('$mm CalculatedDistances from backend:: ${remoteList.length}');
-    realm.write(() {
-      realm.addAll<CalculatedDistance>(remoteList, update: true);
-    });
-    return remoteList;
+    try {
+      localList = await _getCalculatedDistancesFromBackend(routeId: routeId);
+      pp('$mm CalculatedDistances from backend:: ${localList.length}');
+      realm.write(() {
+        realm.addAll<CalculatedDistance>(localList, update: true);
+      });
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
   }
 
   Future<RouteBag> refreshRoute(String routeId) async {

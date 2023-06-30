@@ -143,16 +143,24 @@ class DataApiDog {
     return res as int;
   }
 
-  Future addCalculatedDistances(
+  Future<List<CalculatedDistance>> addCalculatedDistances(
       CalculatedDistanceList calculatedDistanceList) async {
-    pp('$mm ... adding routePoints to database ...');
+    pp('$mm ... adding CalculatedDistances to database ...');
 
     final pointsJson = calculatedDistanceList.toJson();
 
     final cmd = '${url}addCalculatedDistances';
-    var res = await _callPost(cmd, pointsJson);
-    pp('$mm CalculatedDistances added to database: $res');
-    return res as int;
+    List res = await _callPost(cmd, pointsJson);
+    pp('$mm CalculatedDistances added to database: ${res.length}');
+    final items = <CalculatedDistance>[];
+    for (var cd in res) {
+      items.add(buildCalculatedDistance(cd));
+    }
+    listApiDog.realm.write(() {
+      listApiDog.realm.addAll<CalculatedDistance>(items);
+    });
+    pp('$mm calc distances cached: ${items.length}');
+    return items;
   }
 
   Future<Route> addRoute(Route route) async {
@@ -181,12 +189,17 @@ class DataApiDog {
     return r;
   }
 
-  Future<int> updateRouteColor(
+  Future<Route> updateRouteColor(
       {required String routeId, required String color}) async {
     final cmd = '${url}updateRouteColor?routeId=$routeId&color=$color';
     var res = await _sendHttpGET(cmd);
-    myPrettyJsonPrint(res);
-    return 0;
+    final route = buildRoute(res);
+    listApiDog.realm.write(() {
+      listApiDog.realm.add<Route>(route, update: true);
+    });
+    pp('$mm route with updated color cached ... ${route.name} - color: ${route.color}');
+    myPrettyJsonPrint(route.toJson());
+    return route;
   }
 
   void addRouteLandmarkToStream(RouteLandmark route) async {

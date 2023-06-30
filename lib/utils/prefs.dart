@@ -53,6 +53,28 @@ class Prefs {
     return country;
   }
 
+  Future saveRoute(Route route) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    Map mJson = route.toJson();
+    var jx = json.encode(mJson);
+    prefs.setString('route', jx);
+    pp("🌽 🌽 🌽 Prefs: saveRoute  SAVED: 🌽 ${route.toJson()} 🌽 🌽 🌽");
+    return null;
+  }
+
+  Future<Route?> getRoute() async {
+    var prefs = await SharedPreferences.getInstance();
+    var string = prefs.getString('route');
+    if (string == null) {
+      return null;
+    }
+    var jx = json.decode(string);
+    var route = buildRoute(jx);
+    pp("🌽 🌽 🌽 Prefs: getRoute 🧩  ${route.name} retrieved");
+    return route;
+  }
+
   Future saveAmbassador(User user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 

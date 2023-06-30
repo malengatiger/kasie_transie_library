@@ -422,12 +422,12 @@ TextStyle myTextStyleMediumLargeWithSize(BuildContext context, double size) {
       fontWeight: FontWeight.w900,
       fontSize: size);
 }
-TextStyle myTextStyleMediumLargeWithColor(BuildContext context, Color color) {
+TextStyle myTextStyleMediumLargeWithColor(BuildContext context, Color color, double size) {
   return GoogleFonts.roboto(
       textStyle: Theme.of(context).textTheme.headlineLarge,
       fontWeight: FontWeight.w900,
       color: color,
-      fontSize: 24);
+      fontSize: size);
 }
 
 TextStyle myTextStyleMediumLargeWithOpacity(

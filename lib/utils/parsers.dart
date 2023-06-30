@@ -387,6 +387,7 @@ CalculatedDistance buildCalculatedDistance(Map map) {
     distanceFromStart: map['distanceFromStart'],
     fromLandmark: map['fromLandmark'],
     toLandmarkId: map['toLandmarkId'],
+    associationId: map['associationId'],
     distanceInMetres: map['distanceInMetres'],
     fromLandmarkId: map['fromLandmarkId'],
     fromRoutePointIndex: map['fromRoutePointIndex'],
@@ -396,6 +397,7 @@ CalculatedDistance buildCalculatedDistance(Map map) {
   );
   return m;
 }
+
 UserGeofenceEvent buildUserGeofenceEvent(Map j) {
   var id = rm.ObjectId.fromHexString(j['_id'] as String);
   var m = UserGeofenceEvent(
@@ -428,6 +430,7 @@ LocationRequest buildLocationRequest(Map j) {
   );
   return m;
 }
+
 LocationResponse buildLocationResponse(Map j) {
   var id = rm.ObjectId.fromHexString(j['_id'] as String);
   var m = LocationResponse(
