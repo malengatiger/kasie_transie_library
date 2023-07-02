@@ -30,6 +30,10 @@ class Initializer {
       throw Exception(msg);
     }
 
+    if (car != null) {
+      myPrettyJsonPrint(car!.toJson());
+    }
+
     try {
       pp('$mm ... starting to get cars ... 1');
       await _getVehicles();
@@ -42,14 +46,22 @@ class Initializer {
 
       pp('$mm sending completion flag to stream .... ${E.nice} ... 4');
       _streamController.sink.add(true);
-
+      try {
+        pp('$mm ... starting to get country cities ... without await! ... 5');
+        if (user != null) {
+          countryCitiesIsolate.getCountryCities(user!.countryId!);
+        }
+        if (car != null) {
+          countryCitiesIsolate.getCountryCities(car!.countryId!);
+        }
+      } catch (e) {
+        pp('$mm something is fucked up here, Boss! - ${E.redDot} $e');
+        pp(e);
+      }
     } catch (e) {
       pp(e);
       throw Exception('Initializer failed!');
     }
-
-    pp('$mm ... starting to get country cities ... without await! ... 5');
-    countryCitiesIsolate.getCountryCities(user!.countryId!);
 
     pp('\n\n$mm ... initialization done! .... 6 ${E.leaf}${E.leaf}${E.leaf}${E.leaf}\n\n');
     return 'We are done, Boss!';
@@ -87,7 +99,6 @@ class Initializer {
       return list;
     }
     throw Exception('Users not here, Joe!');
-
   }
 
   Future _getRoutes() async {

@@ -18,7 +18,7 @@ class CountryCitiesIsolate {
   final xy = '💦💦💦💦💦💦💦💦 Country Cities Isolated Functions: 🍎🍎';
 
   Future<int> getCountryCities(String countryId) async {
-    pp('\n\n\n$xy ..... getting country cities ....');
+    pp('\n\n\n$xy .............................. getting country cities ....');
     final start = DateTime.now();
     final token = await appAuth.getAuthToken();
     int count = 0;
@@ -70,7 +70,7 @@ Future _httpGet(String mUrl, String token) async {
           Uri.parse(mUrl),
           headers: headers,
         )
-        .timeout(const Duration(seconds: 120));
+        .timeout(const Duration(seconds: 600));
     pp('$xyz _httpGet call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
     var end = DateTime.now();
     pp('$xyz _httpGet call: 🔆 elapsed time for http: ${end.difference(start).inSeconds} seconds 🔆 \n\n');

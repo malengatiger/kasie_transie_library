@@ -43,6 +43,18 @@ class Heartbeat {
       return;
     }
 
+
+    final heartbeat = getHeartbeat(car: car, latitude: loc.latitude, longitude: loc.longitude);
+    pp('$mm VehicleHeartbeat to be written to the db ...... see record below.');
+    await dataApiDog.addVehicleHeartbeat(heartbeat);
+    myPrettyJsonPrint(heartbeat.toJson());
+    pp('$mm VehicleHeartbeat to be written to the db ...... see below.');
+    pp('$mm VehicleHeartbeat added to database, registration: ${car.vehicleReg} '
+        'at ${DateTime.now().toIso8601String()}');
+  }
+
+  static VehicleHeartbeat getHeartbeat({required Vehicle car,
+    required double latitude, required double longitude}) {
     final heartbeat = VehicleHeartbeat(ObjectId(),
         ownerName: car.ownerName,
         ownerId: car.ownerId,
@@ -56,17 +68,12 @@ class Heartbeat {
         vehicleHeartbeatId: Uuid.v4().toString(),
         position: Position(
           type: point,
-          coordinates: [loc.longitude, loc.latitude],
-          latitude: loc.latitude,
-          longitude: loc.longitude,
+          coordinates: [longitude, latitude],
+          latitude: latitude,
+          longitude: longitude,
         ));
 
-    pp('$mm VehicleHeartbeat to be written to the db ...... see record below.');
-    await dataApiDog.addVehicleHeartbeat(heartbeat);
-    myPrettyJsonPrint(heartbeat.toJson());
-    pp('$mm VehicleHeartbeat to be written to the db ...... see below.');
-    pp('$mm VehicleHeartbeat added to database, registration: ${car.vehicleReg} '
-        'at ${DateTime.now().toIso8601String()}');
+    return heartbeat;
   }
 }
 const cc = '🔴🔴🔴🔴🔴🔴🌀🌀 Workmanager Heartbeat:  🌀🌀🔴🔴🔴🔴';

@@ -53,6 +53,7 @@ dependencies:
   workmanager: ^0.5.1
   audioplayers: ^4.1.0
   geojson: ^1.0.0
+  location: ^4.4.0
   flutter_polyline_points:
   flutter_dotenv:
 
