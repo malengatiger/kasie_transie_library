@@ -466,6 +466,7 @@ class _Vehicle {
   String? make;
   String? model;
   String? year;
+  String? qrCodeUrl;
   int? passengerCapacity;
   String? associationId, associationName;
 
@@ -482,6 +483,7 @@ class _Vehicle {
       'make': make,
       'model': model,
       'year': year,
+      'qrCodeUrl': qrCodeUrl,
       'passengerCapacity': passengerCapacity,
       'associationId': associationId,
       'associationName': associationName,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart' as fb;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -72,7 +73,7 @@ class FCMBloc {
         type = 'routeChanges';
       } else if (message.data['vehicleChanges'] != null) {
         pp("$mm onMessage: $red vehicleChanges message has arrived!  ... $red ");
-        type = 'vehicleChanges' ;
+        type = 'vehicleChanges';
       } else if (message.data['locationRequest'] != null) {
         pp("$mm onMessage: $red locationRequest message has arrived!  ... $red ");
         type = 'locationRequest';
@@ -88,7 +89,7 @@ class FCMBloc {
       } else if (message.data['dispatchRecord'] != null) {
         pp("$mm onMessage: $red dispatchRecord message has arrived!  ... $red ");
         type = 'dispatchRecord';
-      } else if (message.data['userGeofenceEvent'] != null){
+      } else if (message.data['userGeofenceEvent'] != null) {
         pp("$mm onMessage: $red userGeofenceEvent message has arrived!  ... $red ");
         type = 'userGeofenceEvent';
       } else {
@@ -97,7 +98,6 @@ class FCMBloc {
       }
       //
       processFCMMessage(message, type);
-
     });
 
     fb.FirebaseMessaging.onBackgroundMessage(
@@ -110,15 +110,6 @@ class FCMBloc {
     pp("\n\n$mm FCM : FIREBASE MESSAGING initialization done! - ${E.nice} "
         "will subscribeToTopics() ...........................");
 
-    // var msg = await fb.FirebaseMessaging.instance.getInitialMessage();
-    // if (msg != null) {
-    //   processFCMMessage(msg);
-    // }
-    // fb.FirebaseMessaging.onMessageOpenedApp.listen((event) {
-    //   processFCMMessage(event);
-    // });
-    //
-    // // subscribeToTopics();
   }
 
   static const red = '🍎 🍎';
@@ -173,69 +164,96 @@ class FCMBloc {
   }
 
   void processFCMMessage(fb.RemoteMessage message, String type) {
-    pp("$mm processFCMMessage: $red processing message received: ");
-    myPrettyJsonPrint(message.data);
+    pp("$mm processFCMMessage: $red processing message received: see below ...");
+    final map = message.data;
+    myPrettyJsonPrint(map);
     switch (type) {
       case 'routeChanges':
-        _routeChangesStreamController.sink.add(message.data['routeChanges'] as String);
-        refreshRoute(message.data['routeChanges'] as String);
+        _routeChangesStreamController.sink.add(map['routeChanges'] as String);
+        refreshRoute(map['routeChanges'] as String);
         break;
       case 'vehicleChanges':
-        _vehicleChangesStreamController.sink.add(message.data['vehicleChanges'] as String);
+        _vehicleChangesStreamController.sink
+            .add(map['vehicleChanges'] as String);
         break;
       case 'vehicleArrival':
-        _vehicleArrivalStreamController.sink.add(buildVehicleArrival(message.data));
+        final va = map['vehicleArrival'];
+        final x = jsonDecode(va);
+        _vehicleArrivalStreamController.sink.add(buildVehicleArrival(x));
         break;
       case 'vehicleDeparture':
-        _vehicleDepartureStreamController.sink.add(buildVehicleDeparture(message.data));
+        final va = map['vehicleDeparture'];
+        final x = jsonDecode(va);
+        _vehicleDepartureStreamController.sink.add(buildVehicleDeparture(x));
         break;
       case 'dispatchRecord':
-        _dispatchStreamController.sink.add(buildDispatchRecord(message.data));
+        final va = map['dispatchRecord'];
+        final x = jsonDecode(va);
+        _dispatchStreamController.sink.add(buildDispatchRecord(x));
         break;
       case 'locationRequest':
-        _locationRequestStreamController.sink.add(buildLocationRequest(message.data));
+        final va = map['locationRequest'];
+        final x = jsonDecode(va);
+        _locationRequestStreamController.sink.add(buildLocationRequest(x));
         break;
       case 'locationResponse':
-        _locationResponseStreamController.sink.add(buildLocationResponse(message.data));
+        final va = map['locationResponse'];
+        final x = jsonDecode(va);
+        _locationResponseStreamController.sink.add(buildLocationResponse(x));
         break;
       case 'userGeofenceEvent':
-        _userGeofenceStreamController.sink.add(buildUserGeofenceEvent(message.data));
+        final va = map['userGeofenceEvent'];
+        final x = jsonDecode(va);
+        _userGeofenceStreamController.sink.add(buildUserGeofenceEvent(x));
         break;
     }
   }
+
   void refreshRoute(String routeId) async {
     pp('$mm .. refresh route: $routeId');
     final bag = await listApiDog.refreshRoute(routeId);
     pp('\n\n$mm bag has arrived in fcmBloc. Seems like everything is OK, Boss! '
         'route refreshed: ${E.nice}${E.nice} ${bag.route!.name} ${E.nice}\n');
   }
-  final StreamController<String> _routeChangesStreamController = StreamController.broadcast();
+
+  final StreamController<String> _routeChangesStreamController =
+      StreamController.broadcast();
   Stream<String> get routeChangesStream => _routeChangesStreamController.stream;
 
-  final StreamController<String> _vehicleChangesStreamController = StreamController.broadcast();
-  Stream<String> get vehicleChangesStream => _vehicleChangesStreamController.stream;
+  final StreamController<String> _vehicleChangesStreamController =
+      StreamController.broadcast();
+  Stream<String> get vehicleChangesStream =>
+      _vehicleChangesStreamController.stream;
 
-  final StreamController<VehicleDeparture> _vehicleDepartureStreamController = StreamController.broadcast();
-  Stream<VehicleDeparture> get vehicleDepartureStream => _vehicleDepartureStreamController.stream;
+  final StreamController<VehicleDeparture> _vehicleDepartureStreamController =
+      StreamController.broadcast();
+  Stream<VehicleDeparture> get vehicleDepartureStream =>
+      _vehicleDepartureStreamController.stream;
 
-  final StreamController<VehicleArrival> _vehicleArrivalStreamController = StreamController.broadcast();
-  Stream<VehicleArrival> get vehicleArrivalStream => _vehicleArrivalStreamController.stream;
+  final StreamController<VehicleArrival> _vehicleArrivalStreamController =
+      StreamController.broadcast();
+  Stream<VehicleArrival> get vehicleArrivalStream =>
+      _vehicleArrivalStreamController.stream;
 
-  final StreamController<DispatchRecord> _dispatchStreamController = StreamController.broadcast();
+  final StreamController<DispatchRecord> _dispatchStreamController =
+      StreamController.broadcast();
   Stream<DispatchRecord> get dispatchStream => _dispatchStreamController.stream;
 
-  final StreamController<UserGeofenceEvent> _userGeofenceStreamController = StreamController.broadcast();
-  Stream<UserGeofenceEvent> get userGeofenceStream => _userGeofenceStreamController.stream;
+  final StreamController<UserGeofenceEvent> _userGeofenceStreamController =
+      StreamController.broadcast();
+  Stream<UserGeofenceEvent> get userGeofenceStream =>
+      _userGeofenceStreamController.stream;
 
   //todo - add location request and response
-  final StreamController<LocationRequest> _locationRequestStreamController = StreamController.broadcast();
-  Stream<LocationRequest> get locationRequestStream => _locationRequestStreamController.stream;
+  final StreamController<LocationRequest> _locationRequestStreamController =
+      StreamController.broadcast();
+  Stream<LocationRequest> get locationRequestStream =>
+      _locationRequestStreamController.stream;
 
-  final StreamController<LocationResponse> _locationResponseStreamController = StreamController.broadcast();
-  Stream<LocationResponse> get locationResponseStream => _locationResponseStreamController.stream;
-
-
-
+  final StreamController<LocationResponse> _locationResponseStreamController =
+      StreamController.broadcast();
+  Stream<LocationResponse> get locationResponseStream =>
+      _locationResponseStreamController.stream;
 
   void onDidReceiveNotificationResponse(NotificationResponse details) {
     pp("$mm onDidReceiveNotificationResponse: $red details: ${details.payload} ");

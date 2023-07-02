@@ -69,14 +69,8 @@ O
 lib/widgets/city_selection.dart,b/a/bae87fc0f3dabeb2d125869428ea939f930b31ea
 R
 "lib/widgets/country_selection.dart,1/2/1278c7470502218cccfe944c4647fb9824c7ff6f
-8
-cmds.txt,9/6/96aabe83f58456692f5d448a6988674171d63b89
-Q
-!lib/bloc/the_great_geofencer.dart,3/3/33fd05829ffcd10dde65b5496aec5a77788d5522
 F
 lib/bloc/app_auth.dart,2/e/2e8ace8db1fde91611d0c739cd6d716a3f5ac924
-K
-lib/messaging/fcm_bloc.dart,a/b/abc3ce0d0007de42374e4acee2f4babe2f6f7f47
 G
 lib/data/route_bag.dart,2/0/204f51ea209b239b34c4c12539e8e22a0a8a27f1
 4
@@ -105,8 +99,6 @@ Q
 !lib/utils/initialiazer_cover.dart,6/c/6cffa59198fcb326d2e0ec3d874f44755ad3905f
 M
 lib/widgets/route_widget.dart,b/7/b711d115f86b66d65ede6f01f9a3e8d6dc1e5def
-E
-lib/data/schemas.dart,5/8/58d969c07e26acfd1069cc807eb292b050451ec3
 V
 &lib/widgets/route_landmark_widget.dart,4/f/4fdec60ce96af16dc741bed3b58ce8dca449d65c
 P
@@ -115,8 +107,6 @@ O
 lib/auth/email_auth_signin.dart,2/a/2a121924df2544ed1851a2a61b5ca978703d1370
 J
 lib/bloc/data_api_dog.dart,0/f/0f27426890d5956a726f9c74637bb8749dbd74bb
-G
-lib/data/schemas.g.dart,a/e/ae9d36def259da82b2fd0cef34dd7fbd434adbfb
 Q
 !.idea/libraries/Dart_Packages.xml,f/c/fc67c2d2441e33af1dbd1e910281523d1ce74b4a
 H

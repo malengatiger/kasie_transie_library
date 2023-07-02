@@ -1786,6 +1786,7 @@ class Vehicle extends _Vehicle with RealmEntity, RealmObjectBase, RealmObject {
     String? make,
     String? model,
     String? year,
+    String? qrCodeUrl,
     int? passengerCapacity,
     String? associationId,
     String? associationName,
@@ -1801,6 +1802,7 @@ class Vehicle extends _Vehicle with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'make', make);
     RealmObjectBase.set(this, 'model', model);
     RealmObjectBase.set(this, 'year', year);
+    RealmObjectBase.set(this, 'qrCodeUrl', qrCodeUrl);
     RealmObjectBase.set(this, 'passengerCapacity', passengerCapacity);
     RealmObjectBase.set(this, 'associationId', associationId);
     RealmObjectBase.set(this, 'associationName', associationName);
@@ -1873,6 +1875,12 @@ class Vehicle extends _Vehicle with RealmEntity, RealmObjectBase, RealmObject {
   set year(String? value) => RealmObjectBase.set(this, 'year', value);
 
   @override
+  String? get qrCodeUrl =>
+      RealmObjectBase.get<String>(this, 'qrCodeUrl') as String?;
+  @override
+  set qrCodeUrl(String? value) => RealmObjectBase.set(this, 'qrCodeUrl', value);
+
+  @override
   int? get passengerCapacity =>
       RealmObjectBase.get<int>(this, 'passengerCapacity') as int?;
   @override
@@ -1917,6 +1925,7 @@ class Vehicle extends _Vehicle with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('make', RealmPropertyType.string, optional: true),
       SchemaProperty('model', RealmPropertyType.string, optional: true),
       SchemaProperty('year', RealmPropertyType.string, optional: true),
+      SchemaProperty('qrCodeUrl', RealmPropertyType.string, optional: true),
       SchemaProperty('passengerCapacity', RealmPropertyType.int,
           optional: true),
       SchemaProperty('associationId', RealmPropertyType.string, optional: true),

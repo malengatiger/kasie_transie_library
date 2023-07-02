@@ -281,6 +281,7 @@ Vehicle buildVehicle(Map vehicleJson) {
     make: vehicleJson['make'],
     model: vehicleJson['model'],
     year: vehicleJson['year'],
+    qrCodeUrl: vehicleJson['qrCodeUrl'],
     countryId: vehicleJson['countryId'],
     dateInstalled: vehicleJson['dateInstalled'],
     ownerId: vehicleJson['ownerId'],
