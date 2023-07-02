@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,8 +28,8 @@ pp(dynamic msg) {
   }
 }
 
-String getFmtDate(String date, String locale) {
-  initializeDateFormatting("en","somefile");
+Future<String> getFmtDate(String date, String locale) async {
+  await initializeDateFormatting("en","somefile");
   String mLocale = getValidLocale(locale);
   Future.delayed(const Duration(milliseconds: 10));
 
@@ -136,6 +137,17 @@ Color getColor(String stringColor) {
       return Colors.orange;
     default:
       return Colors.black;
+  }
+}
+
+Future playAudioBeep() async {
+  pp('............ playAudioBeep ......');
+
+  try {
+    final player = AudioPlayer();
+    await player.play(AssetSource('beep2.wav)'));
+  } catch (e) {
+    pp(e);
   }
 }
 
@@ -409,11 +421,11 @@ TextStyle myTextStyleLargeWithColor(BuildContext context, Color color) {
       fontSize: 28);
 }
 
-TextStyle myTextStyleMediumLarge(BuildContext context) {
+TextStyle myTextStyleMediumLarge(BuildContext context, double? size) {
   return GoogleFonts.roboto(
       textStyle: Theme.of(context).textTheme.headlineLarge,
       fontWeight: FontWeight.w900,
-      fontSize: 24);
+      fontSize: size == null? 24: size!);
 }
 
 TextStyle myTextStyleMediumLargeWithSize(BuildContext context, double size) {

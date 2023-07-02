@@ -1441,6 +1441,7 @@ class RoutePoint extends _RoutePoint
   RoutePoint(
     ObjectId id, {
     String? routePointId,
+    String? associationId,
     double? latitude,
     double? longitude,
     double? heading,
@@ -1453,6 +1454,7 @@ class RoutePoint extends _RoutePoint
   }) {
     RealmObjectBase.set(this, 'id', id);
     RealmObjectBase.set(this, 'routePointId', routePointId);
+    RealmObjectBase.set(this, 'associationId', associationId);
     RealmObjectBase.set(this, 'latitude', latitude);
     RealmObjectBase.set(this, 'longitude', longitude);
     RealmObjectBase.set(this, 'heading', heading);
@@ -1477,6 +1479,13 @@ class RoutePoint extends _RoutePoint
   @override
   set routePointId(String? value) =>
       RealmObjectBase.set(this, 'routePointId', value);
+
+  @override
+  String? get associationId =>
+      RealmObjectBase.get<String>(this, 'associationId') as String?;
+  @override
+  set associationId(String? value) =>
+      RealmObjectBase.set(this, 'associationId', value);
 
   @override
   double? get latitude =>
@@ -1547,6 +1556,7 @@ class RoutePoint extends _RoutePoint
         ObjectType.realmObject, RoutePoint, 'RoutePoint', [
       SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
       SchemaProperty('routePointId', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationId', RealmPropertyType.string, optional: true),
       SchemaProperty('latitude', RealmPropertyType.double, optional: true),
       SchemaProperty('longitude', RealmPropertyType.double, optional: true),
       SchemaProperty('heading', RealmPropertyType.double, optional: true),

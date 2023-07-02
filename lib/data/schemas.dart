@@ -127,6 +127,7 @@ class _DispatchRecord {
     map['passengers'] = passengers;
     map['vehicleId'] = vehicleId;
     map['ownerId'] = ownerId;
+    map['routeId'] = routeId;
     map['marshalId'] = marshalId;
     map['created'] = created;
     map['geoHash'] = geoHash;
@@ -353,6 +354,7 @@ class _RoutePoint {
   @PrimaryKey()
   late ObjectId id;
   String? routePointId;
+  String? associationId;
   double? latitude;
   double? longitude;
   double? heading;
@@ -367,16 +369,17 @@ class _RoutePoint {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {};
     map['routePointId'] = routePointId;
+    map['associationId'] = associationId;
     map['created'] = created;
     map['index'] = index;
     map['_id'] = id.hexString;
+
     map['latitude'] = latitude;
     map['longitude'] = longitude;
 
-    if (routeId != null) {
-      map['routeId'] = routeId;
-      map['routeName'] = routeName;
-    }
+    map['routeId'] = routeId;
+    map['routeName'] = routeName;
+
     if (position != null) {
       map['position'] = position!.toJson();
     }

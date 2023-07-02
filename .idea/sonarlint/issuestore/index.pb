@@ -59,8 +59,6 @@ Q
 !lib/l10n/translation_handler.dart,6/8/68d04abc6150923db0a7f3d8e7767b64bd6103db
 N
 binary/macos/realm_version.txt,d/0/d01c4d5c5d010952ec1bad64a385b230d7bc5943
-S
-#lib/utils/device_location_bloc.dart,1/3/13a8f93355b4fa0cd766d700b3b7cfe868e22c17
 L
 lib/utils/error_handler.dart,1/0/10a99e756989f9692ff3b288cdfdb0dc6a40787b
 K
@@ -73,7 +71,3 @@ R
 "lib/widgets/country_selection.dart,1/2/1278c7470502218cccfe944c4647fb9824c7ff6f
 8
 cmds.txt,9/6/96aabe83f58456692f5d448a6988674171d63b89
-S
-#.idea/libraries/Flutter_Plugins.xml,e/8/e8bbc0fdfcefee9aa7b463c83a8a480b92333860
-O
-lib/widgets/vehicle_detail.dart,c/d/cdfbce6e4a2c2931b70a6f3690263a67d48c9b61

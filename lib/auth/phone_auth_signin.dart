@@ -109,6 +109,7 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
 
       if (user != null) {
         pp('$mm KasieTransie user found on database:  🍎 ${user!.toJson()} 🍎');
+        await prefs.saveUser(user!);
         final ass = await listApiDog.getAssociationById(user!.associationId!);
         final users =
         await listApiDog.getAssociationUsers(user!.associationId!);
@@ -123,8 +124,6 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
         }
         pp('$mm KasieTransie users found on database:  🍎 ${users.length} 🍎');
         pp('$mm KasieTransie my country:  🍎 ${myCountry!.name!} 🍎');
-
-        await _doSettings();
 
         if (mounted) {
           var ok = await navigateWithScale(const InitializerCover(), context);
@@ -193,9 +192,10 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
     }
   }
 
-  Future<void> _doSettings() async {
+  Future<void> _finishInitialization() async {
     try {
       await prefs.saveUser(user!);
+      initializer.initialize();
       var settingsList = await listApiDog.getSettings(user!.associationId!);
       if (settingsList.isNotEmpty) {
         settingsList.sort((a, b) => b.created!.compareTo(a.created!));

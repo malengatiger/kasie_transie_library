@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:kasie_transie_library/utils/parsers.dart';
 import 'package:realm/realm.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -47,6 +48,49 @@ class CacheManager {
     pp("$mm  ${list.appErrors.length} appErrors retrieved");
     return list;
   }
+
+  //
+  Future saveDispatchRecord(DispatchRecord dispatchRecord) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final list = await getDispatchRecords();
+    list.add(dispatchRecord);
+    final m =DispatchRecordList(list);
+    final mJson = m.toJson();
+    final saveMe = jsonEncode(mJson);
+    await prefs.setString('dispatchRecords', saveMe);
+
+    pp("$mm saveDispatchRecord: SAVED: 🌽 ${list.length} DispatchRecords in cache $mm");
+
+  }
+  Future deleteDispatchRecords() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    final m = DispatchRecordList([]);
+    final mJson = m.toJson();
+    final saveMe = jsonEncode(mJson);
+    await prefs.setString('dispatchRecords', saveMe);
+    pp('$mm deleteDispatchRecords happened ....');
+  }
+
+  Future<String> getDispatchRecordString() async {
+    final list = await _getDispatchRecordList();
+    return jsonEncode(list);
+  }
+  Future<List<DispatchRecord>> getDispatchRecords() async {
+    final list = await _getDispatchRecordList();
+    return list.dispatchRecords;
+  }
+  Future<DispatchRecordList> _getDispatchRecordList() async {
+    var prefs = await SharedPreferences.getInstance();
+    var string = prefs.getString('dispatchRecords');
+    if (string == null) {
+      return DispatchRecordList([]);
+    }
+    var jx = json.decode(string);
+    var list = DispatchRecordList.fromJson(jx);
+    pp("$mm  ${list.dispatchRecords.length} DispatchRecords retrieved");
+    return list;
+  }
 }
 
 
@@ -58,9 +102,7 @@ class AppErrorList {
   AppErrorList.fromJson(Map data) {
     List list = data['appErrors'];
     for (var value in list) {
-      List<int> bytes = utf8.encode(value['id']);
-
-      final m = AppError(ObjectId.fromBytes(bytes),
+      final m = AppError(ObjectId.fromHexString(value['_id'] as String),
         created: value['created'],
         userId: value['userId'],
         associationId: value['associationId'],
@@ -87,4 +129,50 @@ class AppErrorList {
     };
     return map;
   }
+}
+//
+class DispatchRecordList {
+  List<DispatchRecord> dispatchRecords = [];
+
+  DispatchRecordList(this.dispatchRecords);
+
+  DispatchRecordList.fromJson(Map data) {
+    List list = data['dispatchRecords'];
+    for (var value in list) {
+      final m = buildLocalDispatchRecord(value);
+      dispatchRecords.add(m);
+    }
+  }
+  Map<String, dynamic> toJson() {
+    final list = [];
+    for (var err in dispatchRecords) {
+      list.add(err.toJson());
+    }
+    Map<String, dynamic> map = {
+      'dispatchRecords': list,
+    };
+    return map;
+  }
+}
+DispatchRecord buildLocalDispatchRecord(Map j) {
+  var m = DispatchRecord(
+    ObjectId(),
+    vehicleId: j['vehicleId'],
+    vehicleReg: j['vehicleReg'],
+    associationId: j['associationId'],
+    associationName: j['associationName'],
+    created: j['created'],
+    dispatchRecordId: j['dispatchRecordId'],
+    passengers: j['passengers'],
+    ownerId: j['ownerId'],
+    marshalId: j['marshalId'],
+    marshalName: j['marshalName'],
+    vehicleArrivalId: j['vehicleArrivalId'],
+    dispatched: j['dispatched'],
+    geoHash: j['geoHash'],
+    routeName: j['routeName'],
+    landmarkId: j['landmarkId'],
+    position: buildPosition(j['position']),
+  );
+  return m;
 }

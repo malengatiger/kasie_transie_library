@@ -88,44 +88,47 @@ class InitializerCoverState extends State<InitializerCover>
               child: SizedBox(
                 width: 400,
                 height: 400,
-                child: Card(
-                  shape: getRoundedBorder(radius: 16),
-                  elevation: 8,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        const SizedBox(
-                          height: 64,
-                        ),
-                        const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 6,
-                            backgroundColor: Colors.indigo,
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Card(
+                    shape: getRoundedBorder(radius: 16),
+                    elevation: 8,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          const SizedBox(
+                            height: 64,
                           ),
-                        ),
-                        const SizedBox(
-                          height: 64,
-                        ),
-                        Row(mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('Time Elapsed: '),
-                            const SizedBox(
-                              width: 12,
+                          const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 6,
+                              backgroundColor: Colors.indigo,
                             ),
-                            Text(
-                              m,
-                              style: myTextStyleLargePrimaryColor(context),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 24,
-                        ),
-                        Text('Loading association data from the Mother Ship', style: myTextStyleSmallBold(context),)
-                      ],
+                          ),
+                          const SizedBox(
+                            height: 64,
+                          ),
+                          Row(mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('Time Elapsed: '),
+                              const SizedBox(
+                                width: 12,
+                              ),
+                              Text(
+                                m,
+                                style: myTextStyleLargePrimaryColor(context),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 24,
+                          ),
+                          Text('Loading association data from the Mother Ship', style: myTextStyleSmallBold(context),)
+                        ],
+                      ),
                     ),
                   ),
                 ),

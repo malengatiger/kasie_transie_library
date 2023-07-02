@@ -257,6 +257,7 @@ RoutePoint buildRoutePoint(Map value) {
     longitude: value['longitude'],
     routeId: value['routeId'],
     index: value['index'],
+    associationId: value['associationId'],
     latitude: value['latitude'],
     created: value['created'],
     heading: value['heading'],

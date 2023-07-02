@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/material.dart';
 import 'package:kasie_transie_library/auth/phone_auth_signin.dart';
+import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/initialiazer_cover.dart';
 import 'package:kasie_transie_library/utils/initializer.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
+import 'package:realm/realm.dart';
 
 import '../bloc/list_api_dog.dart';
 import '../bloc/theme_bloc.dart';
@@ -81,6 +83,8 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
         user = await listApiDog.getUserById(userCred.user!.uid);
         if (user != null) {
           pp('$mm KasieTransie user found on database:  🍎 ${user!.toJson()} 🍎');
+          await prefs.saveUser(user!);
+
           final association = await listApiDog.getAssociationById(user!.associationId!);
           final users =
               await listApiDog.getAssociationUsers(user!.associationId!);
@@ -167,6 +171,28 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
       await themeBloc.changeToLocale(settingsList.first.locale!);
       await prefs.saveSettings(settingsList.first);
       pp('$mm ........ settings should be saved by now ...');
+    } else {
+      final m = lib.SettingsModel(ObjectId(),
+        associationId: user!.associationId,
+        created: DateTime.now().toUtc().toIso8601String(),
+        commuterGeofenceRadius: 200,
+        commuterSearchMinutes: 30,
+        commuterGeoQueryRadius: 50,
+        distanceFilter: 10,
+        geofenceRadius: 200,
+        heartbeatIntervalSeconds: 300,
+        locale: 'en',
+        loiteringDelay: 30,
+        themeIndex: 0,
+        vehicleGeoQueryRadius: 200,
+        vehicleSearchMinutes: 30,
+        numberOfLandmarksToScan: 0,
+        refreshRateInSeconds: 300,
+      );
+      //
+      pp('$mm ........ adding default settings for association ...');
+      await dataApiDog.addSettings(m);
+
     }
     } catch (e) {
       pp('$mm ... settings fucking up! ${E.redDot}');
@@ -205,7 +231,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
                         ),
                         Text(
                           'Email Authentication',
-                          style: myTextStyleMediumLarge(context),
+                          style: myTextStyleMediumLarge(context, 24),
                         ),
                         const SizedBox(
                           height: 48,

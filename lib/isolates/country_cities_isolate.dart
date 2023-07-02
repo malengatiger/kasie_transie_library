@@ -10,8 +10,8 @@ import 'package:kasie_transie_library/data/schemas.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/parsers.dart';
 
-import 'functions.dart';
-import 'kasie_exception.dart';
+import '../utils/functions.dart';
+import '../utils/kasie_exception.dart';
 
 final CountryCitiesIsolate countryCitiesIsolate = CountryCitiesIsolate();
 class CountryCitiesIsolate {

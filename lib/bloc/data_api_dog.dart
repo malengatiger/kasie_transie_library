@@ -86,11 +86,14 @@ class DataApiDog {
     pp('$mm UserGeofenceEvent added to database: $res');
   }
 
-  Future addDispatchRecord(DispatchRecord event) async {
+  Future<DispatchRecord> addDispatchRecord(DispatchRecord event) async {
     final bag = event.toJson();
     final cmd = '${url}addDispatchRecord';
     final res = await _callPost(cmd, bag);
+    final r = buildDispatchRecord(res);
     pp('$mm DispatchRecord added to database: $res');
+    myPrettyJsonPrint(res);
+    return r;
   }
 
   Future addVehicleArrival(VehicleArrival event) async {

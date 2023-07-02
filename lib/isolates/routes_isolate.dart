@@ -19,30 +19,44 @@ final RoutesIsolate routesIsolate = RoutesIsolate();
 class RoutesIsolate {
   final xy = '☕️☕️☕️☕️☕️☕️☕️☕️☕️ Routes Isolate Functions: 🍎🍎';
 
-  Future<int> getRoutes(String associationId) async {
+  Future<List<Route>> getRoutes(String associationId) async {
     pp('\n\n\n$xy ............................ getting routes ....');
-    final token = await appAuth.getAuthToken();
+    try {
+      final token = await appAuth.getAuthToken();
 
-    if (token != null) {
-      final bag = DonkeyBag(associationId, KasieEnvironment.getUrl(), token);
-      List mRoutes = await _handleRoutes(bag);
-      pp('$xy hey Joe, do yo know where you are? ${E.redDot} ');
+      if (token != null) {
+        final bag = DonkeyBag(associationId, KasieEnvironment.getUrl(), token);
+        List mRoutes = await _handleRoutes(bag);
+        pp('$xy hey Joe, do yo know where you are? ${E.redDot} ');
 
-      final routeIds = <String>[];
-      for (var value1 in mRoutes) {
-        routeIds.add(value1.routeId!);
+        var finalRoutes = <Route>[];
+        final routeIds = <String>[];
+        for (var value1 in mRoutes) {
+          routeIds.add(value1.routeId!);
+          final route = await listApiDog.getRoute(value1.routeId);
+          if (route != null) {
+            finalRoutes.add(route);
+          }
+        }
+        pp('$xy get landmarks and routePoints for ${routeIds.length} routes ... ');
+        await _handleRouteLandmarks(routeIds, bag);
+        await _handleRoutePoints(routeIds, bag);
+        await _handleRouteCities(routeIds, bag);
+        pp('\n\n\n$xy ..... done getting routes ....\n\n');
+        return finalRoutes;
+      } else {
+        final msg =
+            '$xy ... getRoutes fell down and screamed! ${E.redDot} '
+            'no Firebase token found!!';
+        pp(msg);
+        throw Exception(msg);
       }
-      pp('$xy get landmarks and routePoints for ${routeIds.length} routes ... ');
-
-      await _handleRouteLandmarks(routeIds, bag);
-      await _handleRoutePoints(routeIds, bag);
-      await _handleRouteCities(routeIds, bag);
-
-      pp('\n\n\n$xy ..... done getting routes ....\n\n');
-    } else {
-      pp('$xy ${E.redDot}${E.redDot}${E.redDot}${E.redDot} no Firebase token found!!!! ${E.redDot}');
+    } catch (e) {
+      final msg = '$xy ... getRoutes fell down and screamed! '
+          '${E.redDot}${E.redDot}${E.redDot} $e';
+      pp(msg);
+      throw Exception(msg);
     }
-    return 0;
   }
 
   Future<List<Route>> _handleRoutes(DonkeyBag bag) async {
@@ -216,7 +230,7 @@ Future _httpGet(String mUrl, String token) async {
           Uri.parse(mUrl),
           headers: headers,
         )
-        .timeout(const Duration(seconds: 120));
+        .timeout(const Duration(seconds: 600));
     pp('$xyz _httpGet call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
     var end = DateTime.now();
     pp('$xyz _httpGet call: 🔆 elapsed time for http: ${end.difference(start).inSeconds} seconds 🔆 \n\n');
