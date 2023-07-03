@@ -10,6 +10,7 @@ import 'package:kasie_transie_library/data/schemas.dart' as lib;
 import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
+import 'package:kasie_transie_library/utils/local_finder.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 
 class AssociationRouteMaps extends StatefulWidget {
@@ -69,12 +70,9 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
       final loc = await locationBloc.getLocation();
       pp('\n\n$mm .......... findAssociationRoutesByLocation ...');
 
-      routes = await listApiDog.findAssociationRoutesByLocation(
-          LocationFinderParameter(
-              latitude: loc.latitude,
-              longitude: loc.longitude,
-              limit: 12,
-              radiusInKM: 50));
+      routes = await localFinder.findNearestRoutes(latitude: loc.latitude, longitude: loc.longitude,
+          radiusInMetres: 1000 * 100);
+
     } catch (e) {
       pp(e);
       showSnackBar(
@@ -428,6 +426,7 @@ class RouteDropDown extends StatelessWidget {
       items.add(DropdownMenuItem<lib.Route>(value: r, child: Text(r.name!)));
     }
     return DropdownButton(
+        hint: const Text('Select Route'),
         items: items,
         onChanged: (r) {
           if (r != null) {

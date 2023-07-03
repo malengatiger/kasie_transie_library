@@ -5,6 +5,7 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kasie_transie_library/data/color_and_locale.dart';
 
 import '../data/schemas.dart';
 import '../utils/functions.dart';
@@ -61,19 +62,25 @@ class ThemeBloc {
     themeStreamController.sink.add(m);
   }
 
-  Future<void> changeToTheme(int index) async {
-    pp('\n\n$mm changing to theme index: $index, adding index to stream');
-    settings = await prefs.getSettings();
-    await setLocaleAndTheme(index, settings!.locale!, settings!);
-    pp('$mm changed theme index: $index, locale: ${settings!.locale} updated current cached settings');
+  Future<void> changeToTheme(ColorAndLocale colorAndLocale) async {
+    pp('\n\n$mm changing to theme index: ${colorAndLocale.themeIndex} ${colorAndLocale.locale}, adding to stream');
+    Locale newLocale = Locale(colorAndLocale.locale);
+    final m =
+    LocaleAndTheme(themeIndex: colorAndLocale.themeIndex, locale: newLocale);
+    themeStreamController.sink.add(m);
+
+    pp('$mm changeToTheme has put a locale on the themeStreamController');
   }
 
-  Future<void> changeToLocale(String locale) async {
-    var settings = await prefs.getSettings();
-    if (settings == null) {
-      return;
-    }
-    await setLocaleAndTheme(settings.themeIndex!, locale, settings);
+  Future<void> changeToLocale(ColorAndLocale colorAndLocale) async {
+    pp('\n\n$mm changing to theme index: ${colorAndLocale.themeIndex} ${colorAndLocale.locale}, adding to stream');
+
+    Locale newLocale = Locale(colorAndLocale.locale);
+    final m =
+    LocaleAndTheme(themeIndex: colorAndLocale.themeIndex, locale: newLocale);
+    themeStreamController.sink.add(m);
+
+    pp('$mm setLocaleAndTheme has put a locale on the themeStreamController');
   }
 
   Future<void> setLocaleAndTheme(int index, String locale, SettingsModel settings) async {
@@ -118,9 +125,28 @@ class SchemeUtil {
       return _themeBags.first;
     }
 
-    return _themeBags.elementAt(themeIndex);
+    final bag = _themeBags.elementAt(themeIndex);
+    return bag;
   }
 
+  static List<ColorFromTheme> getDarkThemeColors() {
+    final colors = <ColorFromTheme>[];
+    var index = 0;
+    for (var value in _themeBags) {
+      colors.add(ColorFromTheme(value.darkTheme.primaryColor, index));
+      index++;
+    }
+    return colors;
+  }
+  static List<ColorFromTheme> getLightThemeColors() {
+    final colors = <ColorFromTheme>[];
+    var index = 0;
+    for (var value in _themeBags) {
+      colors.add(ColorFromTheme(value.lightTheme.primaryColor, index));
+      index++;
+    }
+    return colors;
+  }
   static ThemeBag getRandomTheme() {
     if (_themeBags.isEmpty) _setThemes();
     var index = _rand.nextInt(_themeBags.length - 1);
@@ -245,6 +271,13 @@ class SchemeUtil {
   }
 }
 
+class ColorFromTheme {
+  late Color color;
+  late int themeIndex;
+
+  ColorFromTheme(this.color, this.themeIndex);
+
+}
 class ThemeBag {
   late final ThemeData lightTheme;
   late final ThemeData darkTheme;

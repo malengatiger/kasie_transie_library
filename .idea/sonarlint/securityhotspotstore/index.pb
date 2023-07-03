@@ -47,16 +47,12 @@ W
 'windows/flutter/generated_plugins.cmake,8/8/88ca6865187a33a9504c7309c5e20c833b7b0094
 ]
 -windows/flutter/generated_plugin_registrant.h,c/4/c4f32636ccc6ab3d0e1279d8d53341e15d62642b
-E
-lib/l10n/my_keys.dart,1/b/1bc97497c84bf2179a04983aaa15a5f75ea3a892
 K
 lib/l10n/locale_keys.g.dart,3/6/366b7b77a469ef644a1c811ce8b36b66d935bed8
 N
 lib/utils/kasie_exception.dart,b/b/bb23b0771d428b91650b02ea2b4bd0866a3ea69d
 E
 lib/utils/emojis.dart,b/2/b2f18d221e5f59abf94d37d984bc43a54e648266
-Q
-!lib/l10n/translation_handler.dart,6/8/68d04abc6150923db0a7f3d8e7767b64bd6103db
 N
 lib/utils/navigator_utils.dart,e/2/e23a49c7f56ad4b570f6167926139edd864f4804
 N
@@ -77,14 +73,8 @@ G
 .env,3/c/3c84dcdc6bbe3d7817c49dcdc327b926fea1808a
 N
 lib/data/route_point_list.dart,5/4/54a444dc3014bf4246be841fe332300f8c8a3df1
-T
-$lib/maps/association_route_maps.dart,0/1/01800237c9a2f12c0c89a2070b4fc191bb6a0972
-L
-lib/maps/directions_dog.dart,4/1/41a45c342eb19917c3b78ddfbea3eb6f4ba333e0
 V
 &lib/data/calculated_distance_list.dart,1/1/11569e35f6e7041043625f061a6bda0a543236ba
-D
-lib/utils/prefs.dart,0/6/062ed39b477cbfc674db4a3f8539e7725e506c8c
 O
 lib/widgets/vehicle_detail.dart,c/d/cdfbce6e4a2c2931b70a6f3690263a67d48c9b61
 J
@@ -103,11 +93,5 @@ V
 &lib/widgets/route_landmark_widget.dart,4/f/4fdec60ce96af16dc741bed3b58ce8dca449d65c
 P
  lib/widgets/dispatch_widget.dart,4/b/4ba0e2443a5d602521acfd543eb0df7c9f62120a
-O
-lib/auth/email_auth_signin.dart,2/a/2a121924df2544ed1851a2a61b5ca978703d1370
-J
-lib/bloc/data_api_dog.dart,0/f/0f27426890d5956a726f9c74637bb8749dbd74bb
 Q
 !.idea/libraries/Dart_Packages.xml,f/c/fc67c2d2441e33af1dbd1e910281523d1ce74b4a
-H
-lib/utils/functions.dart,b/0/b0a619b39b8dd6d9cb3842f9eccbadb6212c8b3f

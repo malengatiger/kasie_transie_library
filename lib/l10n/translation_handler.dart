@@ -48,16 +48,17 @@ class TranslationHandler {
     localeMap.clear();
     var start = DateTime.now();
     var s = await getStringFromAssets(locale);
-    var mJson = jsonDecode(s);
-
+    var xJson = jsonDecode(s);
+    var json2 = xJson['map'];
+    myPrettyJsonPrint(json2);
     final translationKeys = MyKeys.getKeys();
 
     translationKeys.forEach((key, value) {
       try {
-        if (mJson[key] == null) {
+        if (json2[key] == null) {
           pp('$mm key error, 🔴🔴 this key not found in json file: $key 🔴🔴');
         } else {
-          localeMap[key] = mJson[key];
+          localeMap[key] = json2[key];
         }
       } catch (e) {
         pp('$mm $e key with error: $key');

@@ -6,6 +6,7 @@ import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:realm/realm.dart';
 
 import '../bloc/theme_bloc.dart';
 import '../data/schemas.dart' as lib;
@@ -106,6 +107,40 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
           '$mm seeking to acquire this user from the Kasie database by their id: 🌀🌀🌀${userCred
               .user?.uid}');
       user = await listApiDog.getUserById(userCred.user!.uid);
+      //
+      var settingsList =
+      await listApiDog.getSettings(user!.associationId!, true);
+      if (settingsList.isNotEmpty) {
+        settingsList.sort((a, b) => b.created!.compareTo(a.created!));
+        await themeBloc.changeToTheme(settingsList.first.themeIndex!);
+        pp('$mm KasieTransie theme has been set to:  🍎 ${settingsList.first.themeIndex!} 🍎');
+        await themeBloc.changeToLocale(settingsList.first.locale!);
+        await prefs.saveSettings(settingsList.first);
+        pp('$mm ........ settings should be saved by now ...');
+      } else {
+        final m = lib.SettingsModel(ObjectId(),
+          associationId: user!.associationId,
+          created: DateTime.now().toUtc().toIso8601String(),
+          commuterGeofenceRadius: 200,
+          commuterSearchMinutes: 30,
+          commuterGeoQueryRadius: 50,
+          distanceFilter: 10,
+          geofenceRadius: 200,
+          heartbeatIntervalSeconds: 300,
+          locale: 'en',
+          loiteringDelay: 30,
+          themeIndex: 0,
+          vehicleGeoQueryRadius: 200,
+          vehicleSearchMinutes: 30,
+          numberOfLandmarksToScan: 0,
+          refreshRateInSeconds: 300,
+        );
+        //
+        pp('$mm ........ adding default settings for association ...');
+        final sett = await dataApiDog.addSettings(m);
+        await prefs.saveSettings(sett);
+      }
+      //
 
       if (user != null) {
         pp('$mm KasieTransie user found on database:  🍎 ${user!.toJson()} 🍎');
@@ -155,10 +190,10 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
       }
     } catch (e) {
       pp('\n\n\n $mm ${E.redDot} This is annoying! .... $e \n\n\n');
-      String msg = 'Unable lo Sign in. Have you registered an association?';
+      String msg = 'Unable to Sign in. Have you registered an association?';
       if (msg.contains('dup key')) {
         msg = signInStrings == null
-            ? 'Duplicate organization name'
+            ? 'Duplicate association name'
             : signInStrings!.duplicateOrg;
       }
       if (msg.contains('not found')) {
@@ -192,24 +227,6 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
     }
   }
 
-  Future<void> _finishInitialization() async {
-    try {
-      await prefs.saveUser(user!);
-      initializer.initialize();
-      var settingsList = await listApiDog.getSettings(user!.associationId!);
-      if (settingsList.isNotEmpty) {
-        settingsList.sort((a, b) => b.created!.compareTo(a.created!));
-        await themeBloc.changeToTheme(settingsList.first.themeIndex!);
-        pp('$mm KasieTransie theme has been set to:  🍎 ${settingsList.first
-            .themeIndex!} 🍎');
-        await themeBloc.changeToLocale(settingsList.first.locale!);
-        await prefs.saveSettings(settingsList.first);
-        pp('$mm ........ settings should be saved by now ...');
-      }
-    } catch (e) {
-      pp('$mm ${E.redDot} We are fucked, Jack! The problem: $e');
-    }
-  }
 
   void _start() async {
     pp('$mm _start: ....... Verifying phone number ...');
@@ -296,7 +313,7 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
     return SafeArea(
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('KasieTransie SignIn'),
+            title: const Text('Cellphone sign In'),
             bottom: const PreferredSize(
                 preferredSize: Size.fromHeight(100), child: Column()),
           ),

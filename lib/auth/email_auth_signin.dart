@@ -163,7 +163,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
   Future<void> _doSettings() async {
     try {
     var settingsList =
-        await listApiDog.getSettings(user!.associationId!);
+        await listApiDog.getSettings(user!.associationId!, true);
     if (settingsList.isNotEmpty) {
       settingsList.sort((a, b) => b.created!.compareTo(a.created!));
       await themeBloc.changeToTheme(settingsList.first.themeIndex!);
@@ -191,8 +191,8 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
       );
       //
       pp('$mm ........ adding default settings for association ...');
-      await dataApiDog.addSettings(m);
-
+      final sett = await dataApiDog.addSettings(m);
+      await prefs.saveSettings(sett);
     }
     } catch (e) {
       pp('$mm ... settings fucking up! ${E.redDot}');
@@ -208,7 +208,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
           title: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Kasie Email Sign In',
+              'Email Sign In',
               style: myTextStyleLarge(context),
             ),
           ),

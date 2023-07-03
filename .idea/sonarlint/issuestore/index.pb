@@ -51,12 +51,8 @@ H
 android/local.properties,2/6/2692013b75d96a0c759e065508281625194c49ee
 K
 lib/l10n/locale_keys.g.dart,3/6/366b7b77a469ef644a1c811ce8b36b66d935bed8
-E
-lib/l10n/my_keys.dart,1/b/1bc97497c84bf2179a04983aaa15a5f75ea3a892
 N
 lib/utils/navigator_utils.dart,e/2/e23a49c7f56ad4b570f6167926139edd864f4804
-Q
-!lib/l10n/translation_handler.dart,6/8/68d04abc6150923db0a7f3d8e7767b64bd6103db
 N
 binary/macos/realm_version.txt,d/0/d01c4d5c5d010952ec1bad64a385b230d7bc5943
 L
@@ -77,10 +73,6 @@ G
 lib/data/route_bag.dart,2/0/204f51ea209b239b34c4c12539e8e22a0a8a27f1
 N
 lib/data/route_point_list.dart,5/4/54a444dc3014bf4246be841fe332300f8c8a3df1
-T
-$lib/maps/association_route_maps.dart,0/1/01800237c9a2f12c0c89a2070b4fc191bb6a0972
-L
-lib/maps/directions_dog.dart,4/1/41a45c342eb19917c3b78ddfbea3eb6f4ba333e0
 V
 &lib/data/calculated_distance_list.dart,1/1/11569e35f6e7041043625f061a6bda0a543236ba
 O
@@ -91,18 +83,10 @@ R
 "lib/providers/kasie_providers.dart,4/4/444f3d43023add5c821968865c0b4250a3a678a2
 R
 "lib/isolates/landmark_isolate.dart,f/c/fc6db5720b1b00c776a396d6ea90e8b204ce1e2f
-D
-lib/utils/prefs.dart,0/6/062ed39b477cbfc674db4a3f8539e7725e506c8c
 Q
 !.idea/libraries/Dart_Packages.xml,f/c/fc67c2d2441e33af1dbd1e910281523d1ce74b4a
-J
-lib/bloc/data_api_dog.dart,0/f/0f27426890d5956a726f9c74637bb8749dbd74bb
 P
  lib/widgets/dispatch_widget.dart,4/b/4ba0e2443a5d602521acfd543eb0df7c9f62120a
-O
-lib/auth/email_auth_signin.dart,2/a/2a121924df2544ed1851a2a61b5ca978703d1370
-H
-lib/utils/functions.dart,b/0/b0a619b39b8dd6d9cb3842f9eccbadb6212c8b3f
 Q
 !lib/utils/initialiazer_cover.dart,6/c/6cffa59198fcb326d2e0ec3d874f44755ad3905f
 K

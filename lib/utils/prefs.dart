@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:kasie_transie_library/data/color_and_locale.dart';
 import 'package:kasie_transie_library/utils/parsers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -75,6 +76,31 @@ class Prefs {
     return route;
   }
 
+  //
+
+  Future saveColorAndLocale(ColorAndLocale colorAndLocale) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    Map mJson = colorAndLocale.toJson();
+    var jx = json.encode(mJson);
+    prefs.setString('ColorAndLocale', jx);
+    pp("🌽 🌽 🌽 Prefs: saveColorAndLocale  SAVED: 🌽 ${colorAndLocale.toJson()} 🌽 🌽 🌽");
+  }
+
+  Future<ColorAndLocale> getColorAndLocale() async {
+    var prefs = await SharedPreferences.getInstance();
+    var string = prefs.getString('ColorAndLocale');
+    if (string == null) {
+      return ColorAndLocale(themeIndex: 0, locale: 'en');
+    }
+    var jx = json.decode(string);
+    var cl = ColorAndLocale.fromJson(jx);
+    pp("🌽 🌽 🌽 Prefs: getColorAndLocale 🧩  ${cl.toJson()} retrieved");
+    return cl;
+  }
+
+  //
+
   Future saveAmbassador(User user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -103,8 +129,7 @@ class Prefs {
     Map mJson = settings.toJson();
     var jx = json.encode(mJson);
     prefs.setString('SettingsModel', jx);
-    pp("🌽 🌽 🌽 Prefs: saveSettings:  SAVED: 🌽 ${settings.toJson()} 🌽 🌽 🌽");
-    return null;
+    pp("🌽 🌽 🌽 Prefs: saveSettings:  SAVED: 🌽 themeIndex: ${settings.themeIndex} 🌽 locale: ${settings.locale} 🌽 🌽");
   }
 
   Future<SettingsModel?> getSettings() async {
@@ -115,7 +140,7 @@ class Prefs {
     }
     var jx = json.decode(string);
     var sett = buildSettingsModel(jx);
-    pp("🌽 🌽 🌽 Prefs: getSettings 🧩  ${sett.toJson()} retrieved");
+    pp("🌽 🌽 🌽 Prefs: getSettings 🧩  themeIndex: ${sett.themeIndex} 🌽 locale: ${sett.locale} retrieved");
     return sett;
   }
 

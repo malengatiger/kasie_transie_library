@@ -12,6 +12,8 @@ import 'package:pretty_json/pretty_json.dart';
 import 'dart:ui' as ui;
 import 'package:intl/intl.dart';
 
+import 'emojis.dart';
+
 
 pp(dynamic msg) {
   var fmt = DateFormat('dd/MM/HH:mm:ss');
@@ -670,8 +672,12 @@ showToast(
 }
 
 Future<String> getStringFromAssets(String path) async {
-  pp('getStringFromAssets: locale: $path');
-  final stringData = await rootBundle.loadString('assets/l10n/$path.json');
+  final mPath = 'assets/l10n/$path.json';
+
+  pp('${E.blueDot}${E.blueDot}${E.blueDot} getStringFromAssets: locale: $mPath');
+  final stringData = await rootBundle.loadString(mPath);
+  pp('${E.blueDot}${E.blueDot}${E.blueDot} getStringFromAssets: stringData: $stringData');
+
   return stringData;
 }
 

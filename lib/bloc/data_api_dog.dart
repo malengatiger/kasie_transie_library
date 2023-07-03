@@ -299,16 +299,24 @@ class DataApiDog {
     final bag = association.toJson();
     final cmd = '${url}registerAssociation';
 
-    final res = _callPost(cmd, bag);
+    final res = await _callPost(cmd, bag);
     pp('$mm association registration added to database: $res');
   }
 
-  Future addSettings(SettingsModel settings) async {
+  Future<SettingsModel> addSettings(SettingsModel settings) async {
     final bag = settings.toJson();
     final cmd = '${url}addSettingsModel';
 
-    final res = _callPost(cmd, bag);
-    pp('$mm settings added to database: $res');
+    final res = await _callPost(cmd, bag);
+    final r = buildSettingsModel(res);
+
+    listApiDog.realm.write(() {
+      listApiDog.realm.add<SettingsModel>(r);
+    });
+    pp('$mm settings added to database ...');
+    myPrettyJsonPrint(res);
+
+    return r;
   }
 
   Future _callPost(String mUrl, Map? bag) async {
