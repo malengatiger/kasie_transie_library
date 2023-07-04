@@ -65,7 +65,7 @@ class QRScannerState extends State<QRScanner>
   void _returnScannedData(dynamic map) async {
     pp('$mm _returnScannedData : ${E.leaf2}${E.leaf2}${E.leaf2}');
     //
-    await playAudioBeep();
+    // await playAudioBeep();
     qrViewController!.resumeCamera();
 
     try {

@@ -237,6 +237,22 @@ class ListApiDog {
     return list;
   }
 
+  Future<List<DispatchRecord>> getMarshalDispatchRecords(
+      String userId, bool refresh) async {
+    rm.RealmResults<DispatchRecord> results = realm.query<DispatchRecord>('marshalId == \$0',[userId]);
+    final list = <DispatchRecord>[];
+    if (refresh || results.isEmpty) {
+      return await getMarshalDispatchesFromBackend(userId);
+    }
+
+    for (var element in results) {
+      list.add(element);
+    }
+    pp('$mm cached dispatches from realm: ${list.length}');
+
+    return list;
+  }
+
   Future<List<RouteCity>> getAssociationRouteCities(
       String associationId) async {
     final cmd = '${url}getAssociationRouteCities?associationId=$associationId';
@@ -307,6 +323,22 @@ class ListApiDog {
     pp('$mm cached association vehicles from backend: ${list.length}');
     return list;
   }
+
+  Future<List<DispatchRecord>> getMarshalDispatchesFromBackend(String userId) async {
+    final cmd = '${url}getMarshalDispatchRecords?userId=$userId';
+    List resp = await _sendHttpGET(cmd);
+    var list = <DispatchRecord>[];
+    for (var vehicleJson in resp) {
+      list.add(buildDispatchRecord(vehicleJson));
+    }
+
+    realm.write(() {
+      realm.addAll<DispatchRecord>(list, update: true);
+    });
+    pp('$mm cached marshal dispatches from backend: ${list.length}');
+    return list;
+  }
+
 
   Future<List<Association>> getAssociations() async {
     rm.RealmResults<Association> results = realm.all<Association>();
@@ -563,35 +595,28 @@ class ListApiDog {
   }
 
   Future<List<Route>> _getRoutesFromBackend(AssociationParameter p) async {
+    pp('$mm .......... getAssociationRoutes; _getRoutesFromBackend: ... : ${p.associationId}');
+
     final cmd = '${url}getAssociationRoutes?associationId=${p.associationId}';
     var list = <Route>[];
     List resp = await _sendHttpGET(cmd);
 
+    pp('$mm .......... raw payload: $list');
     for (var value in resp) {
       pp('$mm route from backend: ${value['name']}');
       var r = buildRoute(value);
       list.add(r);
     }
-    try {
-      realm.write(() {
-        realm.deleteAll<Route>();
-      });
-    } catch (e) {
-      pp(e);
-    }
 
-    pp('$mm routes have been deleted from local realm db ');
-    pp('$mm routes from backend : ${list.length}');
-
-    for (var route in list) {
+    pp('$mm ....... routes from backend : ${list.length}');
       try {
         realm.write(() {
-          realm.add(route);
+          realm.addAll<Route>(list, update: true);
         });
       } catch (e) {
         pp('$mm ... REALM ERROR: ${E.redDot} $e');
       }
-    }
+
     pp('$mm ......... cached routes: ${list.length}');
     return list;
   }
@@ -774,7 +799,7 @@ class ListApiDog {
   String token = 'NoTokenYet';
 
   Future _sendHttpGET(String mUrl) async {
-    pp('$xz _sendHttpGET: 🔆 🔆 🔆 calling : 💙 $mUrl  💙');
+    pp('$xz _sendHttpGET: 🔆 🔆 🔆 ...... calling : 💙 $mUrl  💙');
     var start = DateTime.now();
     headers['Authorization'] = 'Bearer $token';
     try {
@@ -784,6 +809,7 @@ class ListApiDog {
             headers: headers,
           )
           .timeout(const Duration(seconds: timeOutInSeconds));
+
       pp('$xz http GET call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
       var end = DateTime.now();
       pp('$xz http GET call: 🔆 elapsed time for http: ${end.difference(start).inSeconds} seconds 🔆 \n\n');

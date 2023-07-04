@@ -1,47 +1,26 @@
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/material.dart';
 import 'package:kasie_transie_library/auth/phone_auth_signin.dart';
-import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/initialiazer_cover.dart';
-import 'package:kasie_transie_library/utils/initializer.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
-import 'package:realm/realm.dart';
 
 import '../bloc/list_api_dog.dart';
-import '../bloc/theme_bloc.dart';
 import '../data/schemas.dart' as lib;
 import '../utils/emojis.dart';
 import '../utils/prefs.dart';
 
 class EmailAuthSignin extends StatefulWidget {
-  const EmailAuthSignin({Key? key}) : super(key: key);
+  const EmailAuthSignin(
+      {Key? key, required this.onGoodSignIn, required this.onSignInError})
+      : super(key: key);
 
+  final Function onGoodSignIn;
+  final Function onSignInError;
   @override
   EmailAuthSigninState createState() => EmailAuthSigninState();
 }
 
-/*
-{
-  "_partitionKey": null,
-  "_id": "6493511c5d5c1e6cd275ce2b",
-  "userType": "ASSOCIATION_OFFICIAL",
-  "userId": "8UnQARfMOgdpj4BtqtmWRasNSop2",
-  "firstName": "St. Vincent",
-  "lastName": "Peters-Maltbie",
-  "gender": null,
-  "countryId": "7a2328bf-915f-4194-82ae-6c220c046cac",
-  "associationId": "2f3faebd-6159-4b03-9857-9dad6d9a82ac",
-  "associationName": "The Most Awesome Taxi Association",
-  "fcmToken": null,
-  "email": "stvincent@theawesome.com",
-  "cellphone": "+19095550007",
-  "password": "pass123",
-  "countryName": "South Africa",
-  "dateRegistered": null,
-  "name": "St. Vincent Peters-Maltbie"
-}
- */
 class EmailAuthSigninState extends State<EmailAuthSignin>
     with SingleTickerProviderStateMixin {
   final mm = '💦💦💦💦💦💦 EmailAuthSignin 🔷🔷';
@@ -52,6 +31,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
 
   var formKey = GlobalKey<FormState>();
   bool busy = false;
+  bool initializing = false;
   lib.User? user;
   SignInStrings? signInStrings;
 
@@ -85,7 +65,8 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
           pp('$mm KasieTransie user found on database:  🍎 ${user!.toJson()} 🍎');
           await prefs.saveUser(user!);
 
-          final association = await listApiDog.getAssociationById(user!.associationId!);
+          final association =
+              await listApiDog.getAssociationById(user!.associationId!);
           final users =
               await listApiDog.getAssociationUsers(user!.associationId!);
           final countries = await listApiDog.getCountries();
@@ -101,103 +82,82 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
           pp('$mm KasieTransie users found on database:  🍎 ${users.length} 🍎');
           pp('$mm KasieTransie my country:  🍎 ${myCountry!.name!} 🍎');
 
-          try {
-            await prefs.saveUser(user!);
-            pp('\n\n\n$mm ... about to initialize KasieTransie data ..... ');
+          await prefs.saveUser(user!);
+          pp('\n\n\n$mm ... about to initialize KasieTransie data ..... ');
 
-            await _doSettings();
+          if (mounted) {
+            showSnackBar(
+                duration: const Duration(seconds: 2),
+                padding: 20,
+                backgroundColor: Theme.of(context).primaryColor,
+                textStyle: myTextStyleMedium(context),
+                message: 'You have been signed in OK. Welcome!',
+                context: context);
 
-            if (mounted) {
-              showSnackBar(
-                  duration: const Duration(seconds: 2),
-                  padding: 20,
-                  backgroundColor: Theme.of(context).primaryColor,
-                  textStyle: myTextStyleMedium(context),
-                  message: 'You have been signed in OK. Welcome!',
-                  context: context);
-
-              var ok = await navigateWithScale(const InitializerCover(), context);
-              pp('$mm initialization should be complete! : $ok');
-              pp('$mm every check is cool. about to pop!');
-              if (mounted) {
-                Navigator.of(context).pop(user!);
-              }
-            }
-          } catch (e) {
-            pp('$mm ${E.redDot} We are fucked, Jack! The problem: $e');
+            navigateWithScale(
+                InitializerCover(
+                  onInitializationComplete: () {
+                    pp('$mm initialization should be complete! ');
+                    widget.onGoodSignIn();
+                  },
+                  onError: () {
+                    pp('$mm initialization is fucked! ');
+                    widget.onSignInError();
+                  },
+                ),
+                context);
           }
-          setState(() {
-            busy = false;
-          });
-          return;
         }
       } else {
-        if (mounted) {
-          showSnackBar(
-              message:
-                  'Authentication failed, please check your email and password',
-              context: context);
-        }
+        widget.onSignInError();
       }
     } catch (e) {
       pp(e);
-      if (mounted) {
-        showSnackBar(
-            backgroundColor: Colors.red,
-            textStyle: const TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold),
-            padding: 20,
-            message:
-                'We may have a slight problem here. Let us solve it together!',
-            context: context);
-      }
+      widget.onSignInError();
     }
     setState(() {
       busy = false;
     });
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
   }
 
   Future<void> _doSettings() async {
-    try {
-    var settingsList =
-        await listApiDog.getSettings(user!.associationId!, true);
-    if (settingsList.isNotEmpty) {
-      settingsList.sort((a, b) => b.created!.compareTo(a.created!));
-      await themeBloc.changeToTheme(settingsList.first.themeIndex!);
-      pp('$mm KasieTransie theme has been set to:  🍎 ${settingsList.first.themeIndex!} 🍎');
-      await themeBloc.changeToLocale(settingsList.first.locale!);
-      await prefs.saveSettings(settingsList.first);
-      pp('$mm ........ settings should be saved by now ...');
-    } else {
-      final m = lib.SettingsModel(ObjectId(),
-        associationId: user!.associationId,
-        created: DateTime.now().toUtc().toIso8601String(),
-        commuterGeofenceRadius: 200,
-        commuterSearchMinutes: 30,
-        commuterGeoQueryRadius: 50,
-        distanceFilter: 10,
-        geofenceRadius: 200,
-        heartbeatIntervalSeconds: 300,
-        locale: 'en',
-        loiteringDelay: 30,
-        themeIndex: 0,
-        vehicleGeoQueryRadius: 200,
-        vehicleSearchMinutes: 30,
-        numberOfLandmarksToScan: 0,
-        refreshRateInSeconds: 300,
-      );
-      //
-      pp('$mm ........ adding default settings for association ...');
-      final sett = await dataApiDog.addSettings(m);
-      await prefs.saveSettings(sett);
-    }
-    } catch (e) {
-      pp('$mm ... settings fucking up! ${E.redDot}');
-      pp(e);
-    }
+    // try {
+    // var settingsList =
+    //     await listApiDog.getSettings(user!.associationId!, true);
+    // if (settingsList.isNotEmpty) {
+    //   settingsList.sort((a, b) => b.created!.compareTo(a.created!));
+    //   await themeBloc.changeToTheme(settingsList.first.themeIndex!);
+    //   pp('$mm KasieTransie theme has been set to:  🍎 ${settingsList.first.themeIndex!} 🍎');
+    //   await themeBloc.changeToLocale(settingsList.first.locale!);
+    //   await prefs.saveSettings(settingsList.first);
+    //   pp('$mm ........ settings should be saved by now ...');
+    // } else {
+    //   final m = lib.SettingsModel(ObjectId(),
+    //     associationId: user!.associationId,
+    //     created: DateTime.now().toUtc().toIso8601String(),
+    //     commuterGeofenceRadius: 200,
+    //     commuterSearchMinutes: 30,
+    //     commuterGeoQueryRadius: 50,
+    //     distanceFilter: 10,
+    //     geofenceRadius: 200,
+    //     heartbeatIntervalSeconds: 300,
+    //     locale: 'en',
+    //     loiteringDelay: 30,
+    //     themeIndex: 0,
+    //     vehicleGeoQueryRadius: 200,
+    //     vehicleSearchMinutes: 30,
+    //     numberOfLandmarksToScan: 0,
+    //     refreshRateInSeconds: 300,
+    //   );
+    //   //
+    //   pp('$mm ........ adding default settings for association ...');
+    //   final sett = await dataApiDog.addSettings(m);
+    //   await prefs.saveSettings(sett);
+    // }
+    // } catch (e) {
+    //   pp('$mm ... settings fucking up! ${E.redDot}');
+    //   pp(e);
+    // }
   }
 
   @override
@@ -306,7 +266,18 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
                   ),
                 ),
               ),
-            )
+            ),
+            initializing? Positioned(child: InitializerCover(onInitializationComplete: (){
+              pp('$mm ................................'
+                  '... onInitializationComplete .... ');
+              Navigator.of(context).pop();
+              widget.onGoodSignIn();
+            }, onError: (){
+              pp('$mm ................................'
+                  '... onError .... ');
+              Navigator.of(context).pop();
+              widget.onSignInError();
+            })):const SizedBox(),
           ],
         ),
       ),

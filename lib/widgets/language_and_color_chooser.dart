@@ -124,8 +124,13 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
     return SafeArea(
         child: Scaffold(
       appBar: AppBar(
+        leading: const SizedBox(),
         title:  Text('Language & Colour', style: myTextStyleMediumLargeWithColor(context, Theme.of(context).primaryColor, 24),),
-
+        actions: [
+          IconButton(onPressed: (){
+            Navigator.of(context).pop(colorAndLocale);
+          }, icon: const Icon(Icons.check)),
+        ],
         bottom: PreferredSize(preferredSize: const Size.fromHeight(64), child: Column(
           children: [
             Row(mainAxisAlignment: MainAxisAlignment.center,

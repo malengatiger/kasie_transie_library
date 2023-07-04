@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,7 +9,6 @@ import 'package:intl/date_symbol_data_file.dart';
 import 'package:intl/intl.dart';
 import 'package:pretty_json/pretty_json.dart';
 import 'dart:ui' as ui;
-import 'package:intl/intl.dart';
 
 import 'emojis.dart';
 
@@ -139,17 +137,6 @@ Color getColor(String stringColor) {
       return Colors.orange;
     default:
       return Colors.black;
-  }
-}
-
-Future playAudioBeep() async {
-  pp('............ playAudioBeep ......');
-
-  try {
-    final player = AudioPlayer();
-    await player.play(AssetSource('beep2.wav)'));
-  } catch (e) {
-    pp(e);
   }
 }
 
@@ -676,7 +663,7 @@ Future<String> getStringFromAssets(String path) async {
 
   pp('${E.blueDot}${E.blueDot}${E.blueDot} getStringFromAssets: locale: $mPath');
   final stringData = await rootBundle.loadString(mPath);
-  pp('${E.blueDot}${E.blueDot}${E.blueDot} getStringFromAssets: stringData: $stringData');
+  // pp('${E.blueDot}${E.blueDot}${E.blueDot} getStringFromAssets: stringData: $stringData');
 
   return stringData;
 }

@@ -3,8 +3,6 @@ import 'dart:collection';
 
 import 'package:geofence_service/geofence_service.dart' as geo;
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/parsers.dart';
 import 'package:realm/realm.dart';
 

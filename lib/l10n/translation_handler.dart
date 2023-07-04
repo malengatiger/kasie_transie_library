@@ -50,7 +50,7 @@ class TranslationHandler {
     var s = await getStringFromAssets(locale);
     var xJson = jsonDecode(s);
     var json2 = xJson['map'];
-    myPrettyJsonPrint(json2);
+    // myPrettyJsonPrint(json2);
     final translationKeys = MyKeys.getKeys();
 
     translationKeys.forEach((key, value) {

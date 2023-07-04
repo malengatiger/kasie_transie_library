@@ -6,29 +6,22 @@ import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:realm/realm.dart';
 
-import '../bloc/theme_bloc.dart';
 import '../data/schemas.dart' as lib;
 import '../l10n/translation_handler.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
 import '../utils/initialiazer_cover.dart';
-import '../utils/initializer.dart';
 import '../utils/navigator_utils.dart';
 
 class PhoneAuthSignin extends StatefulWidget {
   const PhoneAuthSignin({Key? key,
-    // required this.prefs,
-    // required this.listApiDog,
-    required this.dataApiDog,
-    required this.onSuccessfulSignIn})
+    required this.dataApiDog, required this.onGoodSignIn, required this.onSignInError,})
       : super(key: key);
 
-  // final Prefs prefs;
-  // final ListApiDog listApiDog;
+  final Function onGoodSignIn;
+  final Function onSignInError;
   final DataApiDog dataApiDog;
-  final Function(lib.User) onSuccessfulSignIn;
 
   @override
   PhoneAuthSigninState createState() => PhoneAuthSigninState();
@@ -53,6 +46,7 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
   bool verificationFailed = false;
   bool verificationCompleted = false;
   bool busy = false;
+  bool initializing = false;
   lib.User? user;
   SignInStrings? signInStrings;
 
@@ -71,7 +65,6 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
     setState(() {});
   }
 
-  void onSuccessfulSignIn(lib.User user) {}
 
   void _processSignIn() async {
     pp('\n\n$mm _processSignIn ... sign in the user using code: ${codeController
@@ -106,41 +99,7 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
       pp(
           '$mm seeking to acquire this user from the Kasie database by their id: 🌀🌀🌀${userCred
               .user?.uid}');
-      user = await listApiDog.getUserById(userCred.user!.uid);
-      //
-      var settingsList =
-      await listApiDog.getSettings(user!.associationId!, true);
-      if (settingsList.isNotEmpty) {
-        settingsList.sort((a, b) => b.created!.compareTo(a.created!));
-        await themeBloc.changeToTheme(settingsList.first.themeIndex!);
-        pp('$mm KasieTransie theme has been set to:  🍎 ${settingsList.first.themeIndex!} 🍎');
-        await themeBloc.changeToLocale(settingsList.first.locale!);
-        await prefs.saveSettings(settingsList.first);
-        pp('$mm ........ settings should be saved by now ...');
-      } else {
-        final m = lib.SettingsModel(ObjectId(),
-          associationId: user!.associationId,
-          created: DateTime.now().toUtc().toIso8601String(),
-          commuterGeofenceRadius: 200,
-          commuterSearchMinutes: 30,
-          commuterGeoQueryRadius: 50,
-          distanceFilter: 10,
-          geofenceRadius: 200,
-          heartbeatIntervalSeconds: 300,
-          locale: 'en',
-          loiteringDelay: 30,
-          themeIndex: 0,
-          vehicleGeoQueryRadius: 200,
-          vehicleSearchMinutes: 30,
-          numberOfLandmarksToScan: 0,
-          refreshRateInSeconds: 300,
-        );
-        //
-        pp('$mm ........ adding default settings for association ...');
-        final sett = await dataApiDog.addSettings(m);
-        await prefs.saveSettings(sett);
-      }
-      //
+      user = await listApiDog.getUserById(userCred.user!.uid); //
 
       if (user != null) {
         pp('$mm KasieTransie user found on database:  🍎 ${user!.toJson()} 🍎');
@@ -159,34 +118,10 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
         }
         pp('$mm KasieTransie users found on database:  🍎 ${users.length} 🍎');
         pp('$mm KasieTransie my country:  🍎 ${myCountry!.name!} 🍎');
-
-        if (mounted) {
-          var ok = await navigateWithScale(const InitializerCover(), context);
-          pp('$mm initialization should be complete! : $ok');
-          pp('$mm every check is cool. about to pop!');
-          if (mounted) {
-            Navigator.of(context).pop(user!);
-          }
-        }
         setState(() {
-          busy = false;
+          initializing = true;
         });
-        if (mounted) {
-          showSnackBar(
-              message: signInStrings == null
-                  ? '${user!.name} has been signed in'
-                  : signInStrings!.memberSignedIn,
-              backgroundColor: Theme
-                  .of(context)
-                  .primaryColorDark,
-              context: context);
-        }
-        pp('$mm every check is cool. about to pop!');
-        widget.onSuccessfulSignIn(user!);
-        if (mounted) {
-          Navigator.of(context).pop(user!);
-        }
-        return;
+
       }
     } catch (e) {
       pp('\n\n\n $mm ${E.redDot} This is annoying! .... $e \n\n\n');
@@ -212,18 +147,19 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
             : signInStrings!.serverUnreachable;
       }
       pp(msg);
-      if (mounted) {
-        showSnackBar(
-            duration: const Duration(seconds: 5),
-            textStyle: myTextStyleMedium(context),
-            padding: 20.0,
-            message: msg,
-            context: context);
-        setState(() {
-          busy = false;
-        });
-      }
-      return;
+      widget.onSignInError();
+      // if (mounted) {
+      //   showSnackBar(
+      //       duration: const Duration(seconds: 5),
+      //       textStyle: myTextStyleMedium(context),
+      //       padding: 20.0,
+      //       message: msg,
+      //       context: context);
+      //   setState(() {
+      //     busy = false;
+      //   });
+      // }
+      // return;
     }
   }
 
@@ -310,14 +246,14 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Text('Cellphone sign In'),
-            bottom: const PreferredSize(
-                preferredSize: Size.fromHeight(100), child: Column()),
-          ),
-          body: Padding(
+    return SafeArea(child: Scaffold(
+      appBar: AppBar(
+        title: const Text('Phone SignIn'),
+        bottom: const PreferredSize(preferredSize: Size.fromHeight(100), child: Column()),
+      ),
+      body: Stack(
+        children: [
+          Padding(
             padding: const EdgeInsets.all(16.0),
             child: Card(
               elevation: 4,
@@ -520,7 +456,21 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
               ),
             ),
           ),
-        ));
+          initializing? Positioned(child: InitializerCover(onInitializationComplete: (){
+            pp('$mm ................................'
+                '... onInitializationComplete .... ');
+            Navigator.of(context).pop();
+            widget.onGoodSignIn();
+          }, onError: (){
+            pp('$mm ................................'
+              '... onError .... ');
+
+            Navigator.of(context).pop();
+            widget.onSignInError();
+          })):const SizedBox(),
+        ],
+      ),
+    ));
   }
 }
 

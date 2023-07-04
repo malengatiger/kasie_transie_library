@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart';
-import 'package:kasie_transie_library/isolates/country_cities_isolate.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/isolates/routes_isolate.dart';
@@ -20,7 +19,7 @@ class Initializer {
 
   Stream<bool> get completionStream => _streamController.stream;
 
-  Future initialize() async {
+  Future<String> initialize() async {
     pp('\n\n\n$mm ... initialize starting; all association data to be downloaded ....');
 
     car = await prefs.getCar();
@@ -33,10 +32,13 @@ class Initializer {
     if (car != null) {
       myPrettyJsonPrint(car!.toJson());
     }
+    if (user != null) {
+      myPrettyJsonPrint(user!.toJson());
+    }
 
     try {
-      pp('$mm ... starting to get cars ... 1');
-      await _getVehicles();
+      // pp('$mm ... starting to get cars ... 1');
+      // await _getVehicles();
 
       pp('$mm ... starting to get users ... 2');
       await _getUsers();
@@ -46,18 +48,20 @@ class Initializer {
 
       pp('$mm sending completion flag to stream .... ${E.nice} ... 4');
       _streamController.sink.add(true);
-      try {
-        pp('$mm ... starting to get country cities ... without await! ... 5');
-        if (user != null) {
-          countryCitiesIsolate.getCountryCities(user!.countryId!);
-        }
-        if (car != null) {
-          countryCitiesIsolate.getCountryCities(car!.countryId!);
-        }
-      } catch (e) {
-        pp('$mm something is fucked up here, Boss! - ${E.redDot} $e');
-        pp(e);
-      }
+      return "Possibility exists that we are done, Chief!";
+
+      // try {
+      //   pp('$mm ... starting to get country cities ... without await! ... 5');
+      //   if (user != null) {
+      //     countryCitiesIsolate.getCountryCities(user!.countryId!);
+      //   }
+      //   if (car != null) {
+      //     countryCitiesIsolate.getCountryCities(car!.countryId!);
+      //   }
+      // } catch (e) {
+      //   pp('$mm something is fucked up here, Boss! - ${E.redDot} $e');
+      //   pp(e);
+      // }
     } catch (e) {
       pp(e);
       throw Exception('Initializer failed!');
