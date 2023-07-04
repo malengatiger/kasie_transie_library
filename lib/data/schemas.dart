@@ -123,6 +123,7 @@ class _DispatchRecord {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {};
     map['dispatchRecordId'] = dispatchRecordId;
+    map['_id'] = id.hexString;
     map['landmarkId'] = landmarkId;
     map['passengers'] = passengers;
     map['vehicleId'] = vehicleId;
@@ -183,9 +184,11 @@ class _Association {
     Map<String, dynamic> map = {};
     map['cityId'] = cityId;
     map['countryId'] = countryId;
+    map['associationId'] = associationId;
     map['associationName'] = associationName;
     map['cityName'] = cityName;
     map['active'] = active;
+    map['_id'] = id.hexString;
     map['countryName'] = countryName;
     map['dateRegistered'] = dateRegistered;
     map['geoHash'] = geoHash;
@@ -221,6 +224,7 @@ class _VehicleArrival {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {};
     map['landmarkId'] = landmarkId;
+    map['_id'] = id.hexString;
     map['ownerId'] = ownerId;
     map['vehicleId'] = vehicleId;
     map['ownerId'] = ownerId;
@@ -260,6 +264,7 @@ class _VehicleDeparture {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {};
     map['landmarkId'] = landmarkId;
+    map['_id'] = id.hexString;
     map['ownerId'] = ownerId;
     map['vehicleId'] = vehicleId;
     map['ownerId'] = ownerId;
@@ -298,6 +303,7 @@ class _UserGeofenceEvent {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {};
     map['userGeofenceId'] = userGeofenceId;
+    map['_id'] = id.hexString;
     map['landmarkId'] = landmarkId;
     map['action'] = action;
     map['userId'] = userId;
@@ -333,6 +339,7 @@ class _VehicleHeartbeat {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {};
     map['ownerId'] = ownerId;
+    map['_id'] = id.hexString;
     map['vehicleId'] = vehicleId;
     map['ownerName'] = ownerName;
     map['created'] = created;
