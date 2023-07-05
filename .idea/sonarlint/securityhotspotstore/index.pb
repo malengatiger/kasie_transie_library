@@ -1,8 +1,6 @@
 
 9
 	README.md,8/e/8ec9a00bfd09b3190ac6b22251dbb1aa95a0579d
-H
-lib/data/route_pair.dart,6/8/68ac186f202a24cbf6967001ce5244b5d870d833
 9
 	.metadata,5/a/5adbcffabbc7cc6a2701af40c04edc2b3ff65fcb
 N
@@ -67,8 +65,6 @@ R
 "lib/widgets/country_selection.dart,1/2/1278c7470502218cccfe944c4647fb9824c7ff6f
 F
 lib/bloc/app_auth.dart,2/e/2e8ace8db1fde91611d0c739cd6d716a3f5ac924
-G
-lib/data/route_bag.dart,2/0/204f51ea209b239b34c4c12539e8e22a0a8a27f1
 4
 .env,3/c/3c84dcdc6bbe3d7817c49dcdc327b926fea1808a
 N
@@ -123,9 +119,5 @@ O
 lib/widgets/locale_chooser.dart,2/1/2163e20a8caaa58fc903d0996eaede998c75d511
 J
 lib/bloc/data_api_dog.dart,0/f/0f27426890d5956a726f9c74637bb8749dbd74bb
-D
-lib/utils/prefs.dart,0/6/062ed39b477cbfc674db4a3f8539e7725e506c8c
 N
 lib/data/color_and_locale.dart,5/4/54dcc551d38ac6efc527fd0c230bfbc8ce668b1a
-H
-lib/bloc/theme_bloc.dart,f/6/f67048e6e712a43d23400d457095afdd941be33a

@@ -44,6 +44,8 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
     try {
       colors = SchemeUtil.getDarkThemeColors();
       colorAndLocale = await prefs.getColorAndLocale();
+      colorFromTheme = SchemeUtil.getColorFromTheme(colorAndLocale);
+      langBag = LangBag(language: await translator.translate(colorAndLocale.locale, locale), index: 0, locale: colorAndLocale.locale, );
       await getLanguages();
     } catch (e) {
       pp(e);
@@ -97,7 +99,7 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
     pp('$mm onColorChosen, index: ${colorFromTheme.themeIndex}');
     colorAndLocale.themeIndex = colorFromTheme.themeIndex;
     prefs.saveColorAndLocale(colorAndLocale);
-    themeBloc.changeToTheme(colorAndLocale);
+    themeBloc.changeColorAndLocale(colorAndLocale);
     setState(() {
       this.colorFromTheme = colorFromTheme;
     });
@@ -110,7 +112,7 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
     colorAndLocale.locale = bag.locale;
     prefs.saveColorAndLocale(colorAndLocale);
     locale = bag.locale;
-    themeBloc.changeToLocale(colorAndLocale);
+    themeBloc.changeColorAndLocale(colorAndLocale);
     await getLanguages();
     setState(() {
       langBag = bag;

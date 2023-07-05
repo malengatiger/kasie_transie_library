@@ -59,8 +59,6 @@ L
 lib/utils/error_handler.dart,1/0/10a99e756989f9692ff3b288cdfdb0dc6a40787b
 K
 lib/bloc/geo_hash_util.dart,6/1/619ee1d07194d8979c54731c227d110998dea3e6
-H
-lib/data/route_pair.dart,6/8/68ac186f202a24cbf6967001ce5244b5d870d833
 O
 lib/widgets/city_selection.dart,b/a/bae87fc0f3dabeb2d125869428ea939f930b31ea
 R
@@ -69,8 +67,6 @@ F
 lib/bloc/app_auth.dart,2/e/2e8ace8db1fde91611d0c739cd6d716a3f5ac924
 4
 .env,3/c/3c84dcdc6bbe3d7817c49dcdc327b926fea1808a
-G
-lib/data/route_bag.dart,2/0/204f51ea209b239b34c4c12539e8e22a0a8a27f1
 N
 lib/data/route_point_list.dart,5/4/54a444dc3014bf4246be841fe332300f8c8a3df1
 V
@@ -123,9 +119,5 @@ J
 lib/bloc/data_api_dog.dart,0/f/0f27426890d5956a726f9c74637bb8749dbd74bb
 O
 lib/widgets/locale_chooser.dart,2/1/2163e20a8caaa58fc903d0996eaede998c75d511
-D
-lib/utils/prefs.dart,0/6/062ed39b477cbfc674db4a3f8539e7725e506c8c
 N
 lib/data/color_and_locale.dart,5/4/54dcc551d38ac6efc527fd0c230bfbc8ce668b1a
-H
-lib/bloc/theme_bloc.dart,f/6/f67048e6e712a43d23400d457095afdd941be33a

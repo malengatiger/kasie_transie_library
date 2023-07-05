@@ -14,87 +14,41 @@ import '../utils/prefs.dart';
 final ThemeBloc themeBloc = ThemeBloc();
 
 class ThemeBloc {
+  final mm = '🍎🍎🍎ThemeBloc 🍎🍎🍎: ';
   ThemeBloc() {
     pp('$mm ... ThemeBloc initializing ....');
     _initialize();
   }
 
-  final StreamController<LocaleAndTheme> themeStreamController =
+  final StreamController<ColorAndLocale> themeStreamController =
       StreamController.broadcast();
 
-  final mm = '🍎🍎🍎ThemeBloc 🍎🍎🍎: ';
-  Stream<LocaleAndTheme> get localeAndThemeStream =>
+  Stream<ColorAndLocale> get localeAndThemeStream =>
       themeStreamController.stream;
 
-  final _rand = Random(DateTime.now().millisecondsSinceEpoch);
-  int _themeIndex = 0;
-  int get themeIndex => _themeIndex;
-  SettingsModel? settings;
+  ColorAndLocale? colorAndLocale;
 
   _initialize() async {
-    settings = await prefs.getSettings();
-    if (settings == null) {
-      return;
-    }
-    pp('$mm initialize: acquired settings: ....theme index: ${settings!.themeIndex}');
-    Locale newLocale = Locale(settings!.locale!);
-    final m =
-        LocaleAndTheme(themeIndex: settings!.themeIndex!, locale: newLocale);
-    pp('$mm initialize: locale = ${m.locale.toString()} ... put $m in the stream');
-    themeStreamController.sink.add(m);
+    colorAndLocale = await prefs.getColorAndLocale();
+    colorAndLocale ??= ColorAndLocale(themeIndex: 0, locale: 'en');
+    pp('$mm initialize: acquired settings: ....theme index: ${colorAndLocale!.themeIndex}');
+    pp('$mm initialize: locale = ${colorAndLocale!.locale} ... '
+        'themeIndex: ${colorAndLocale!.themeIndex} in the stream');
+
+    themeStreamController.sink.add(colorAndLocale!);
   }
 
   ThemeBag getTheme(int index) {
     return SchemeUtil.getTheme(themeIndex: index);
   }
 
-  Future<void> changeToRandomTheme() async {
-    _themeIndex = _rand.nextInt(SchemeUtil.getThemeCount() - 1);
-    pp('\n\n$mm changing to theme index: $_themeIndex');
-    pp('$mm _setStream: setting stream .... to theme index: $_themeIndex');
-    settings ??= await prefs.getSettings();
-    settings!.themeIndex = _themeIndex;
-    await prefs.saveSettings(settings!);
-
-    Locale newLocale = Locale(settings!.locale!);
-    final m =
-        LocaleAndTheme(themeIndex: settings!.themeIndex!, locale: newLocale);
-    themeStreamController.sink.add(m);
-  }
-
-  Future<void> changeToTheme(ColorAndLocale colorAndLocale) async {
+  Future<void> changeColorAndLocale(ColorAndLocale colorAndLocale) async {
     pp('\n\n$mm changing to theme index: ${colorAndLocale.themeIndex} ${colorAndLocale.locale}, adding to stream');
-    Locale newLocale = Locale(colorAndLocale.locale);
-    final m =
-    LocaleAndTheme(themeIndex: colorAndLocale.themeIndex, locale: newLocale);
-    themeStreamController.sink.add(m);
+    themeStreamController.sink.add(colorAndLocale);
 
-    pp('$mm changeToTheme has put a locale on the themeStreamController');
+    pp('$mm changeToTheme has put a colorAndLocale on the themeStreamController');
   }
 
-  Future<void> changeToLocale(ColorAndLocale colorAndLocale) async {
-    pp('\n\n$mm changing to theme index: ${colorAndLocale.themeIndex} ${colorAndLocale.locale}, adding to stream');
-
-    Locale newLocale = Locale(colorAndLocale.locale);
-    final m =
-    LocaleAndTheme(themeIndex: colorAndLocale.themeIndex, locale: newLocale);
-    themeStreamController.sink.add(m);
-
-    pp('$mm setLocaleAndTheme has put a locale on the themeStreamController');
-  }
-
-  Future<void> setLocaleAndTheme(int index, String locale, SettingsModel settings) async {
-    settings.themeIndex = index;
-    settings.locale = locale;
-    await prefs.saveSettings(settings);
-
-    Locale newLocale = Locale(settings.locale!);
-    final m =
-        LocaleAndTheme(themeIndex: settings.themeIndex!, locale: newLocale);
-    themeStreamController.sink.add(m);
-    pp('$mm setLocaleAndTheme has put a locale on the themeStreamController');
-
-  }
 
   int getThemeCount() {
     return SchemeUtil.getThemeCount();
@@ -146,6 +100,12 @@ class SchemeUtil {
       index++;
     }
     return colors;
+  }
+
+  static ColorFromTheme getColorFromTheme(ColorAndLocale colorAndLocale) {
+    var bag = getThemeByIndex(colorAndLocale.themeIndex);
+    final cft = ColorFromTheme(bag.darkTheme.primaryColor, colorAndLocale.themeIndex);
+    return cft;
   }
   static ThemeBag getRandomTheme() {
     if (_themeBags.isEmpty) _setThemes();

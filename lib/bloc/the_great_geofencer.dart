@@ -181,16 +181,20 @@ class TheGreatGeofencer {
       case 'GeofenceStatus.DWELL':
         if (_user != null) {
           _addUserGeofenceEvent(geofence, 'GeofenceStatus.DWELL');
-        } else {
+        }
+        if (_vehicle != null) {
           _addVehicleArrival(geofence);
         }
+
         break;
       case 'GeofenceStatus.EXIT':
         if (_user != null) {
           _addUserGeofenceEvent(geofence, 'GeofenceStatus.EXIT');
-        } else {
+        }
+        if (_vehicle != null) {
           _addVehicleDeparture(geofence);
         }
+
 
         break;
     }

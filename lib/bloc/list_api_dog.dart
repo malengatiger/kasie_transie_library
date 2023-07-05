@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:kasie_transie_library/data/counter_bag.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
 import 'package:realm/realm.dart' as rm;
@@ -253,6 +254,18 @@ class ListApiDog {
     return list;
   }
 
+  Future<List<CounterBag>> getVehicleCounts(
+      String vehicleId) async {
+    final cmd = '${url}getVehicleCounts?vehicleId=$vehicleId';
+    List resp = await _sendHttpGET(cmd);
+    var list = <CounterBag>[];
+    for (var mJson in resp) {
+      list.add(CounterBag.fromJson(mJson));
+    }
+
+    pp('$mm getVehicleCounts from mongo: ${list.length}');
+    return list;
+  }
   Future<List<RouteCity>> getAssociationRouteCities(
       String associationId) async {
     final cmd = '${url}getAssociationRouteCities?associationId=$associationId';
