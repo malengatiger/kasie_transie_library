@@ -23,7 +23,7 @@ class AssociationRouteMaps extends StatefulWidget {
 }
 
 class AssociationRouteMapsState extends State<AssociationRouteMaps> {
-  static const defaultZoom = 14.0;
+  static const defaultZoom = 16.0;
   final Completer<GoogleMapController> _mapController = Completer();
 
   CameraPosition? _myCurrentCameraPosition = const CameraPosition(
@@ -192,6 +192,18 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
       //return;
     }
     _addPolyLine();
+    landmarkIndex = 0;
+    for (var rl in routeLandmarks) {
+      _markers.add(Marker(markerId: MarkerId(rl.landmarkId!),
+      icon: numberMarkers.elementAt(landmarkIndex),
+      position: LatLng(rl.position!.coordinates[1], rl.position!.coordinates[0]),
+        infoWindow: InfoWindow(
+          title: rl.landmarkName,
+          snippet: '🍎Part of ${rl.routeName}'
+        )
+      ));
+      landmarkIndex++;
+    }
     setState(() {});
     var point = existingRoutePoints.first;
     var latLng = LatLng(
@@ -307,20 +319,18 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Row(
+          title: Row(mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text('Route Maps', style: myTextStyleSmall(context),),
-              const SizedBox(
-                width: 28,
+              Expanded(
+                child: RouteDropDown(
+                    routes: routes,
+                    onRoutePicked: (r) {
+                      setState(() {
+                        routeSelected = r;
+                      });
+                      _getRouteMap(r);
+                    }),
               ),
-              RouteDropDown(
-                  routes: routes,
-                  onRoutePicked: (r) {
-                    setState(() {
-                      routeSelected = r;
-                    });
-                    _getRouteMap(r);
-                  }),
             ],
           ),
         ),
@@ -423,10 +433,11 @@ class RouteDropDown extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = <DropdownMenuItem<lib.Route>>[];
     for (var r in routes) {
-      items.add(DropdownMenuItem<lib.Route>(value: r, child: Text(r.name!)));
+      items.add(DropdownMenuItem<lib.Route>(value: r, 
+          child: Text(r.name!, style: myTextStyleSmall(context),)));
     }
     return DropdownButton(
-        hint: const Text('Select Route'),
+        hint:  Text('Select Route', style: myTextStyleSmall(context),),
         items: items,
         onChanged: (r) {
           if (r != null) {

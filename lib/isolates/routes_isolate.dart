@@ -23,7 +23,6 @@ class RoutesIsolate {
     pp('\n\n\n$xy ............................ getting routes ....');
     try {
       final token = await appAuth.getAuthToken();
-
       if (token != null) {
         final bag = DonkeyBag(associationId, KasieEnvironment.getUrl(), token);
         List mRoutes = await _handleRoutes(bag);
@@ -42,7 +41,10 @@ class RoutesIsolate {
         await _handleRouteLandmarks(routeIds, bag);
         await _handleRoutePoints(routeIds, bag);
         await _handleRouteCities(routeIds, bag);
-        pp('\n\n\n$xy ..... done getting routes ....\n\n');
+
+        pp('\n\n\n$xy ..... done getting routes ....${E.leaf} '
+            'returning ${finalRoutes.length} routes\n\n');
+
         return finalRoutes;
       } else {
         final msg =

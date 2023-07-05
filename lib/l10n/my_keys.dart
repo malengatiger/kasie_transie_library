@@ -11,6 +11,17 @@ class MyKeys {
   }
 
   static _buildMap() {
+    hashMap['ownerDash'] = 'ownerDash';
+    hashMap['search'] = 'search';
+    hashMap['numberOfCars'] = 'numberOfCars';
+    hashMap['waiting'] = 'waiting';
+    hashMap['vehicles'] = 'vehicles';
+    hashMap['refresh'] = 'refresh';
+    hashMap['searchVehicles'] = 'searchVehicles';
+    hashMap['tapToClose'] = 'tapToClose';
+    hashMap['numberOfDays'] = 'numberOfDays';
+    hashMap['weHelp'] = 'weHelp';
+
     hashMap['routeColour'] = 'routeColour';
     hashMap['pt'] = 'pt';
     hashMap['noLandmarks'] = 'noLandmarks';

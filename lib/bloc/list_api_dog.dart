@@ -8,6 +8,7 @@ import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
 import 'package:realm/realm.dart' as rm;
 
+import '../data/big_bag.dart';
 import '../data/route_bag.dart';
 import '../data/schemas.dart';
 import '../providers/kasie_providers.dart';
@@ -159,6 +160,20 @@ class ListApiDog {
     return null;
   }
 
+  Future<BigBag> getOwnersBag(String userId, String startDate) async {
+    final cmd = '${url}getOwnersBag?userId=$userId&startDate=$startDate';
+    final resp = await _sendHttpGET(cmd);
+    final bag = BigBag.fromJson(resp);
+
+    pp('$mm getOwnersBag: '
+        '\n vehicleHeartbeats: ${bag.vehicleHeartbeats.length} '
+        '\n vehicleArrivals: ${bag.vehicleArrivals.length} '
+        '\n vehicleHeartbeats: ${bag.vehicleHeartbeats.length} '
+        '\n vehicleDepartures: ${bag.vehicleDepartures.length}');
+
+    return bag;
+  }
+
   Future<List<State>> getCountryStates(String countryId) async {
     var mList = <State>[];
 
@@ -237,6 +252,21 @@ class ListApiDog {
 
     return list;
   }
+  Future<List<Vehicle>> getOwnerVehicles(
+      String userId, bool refresh) async {
+    rm.RealmResults<Vehicle> results = realm.query<Vehicle>('ownerId == \$0',[userId]);
+    final list = <Vehicle>[];
+    if (refresh || results.isEmpty) {
+      return await getOwnerCarsFromBackend(userId);
+    }
+
+    for (var element in results) {
+      list.add(element);
+    }
+    pp('$mm cached owner vehicles from realm: ${list.length}');
+
+    return list;
+  }
 
   Future<List<DispatchRecord>> getMarshalDispatchRecords(
       String userId, bool refresh) async {
@@ -264,6 +294,18 @@ class ListApiDog {
     }
 
     pp('$mm getVehicleCounts from mongo: ${list.length}');
+    return list;
+  }
+  Future<List<CounterBag>> getVehicleCountsByDate(
+      String vehicleId, String startDate) async {
+    final cmd = '${url}getVehicleCountsByDate?vehicleId=$vehicleId&startDate=$startDate';
+    List resp = await _sendHttpGET(cmd);
+    var list = <CounterBag>[];
+    for (var mJson in resp) {
+      list.add(CounterBag.fromJson(mJson));
+    }
+
+    pp('$mm getVehicleCountsByDate from mongo: ${list.length}');
     return list;
   }
   Future<List<RouteCity>> getAssociationRouteCities(
@@ -334,6 +376,21 @@ class ListApiDog {
       realm.addAll<Vehicle>(list, update: true);
     });
     pp('$mm cached association vehicles from backend: ${list.length}');
+    return list;
+  }
+  Future<List<Vehicle>> getOwnerCarsFromBackend(String userId) async {
+    final cmd = '${url}getOwnerVehicles?userIdId=$userId';
+    List resp = await _sendHttpGET(cmd);
+    var list = <Vehicle>[];
+    for (var vehicleJson in resp) {
+      list.add(buildVehicle(vehicleJson));
+    }
+
+    realm.write(() {
+      realm.deleteAll<Vehicle>();
+      realm.addAll<Vehicle>(list, update: true);
+    });
+    pp('$mm cached owner vehicles from backend: ${list.length}');
     return list;
   }
 
