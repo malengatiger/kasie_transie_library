@@ -116,14 +116,20 @@ class LocationResponseMapState extends State<LocationResponseMap> {
         final latLng = LatLng(
             point.position!.coordinates[1], point.position!.coordinates[0]);
         latLngs.add(latLng);
-        final polyLine = Polyline(
-          polylineId: PolylineId(route.routeId!),
-          points: latLngs,
-          width: 12,
-          color: getColor(route.color!),
-        );
-        _polyLines.add(polyLine);
       }
+      final polyLine = Polyline(
+        polylineId: PolylineId(route.routeId!),
+        points: latLngs,
+        width: 12,
+        onTap: () {
+          pp('$mm ... polyline tapped ... point below ...');
+
+        },
+        consumeTapEvents: true,
+        color: getColor(route.color!),
+      );
+      _polyLines.add(polyLine);
+
       routeIndex++;
     }
   }
@@ -151,6 +157,10 @@ class LocationResponseMapState extends State<LocationResponseMap> {
             markerId: MarkerId(mark.landmarkId!),
             icon: icon,
             position: latLng,
+            onTap: () {
+              pp('$mm landmark tapped ...');
+              myPrettyJsonPrint(mark.toJson());
+            },
             infoWindow: InfoWindow(
               title: mark.landmarkName,
               snippet: mark.routeName,
@@ -206,7 +216,9 @@ class LocationResponseMapState extends State<LocationResponseMap> {
 
   @override
   Widget build(BuildContext context) {
-    final localDate = DateTime.parse(widget.locationResponse.created!).toLocal().toIso8601String();
+    final localDate = DateTime.parse(widget.locationResponse.created!)
+        .toLocal()
+        .toIso8601String();
     final date = getFormattedDateLong(localDate);
     return SafeArea(
       child: Scaffold(
@@ -224,13 +236,13 @@ class LocationResponseMapState extends State<LocationResponseMap> {
               ),
             ],
           ),
-          actions: [
-            IconButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                icon: const Icon(Icons.close)),
-          ],
+          // actions: [
+          //   IconButton(
+          //       onPressed: () {
+          //         Navigator.of(context).pop();
+          //       },
+          //       icon: const Icon(Icons.close)),
+          // ],
         ),
         body: busy
             ? const Center(
@@ -270,32 +282,37 @@ class LocationResponseMapState extends State<LocationResponseMap> {
                   ),
                   Positioned(
                       child: GestureDetector(
-                        onTap: (){
-                          Navigator.of(context).pop();
-                        },
-                        child: Card(
-                    shape: getRoundedBorder(radius: 16),
-                    color: Colors.black38,
-                    elevation: 8,
-                    child: SizedBox(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Card(
+                      shape: getRoundedBorder(radius: 16),
+                      color: Colors.black38,
+                      elevation: 8,
+                      child: SizedBox(
                         width: 220,
                         height: 64,
                         child: Center(
                           child: Column(
                             children: [
-                              const SizedBox(height: 12,),
+                              const SizedBox(
+                                height: 12,
+                              ),
                               Text(
                                 '${widget.locationResponse.vehicleReg}',
                                 style: myTextStyleMediumLargeWithColor(
                                     context, Colors.white30, 20),
                               ),
-                              Text(date, style: myTextStyleSmall(context),),
+                              Text(
+                                date,
+                                style: myTextStyleSmall(context),
+                              ),
                             ],
                           ),
                         ),
+                      ),
                     ),
-                  ),
-                      ))
+                  ))
                 ],
               ),
       ),

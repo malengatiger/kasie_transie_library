@@ -93,10 +93,6 @@ S
 #.idea/libraries/Flutter_Plugins.xml,e/8/e8bbc0fdfcefee9aa7b463c83a8a480b92333860
 <
 pubspec.yaml,e/8/e8e045469170189f1d6ef12576bd01af132b1018
-Y
-)lib/utils/device_background_location.dart,1/e/1efc5ba4b8bb851e5c438dac3827db57b42c5c29
-L
-lib/messaging/heartbeat.dart,b/1/b14f98b7711cc4bb9ca72552b2ac79fb8d7dfc73
 X
 (lib/isolates/country_cities_isolate.dart,6/c/6c5f4ef676527601b6dee97fc7714324a6e132a5
 L

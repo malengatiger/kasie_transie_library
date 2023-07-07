@@ -235,7 +235,8 @@ class FCMBloc {
     pp('$mm checking if location request is for me');
     final car = await prefs.getCar();
     if (car == null) {
-      pp('$mm location request is NOT for me');
+      pp('$mm location request is NOT for me. ${E.redDot}${E.redDot}${E.redDot} '
+          'CAR is NULL. What the fuck!');
       return;
     }
     if (request.vehicleId == car.vehicleId) {
@@ -265,7 +266,7 @@ class FCMBloc {
         pp(e);
       }
     } else {
-      pp('$mm ... nice try, but this location request is not for me. ${E.redDot}');
+      pp('$mm ... nice try, but this location request is definitely not for me. ${E.blueDot}');
     }
   }
 
@@ -389,7 +390,7 @@ void _respondToLocationRequest(
     pp('$mxx sending background location response! ${E.blueDot}');
     final result = await _sendLocationResponse(resp, token);
     pp('$mxx background location response successfully sent! ${E.leaf} ');
-    myPrettyJsonPrint(result.toJson());
+    myPrettyJsonPrint(result);
   } catch (e) {
     pp(e);
   }
