@@ -148,6 +148,10 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    var height = 100.0;
+    if (cars.length < 11) {
+      height = 24;
+    }
     return SafeArea(
         child: Scaffold(
             appBar: AppBar(
@@ -163,10 +167,11 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
                     icon: const Icon(Icons.refresh))
               ],
               bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(100),
-                  child: Column(
+                  preferredSize:  Size.fromHeight(height),
+                  child: showCarDetails? const SizedBox(): Column(
                     children: [
-                      Row(
+                       SizedBox(height: height == 100? 12:24,),
+                      height == 24? const SizedBox(): Row(
                         children: [
                           SizedBox(
                             width: 300,
@@ -231,51 +236,54 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
                       )
                     : Padding(
                         padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          children: [
-                            const SizedBox(
-                              height: 48,
-                            ),
-                            Expanded(
-                              child: bd.Badge(
-                                badgeContent: Text('${cars.length}'),
-                                badgeStyle: bd.BadgeStyle(
-                                    badgeColor: Colors.green[900]!,
-                                    padding: const EdgeInsets.all(12)),
-                                child: ListView.builder(
-                                    itemCount: carsToDisplay.length,
-                                    itemBuilder: (ctx, index) {
-                                      final ass =
-                                          carsToDisplay.elementAt(index);
-                                      return GestureDetector(
-                                        onTap: () {
-                                          _onCarSelected(ass);
-                                        },
-                                        child: Card(
-                                          shape: getRoundedBorder(radius: 16),
-                                          elevation: 4,
-                                          child: ListTile(
-                                            title: Text(
-                                              '${ass.vehicleReg}',
-                                              style: myTextStyleMediumBold(
-                                                  context),
-                                            ),
-                                            subtitle: Text(
-                                              '${ass.make} ${ass.model} - ${ass.year}',
-                                              style: myTextStyleSmall(context),
-                                            ),
-                                            leading: Icon(
-                                              Icons.airport_shuttle,
-                                              color: Theme.of(context)
-                                                  .primaryColor,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            children: [
+                              const SizedBox(
+                                height: 8,
+                              ),
+                              Expanded(
+                                child: bd.Badge(
+                                  badgeContent: Text('${cars.length}'),
+                                  badgeStyle: bd.BadgeStyle(
+                                      badgeColor: Colors.green[900]!,
+                                      padding: const EdgeInsets.all(12)),
+                                  child: ListView.builder(
+                                      itemCount: carsToDisplay.length,
+                                      itemBuilder: (ctx, index) {
+                                        final ass =
+                                            carsToDisplay.elementAt(index);
+                                        return GestureDetector(
+                                          onTap: () {
+                                            _onCarSelected(ass);
+                                          },
+                                          child: Card(
+                                            shape: getRoundedBorder(radius: 16),
+                                            elevation: 4,
+                                            child: ListTile(
+                                              title: Text(
+                                                '${ass.vehicleReg}',
+                                                style: myTextStyleMediumBold(
+                                                    context),
+                                              ),
+                                              subtitle: Text(
+                                                '${ass.make} ${ass.model} - ${ass.year}',
+                                                style: myTextStyleSmall(context),
+                                              ),
+                                              leading: Icon(
+                                                Icons.airport_shuttle,
+                                                color: Theme.of(context)
+                                                    .primaryColor,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      );
-                                    }),
-                              ),
-                            )
-                          ],
+                                        );
+                                      }),
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       ),
                 showCarDetails

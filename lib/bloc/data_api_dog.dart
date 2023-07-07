@@ -58,18 +58,22 @@ class DataApiDog {
     }
   }
 
-  Future addLocationRequest(LocationRequest request) async {
+  Future<LocationRequest> addLocationRequest(LocationRequest request) async {
     final bag = request.toJson();
     final cmd = '${url}addLocationRequest';
     final res = await _callPost(cmd, bag);
+    final lr = buildLocationRequest(res);
     pp('$mm LocationRequest added to database: $res');
+    return lr;
   }
 
-  Future addLocationResponse(LocationResponse response) async {
+  Future <LocationResponse>addLocationResponse(LocationResponse response) async {
     final bag = response.toJson();
     final cmd = '${url}addLocationResponse';
     final res = await _callPost(cmd, bag);
     pp('$mm LocationResponse added to database: $res');
+    final lr = buildLocationResponse(res);
+    return lr;
   }
 
   Future addVehicle(Vehicle vehicle) async {
@@ -77,6 +81,7 @@ class DataApiDog {
     final cmd = '${url}addVehicle';
     final res = await _callPost(cmd, bag);
     pp('$mm vehicle added to database: $res');
+
   }
 
   Future addUserGeofenceEvent(UserGeofenceEvent event) async {

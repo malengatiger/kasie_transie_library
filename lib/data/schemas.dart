@@ -633,7 +633,7 @@ class _LocationRequest {
   @PrimaryKey()
   late ObjectId id;
   @Indexed()
-  String? vehicleId;
+  String? vehicleId, vehicleReg;
   String? userId;
   String? userName;
   String? created;
@@ -645,6 +645,7 @@ class _LocationRequest {
       'userId': userId,
       'vehicleId': vehicleId,
       'userName': userName,
+      'vehicleReg': vehicleReg,
       'created': created,
       'associationId': associationId,
     };
@@ -658,7 +659,7 @@ class _LocationResponse {
   late ObjectId id;
   @Indexed()
   String? userId;
-  String? vehicleId;
+  String? vehicleId, vehicleReg;
   String? geoHash;
   String? userName;
   String? created;
@@ -670,6 +671,7 @@ class _LocationResponse {
       '_id': id.hexString,
       'geoHash': geoHash,
       'userId': userId,
+      'vehicleReg': vehicleReg,
       'position': position == null ? null : position!.toJson(),
       'vehicleId': vehicleId,
       'userName': userName,

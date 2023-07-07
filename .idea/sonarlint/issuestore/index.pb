@@ -63,8 +63,6 @@ O
 lib/widgets/city_selection.dart,b/a/bae87fc0f3dabeb2d125869428ea939f930b31ea
 R
 "lib/widgets/country_selection.dart,1/2/1278c7470502218cccfe944c4647fb9824c7ff6f
-F
-lib/bloc/app_auth.dart,2/e/2e8ace8db1fde91611d0c739cd6d716a3f5ac924
 4
 .env,3/c/3c84dcdc6bbe3d7817c49dcdc327b926fea1808a
 N
@@ -73,8 +71,6 @@ V
 &lib/data/calculated_distance_list.dart,1/1/11569e35f6e7041043625f061a6bda0a543236ba
 O
 lib/widgets/vehicle_detail.dart,c/d/cdfbce6e4a2c2931b70a6f3690263a67d48c9b61
-J
-lib/utils/environment.dart,2/9/29aa30c893fdd0dcb85853c0a069b2d7d001deae
 R
 "lib/providers/kasie_providers.dart,4/4/444f3d43023add5c821968865c0b4250a3a678a2
 R
@@ -103,20 +99,12 @@ L
 lib/messaging/heartbeat.dart,b/1/b14f98b7711cc4bb9ca72552b2ac79fb8d7dfc73
 <
 pubspec.yaml,e/8/e8e045469170189f1d6ef12576bd01af132b1018
-G
-lib/data/schemas.g.dart,a/e/ae9d36def259da82b2fd0cef34dd7fbd434adbfb
-F
-lib/utils/parsers.dart,f/d/fdd3bbae621bfbda008d330ec565412416ae2e53
 L
 lib/maps/directions_dog.dart,4/1/41a45c342eb19917c3b78ddfbea3eb6f4ba333e0
-K
-lib/messaging/fcm_bloc.dart,a/b/abc3ce0d0007de42374e4acee2f4babe2f6f7f47
 J
 lib/widgets/color_pad.dart,e/6/e63096aea4abf56d8d908e312322904122aec7a8
 M
 lib/widgets/color_picker.dart,0/8/086e8ab888e0a3fc09f217585a45b74cbb207475
-J
-lib/bloc/data_api_dog.dart,0/f/0f27426890d5956a726f9c74637bb8749dbd74bb
 O
 lib/widgets/locale_chooser.dart,2/1/2163e20a8caaa58fc903d0996eaede998c75d511
 N

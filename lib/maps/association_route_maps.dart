@@ -30,7 +30,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     target: LatLng(-25.8656, 27.7564),
     zoom: defaultZoom,
   );
-  static const mm = '😡😡😡😡😡😡😡 RouteMapStatic: 💪 ';
+  static const mm = '😡😡😡😡😡😡😡 AssociationRouteMaps: 💪 ';
   final _key = GlobalKey<ScaffoldState>();
   bool busy = false;
   bool isHybrid = true;

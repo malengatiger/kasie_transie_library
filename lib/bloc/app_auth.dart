@@ -6,7 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart' as env;
 
 
 final AppAuth appAuth = AppAuth(FirebaseAuth.instance);
-
+String? fcmToken;
 class AppAuth {
   static const locks = '🔐🔐🔐🔐🔐🔐🔐🔐 AppAuth: ';
   final FirebaseAuth? firebaseAuth;
@@ -24,6 +24,7 @@ class AppAuth {
       pp('$locks getAuthToken has fallen down. ${E.redDot}${E.redDot}${E.redDot}  Firebase id token not found 🍎');
 
     }
+    fcmToken = token;
     return token;
   }
 

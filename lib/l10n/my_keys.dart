@@ -11,6 +11,20 @@ class MyKeys {
   }
 
   static _buildMap() {
+    hashMap['historyCars'] = 'historyCars';
+    hashMap['date'] = 'date';
+    hashMap['locationResponse'] = 'locationResponse';
+    hashMap['requestLocation'] = 'requestLocation';
+    hashMap['locationRequestSent'] = 'locationRequestSent';
+    hashMap['totalPassenger'] = 'totalPassenger';
+    hashMap['historyCar'] = 'historyCar';
+    hashMap['refresh'] = 'refresh';
+    hashMap['getDirections'] = 'getDirections';
+    hashMap['taxiNotOnRoute'] = 'taxiNotOnRoute';
+    hashMap['taxiOnRoute'] = 'taxiOnRoute';
+    hashMap['taxiCurrentLocation'] = 'taxiCurrentLocation';
+    hashMap['days'] = 'days';
+
     hashMap['ownerDash'] = 'ownerDash';
     hashMap['search'] = 'search';
     hashMap['numberOfCars'] = 'numberOfCars';

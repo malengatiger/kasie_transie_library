@@ -1,14 +1,24 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart' as fb;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:http/http.dart' as http;
+import 'package:kasie_transie_library/bloc/app_auth.dart';
+import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart';
+import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
+import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/parsers.dart';
+import 'package:realm/realm.dart';
 
 import '../bloc/list_api_dog.dart';
+import '../utils/error_handler.dart';
 import '../utils/functions.dart';
+import '../utils/kasie_exception.dart';
 import '../utils/prefs.dart';
 
 final FCMBloc fcmBloc = FCMBloc(fb.FirebaseMessaging.instance);
@@ -67,37 +77,8 @@ class FCMBloc {
     fb.FirebaseMessaging.onMessage.listen((fb.RemoteMessage message) {
       // RemoteNotification? notification = message.notification;
       // AndroidNotification? android = message.notification?.android;
-      String type = '';
-      if (message.data['routeChanges'] != null) {
-        pp("$mm onMessage: $red routeChanges message has arrived!  ... $red ");
-        type = 'routeChanges';
-      } else if (message.data['vehicleChanges'] != null) {
-        pp("$mm onMessage: $red vehicleChanges message has arrived!  ... $red ");
-        type = 'vehicleChanges';
-      } else if (message.data['locationRequest'] != null) {
-        pp("$mm onMessage: $red locationRequest message has arrived!  ... $red ");
-        type = 'locationRequest';
-      } else if (message.data['locationResponse'] != null) {
-        pp("$mm onMessage: $red locationResponse message has arrived!  ... $red ");
-        type = 'locationResponse';
-      } else if (message.data['vehicleArrival'] != null) {
-        pp("$mm onMessage: $red vehicleArrival message has arrived!  ... $red\n ");
-        type = 'vehicleArrival';
-      } else if (message.data['vehicleDeparture'] != null) {
-        pp("$mm onMessage: $red vehicleDeparture message has arrived!  ... $red ");
-        type = 'vehicleDeparture';
-      } else if (message.data['dispatchRecord'] != null) {
-        pp("$mm onMessage: $red dispatchRecord message has arrived!  ... $red ");
-        type = 'dispatchRecord';
-      } else if (message.data['userGeofenceEvent'] != null) {
-        pp("$mm onMessage: $red userGeofenceEvent message has arrived!  ... $red ");
-        type = 'userGeofenceEvent';
-      } else {
-        pp("$mm onMessage: $red unknown message has arrived!  ... $red ");
-        return;
-      }
       //
-      processFCMMessage(message, type);
+      processFCMMessage(message, getMessageType(message));
     });
 
     fb.FirebaseMessaging.onBackgroundMessage(
@@ -109,10 +90,43 @@ class FCMBloc {
 
     pp("\n\n$mm FCM : FIREBASE MESSAGING initialization done! - ${E.nice} "
         "will subscribeToTopics() ...........................");
+  }
 
+  String getMessageType(fb.RemoteMessage message) {
+    var type = '';
+    if (message.data['routeChanges'] != null) {
+      pp("$mm onMessage: $red routeChanges message has arrived!  ... $red ");
+      type = 'routeChanges';
+    } else if (message.data['vehicleChanges'] != null) {
+      pp("$mm onMessage: $red vehicleChanges message has arrived!  ... $red ");
+      type = 'vehicleChanges';
+    } else if (message.data['locationRequest'] != null) {
+      pp("$mm onMessage: $red locationRequest message has arrived!  ... $red ");
+      type = 'locationRequest';
+    } else if (message.data['locationResponse'] != null) {
+      pp("$mm onMessage: $red locationResponse message has arrived!  ... $red ");
+      type = 'locationResponse';
+    } else if (message.data['vehicleArrival'] != null) {
+      pp("$mm onMessage: $red vehicleArrival message has arrived!  ... $red\n ");
+      type = 'vehicleArrival';
+    } else if (message.data['vehicleDeparture'] != null) {
+      pp("$mm onMessage: $red vehicleDeparture message has arrived!  ... $red ");
+      type = 'vehicleDeparture';
+    } else if (message.data['dispatchRecord'] != null) {
+      pp("$mm onMessage: $red dispatchRecord message has arrived!  ... $red ");
+      type = 'dispatchRecord';
+    } else if (message.data['userGeofenceEvent'] != null) {
+      pp("$mm onMessage: $red userGeofenceEvent message has arrived!  ... $red ");
+      type = 'userGeofenceEvent';
+    } else {
+      pp("$mm onMessage: $red unknown message has arrived!  ... $red ");
+      return 'unknown';
+    }
+    return type;
   }
 
   static const red = '🍎 🍎';
+
   Future<void> subscribeToTopics() async {
     var user = await prefs.getUser();
     var car = await prefs.getCar();
@@ -194,18 +208,63 @@ class FCMBloc {
       case 'locationRequest':
         final va = map['locationRequest'];
         final x = jsonDecode(va);
-        _locationRequestStreamController.sink.add(buildLocationRequest(x));
+        //todo - respond if it the request is for you
+        final locReq = buildLocationRequest(x);
+        _locationRequestStreamController.sink.add(locReq);
+        _respondToLocationRequest(locReq);
         break;
       case 'locationResponse':
         final va = map['locationResponse'];
         final x = jsonDecode(va);
-        _locationResponseStreamController.sink.add(buildLocationResponse(x));
+        pp('$mm ${E.redDot} location response raw: check registration ... ${E.redDot}\n$x');
+        final resp = buildLocationResponse(x);
+        pp('$mm ... to be put into _locationResponseStreamController ... check for null');
+        myPrettyJsonPrint(resp.toJson());
+        _locationResponseStreamController.sink.add(resp);
         break;
       case 'userGeofenceEvent':
         final va = map['userGeofenceEvent'];
         final x = jsonDecode(va);
         _userGeofenceStreamController.sink.add(buildUserGeofenceEvent(x));
         break;
+    }
+  }
+
+  void _respondToLocationRequest(LocationRequest request) async {
+    pp('$mm checking if location request is for me');
+    final car = await prefs.getCar();
+    if (car == null) {
+      pp('$mm location request is NOT for me');
+      return;
+    }
+    if (request.vehicleId == car.vehicleId) {
+      pp('$mm location request is for me! ... must respond!!');
+      final loc = await locationBloc.getLocation();
+      final resp = LocationResponse(
+        ObjectId(),
+        associationId: car.associationId,
+        created: DateTime.now().toUtc().toIso8601String(),
+        userId: request.userId,
+        userName: request.userName,
+        vehicleId: car.vehicleId,
+        vehicleReg: car.vehicleReg,
+        position: Position(
+          type: point,
+          coordinates: [loc.longitude, loc.latitude],
+          latitude: loc.latitude,
+          longitude: loc.longitude,
+        ),
+      );
+      try {
+        pp('$mm sending location response! ${E.blueDot}');
+        final result = await dataApiDog.addLocationResponse(resp);
+        pp('$mm location response successfully sent! ${E.leaf} ');
+        myPrettyJsonPrint(result.toJson());
+      } catch (e) {
+        pp(e);
+      }
+    } else {
+      pp('$mm ... nice try, but this location request is not for me. ${E.redDot}');
     }
   }
 
@@ -218,40 +277,48 @@ class FCMBloc {
 
   final StreamController<String> _routeChangesStreamController =
       StreamController.broadcast();
+
   Stream<String> get routeChangesStream => _routeChangesStreamController.stream;
 
   final StreamController<String> _vehicleChangesStreamController =
       StreamController.broadcast();
+
   Stream<String> get vehicleChangesStream =>
       _vehicleChangesStreamController.stream;
 
   final StreamController<VehicleDeparture> _vehicleDepartureStreamController =
       StreamController.broadcast();
+
   Stream<VehicleDeparture> get vehicleDepartureStream =>
       _vehicleDepartureStreamController.stream;
 
   final StreamController<VehicleArrival> _vehicleArrivalStreamController =
       StreamController.broadcast();
+
   Stream<VehicleArrival> get vehicleArrivalStream =>
       _vehicleArrivalStreamController.stream;
 
   final StreamController<DispatchRecord> _dispatchStreamController =
       StreamController.broadcast();
+
   Stream<DispatchRecord> get dispatchStream => _dispatchStreamController.stream;
 
   final StreamController<UserGeofenceEvent> _userGeofenceStreamController =
       StreamController.broadcast();
+
   Stream<UserGeofenceEvent> get userGeofenceStream =>
       _userGeofenceStreamController.stream;
 
   //todo - add location request and response
   final StreamController<LocationRequest> _locationRequestStreamController =
       StreamController.broadcast();
+
   Stream<LocationRequest> get locationRequestStream =>
       _locationRequestStreamController.stream;
 
   final StreamController<LocationResponse> _locationResponseStreamController =
       StreamController.broadcast();
+
   Stream<LocationResponse> get locationResponseStream =>
       _locationResponseStreamController.stream;
 
@@ -260,7 +327,164 @@ class FCMBloc {
   }
 }
 
+const mxx = ' 💙💙Background Processing  💙💙';
+
+///Handling FCM messages in the background
+///
 Future<void> kasieFirebaseMessagingBackgroundHandler(
     fb.RemoteMessage message) async {
-  pp("🍎🍎 kasieFirebaseMessagingBackgroundHandler: data: ${message.data} ");
+
+  pp("\n\n\n🍎🍎🍎🍎🍎🍎🍎🍎 kasieFirebaseMessagingBackgroundHandler: "
+      "data: ${message.data}, will handle it happily! 🍎🍎🍎🍎");
+
+  await Firebase.initializeApp();
+  pp('$mxx ... Firebase.initializeApp done and dusted!');
+  String? tok = await appAuth.getAuthToken();
+  if (tok == null) {
+    pp('\n$mxx unable to get auth token ${E.redDot}${E.redDot}${E.redDot}');
+    return;
+  }
+  final car = await prefs.getCar();
+  if (car == null) {
+    pp('... car is null in background ...');
+    return;
+  }
+  final type = fcmBloc.getMessageType(message);
+  final map = message.data;
+
+  if (type == 'locationRequest') {
+    final va = map['locationRequest'];
+    final x = jsonDecode(va);
+    final locReq = buildLocationRequest(x);
+    if (car.vehicleId == locReq.vehicleId) {
+      pp('\n\n$mxx ... this request is for me .... ${E.blueDot} gotta respond!');
+      _respondToLocationRequest(request: locReq, token: tok, car: car);
+    }
+  } else {
+    pp('$mxx ... this is a $type message, ignored for now!');
+  }
+}
+
+void _respondToLocationRequest(
+    {required LocationRequest request,
+    required String token,
+    required Vehicle car}) async {
+  final loc = await locationBloc.getLocation();
+  pp('$mxx .. location in background: $loc');
+  final resp = LocationResponse(
+    ObjectId(),
+    associationId: car.associationId,
+    created: DateTime.now().toUtc().toIso8601String(),
+    userId: request.userId,
+    userName: request.userName,
+    vehicleId: car.vehicleId,
+    vehicleReg: car.vehicleReg,
+    position: Position(
+      type: point,
+      coordinates: [loc.longitude, loc.latitude],
+      latitude: loc.latitude,
+      longitude: loc.longitude,
+    ),
+  );
+  try {
+    pp('$mxx sending background location response! ${E.blueDot}');
+    final result = await _sendLocationResponse(resp, token);
+    pp('$mxx background location response successfully sent! ${E.leaf} ');
+    myPrettyJsonPrint(result.toJson());
+  } catch (e) {
+    pp(e);
+  }
+}
+
+Future<LocationResponse> _sendLocationResponse(
+    LocationResponse resp, String fcmToken) async {
+  var start = DateTime.now();
+  Map<String, String> headers = {
+    'Content-type': 'application/json',
+    'Accept': 'application/json',
+  };
+  final bag = resp.toJson();
+  final userPrefix = KasieEnvironment.getUrl();
+  final mUrl = '${userPrefix}addLocationResponse';
+  pp('$mxx _sendLocationResponse: 🔆🔆🔆 ...... calling : 💙 $mUrl  💙');
+
+  headers['Authorization'] = 'Bearer $fcmToken';
+  final client = http.Client();
+  try {
+    var resp = await client
+        .post(
+          Uri.parse(mUrl),
+          headers: headers,
+          body: bag,
+        )
+        .timeout(const Duration(seconds: 300));
+
+    pp('$mxx http GET call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
+    var end = DateTime.now();
+    pp('$mxx http GET call: 🔆 elapsed time for http: ${end.difference(start).inSeconds} seconds 🔆 \n\n');
+
+    if (resp.statusCode == 403) {
+      var msg =
+          '$mxx 😡😡 status code: ${resp.statusCode}, Request Forbidden 🥪 🥙 🌮  😡 ${resp.body}';
+      pp(msg);
+      final gex = KasieException(
+          message: 'Forbidden call',
+          url: mUrl,
+          translationKey: 'serverProblem',
+          errorType: KasieException.httpException);
+      errorHandler.handleError(exception: gex);
+      throw gex;
+    }
+
+    if (resp.statusCode != 200) {
+      var msg =
+          '😡 😡 The response is not 200; it is ${resp.statusCode}, NOT GOOD, throwing up !! 🥪 🥙 🌮  😡 ${resp.body}';
+      pp(msg);
+      final gex = KasieException(
+          message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
+          url: mUrl,
+          translationKey: 'serverProblem',
+          errorType: KasieException.socketException);
+      errorHandler.handleError(exception: gex);
+      throw gex;
+    }
+    var mJson = json.decode(resp.body);
+    return buildLocationResponse(mJson);
+  } on SocketException {
+    pp('$mxx SocketException, really means that server cannot be reached 😑');
+    final gex = KasieException(
+        message: 'Server not available',
+        url: mUrl,
+        translationKey: 'serverProblem',
+        errorType: KasieException.socketException);
+    errorHandler.handleError(exception: gex);
+    throw gex;
+  } on HttpException {
+    pp("$mxx HttpException occurred 😱");
+    final gex = KasieException(
+        message: 'Server not available',
+        url: mUrl,
+        translationKey: 'serverProblem',
+        errorType: KasieException.httpException);
+    errorHandler.handleError(exception: gex);
+    throw gex;
+  } on FormatException {
+    pp("$mxx Bad response format 👎");
+    final gex = KasieException(
+        message: 'Bad response format',
+        url: mUrl,
+        translationKey: 'serverProblem',
+        errorType: KasieException.formatException);
+    errorHandler.handleError(exception: gex);
+    throw gex;
+  } on TimeoutException {
+    pp("$mxx No Internet connection. Request has timed out in 300 seconds 👎");
+    final gex = KasieException(
+        message: 'No Internet connection. Request timed out',
+        url: mUrl,
+        translationKey: 'networkProblem',
+        errorType: KasieException.timeoutException);
+    errorHandler.handleError(exception: gex);
+    throw gex;
+  }
 }

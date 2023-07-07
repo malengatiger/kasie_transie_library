@@ -427,6 +427,7 @@ LocationRequest buildLocationRequest(Map j) {
     userId: j['userId'],
     vehicleId: j['vehicleId'],
     associationId: j['associationId'],
+    vehicleReg: j['vehicleReg'],
     userName: j['userName'],
     created: j['created'],
   );
@@ -440,6 +441,7 @@ LocationResponse buildLocationResponse(Map j) {
     userId: j['userId'],
     vehicleId: j['vehicleId'],
     associationId: j['associationId'],
+    vehicleReg: j['vehicleReg'],
     userName: j['userName'],
     created: j['created'],
     geoHash: j['geoHash'],

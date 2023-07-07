@@ -511,6 +511,7 @@ class ListApiDog {
     }
     pp('$mm RouteLandmarks from realm:: ${localList.length}');
     if (localList.isNotEmpty && !refresh) {
+      myPrettyJsonPrint(localList.first.toJson());
       return localList;
     }
     //
@@ -723,7 +724,7 @@ class ListApiDog {
     }
 
     pp('$mm findAssociationRoutesByLocation;  ${E.appleRed} routes found: ${list.length}');
-
+    myPrettyJsonPrint(list.first.toJson());
     return list;
   }
 

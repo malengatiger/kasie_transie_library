@@ -2490,6 +2490,7 @@ class LocationRequest extends _LocationRequest
   LocationRequest(
     ObjectId id, {
     String? vehicleId,
+    String? vehicleReg,
     String? userId,
     String? userName,
     String? created,
@@ -2497,6 +2498,7 @@ class LocationRequest extends _LocationRequest
   }) {
     RealmObjectBase.set(this, 'id', id);
     RealmObjectBase.set(this, 'vehicleId', vehicleId);
+    RealmObjectBase.set(this, 'vehicleReg', vehicleReg);
     RealmObjectBase.set(this, 'userId', userId);
     RealmObjectBase.set(this, 'userName', userName);
     RealmObjectBase.set(this, 'created', created);
@@ -2515,6 +2517,13 @@ class LocationRequest extends _LocationRequest
       RealmObjectBase.get<String>(this, 'vehicleId') as String?;
   @override
   set vehicleId(String? value) => RealmObjectBase.set(this, 'vehicleId', value);
+
+  @override
+  String? get vehicleReg =>
+      RealmObjectBase.get<String>(this, 'vehicleReg') as String?;
+  @override
+  set vehicleReg(String? value) =>
+      RealmObjectBase.set(this, 'vehicleReg', value);
 
   @override
   String? get userId => RealmObjectBase.get<String>(this, 'userId') as String?;
@@ -2557,6 +2566,8 @@ class LocationRequest extends _LocationRequest
       SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
       SchemaProperty('vehicleId', RealmPropertyType.string,
           optional: true, indexType: RealmIndexType.regular),
+      SchemaProperty('vehicleReg', RealmPropertyType.string,
+          optional: true, indexType: RealmIndexType.regular),
       SchemaProperty('userId', RealmPropertyType.string, optional: true),
       SchemaProperty('userName', RealmPropertyType.string, optional: true),
       SchemaProperty('created', RealmPropertyType.string, optional: true),
@@ -2571,6 +2582,7 @@ class LocationResponse extends _LocationResponse
     ObjectId id, {
     String? userId,
     String? vehicleId,
+    String? vehicleReg,
     String? geoHash,
     String? userName,
     String? created,
@@ -2580,6 +2592,7 @@ class LocationResponse extends _LocationResponse
     RealmObjectBase.set(this, 'id', id);
     RealmObjectBase.set(this, 'userId', userId);
     RealmObjectBase.set(this, 'vehicleId', vehicleId);
+    RealmObjectBase.set(this, 'vehicleReg', vehicleReg);
     RealmObjectBase.set(this, 'geoHash', geoHash);
     RealmObjectBase.set(this, 'userName', userName);
     RealmObjectBase.set(this, 'created', created);
@@ -2604,6 +2617,13 @@ class LocationResponse extends _LocationResponse
       RealmObjectBase.get<String>(this, 'vehicleId') as String?;
   @override
   set vehicleId(String? value) => RealmObjectBase.set(this, 'vehicleId', value);
+
+  @override
+  String? get vehicleReg =>
+      RealmObjectBase.get<String>(this, 'vehicleReg') as String?;
+  @override
+  set vehicleReg(String? value) =>
+      RealmObjectBase.set(this, 'vehicleReg', value);
 
   @override
   String? get geoHash =>
@@ -2655,6 +2675,7 @@ class LocationResponse extends _LocationResponse
       SchemaProperty('userId', RealmPropertyType.string,
           optional: true, indexType: RealmIndexType.regular),
       SchemaProperty('vehicleId', RealmPropertyType.string, optional: true),
+      SchemaProperty('vehicleReg', RealmPropertyType.string, optional: true),
       SchemaProperty('geoHash', RealmPropertyType.string, optional: true),
       SchemaProperty('userName', RealmPropertyType.string, optional: true),
       SchemaProperty('created', RealmPropertyType.string, optional: true),
