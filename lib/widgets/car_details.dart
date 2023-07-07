@@ -77,8 +77,13 @@ class CarDetailsState extends State<CarDetails>
       pp('\n\n$mm ... ${E.redDot} I refuse to navigate to map, map is busy! ${E.redDot}');
       return;
     }
-    busyWithMap = true;
-    await navigateWithScale(LocationResponseMap(locationResponse: locationResponse!), context);
+    // await navigateWithScale(LocationResponseMap(locationResponse: locationResponse!), context);
+    if (mounted) {
+      busyWithMap = true;
+      await Navigator.of(context).push(MaterialPageRoute(builder: (ctx){
+            return LocationResponseMap(locationResponse: locationResponse!,);
+          }));
+    }
     pp('\n\n$mm _navigateToMap: .... ${E.blueDot} back from map: ${locationResponse!.vehicleReg!}');
     busyWithMap = false;
   }

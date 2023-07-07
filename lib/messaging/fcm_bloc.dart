@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart' as fb;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -333,14 +334,13 @@ const mxx = ' 💙💙Background Processing  💙💙';
 ///
 Future<void> kasieFirebaseMessagingBackgroundHandler(
     fb.RemoteMessage message) async {
-
   pp("\n\n\n🍎🍎🍎🍎🍎🍎🍎🍎 kasieFirebaseMessagingBackgroundHandler: "
       "data: ${message.data}, will handle it happily! 🍎🍎🍎🍎");
 
   await Firebase.initializeApp();
   pp('$mxx ... Firebase.initializeApp done and dusted!');
-  String? tok = await appAuth.getAuthToken();
-  if (tok == null) {
+  var myToken = await FirebaseAuth.instance.currentUser?.getIdToken();
+  if (myToken == null) {
     pp('\n$mxx unable to get auth token ${E.redDot}${E.redDot}${E.redDot}');
     return;
   }
@@ -349,19 +349,18 @@ Future<void> kasieFirebaseMessagingBackgroundHandler(
     pp('... car is null in background ...');
     return;
   }
-  final type = fcmBloc.getMessageType(message);
   final map = message.data;
 
-  if (type == 'locationRequest') {
+  if (map['locationRequest'] != null) {
     final va = map['locationRequest'];
     final x = jsonDecode(va);
     final locReq = buildLocationRequest(x);
     if (car.vehicleId == locReq.vehicleId) {
       pp('\n\n$mxx ... this request is for me .... ${E.blueDot} gotta respond!');
-      _respondToLocationRequest(request: locReq, token: tok, car: car);
+      _respondToLocationRequest(request: locReq, token: myToken, car: car);
     }
   } else {
-    pp('$mxx ... this is a $type message, ignored for now!');
+    pp('$mxx ... this is a non location request message, ignored for now!');
   }
 }
 
@@ -396,62 +395,51 @@ void _respondToLocationRequest(
   }
 }
 
-Future<LocationResponse> _sendLocationResponse(
-    LocationResponse resp, String fcmToken) async {
-  var start = DateTime.now();
+Future _sendLocationResponse(LocationResponse resp, String fcmToken) async {
   Map<String, String> headers = {
     'Content-type': 'application/json',
     'Accept': 'application/json',
   };
-  final bag = resp.toJson();
-  final userPrefix = KasieEnvironment.getUrl();
-  final mUrl = '${userPrefix}addLocationResponse';
+  final urlPrefix = KasieEnvironment.getUrl();
+  final mUrl = '${urlPrefix}addLocationResponse';
   pp('$mxx _sendLocationResponse: 🔆🔆🔆 ...... calling : 💙 $mUrl  💙');
 
+  String? mBag;
+  mBag = json.encode(resp.toJson());
+
+  var start = DateTime.now();
   headers['Authorization'] = 'Bearer $fcmToken';
   final client = http.Client();
   try {
     var resp = await client
         .post(
           Uri.parse(mUrl),
+          body: mBag,
           headers: headers,
-          body: bag,
         )
-        .timeout(const Duration(seconds: 300));
-
-    pp('$mxx http GET call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
-    var end = DateTime.now();
-    pp('$mxx http GET call: 🔆 elapsed time for http: ${end.difference(start).inSeconds} seconds 🔆 \n\n');
-
-    if (resp.statusCode == 403) {
-      var msg =
-          '$mxx 😡😡 status code: ${resp.statusCode}, Request Forbidden 🥪 🥙 🌮  😡 ${resp.body}';
-      pp(msg);
-      final gex = KasieException(
-          message: 'Forbidden call',
-          url: mUrl,
-          translationKey: 'serverProblem',
-          errorType: KasieException.httpException);
-      errorHandler.handleError(exception: gex);
-      throw gex;
-    }
-
-    if (resp.statusCode != 200) {
-      var msg =
-          '😡 😡 The response is not 200; it is ${resp.statusCode}, NOT GOOD, throwing up !! 🥪 🥙 🌮  😡 ${resp.body}';
-      pp(msg);
-      final gex = KasieException(
+        .timeout(const Duration(seconds: 30));
+    if (resp.statusCode == 200) {
+      pp('$mxx  _sendLocationResponse RESPONSE: 💙💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
+    } else {
+      pp('$mxx  👿👿👿_sendLocationResponse: 🔆 statusCode: 👿👿👿 ${resp.statusCode} 🔆🔆🔆 for $mUrl');
+      pp(resp.body);
+      throw KasieException(
           message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
           url: mUrl,
           translationKey: 'serverProblem',
           errorType: KasieException.socketException);
-      errorHandler.handleError(exception: gex);
-      throw gex;
     }
-    var mJson = json.decode(resp.body);
-    return buildLocationResponse(mJson);
+    var end = DateTime.now();
+    pp('$mxx  _sendLocationResponse: 🔆 elapsed time: ${end.difference(start).inSeconds} seconds 🔆');
+    try {
+      var mJson = json.decode(resp.body);
+      return mJson;
+    } catch (e) {
+      pp("$mxx 👿👿👿👿👿👿👿 json.decode failed, returning response body");
+      return resp.body;
+    }
   } on SocketException {
-    pp('$mxx SocketException, really means that server cannot be reached 😑');
+    pp('$mxx  SocketException: really means that server cannot be reached 😑');
     final gex = KasieException(
         message: 'Server not available',
         url: mUrl,
@@ -460,7 +448,7 @@ Future<LocationResponse> _sendLocationResponse(
     errorHandler.handleError(exception: gex);
     throw gex;
   } on HttpException {
-    pp("$mxx HttpException occurred 😱");
+    pp("$mxx  HttpException occurred 😱");
     final gex = KasieException(
         message: 'Server not available',
         url: mUrl,
@@ -469,7 +457,7 @@ Future<LocationResponse> _sendLocationResponse(
     errorHandler.handleError(exception: gex);
     throw gex;
   } on FormatException {
-    pp("$mxx Bad response format 👎");
+    pp("$mxx  Bad response format 👎");
     final gex = KasieException(
         message: 'Bad response format',
         url: mUrl,
@@ -478,9 +466,9 @@ Future<LocationResponse> _sendLocationResponse(
     errorHandler.handleError(exception: gex);
     throw gex;
   } on TimeoutException {
-    pp("$mxx No Internet connection. Request has timed out in 300 seconds 👎");
+    pp("$mxx  No Internet connection. Request has timed out in 30 seconds 👎");
     final gex = KasieException(
-        message: 'No Internet connection. Request timed out',
+        message: 'Request timed out. No Internet connection',
         url: mUrl,
         translationKey: 'networkProblem',
         errorType: KasieException.timeoutException);

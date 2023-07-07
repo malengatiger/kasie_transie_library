@@ -453,9 +453,7 @@ class ListApiDog {
     final b = realm.query<RoutePoint>('routeId == \$0', [routeId]);
     list = b.toList();
     pp('$mm cached routePoints returned from Realm : ${E.blueDot} ${list.length}');
-    if (list.isNotEmpty) {
-      myPrettyJsonPrint(list.last.toJson());
-    }
+
     return list;
   }
 
@@ -482,9 +480,7 @@ class ListApiDog {
     } catch (e) {
       pp('$mm  ${E.redDot} Realm does not like something? ${E.redDot} $e ${E.redDot} ');
     }
-    if (list.isNotEmpty) {
-      myPrettyJsonPrint(list.last.toJson());
-    }
+
     pp('$mm cached routePoints returned from Realm : ${E.blueDot} ${list.length}');
     return list;
   }
@@ -511,7 +507,6 @@ class ListApiDog {
     }
     pp('$mm RouteLandmarks from realm:: ${localList.length}');
     if (localList.isNotEmpty && !refresh) {
-      myPrettyJsonPrint(localList.first.toJson());
       return localList;
     }
     //

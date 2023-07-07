@@ -136,7 +136,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
   }
 
   Future _buildLandmarks() async {
-    pp('$mm _buildLandmarks ...');
+    pp('$mm _buildLandmarks on map ...');
     var routeIndex = 0;
     for (var route in routes) {
       pp('$mm route: ${route.name} - ${route.routeId}');
@@ -144,9 +144,6 @@ class LocationResponseMapState extends State<LocationResponseMap> {
       var index = 0;
 
       for (var mark in bag.routeLandmarks) {
-        pp('$mm landmarkName: ${mark.landmarkName} - routePointId: ${mark.routePointId} '
-            'routePointIndex: ${mark.routePointIndex}');
-
         final latLng = LatLng(
             mark.position!.coordinates[1], mark.position!.coordinates[0]);
         final icon = await buildIcon(index);
@@ -158,9 +155,6 @@ class LocationResponseMapState extends State<LocationResponseMap> {
               title: mark.landmarkName,
               snippet: mark.routeName,
             )));
-        pp('$mm _buildLandmarks ... marker added, total markers:'
-            ' ${_markers.length}, current index: $index '
-            'for ${mark.routeName} - ${mark.landmarkName}');
         index++;
       }
 
@@ -171,6 +165,8 @@ class LocationResponseMapState extends State<LocationResponseMap> {
   }
 
   Future<void> putResponseOnMap() async {
+    pp('$mm _putResponseOnMap ...');
+
     final latLng = LatLng(widget.locationResponse.position!.coordinates[1],
         widget.locationResponse.position!.coordinates[0]);
 

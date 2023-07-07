@@ -19,24 +19,25 @@ class Heartbeat {
   late Timer timer;
 
   void startHeartbeat() async {
-    pp('$mm start Heartbeat ....');
+    pp('\n\n$mm start Heartbeat ............................................');
     final sett = await prefs.getSettings();
-    int seconds = 300; //5 minutes
+    int seconds = 600; //10 minutes
     if (sett != null) {
       seconds = sett.heartbeatIntervalSeconds!;
+      //todo - remove after test - check default settings
+      if (seconds < 600) {
+        seconds = 600;
+      }
     }
     await addHeartbeat();
-    pp('$mm Heartbeat ......... tick duration of ${E.leaf} $seconds seconds  ${E.leaf}');
+    pp('$mm Heartbeat ......... timer will start with tick of ${E.leaf} $seconds seconds  ${E.leaf}');
 
     timer = Timer.periodic(Duration(seconds: seconds), (timer) {
-      pp('\n\n$mm .... on Heartbeat timer tick:'
-          ' ${timer.tick} ${E.leaf} ${E.leaf} ... add another heartbeat!');
       addHeartbeat();
     });
   }
 
   Future addHeartbeat() async {
-    pp('$mm addHeartbeat: VehicleHeartbeat to be added ....');
     final loc = await locationBloc.getLocation();
     final car = await prefs.getCar();
     if (car == null) {
@@ -45,11 +46,8 @@ class Heartbeat {
 
 
     final heartbeat = getHeartbeat(car: car, latitude: loc.latitude, longitude: loc.longitude);
-    pp('$mm VehicleHeartbeat to be written to the db ...... see record below.');
     await dataApiDog.addVehicleHeartbeat(heartbeat);
-    myPrettyJsonPrint(heartbeat.toJson());
-    pp('$mm VehicleHeartbeat to be written to the db ...... see below.');
-    pp('$mm VehicleHeartbeat added to database, registration: ${car.vehicleReg} '
+    pp('\n\n$mm VehicleHeartbeat added to database, registration: ${car.vehicleReg} '
         'at ${DateTime.now().toIso8601String()}');
   }
 
