@@ -87,14 +87,10 @@ K
 lib/bloc/cache_manager.dart,f/6/f6af9dc2c14cc2d983ed952cbc52421867d334ab
 K
 lib/utils/local_finder.dart,5/5/552372b167342b7b8c4258298bc2e7f7db25359f
-S
-#.idea/libraries/Flutter_Plugins.xml,e/8/e8bbc0fdfcefee9aa7b463c83a8a480b92333860
 X
 (lib/isolates/country_cities_isolate.dart,6/c/6c5f4ef676527601b6dee97fc7714324a6e132a5
 S
 #lib/utils/device_location_bloc.dart,1/3/13a8f93355b4fa0cd766d700b3b7cfe868e22c17
-<
-pubspec.yaml,e/8/e8e045469170189f1d6ef12576bd01af132b1018
 L
 lib/maps/directions_dog.dart,4/1/41a45c342eb19917c3b78ddfbea3eb6f4ba333e0
 J

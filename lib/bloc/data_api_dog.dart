@@ -324,6 +324,68 @@ class DataApiDog {
     return r;
   }
 
+  Future<VehiclePhoto> addVehiclePhoto(VehiclePhoto vehiclePhoto) async {
+    final bag = vehiclePhoto.toJson();
+    final cmd = '${url}addVehiclePhoto';
+
+    final res = await _callPost(cmd, bag);
+    final r = buildVehiclePhoto(res);
+
+    listApiDog.realm.write(() {
+      listApiDog.realm.add<VehiclePhoto>(r, update: true);
+    });
+    pp('$mm VehiclePhoto added to database ...');
+    myPrettyJsonPrint(res);
+
+    return r;
+  }
+  Future<VehicleMediaRequest> addVehicleMediaRequest(VehicleMediaRequest vehicleMediaRequest) async {
+    final bag = vehicleMediaRequest.toJson();
+    final cmd = '${url}addVehicleMediaRequest';
+
+    final res = await _callPost(cmd, bag);
+    final r = buildVehicleMediaRequest(res);
+
+    listApiDog.realm.write(() {
+      listApiDog.realm.add<VehicleMediaRequest>(r, update: true);
+    });
+    pp('$mm VehicleMediaRequest added to database ...');
+    myPrettyJsonPrint(res);
+
+    return r;
+  }
+  Future<RouteUpdateRequest> addRouteUpdateRequest (RouteUpdateRequest routeUpdateRequest) async {
+    final bag = routeUpdateRequest.toJson();
+    final cmd = '${url}addRouteUpdateRequest';
+
+    final res = await _callPost(cmd, bag);
+    final r = buildRouteUpdateRequest(res);
+
+    listApiDog.realm.write(() {
+      listApiDog.realm.add<RouteUpdateRequest>(r, update: true);
+    });
+    pp('$mm RouteUpdateRequest added to database ...');
+    myPrettyJsonPrint(res);
+
+    return r;
+  }
+  Future<VehicleVideo> addVehicleVideo(VehicleVideo vehicleVideo) async {
+    final bag = vehicleVideo.toJson();
+    final cmd = '${url}addVehicleVideo';
+
+    final res = await _callPost(cmd, bag);
+    final r = buildVehicleVideo(res);
+
+    listApiDog.realm.write(() {
+      listApiDog.realm.add<VehicleVideo>(r, update: true);
+    });
+    pp('$mm vehicleVideo added to database ...');
+    myPrettyJsonPrint(res);
+
+    return r;
+  }
+
+
   Future _callPost(String mUrl, Map? bag) async {
     String? mBag;
     if (bag != null) {
@@ -497,4 +559,5 @@ class DataApiDog {
       throw gex;
     }
   }
+
 }

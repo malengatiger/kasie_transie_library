@@ -54,6 +54,10 @@ dependencies:
   audioplayers: ^4.1.0
   geojson: ^1.0.0
   location: ^4.4.0
+  native_device_orientation: ^1.1.4
+  image: ^4.0.17
+  video_thumbnail: ^0.5.3
+
   flutter_polyline_points:
   flutter_dotenv:
 

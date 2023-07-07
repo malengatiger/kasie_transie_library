@@ -780,6 +780,202 @@ class Association extends _Association
   }
 }
 
+class RouteUpdateRequest extends _RouteUpdateRequest
+    with RealmEntity, RealmObjectBase, RealmObject {
+  RouteUpdateRequest(
+    ObjectId id, {
+    String? routeId,
+    String? routeName,
+    String? userId,
+    String? created,
+    String? associationId,
+    String? userName,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'routeId', routeId);
+    RealmObjectBase.set(this, 'routeName', routeName);
+    RealmObjectBase.set(this, 'userId', userId);
+    RealmObjectBase.set(this, 'created', created);
+    RealmObjectBase.set(this, 'associationId', associationId);
+    RealmObjectBase.set(this, 'userName', userName);
+  }
+
+  RouteUpdateRequest._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get routeId =>
+      RealmObjectBase.get<String>(this, 'routeId') as String?;
+  @override
+  set routeId(String? value) => RealmObjectBase.set(this, 'routeId', value);
+
+  @override
+  String? get routeName =>
+      RealmObjectBase.get<String>(this, 'routeName') as String?;
+  @override
+  set routeName(String? value) => RealmObjectBase.set(this, 'routeName', value);
+
+  @override
+  String? get userId => RealmObjectBase.get<String>(this, 'userId') as String?;
+  @override
+  set userId(String? value) => RealmObjectBase.set(this, 'userId', value);
+
+  @override
+  String? get created =>
+      RealmObjectBase.get<String>(this, 'created') as String?;
+  @override
+  set created(String? value) => RealmObjectBase.set(this, 'created', value);
+
+  @override
+  String? get associationId =>
+      RealmObjectBase.get<String>(this, 'associationId') as String?;
+  @override
+  set associationId(String? value) =>
+      RealmObjectBase.set(this, 'associationId', value);
+
+  @override
+  String? get userName =>
+      RealmObjectBase.get<String>(this, 'userName') as String?;
+  @override
+  set userName(String? value) => RealmObjectBase.set(this, 'userName', value);
+
+  @override
+  Stream<RealmObjectChanges<RouteUpdateRequest>> get changes =>
+      RealmObjectBase.getChanges<RouteUpdateRequest>(this);
+
+  @override
+  RouteUpdateRequest freeze() =>
+      RealmObjectBase.freezeObject<RouteUpdateRequest>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(RouteUpdateRequest._);
+    return const SchemaObject(
+        ObjectType.realmObject, RouteUpdateRequest, 'RouteUpdateRequest', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('routeId', RealmPropertyType.string, optional: true),
+      SchemaProperty('routeName', RealmPropertyType.string, optional: true),
+      SchemaProperty('userId', RealmPropertyType.string, optional: true),
+      SchemaProperty('created', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationId', RealmPropertyType.string, optional: true),
+      SchemaProperty('userName', RealmPropertyType.string, optional: true),
+    ]);
+  }
+}
+
+class VehicleMediaRequest extends _VehicleMediaRequest
+    with RealmEntity, RealmObjectBase, RealmObject {
+  VehicleMediaRequest(
+    ObjectId id, {
+    String? userId,
+    String? vehicleId,
+    String? vehicleReg,
+    String? requesterId,
+    String? created,
+    String? associationId,
+    String? requesterName,
+    bool? addVideo,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'userId', userId);
+    RealmObjectBase.set(this, 'vehicleId', vehicleId);
+    RealmObjectBase.set(this, 'vehicleReg', vehicleReg);
+    RealmObjectBase.set(this, 'requesterId', requesterId);
+    RealmObjectBase.set(this, 'created', created);
+    RealmObjectBase.set(this, 'associationId', associationId);
+    RealmObjectBase.set(this, 'requesterName', requesterName);
+    RealmObjectBase.set(this, 'addVideo', addVideo);
+  }
+
+  VehicleMediaRequest._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get userId => RealmObjectBase.get<String>(this, 'userId') as String?;
+  @override
+  set userId(String? value) => RealmObjectBase.set(this, 'userId', value);
+
+  @override
+  String? get vehicleId =>
+      RealmObjectBase.get<String>(this, 'vehicleId') as String?;
+  @override
+  set vehicleId(String? value) => RealmObjectBase.set(this, 'vehicleId', value);
+
+  @override
+  String? get vehicleReg =>
+      RealmObjectBase.get<String>(this, 'vehicleReg') as String?;
+  @override
+  set vehicleReg(String? value) =>
+      RealmObjectBase.set(this, 'vehicleReg', value);
+
+  @override
+  String? get requesterId =>
+      RealmObjectBase.get<String>(this, 'requesterId') as String?;
+  @override
+  set requesterId(String? value) =>
+      RealmObjectBase.set(this, 'requesterId', value);
+
+  @override
+  String? get created =>
+      RealmObjectBase.get<String>(this, 'created') as String?;
+  @override
+  set created(String? value) => RealmObjectBase.set(this, 'created', value);
+
+  @override
+  String? get associationId =>
+      RealmObjectBase.get<String>(this, 'associationId') as String?;
+  @override
+  set associationId(String? value) =>
+      RealmObjectBase.set(this, 'associationId', value);
+
+  @override
+  String? get requesterName =>
+      RealmObjectBase.get<String>(this, 'requesterName') as String?;
+  @override
+  set requesterName(String? value) =>
+      RealmObjectBase.set(this, 'requesterName', value);
+
+  @override
+  bool? get addVideo => RealmObjectBase.get<bool>(this, 'addVideo') as bool?;
+  @override
+  set addVideo(bool? value) => RealmObjectBase.set(this, 'addVideo', value);
+
+  @override
+  Stream<RealmObjectChanges<VehicleMediaRequest>> get changes =>
+      RealmObjectBase.getChanges<VehicleMediaRequest>(this);
+
+  @override
+  VehicleMediaRequest freeze() =>
+      RealmObjectBase.freezeObject<VehicleMediaRequest>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(VehicleMediaRequest._);
+    return const SchemaObject(
+        ObjectType.realmObject, VehicleMediaRequest, 'VehicleMediaRequest', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('userId', RealmPropertyType.string, optional: true),
+      SchemaProperty('vehicleId', RealmPropertyType.string, optional: true),
+      SchemaProperty('vehicleReg', RealmPropertyType.string, optional: true),
+      SchemaProperty('requesterId', RealmPropertyType.string, optional: true),
+      SchemaProperty('created', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationId', RealmPropertyType.string, optional: true),
+      SchemaProperty('requesterName', RealmPropertyType.string, optional: true),
+      SchemaProperty('addVideo', RealmPropertyType.bool, optional: true),
+    ]);
+  }
+}
+
 class VehicleArrival extends _VehicleArrival
     with RealmEntity, RealmObjectBase, RealmObject {
   VehicleArrival(
@@ -952,6 +1148,320 @@ class VehicleArrival extends _VehicleArrival
       SchemaProperty('ownerId', RealmPropertyType.string, optional: true),
       SchemaProperty('ownerName', RealmPropertyType.string, optional: true),
       SchemaProperty('dispatched', RealmPropertyType.bool, optional: true),
+    ]);
+  }
+}
+
+class VehiclePhoto extends _VehiclePhoto
+    with RealmEntity, RealmObjectBase, RealmObject {
+  VehiclePhoto(
+    ObjectId id, {
+    String? vehiclePhotoId,
+    String? landmarkId,
+    String? landmarkName,
+    Position? position,
+    String? geoHash,
+    String? created,
+    String? vehicleId,
+    String? associationId,
+    String? vehicleReg,
+    String? thumbNailUrl,
+    String? url,
+    String? userId,
+    String? userName,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'vehiclePhotoId', vehiclePhotoId);
+    RealmObjectBase.set(this, 'landmarkId', landmarkId);
+    RealmObjectBase.set(this, 'landmarkName', landmarkName);
+    RealmObjectBase.set(this, 'position', position);
+    RealmObjectBase.set(this, 'geoHash', geoHash);
+    RealmObjectBase.set(this, 'created', created);
+    RealmObjectBase.set(this, 'vehicleId', vehicleId);
+    RealmObjectBase.set(this, 'associationId', associationId);
+    RealmObjectBase.set(this, 'vehicleReg', vehicleReg);
+    RealmObjectBase.set(this, 'thumbNailUrl', thumbNailUrl);
+    RealmObjectBase.set(this, 'url', url);
+    RealmObjectBase.set(this, 'userId', userId);
+    RealmObjectBase.set(this, 'userName', userName);
+  }
+
+  VehiclePhoto._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get vehiclePhotoId =>
+      RealmObjectBase.get<String>(this, 'vehiclePhotoId') as String?;
+  @override
+  set vehiclePhotoId(String? value) =>
+      RealmObjectBase.set(this, 'vehiclePhotoId', value);
+
+  @override
+  String? get landmarkId =>
+      RealmObjectBase.get<String>(this, 'landmarkId') as String?;
+  @override
+  set landmarkId(String? value) =>
+      RealmObjectBase.set(this, 'landmarkId', value);
+
+  @override
+  String? get landmarkName =>
+      RealmObjectBase.get<String>(this, 'landmarkName') as String?;
+  @override
+  set landmarkName(String? value) =>
+      RealmObjectBase.set(this, 'landmarkName', value);
+
+  @override
+  Position? get position =>
+      RealmObjectBase.get<Position>(this, 'position') as Position?;
+  @override
+  set position(covariant Position? value) =>
+      RealmObjectBase.set(this, 'position', value);
+
+  @override
+  String? get geoHash =>
+      RealmObjectBase.get<String>(this, 'geoHash') as String?;
+  @override
+  set geoHash(String? value) => RealmObjectBase.set(this, 'geoHash', value);
+
+  @override
+  String? get created =>
+      RealmObjectBase.get<String>(this, 'created') as String?;
+  @override
+  set created(String? value) => RealmObjectBase.set(this, 'created', value);
+
+  @override
+  String? get vehicleId =>
+      RealmObjectBase.get<String>(this, 'vehicleId') as String?;
+  @override
+  set vehicleId(String? value) => RealmObjectBase.set(this, 'vehicleId', value);
+
+  @override
+  String? get associationId =>
+      RealmObjectBase.get<String>(this, 'associationId') as String?;
+  @override
+  set associationId(String? value) =>
+      RealmObjectBase.set(this, 'associationId', value);
+
+  @override
+  String? get vehicleReg =>
+      RealmObjectBase.get<String>(this, 'vehicleReg') as String?;
+  @override
+  set vehicleReg(String? value) =>
+      RealmObjectBase.set(this, 'vehicleReg', value);
+
+  @override
+  String? get thumbNailUrl =>
+      RealmObjectBase.get<String>(this, 'thumbNailUrl') as String?;
+  @override
+  set thumbNailUrl(String? value) =>
+      RealmObjectBase.set(this, 'thumbNailUrl', value);
+
+  @override
+  String? get url => RealmObjectBase.get<String>(this, 'url') as String?;
+  @override
+  set url(String? value) => RealmObjectBase.set(this, 'url', value);
+
+  @override
+  String? get userId => RealmObjectBase.get<String>(this, 'userId') as String?;
+  @override
+  set userId(String? value) => RealmObjectBase.set(this, 'userId', value);
+
+  @override
+  String? get userName =>
+      RealmObjectBase.get<String>(this, 'userName') as String?;
+  @override
+  set userName(String? value) => RealmObjectBase.set(this, 'userName', value);
+
+  @override
+  Stream<RealmObjectChanges<VehiclePhoto>> get changes =>
+      RealmObjectBase.getChanges<VehiclePhoto>(this);
+
+  @override
+  VehiclePhoto freeze() => RealmObjectBase.freezeObject<VehiclePhoto>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(VehiclePhoto._);
+    return const SchemaObject(
+        ObjectType.realmObject, VehiclePhoto, 'VehiclePhoto', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('vehiclePhotoId', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('landmarkId', RealmPropertyType.string, optional: true),
+      SchemaProperty('landmarkName', RealmPropertyType.string, optional: true),
+      SchemaProperty('position', RealmPropertyType.object,
+          optional: true, linkTarget: 'Position'),
+      SchemaProperty('geoHash', RealmPropertyType.string, optional: true),
+      SchemaProperty('created', RealmPropertyType.string, optional: true),
+      SchemaProperty('vehicleId', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationId', RealmPropertyType.string, optional: true),
+      SchemaProperty('vehicleReg', RealmPropertyType.string, optional: true),
+      SchemaProperty('thumbNailUrl', RealmPropertyType.string, optional: true),
+      SchemaProperty('url', RealmPropertyType.string, optional: true),
+      SchemaProperty('userId', RealmPropertyType.string, optional: true),
+      SchemaProperty('userName', RealmPropertyType.string, optional: true),
+    ]);
+  }
+}
+
+class VehicleVideo extends _VehicleVideo
+    with RealmEntity, RealmObjectBase, RealmObject {
+  VehicleVideo(
+    ObjectId id, {
+    String? vehicleVideoId,
+    String? landmarkId,
+    String? landmarkName,
+    Position? position,
+    String? geoHash,
+    String? created,
+    String? vehicleId,
+    String? associationId,
+    String? vehicleReg,
+    String? thumbNailUrl,
+    String? url,
+    String? userId,
+    String? userName,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'vehicleVideoId', vehicleVideoId);
+    RealmObjectBase.set(this, 'landmarkId', landmarkId);
+    RealmObjectBase.set(this, 'landmarkName', landmarkName);
+    RealmObjectBase.set(this, 'position', position);
+    RealmObjectBase.set(this, 'geoHash', geoHash);
+    RealmObjectBase.set(this, 'created', created);
+    RealmObjectBase.set(this, 'vehicleId', vehicleId);
+    RealmObjectBase.set(this, 'associationId', associationId);
+    RealmObjectBase.set(this, 'vehicleReg', vehicleReg);
+    RealmObjectBase.set(this, 'thumbNailUrl', thumbNailUrl);
+    RealmObjectBase.set(this, 'url', url);
+    RealmObjectBase.set(this, 'userId', userId);
+    RealmObjectBase.set(this, 'userName', userName);
+  }
+
+  VehicleVideo._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get vehicleVideoId =>
+      RealmObjectBase.get<String>(this, 'vehicleVideoId') as String?;
+  @override
+  set vehicleVideoId(String? value) =>
+      RealmObjectBase.set(this, 'vehicleVideoId', value);
+
+  @override
+  String? get landmarkId =>
+      RealmObjectBase.get<String>(this, 'landmarkId') as String?;
+  @override
+  set landmarkId(String? value) =>
+      RealmObjectBase.set(this, 'landmarkId', value);
+
+  @override
+  String? get landmarkName =>
+      RealmObjectBase.get<String>(this, 'landmarkName') as String?;
+  @override
+  set landmarkName(String? value) =>
+      RealmObjectBase.set(this, 'landmarkName', value);
+
+  @override
+  Position? get position =>
+      RealmObjectBase.get<Position>(this, 'position') as Position?;
+  @override
+  set position(covariant Position? value) =>
+      RealmObjectBase.set(this, 'position', value);
+
+  @override
+  String? get geoHash =>
+      RealmObjectBase.get<String>(this, 'geoHash') as String?;
+  @override
+  set geoHash(String? value) => RealmObjectBase.set(this, 'geoHash', value);
+
+  @override
+  String? get created =>
+      RealmObjectBase.get<String>(this, 'created') as String?;
+  @override
+  set created(String? value) => RealmObjectBase.set(this, 'created', value);
+
+  @override
+  String? get vehicleId =>
+      RealmObjectBase.get<String>(this, 'vehicleId') as String?;
+  @override
+  set vehicleId(String? value) => RealmObjectBase.set(this, 'vehicleId', value);
+
+  @override
+  String? get associationId =>
+      RealmObjectBase.get<String>(this, 'associationId') as String?;
+  @override
+  set associationId(String? value) =>
+      RealmObjectBase.set(this, 'associationId', value);
+
+  @override
+  String? get vehicleReg =>
+      RealmObjectBase.get<String>(this, 'vehicleReg') as String?;
+  @override
+  set vehicleReg(String? value) =>
+      RealmObjectBase.set(this, 'vehicleReg', value);
+
+  @override
+  String? get thumbNailUrl =>
+      RealmObjectBase.get<String>(this, 'thumbNailUrl') as String?;
+  @override
+  set thumbNailUrl(String? value) =>
+      RealmObjectBase.set(this, 'thumbNailUrl', value);
+
+  @override
+  String? get url => RealmObjectBase.get<String>(this, 'url') as String?;
+  @override
+  set url(String? value) => RealmObjectBase.set(this, 'url', value);
+
+  @override
+  String? get userId => RealmObjectBase.get<String>(this, 'userId') as String?;
+  @override
+  set userId(String? value) => RealmObjectBase.set(this, 'userId', value);
+
+  @override
+  String? get userName =>
+      RealmObjectBase.get<String>(this, 'userName') as String?;
+  @override
+  set userName(String? value) => RealmObjectBase.set(this, 'userName', value);
+
+  @override
+  Stream<RealmObjectChanges<VehicleVideo>> get changes =>
+      RealmObjectBase.getChanges<VehicleVideo>(this);
+
+  @override
+  VehicleVideo freeze() => RealmObjectBase.freezeObject<VehicleVideo>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(VehicleVideo._);
+    return const SchemaObject(
+        ObjectType.realmObject, VehicleVideo, 'VehicleVideo', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('vehicleVideoId', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('landmarkId', RealmPropertyType.string, optional: true),
+      SchemaProperty('landmarkName', RealmPropertyType.string, optional: true),
+      SchemaProperty('position', RealmPropertyType.object,
+          optional: true, linkTarget: 'Position'),
+      SchemaProperty('geoHash', RealmPropertyType.string, optional: true),
+      SchemaProperty('created', RealmPropertyType.string, optional: true),
+      SchemaProperty('vehicleId', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationId', RealmPropertyType.string, optional: true),
+      SchemaProperty('vehicleReg', RealmPropertyType.string, optional: true),
+      SchemaProperty('thumbNailUrl', RealmPropertyType.string, optional: true),
+      SchemaProperty('url', RealmPropertyType.string, optional: true),
+      SchemaProperty('userId', RealmPropertyType.string, optional: true),
+      SchemaProperty('userName', RealmPropertyType.string, optional: true),
     ]);
   }
 }

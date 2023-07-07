@@ -252,9 +252,10 @@ class ListApiDog {
 
     return list;
   }
-  Future<List<Vehicle>> getOwnerVehicles(
-      String userId, bool refresh) async {
-    rm.RealmResults<Vehicle> results = realm.query<Vehicle>('ownerId == \$0',[userId]);
+
+  Future<List<Vehicle>> getOwnerVehicles(String userId, bool refresh) async {
+    rm.RealmResults<Vehicle> results =
+        realm.query<Vehicle>('ownerId == \$0', [userId]);
     final list = <Vehicle>[];
     if (refresh || results.isEmpty) {
       return await getOwnerCarsFromBackend(userId);
@@ -270,7 +271,8 @@ class ListApiDog {
 
   Future<List<DispatchRecord>> getMarshalDispatchRecords(
       String userId, bool refresh) async {
-    rm.RealmResults<DispatchRecord> results = realm.query<DispatchRecord>('marshalId == \$0',[userId]);
+    rm.RealmResults<DispatchRecord> results =
+        realm.query<DispatchRecord>('marshalId == \$0', [userId]);
     final list = <DispatchRecord>[];
     if (refresh || results.isEmpty) {
       return await getMarshalDispatchesFromBackend(userId);
@@ -284,8 +286,7 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<CounterBag>> getVehicleCounts(
-      String vehicleId) async {
+  Future<List<CounterBag>> getVehicleCounts(String vehicleId) async {
     final cmd = '${url}getVehicleCounts?vehicleId=$vehicleId';
     List resp = await _sendHttpGET(cmd);
     var list = <CounterBag>[];
@@ -296,9 +297,11 @@ class ListApiDog {
     pp('$mm getVehicleCounts from mongo: ${list.length}');
     return list;
   }
+
   Future<List<CounterBag>> getVehicleCountsByDate(
       String vehicleId, String startDate) async {
-    final cmd = '${url}getVehicleCountsByDate?vehicleId=$vehicleId&startDate=$startDate';
+    final cmd =
+        '${url}getVehicleCountsByDate?vehicleId=$vehicleId&startDate=$startDate';
     List resp = await _sendHttpGET(cmd);
     var list = <CounterBag>[];
     for (var mJson in resp) {
@@ -308,6 +311,7 @@ class ListApiDog {
     pp('$mm getVehicleCountsByDate from mongo: ${list.length}');
     return list;
   }
+
   Future<List<RouteCity>> getAssociationRouteCities(
       String associationId) async {
     final cmd = '${url}getAssociationRouteCities?associationId=$associationId';
@@ -378,6 +382,7 @@ class ListApiDog {
     pp('$mm cached association vehicles from backend: ${list.length}');
     return list;
   }
+
   Future<List<Vehicle>> getOwnerCarsFromBackend(String userId) async {
     final cmd = '${url}getOwnerVehicles?userIdId=$userId';
     List resp = await _sendHttpGET(cmd);
@@ -394,7 +399,8 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<DispatchRecord>> getMarshalDispatchesFromBackend(String userId) async {
+  Future<List<DispatchRecord>> getMarshalDispatchesFromBackend(
+      String userId) async {
     final cmd = '${url}getMarshalDispatchRecords?userId=$userId';
     List resp = await _sendHttpGET(cmd);
     var list = <DispatchRecord>[];
@@ -408,7 +414,6 @@ class ListApiDog {
     pp('$mm cached marshal dispatches from backend: ${list.length}');
     return list;
   }
-
 
   Future<List<Association>> getAssociations() async {
     rm.RealmResults<Association> results = realm.all<Association>();
@@ -520,6 +525,165 @@ class ListApiDog {
       pp(e);
     }
     return localList;
+  }
+
+  Future<List<VehiclePhoto>> getVehiclePhotos(
+      String vehicleId, bool refresh) async {
+    var localList = <VehiclePhoto>[];
+    rm.RealmResults<VehiclePhoto> results =
+        realm.query<VehiclePhoto>("vehicleId == \$0", [vehicleId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        localList.add(element);
+      }
+    }
+    pp('$mm VehiclePhotos from realm:: ${localList.length}');
+    if (localList.isNotEmpty && !refresh) {
+      return localList;
+    }
+    //
+    try {
+      localList = await _getVehiclePhotosFromBackend(vehicleId: vehicleId);
+      pp('$mm RouteLandmarks from backend:: ${localList.length}');
+      realm.write(() {
+        realm.addAll<VehiclePhoto>(localList, update: true);
+      });
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
+  Future<List<VehicleVideo>> getVehicleVideos(
+      String vehicleId, bool refresh) async {
+    var localList = <VehicleVideo>[];
+    rm.RealmResults<VehicleVideo> results =
+    realm.query<VehicleVideo>("vehicleId == \$0", [vehicleId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        localList.add(element);
+      }
+    }
+    pp('$mm VehicleVideos from realm:: ${localList.length}');
+    if (localList.isNotEmpty && !refresh) {
+      return localList;
+    }
+    //
+    try {
+      localList = await _getVehicleVideosFromBackend(vehicleId: vehicleId);
+      pp('$mm RouteLandmarks from backend:: ${localList.length}');
+      realm.write(() {
+        realm.addAll<VehicleVideo>(localList, update: true);
+      });
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
+  Future<List<VehicleMediaRequest>> getVehicleMediaRequests(
+      String vehicleId, bool refresh) async {
+    var localList = <VehicleMediaRequest>[];
+    rm.RealmResults<VehicleMediaRequest> results =
+    realm.query<VehicleMediaRequest>("vehicleId == \$0", [vehicleId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        localList.add(element);
+      }
+    }
+    pp('$mm VehicleMediaRequest from realm:: ${localList.length}');
+    if (localList.isNotEmpty && !refresh) {
+      return localList;
+    }
+    //
+    try {
+      localList = await _getVehicleMediaRequestsFromBackend(vehicleId: vehicleId);
+      pp('$mm RouteLandmarks from backend:: ${localList.length}');
+      realm.write(() {
+        realm.addAll<VehicleMediaRequest>(localList, update: true);
+      });
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
+
+  Future<List<RouteUpdateRequest>> getRouteUpdateRequests(
+      String routeId, bool refresh) async {
+    var localList = <RouteUpdateRequest>[];
+    rm.RealmResults<RouteUpdateRequest> results =
+    realm.query<RouteUpdateRequest>("routeId == \$0", [routeId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        localList.add(element);
+      }
+    }
+    pp('$mm RouteUpdateRequest from realm:: ${localList.length}');
+    if (localList.isNotEmpty && !refresh) {
+      return localList;
+    }
+    //
+    try {
+      localList = await _getRouteUpdateRequestsFromBackend(routeId: routeId);
+      pp('$mm RouteUpdateRequests from backend:: ${localList.length}');
+      realm.write(() {
+        realm.addAll<RouteUpdateRequest>(localList, update: true);
+      });
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
+  Future<List<VehiclePhoto>> _getVehiclePhotosFromBackend(
+      {required String vehicleId}) async {
+    final list = <VehiclePhoto>[];
+    final cmd = '${url}getVehiclePhotos?vehicleId=$vehicleId';
+    List resp = await _sendHttpGET(cmd);
+    for (var value in resp) {
+      var r = buildVehiclePhoto(value);
+      list.add(r);
+    }
+
+    pp('$mm VehiclePhotos found: ${list.length}');
+    return list;
+  }
+  Future<List<VehicleMediaRequest>> _getVehicleMediaRequestsFromBackend(
+      {required String vehicleId}) async {
+    final list = <VehicleMediaRequest>[];
+    final cmd = '${url}getVehicleMediaRequests?vehicleId=$vehicleId';
+    List resp = await _sendHttpGET(cmd);
+    for (var value in resp) {
+      var r = buildVehicleMediaRequest(value);
+      list.add(r);
+    }
+
+    pp('$mm RouteUpdateRequests found: ${list.length}');
+    return list;
+  }
+  Future<List<RouteUpdateRequest>> _getRouteUpdateRequestsFromBackend(
+      {required String routeId}) async {
+    final list = <RouteUpdateRequest>[];
+    final cmd = '${url}getRouteUpdateRequests?routeId=$routeId';
+    List resp = await _sendHttpGET(cmd);
+    for (var value in resp) {
+      var r = buildRouteUpdateRequest(value);
+      list.add(r);
+    }
+
+    pp('$mm RouteUpdateRequests found: ${list.length}');
+    return list;
+  }
+
+  Future<List<VehicleVideo>> _getVehicleVideosFromBackend(
+      {required String vehicleId}) async {
+    final list = <VehicleVideo>[];
+    final cmd = '${url}getVehicleVideos?vehicleId=$vehicleId';
+    List resp = await _sendHttpGET(cmd);
+    for (var value in resp) {
+      var r = buildVehicleVideo(value);
+      list.add(r);
+    }
+
+    pp('$mm VehicleVideos found: ${list.length}');
+    return list;
   }
 
   Future<Route?> getRoute(String routeId) async {
@@ -675,13 +839,13 @@ class ListApiDog {
     }
 
     pp('$mm ....... routes from backend : ${list.length}');
-      try {
-        realm.write(() {
-          realm.addAll<Route>(list, update: true);
-        });
-      } catch (e) {
-        pp('$mm ... REALM ERROR: ${E.redDot} $e');
-      }
+    try {
+      realm.write(() {
+        realm.addAll<Route>(list, update: true);
+      });
+    } catch (e) {
+      pp('$mm ... REALM ERROR: ${E.redDot} $e');
+    }
 
     pp('$mm ......... cached routes: ${list.length}');
     return list;

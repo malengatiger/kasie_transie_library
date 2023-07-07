@@ -168,8 +168,12 @@ class FCMBloc {
         .subscribeToTopic('userGeofenceEvent_$associationId');
     pp('$mm ..... FCM: subscribed to userGeofenceEvent_$associationId');
     //
+    await firebaseMessaging
+        .subscribeToTopic('vehicle_media_request_$associationId');
+    pp('$mm ..... FCM: subscribed to vehicle_media_request_$associationId');
+    //
 
-    pp('$mm ..... FCM: subscribed to all KasieTransie FCM topics\n\n');
+    pp('$mm ..... FCM: subscribed to all ${E.pear} 9 (nine) KasieTransie FCM topics\n\n');
     //
   }
 
@@ -227,6 +231,18 @@ class FCMBloc {
         final va = map['userGeofenceEvent'];
         final x = jsonDecode(va);
         _userGeofenceStreamController.sink.add(buildUserGeofenceEvent(x));
+        break;
+      case 'vehicleMediaRequest':
+        final va = map['vehicleMediaRequest'];
+        final x = jsonDecode(va);
+        _vehicleMediaRequestStreamController.sink
+            .add(buildVehicleMediaRequest(x));
+        break;
+      case 'routeUpdateRequest':
+        final va = map['routeUpdateRequest'];
+        final x = jsonDecode(va);
+        _routeUpdateRequestStreamController.sink
+            .add(buildRouteUpdateRequest(x));
         break;
     }
   }
@@ -311,7 +327,17 @@ class FCMBloc {
   Stream<UserGeofenceEvent> get userGeofenceStream =>
       _userGeofenceStreamController.stream;
 
-  //todo - add location request and response
+  final StreamController<VehicleMediaRequest>
+      _vehicleMediaRequestStreamController = StreamController.broadcast();
+  final StreamController<RouteUpdateRequest>
+      _routeUpdateRequestStreamController = StreamController.broadcast();
+
+  Stream<RouteUpdateRequest> get routeUpdateRequestStream =>
+      _routeUpdateRequestStreamController.stream;
+
+  Stream<VehicleMediaRequest> get vehicleMediaRequestStream =>
+      _vehicleMediaRequestStreamController.stream;
+
   final StreamController<LocationRequest> _locationRequestStreamController =
       StreamController.broadcast();
 

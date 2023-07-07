@@ -201,7 +201,63 @@ class _Association {
     return map;
   }
 }
+//
 
+@RealmModel()
+class _RouteUpdateRequest {
+  @PrimaryKey()
+  late ObjectId id;
+  String? routeId;
+  String? routeName;
+  String? userId;
+  String? created;
+  String? associationId;
+  String? userName;
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {};
+    map['userId'] = userId;
+    map['_id'] = id.hexString;
+    map['routeId'] = routeId;
+    map['routeName'] = routeName;
+    map['userId'] = userId;
+    map['created'] = created;
+    map['userName'] = userName;
+    map['associationId'] = associationId;
+    return map;
+  }
+}
+
+//
+@RealmModel()
+class _VehicleMediaRequest {
+  @PrimaryKey()
+  late ObjectId id;
+  String? userId;
+  String? vehicleId;
+  String? vehicleReg;
+  String? requesterId;
+  String? created;
+  String? associationId;
+  String? requesterName;
+
+  bool? addVideo;
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {};
+    map['userId'] = userId;
+    map['_id'] = id.hexString;
+    map['requesterId'] = requesterId;
+    map['vehicleId'] = vehicleId;
+    map['requesterName'] = requesterName;
+    map['created'] = created;
+    map['vehicleReg'] = vehicleReg;
+    map['associationId'] = associationId;
+    map['addVideo'] = addVideo;
+    return map;
+  }
+}
+//
 @RealmModel()
 class _VehicleArrival {
   @PrimaryKey()
@@ -237,6 +293,79 @@ class _VehicleArrival {
     map['associationId'] = associationId;
     map['associationName'] = associationName;
     map['dispatched'] = dispatched;
+    map['position'] = position == null ? null : position!.toJson();
+    return map;
+  }
+}
+@RealmModel()
+class _VehiclePhoto {
+  @PrimaryKey()
+  late ObjectId id;
+  String? vehiclePhotoId;
+  String? landmarkId;
+  String? landmarkName;
+  _Position? position;
+  String? geoHash;
+  String? created;
+  String? vehicleId;
+  String? associationId;
+  String? vehicleReg;
+  String? thumbNailUrl;
+  String? url;
+  String? userId, userName;
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {};
+    map['landmarkId'] = landmarkId;
+    map['_id'] = id.hexString;
+    map['url'] = url;
+    map['vehicleId'] = vehicleId;
+    map['thumbNailUrl'] = thumbNailUrl;
+    map['userId'] = userId;
+    map['created'] = created;
+    map['geoHash'] = geoHash;
+    map['landmarkName'] = landmarkName;
+    map['vehiclePhotoId'] = vehiclePhotoId;
+    map['vehicleReg'] = vehicleReg;
+    map['associationId'] = associationId;
+    map['userName'] = userName;
+    map['position'] = position == null ? null : position!.toJson();
+    return map;
+  }
+}
+
+@RealmModel()
+class _VehicleVideo {
+  @PrimaryKey()
+  late ObjectId id;
+  String? vehicleVideoId;
+  String? landmarkId;
+  String? landmarkName;
+  _Position? position;
+  String? geoHash;
+  String? created;
+  String? vehicleId;
+  String? associationId;
+  String? vehicleReg;
+  String? thumbNailUrl;
+  String? url;
+  String? userId, userName;
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {};
+    map['landmarkId'] = landmarkId;
+    map['_id'] = id.hexString;
+    map['url'] = url;
+    map['vehicleId'] = vehicleId;
+    map['thumbNailUrl'] = thumbNailUrl;
+    map['userId'] = userId;
+    map['created'] = created;
+    map['geoHash'] = geoHash;
+    map['landmarkName'] = landmarkName;
+    map['vehicleVideoId'] = vehicleVideoId;
+    map['vehicleReg'] = vehicleReg;
+    map['associationId'] = associationId;
+    map['userName'] = userName;
     map['position'] = position == null ? null : position!.toJson();
     return map;
   }

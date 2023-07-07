@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -7,10 +9,13 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_file.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pretty_json/pretty_json.dart';
 import 'dart:ui' as ui;
-
+import 'package:image/image.dart' as img;
 import 'emojis.dart';
+import 'package:video_thumbnail/video_thumbnail.dart' as vt;
+
 
 
 pp(dynamic msg) {
@@ -140,10 +145,70 @@ Color getColor(String stringColor) {
   }
 }
 
+Future<File> getPhotoThumbnail({required File file}) async {
+  final Directory directory = await getApplicationDocumentsDirectory();
 
+  img.Image? image = img.decodeImage(file.readAsBytesSync());
+  var thumbnail = img.copyResize(image!, width: 160);
+  const slash = '/thumbnail_';
+
+  final File mFile = File(
+      '${directory.path}$slash${DateTime.now().millisecondsSinceEpoch}.jpg');
+  var thumb = mFile..writeAsBytesSync(img.encodeJpg(thumbnail, quality: 100));
+  var len = await thumb.length();
+  pp('🔷🔷 photo thumbnail generated: 😡 ${(len / 1024).toStringAsFixed(1)} KB');
+  return thumb;
+}
+Future<File> getVideoThumbnail(File file) async {
+  final Directory directory = await getApplicationDocumentsDirectory();
+  var path = 'possibleVideoThumb_${DateTime.now().toIso8601String()}.jpg';
+  const slash = '/';
+  final thumbFile = File('${directory.path}$slash$path');
+
+  try {
+    final data = await vt.VideoThumbnail.thumbnailData(
+      video: file.path,
+      imageFormat: vt.ImageFormat.JPEG,
+      maxWidth: 128,
+      quality: 100,
+    );
+    await thumbFile.writeAsBytes(data!);
+    pp('🔷🔷Video thumbnail created. length: ${await thumbFile.length()} 🔷🔷🔷');
+    return thumbFile;
+  } catch (e) {
+    pp('ERROR: $e');
+    var m = await getImageFileFromAssets('assets/intro/small.jpg');
+    return m;
+  }
+}
+Future<File> getImageFileFromAssets(String path) async {
+  final byteData = await rootBundle.load('assets/$path');
+
+  final file = File('${(await getTemporaryDirectory()).path}/$path');
+  await file.writeAsBytes(byteData.buffer
+      .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+
+  return file;
+}
 String getDeviceType() {
   final data = MediaQueryData.fromView(WidgetsBinding.instance.window);
   return data.size.shortestSide < 600 ? 'phone' : 'tablet';
+}
+String getThisDeviceType() {
+  final data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+  return data.size.shortestSide < 600 ? 'phone' : 'tablet';
+}
+
+String getFileSizeString({required int bytes, int decimals = 0}) {
+  const suffixes = [" bytes", " KB", " MB", " GB", " TB"];
+  var i = (log(bytes) / log(1024)).floor();
+  return ((bytes / pow(1024, i)).toStringAsFixed(decimals)) + suffixes[i];
+}
+
+double getFileSizeInMB({required int bytes, int decimals = 0}) {
+  var i = (log(bytes) / log(1024)).floor();
+  var size = (bytes / pow(1024, i));
+  return size;
 }
 
 String getFormattedDateHour(String date) {

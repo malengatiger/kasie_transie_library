@@ -383,7 +383,8 @@ VehicleHeartbeat buildVehicleHeartbeat(Map j) {
 CalculatedDistance buildCalculatedDistance(Map map) {
   var id = rm.ObjectId.fromHexString(map['_id'] as String);
 
-  final m = CalculatedDistance(id,
+  final m = CalculatedDistance(
+    id,
     routeId: map['routeId'],
     index: map['index'],
     distanceFromStart: map['distanceFromStart'],
@@ -450,5 +451,76 @@ LocationResponse buildLocationResponse(Map j) {
   return m;
 }
 
+VehiclePhoto buildVehiclePhoto(Map j) {
+  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  var m = VehiclePhoto(
+    id,
+    vehicleId: j['vehicleId'],
+    vehicleReg: j['vehicleReg'],
+    associationId: j['associationId'],
+    userName: j['associationName'],
+    created: j['created'],
+    vehiclePhotoId: j['vehiclePhotoId'],
+    landmarkName: j['landmarkName'],
+    userId: j['userId'],
+    url: j['url'],
+    thumbNailUrl: j['thumbNailUrl'],
+    geoHash: j['geoHash'],
+    landmarkId: j['landmarkId'],
+    position: buildPosition(j['position']),
+  );
+  return m;
+}
+
+VehicleVideo buildVehicleVideo(Map j) {
+  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  var m = VehicleVideo(
+    id,
+    vehicleId: j['vehicleId'],
+    vehicleReg: j['vehicleReg'],
+    associationId: j['associationId'],
+    userName: j['associationName'],
+    created: j['created'],
+    vehicleVideoId: j['vehicleVideoId'],
+    landmarkName: j['landmarkName'],
+    userId: j['userId'],
+    url: j['url'],
+    thumbNailUrl: j['thumbNailUrl'],
+    geoHash: j['geoHash'],
+    landmarkId: j['landmarkId'],
+    position: buildPosition(j['position']),
+  );
+  return m;
+}
+
+VehicleMediaRequest buildVehicleMediaRequest(Map j) {
+  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  var m = VehicleMediaRequest(
+    id,
+    vehicleId: j['vehicleId'],
+    vehicleReg: j['vehicleReg'],
+    associationId: j['associationId'],
+    addVideo: j['addVideo'],
+    created: j['created'],
+    requesterId: j['requesterId'],
+    requesterName: j['requesterName'],
+    userId: j['userId'],
+  );
+  return m;
+}
+
+RouteUpdateRequest buildRouteUpdateRequest(Map j) {
+  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  var m = RouteUpdateRequest(
+    id,
+    routeId: j['routeId'],
+    routeName: j['routeName'],
+    associationId: j['associationId'],
+    userName: j['userName'],
+    created: j['created'],
+    userId: j['userId'],
+  );
+  return m;
+}
 
 const point = 'Point';
