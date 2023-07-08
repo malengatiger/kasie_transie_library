@@ -15,12 +15,13 @@ class QRScanner extends StatefulWidget {
       {Key? key,
       required this.onCarScanned,
       required this.onUserScanned,
-      required this.onError})
+      required this.onError, required this.quitAfterScan})
       : super(key: key);
 
   final Function(lm.Vehicle) onCarScanned;
   final Function(lm.User) onUserScanned;
   final Function onError;
+  final bool quitAfterScan;
 
   @override
   QRScannerState createState() => QRScannerState();
@@ -64,18 +65,20 @@ class QRScannerState extends State<QRScanner>
 
   void _returnScannedData(dynamic map) async {
     pp('$mm _returnScannedData : ${E.leaf2}${E.leaf2}${E.leaf2}');
-    //
-    // await playAudioBeep();
+
     qrViewController!.resumeCamera();
 
     try {
       final vehicleId = map['vehicleId'];
-
       if (vehicleId != null) {
         final vehicle = await listApiDog.getVehicle(vehicleId);
         pp('$mm scanned vehicle retrieved from Realm : ${E.redDot}${E.redDot}${E.redDot}');
         myPrettyJsonPrint(vehicle!.toJson());
         widget.onCarScanned(vehicle);
+        if (widget.quitAfterScan) {
+          qrViewController!.pauseCamera();
+        }
+
         return;
       }
       final userId = map['userId'];

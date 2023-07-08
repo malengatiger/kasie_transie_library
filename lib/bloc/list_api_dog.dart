@@ -42,6 +42,10 @@ final config = rm.Configuration.local(
     LocationResponse.schema,
     LocationRequest.schema,
     DispatchRecord.schema,
+    VehiclePhoto.schema,
+    VehicleVideo.schema,
+    VehicleMediaRequest.schema,
+    RouteUpdateRequest.schema,
   ],
 );
 final ListApiDog listApiDog = ListApiDog(
@@ -537,14 +541,14 @@ class ListApiDog {
         localList.add(element);
       }
     }
-    pp('$mm VehiclePhotos from realm:: ${localList.length}');
+    pp('$mm VehiclePhotos from realm:: ${localList.length} refresh: $refresh');
     if (localList.isNotEmpty && !refresh) {
       return localList;
     }
     //
     try {
       localList = await _getVehiclePhotosFromBackend(vehicleId: vehicleId);
-      pp('$mm RouteLandmarks from backend:: ${localList.length}');
+      pp('$mm VehiclePhoto from backend:: ${localList.length}');
       realm.write(() {
         realm.addAll<VehiclePhoto>(localList, update: true);
       });
@@ -553,11 +557,12 @@ class ListApiDog {
     }
     return localList;
   }
+
   Future<List<VehicleVideo>> getVehicleVideos(
       String vehicleId, bool refresh) async {
     var localList = <VehicleVideo>[];
     rm.RealmResults<VehicleVideo> results =
-    realm.query<VehicleVideo>("vehicleId == \$0", [vehicleId]);
+        realm.query<VehicleVideo>("vehicleId == \$0", [vehicleId]);
     if (results.isNotEmpty) {
       for (var element in results) {
         localList.add(element);
@@ -579,11 +584,12 @@ class ListApiDog {
     }
     return localList;
   }
+
   Future<List<VehicleMediaRequest>> getVehicleMediaRequests(
       String vehicleId, bool refresh) async {
     var localList = <VehicleMediaRequest>[];
     rm.RealmResults<VehicleMediaRequest> results =
-    realm.query<VehicleMediaRequest>("vehicleId == \$0", [vehicleId]);
+        realm.query<VehicleMediaRequest>("vehicleId == \$0", [vehicleId]);
     if (results.isNotEmpty) {
       for (var element in results) {
         localList.add(element);
@@ -595,8 +601,37 @@ class ListApiDog {
     }
     //
     try {
-      localList = await _getVehicleMediaRequestsFromBackend(vehicleId: vehicleId);
-      pp('$mm RouteLandmarks from backend:: ${localList.length}');
+      localList = await _getVehicleMediaRequestsFromBackend(
+          vehicleId: vehicleId, associationId: null, startDate: null);
+      pp('$mm VehicleMediaRequests from backend:: ${localList.length}');
+      realm.write(() {
+        realm.addAll<VehicleMediaRequest>(localList, update: true);
+      });
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
+
+  Future<List<VehicleMediaRequest>> getAssociationVehicleMediaRequests(
+      String associationId, String startDate, bool refresh) async {
+    var localList = <VehicleMediaRequest>[];
+    rm.RealmResults<VehicleMediaRequest> results = realm
+        .query<VehicleMediaRequest>("associationId == \$0", [associationId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        localList.add(element);
+      }
+    }
+    pp('$mm VehicleMediaRequest from realm:: ${localList.length}');
+    if (localList.isNotEmpty && !refresh) {
+      return localList;
+    }
+    //
+    try {
+      localList = await _getVehicleMediaRequestsFromBackend(
+          vehicleId: null, associationId: associationId, startDate: startDate);
+      pp('$mm VehicleMediaRequests from backend, caching to realm: ${localList.length}');
       realm.write(() {
         realm.addAll<VehicleMediaRequest>(localList, update: true);
       });
@@ -610,7 +645,7 @@ class ListApiDog {
       String routeId, bool refresh) async {
     var localList = <RouteUpdateRequest>[];
     rm.RealmResults<RouteUpdateRequest> results =
-    realm.query<RouteUpdateRequest>("routeId == \$0", [routeId]);
+        realm.query<RouteUpdateRequest>("routeId == \$0", [routeId]);
     if (results.isNotEmpty) {
       for (var element in results) {
         localList.add(element);
@@ -632,11 +667,14 @@ class ListApiDog {
     }
     return localList;
   }
+
   Future<List<VehiclePhoto>> _getVehiclePhotosFromBackend(
       {required String vehicleId}) async {
     final list = <VehiclePhoto>[];
     final cmd = '${url}getVehiclePhotos?vehicleId=$vehicleId';
     List resp = await _sendHttpGET(cmd);
+    pp('$mm VehiclePhotos found: ${resp.length}');
+
     for (var value in resp) {
       var r = buildVehiclePhoto(value);
       list.add(r);
@@ -645,11 +683,21 @@ class ListApiDog {
     pp('$mm VehiclePhotos found: ${list.length}');
     return list;
   }
+
   Future<List<VehicleMediaRequest>> _getVehicleMediaRequestsFromBackend(
-      {required String vehicleId}) async {
+      {required String? associationId,
+      required String? vehicleId,
+      required String? startDate}) async {
     final list = <VehicleMediaRequest>[];
-    final cmd = '${url}getVehicleMediaRequests?vehicleId=$vehicleId';
-    List resp = await _sendHttpGET(cmd);
+    var command = '';
+    if (associationId != null) {
+      command =
+          '${url}getAssociationVehicleMediaRequests?associationId=$associationId&startDate=$startDate';
+    }
+    if (vehicleId != null) {
+      command = '${url}getVehicleMediaRequests?vehicleId=$vehicleId';
+    }
+    List resp = await _sendHttpGET(command);
     for (var value in resp) {
       var r = buildVehicleMediaRequest(value);
       list.add(r);
@@ -658,6 +706,7 @@ class ListApiDog {
     pp('$mm RouteUpdateRequests found: ${list.length}');
     return list;
   }
+
   Future<List<RouteUpdateRequest>> _getRouteUpdateRequestsFromBackend(
       {required String routeId}) async {
     final list = <RouteUpdateRequest>[];

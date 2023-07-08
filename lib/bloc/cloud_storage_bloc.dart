@@ -7,8 +7,11 @@ import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
+import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:realm/realm.dart';
 
+import '../utils/device_location_bloc.dart';
 import '../utils/functions.dart';
 
 final CloudStorageBloc cloudStorageBloc = CloudStorageBloc();
@@ -21,30 +24,54 @@ class CloudStorageBloc {
   static const mm = '☕️☕️☕️☕️☕️☕️ CloudStorageBloc: 💚💚 ';
 
   final StreamController<lib.VehiclePhoto> _photoStreamController =
-  StreamController.broadcast();
+      StreamController.broadcast();
   final StreamController<lib.VehicleVideo> _videoStreamController =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
   final StreamController<String> _errorStreamController =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
   Stream<lib.VehiclePhoto> get photoStream => _photoStreamController.stream;
   Stream<lib.VehicleVideo> get videoStream => _videoStreamController.stream;
 
   Stream<String> get errorStream => _errorStreamController.stream;
 
-
-  Future<int> uploadPhoto({
-    required lib.VehiclePhoto vehiclePhoto, required File file, required File thumbnailFile
-  }) async {
-    pp('\n\n\n$mm️ uploadPhoto ☕️☕️☕️☕️☕️☕️☕️️ ... ${vehiclePhoto.toJson()}');
+  Future<int> uploadPhoto(
+      {required lib.Vehicle car,
+      required File file,
+      required File thumbnailFile}) async {
+    pp('\n\n\n$mm️ uploadPhoto ☕️☕️☕️☕️☕️☕️☕️️ ... ${car.vehicleReg}');
 
     pp('\n$mm adding photo data to the database ...o');
     try {
       pp('$mm adding photo ..... 😡😡 😡😡');
-      final urls = await _doTheUpload(file: file, thumbnailFile: thumbnailFile, vehicleId: vehiclePhoto.vehicleId!, isVideo: false);
-      vehiclePhoto.url = urls.$1;
-      vehiclePhoto.thumbNailUrl = urls.$2;
+      final user = await prefs.getUser();
+
+      final urls = await _doTheUpload(
+          file: file,
+          thumbnailFile: thumbnailFile,
+          vehicleId: car.vehicleId!,
+          isVideo: false);
+      final loc = await locationBloc.getLocation();
+      final position = lib.Position(
+          type: 'Point',
+          coordinates: [loc.longitude, loc.latitude],
+          latitude: loc.latitude,
+          longitude: loc.longitude);
+
+      var vehiclePhoto = lib.VehiclePhoto(
+        ObjectId(),
+        vehiclePhotoId: Uuid.v4().toString(),
+        vehicleId: car.vehicleId,
+        vehicleReg: car.vehicleReg,
+        userName: user!.name,
+        userId: user.name,
+        url: urls.$1,
+        thumbNailUrl: urls.$2,
+        created: DateTime.now().toUtc().toIso8601String(),
+        associationId: user!.associationId,
+        position: position,
+      );
 
       await dataApiDog.addVehiclePhoto(vehiclePhoto);
       return uploadFinished;
@@ -53,17 +80,43 @@ class CloudStorageBloc {
       return uploadError;
     }
   }
-  Future<int> uploadVideo({
-    required lib.VehicleVideo vehicleVideo, required File file, required File thumbnailFile
-  }) async {
-    pp('\n\n\n$mm️ uploadVideo ☕️☕️☕️☕️☕️☕️☕️️ ... ${vehicleVideo.toJson()}');
+
+  Future<int> uploadVideo(
+      {required lib.Vehicle car,
+      required File file,
+      required File thumbnailFile}) async {
+    pp('\n\n\n$mm️ uploadVideo ☕️☕️☕️☕️☕️☕️☕️️ ... ${car.vehicleReg}');
 
     pp('\n$mm adding video data to the database ...o');
     try {
       pp('$mm adding video ..... 😡😡 😡😡');
-      final urls = await _doTheUpload(file: file, thumbnailFile: thumbnailFile, vehicleId: vehicleVideo.vehicleId!, isVideo: true);
-      vehicleVideo.url = urls.$1;
-      vehicleVideo.thumbNailUrl = urls.$2;
+      final user = await prefs.getUser();
+
+      final urls = await _doTheUpload(
+          file: file,
+          thumbnailFile: thumbnailFile,
+          vehicleId: car.vehicleId!,
+          isVideo: true);
+      final loc = await locationBloc.getLocation();
+      final position = lib.Position(
+          type: 'Point',
+          coordinates: [loc.longitude, loc.latitude],
+          latitude: loc.latitude,
+          longitude: loc.longitude);
+
+      var vehicleVideo = lib.VehicleVideo(
+        ObjectId(),
+        vehicleVideoId: Uuid.v4().toString(),
+        vehicleId: car.vehicleId,
+        vehicleReg: car.vehicleReg,
+        userName: user!.name,
+        userId: user.name,
+        url: urls.$1,
+        thumbNailUrl: urls.$2,
+        created: DateTime.now().toUtc().toIso8601String(),
+        associationId: user.associationId,
+        position: position,
+      );
 
       await dataApiDog.addVehicleVideo(vehicleVideo);
       return uploadFinished;
@@ -72,7 +125,12 @@ class CloudStorageBloc {
       return uploadError;
     }
   }
-  Future<(String,String)> _doTheUpload({required File file, required File thumbnailFile, required String vehicleId, required bool isVideo}) async {
+
+  Future<(String, String)> _doTheUpload(
+      {required File file,
+      required File thumbnailFile,
+      required String vehicleId,
+      required bool isVideo}) async {
     pp('$mm️ uploadPhoto ☕️☕️☕️☕️☕️☕️☕️ file path: \n${file.path}');
     //upload main file
     late UploadTask uploadTask;
@@ -81,14 +139,11 @@ class CloudStorageBloc {
     if (isVideo) {
       type = 'mp4';
     }
-    final suffix =
-        '${vehicleId}__${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final suffix = '${vehicleId}__${DateTime.now().millisecondsSinceEpoch}.jpg';
 
     var fileName = 'photo_$suffix';
-    var firebaseStorageRef = FirebaseStorage.instance
-        .ref()
-        .child(photoStorageName)
-        .child(fileName);
+    var firebaseStorageRef =
+        FirebaseStorage.instance.ref().child(photoStorageName).child(fileName);
     uploadTask = firebaseStorageRef.putFile(file);
     _reportProgress(uploadTask);
     taskSnapshot = await uploadTask.whenComplete(() {});
@@ -97,10 +152,8 @@ class CloudStorageBloc {
     _printSnapshot(taskSnapshot);
     // upload thumbnail here
     final thumbName = 'thumbnail_$suffix';
-    final firebaseStorageRef2 = FirebaseStorage.instance
-        .ref()
-        .child(photoStorageName)
-        .child(thumbName);
+    final firebaseStorageRef2 =
+        FirebaseStorage.instance.ref().child(photoStorageName).child(thumbName);
 
     final thumbUploadTask = firebaseStorageRef2.putFile(thumbnailFile);
     final thumbTaskSnapshot = await thumbUploadTask.whenComplete(() {});
@@ -108,8 +161,9 @@ class CloudStorageBloc {
     pp('$mm thumbnail file url is available, meaning that upload is complete: \n$thumbUrl');
     _printSnapshot(thumbTaskSnapshot);
 
-    return (url,thumbUrl);
+    return (url, thumbUrl);
   }
+
   void _printSnapshot(TaskSnapshot taskSnapshot) {
     var totalByteCount = taskSnapshot.totalBytes;
     var bytesTransferred = taskSnapshot.bytesTransferred;
@@ -148,7 +202,7 @@ class CloudStorageBloc {
 
     try {
       final http.Response response =
-      await http.get(Uri.parse(mUrl)).catchError((e) {
+          await http.get(Uri.parse(mUrl)).catchError((e) {
         pp('😡😡😡 Download failed: 😡😡😡 $e');
         throw Exception('😡😡😡 Download failed: $e');
       });
@@ -237,11 +291,8 @@ class CloudStorageBloc {
   CloudStorageBloc() {
     pp('🍇 🍇 🍇 🍇 🍇 StorageBloc constructor 🍇 🍇 🍇 🍇 🍇');
   }
-
 }
 
 const uploadBusy = 201;
 const uploadFinished = 200;
 const uploadError = 500;
-
-

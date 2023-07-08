@@ -417,11 +417,12 @@ TextStyle myTextStyleMediumBold(BuildContext context) {
   );
 }
 
-TextStyle myTextStyleMediumBoldWithColor(BuildContext context, Color color) {
+TextStyle myTextStyleMediumBoldWithColor({required  BuildContext context, required  Color color,
+  double? fontSize}) {
   return GoogleFonts.lato(
     textStyle: Theme.of(context).textTheme.headlineMedium,
     fontWeight: FontWeight.w900,
-    fontSize: 20.0,
+    fontSize: fontSize == null? 18.0 : fontSize!,
     color: color,
   );
 }

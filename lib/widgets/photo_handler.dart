@@ -18,11 +18,15 @@ import '../utils/functions.dart';
 import '../utils/prefs.dart';
 
 class PhotoHandler extends StatefulWidget {
-  const PhotoHandler(
-      {Key? key, required this.vehicle,})
-      : super(key: key);
+  const PhotoHandler({
+    Key? key,
+    required this.vehicle,
+    required this.onPhotoTaken,
+  }) : super(key: key);
 
   final lib.Vehicle vehicle;
+  final Function(File, File) onPhotoTaken;
+
   @override
   PhotoHandlerState createState() => PhotoHandlerState();
 }
@@ -59,15 +63,15 @@ class PhotoHandlerState extends State<PhotoHandler>
     user = await prefs.getUser();
     final c = await prefs.getColorAndLocale();
     fileSavedWillUpload =
-    await translator.translate('fileSavedWillUpload', c.locale!);
+        await translator.translate('fileSavedWillUpload', c.locale!);
     takePicture = await translator.translate('takePicture', c.locale!);
   }
 
   Future<void> _observeOrientation() async {
     pp('${E.blueDot} ........ _observeOrientation ... ');
     Stream<NativeDeviceOrientation> stream =
-    NativeDeviceOrientationCommunicator()
-        .onOrientationChanged(useSensor: true);
+        NativeDeviceOrientationCommunicator()
+            .onOrientationChanged(useSensor: true);
     orientStreamSubscription = stream.listen((event) {
       // pp('${E.blueDot}${E.blueDot} orientation, name: ${event.name} index: ${event.index}');
       _deviceOrientation = event;
@@ -84,7 +88,7 @@ class PhotoHandlerState extends State<PhotoHandler>
         maxHeight: height,
         maxWidth: width,
         imageQuality: 100,
-        preferredCameraDevice: CameraDevice.front);
+        preferredCameraDevice: CameraDevice.rear);
 
     if (file != null) {
       await _processFile(file);
@@ -122,12 +126,12 @@ class PhotoHandlerState extends State<PhotoHandler>
     final File mFile = File('${directory.path}$x');
     var z = '/photo_thumbnail_$suffix';
     final File tFile =
-    File('${directory.path}$z${DateTime.now().millisecondsSinceEpoch}.jpg');
+        File('${directory.path}$z${DateTime.now().millisecondsSinceEpoch}.jpg');
     await thumbnailFile.copy(tFile.path);
     //can i force
     if (_deviceOrientation != null) {
       final finalFile =
-      await _processOrientation(mImageFile, _deviceOrientation!);
+          await _processOrientation(mImageFile, _deviceOrientation!);
       await finalFile.copy(mFile.path);
     } else {
       await mImageFile.copy(mFile.path);
@@ -136,25 +140,10 @@ class PhotoHandlerState extends State<PhotoHandler>
       finalFile = mFile;
     });
 
-    pp('$mm check file upload names: \n💚 ${mFile.path} length: ${await mFile.length()} '
-        '\n💚thumb: ${tFile.path} length: ${await tFile.length()}');
+    widget.onPhotoTaken(mFile, tFile);
 
-    final loc = await locationBloc.getLocation();
-    final position =
-    lib.Position(type: 'Point', coordinates: [loc.longitude, loc.latitude], latitude: loc.latitude, longitude: loc.longitude);
-
-    final vehiclePhoto = lib.VehiclePhoto(ObjectId(),
-      vehiclePhotoId: Uuid.v4().toString(),
-      vehicleId: widget.vehicle.vehicleId,
-      vehicleReg: widget.vehicle.vehicleReg,
-      userName: user!.name,
-      userId: user!.name,
-      created: DateTime.now().toUtc().toIso8601String(),
-      associationId: user!.associationId,
-      position: position,
-    );
-   
-    cloudStorageBloc.uploadPhoto(vehiclePhoto: vehiclePhoto, file: mFile, thumbnailFile: thumbnailFile);
+    cloudStorageBloc.uploadPhoto(
+        car: widget.vehicle, file: mFile, thumbnailFile: tFile);
 
     var size = await mFile.length();
     var m = (size / 1024 / 1024).toStringAsFixed(2);
@@ -218,7 +207,6 @@ class PhotoHandlerState extends State<PhotoHandler>
     return mFile;
   }
 
-
   @override
   Widget build(BuildContext context) {
     var brightness = MediaQuery.of(context).platformBrightness;
@@ -253,23 +241,23 @@ class PhotoHandlerState extends State<PhotoHandler>
           children: [
             finalFile == null
                 ? Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage('assets/intro/pic2.jpg'),
-                    opacity: 0.1,
-                    fit: BoxFit.cover),
-              ),
-            )
+                    width: double.infinity,
+                    height: double.infinity,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage('assets/intro/pic2.jpg'),
+                          opacity: 0.1,
+                          fit: BoxFit.cover),
+                    ),
+                  )
                 : Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: FileImage(finalFile!), fit: BoxFit.cover),
-              ),
-            ),
+                    width: double.infinity,
+                    height: double.infinity,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: FileImage(finalFile!), fit: BoxFit.cover),
+                    ),
+                  ),
             Positioned(
               left: 12,
               right: 12,

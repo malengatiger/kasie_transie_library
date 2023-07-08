@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kasie_transie_library/bloc/cloud_storage_bloc.dart';
 import 'package:kasie_transie_library/widgets/video_controls.dart';
 
 import 'package:path_provider/path_provider.dart';
@@ -22,10 +23,12 @@ List<CameraDescription> cameras = [];
 class VideoRecorder extends StatefulWidget {
   const VideoRecorder({
     Key? key,
-    required this.vehicle,
+    required this.vehicle, required this.onVideoMade,
   }) : super(key: key);
 
   final lib.Vehicle vehicle;
+  final Function(File, File) onVideoMade;
+
 
   @override
   VideoRecorderState createState() => VideoRecorderState();
@@ -304,22 +307,9 @@ class VideoRecorderState extends State<VideoRecorder>
     await thumbnailFile0.copy(tFile.path);
 
     pp('$mm.......... _danceWithTheVideo ... Take Me To Church!!');
-    final loc = await locationBloc.getLocation();
-    lib.Position? position;
-    position =
-        lib.Position(type: 'Point', coordinates: [loc.longitude, loc.latitude]);
 
-    var vid = lib.VehicleVideo(
-      ObjectId(),
-      vehicleVideoId: Uuid.v4().toString(),
-      vehicleId: widget.vehicle.vehicleId,
-      vehicleReg: widget.vehicle.vehicleReg,
-      associationId: widget.vehicle.associationId,
-      created: DateTime.now().toUtc().toIso8601String(),
-      userId: user!.userId,
-      userName: user!.name,
-      position: position,
-    );
+    widget.onVideoMade(mFile,tFile);
+    cloudStorageBloc.uploadVideo(car: widget.vehicle, file: mFile, thumbnailFile: tFile);
 
     if (mounted) {
       showToast(
