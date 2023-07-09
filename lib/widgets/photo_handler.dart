@@ -206,6 +206,8 @@ class PhotoHandlerState extends State<PhotoHandler>
         'original file size: height: $heightOrig width: $widthOrig');
     return mFile;
   }
+  String? takePhoto;
+
 
   @override
   Widget build(BuildContext context) {

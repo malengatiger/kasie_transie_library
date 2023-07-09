@@ -494,6 +494,7 @@ VehicleVideo buildVehicleVideo(Map j) {
 }
 
 VehicleMediaRequest buildVehicleMediaRequest(Map j) {
+  myPrettyJsonPrint(j);
   var id = rm.ObjectId.fromHexString(j['_id'] as String);
   var m = VehicleMediaRequest(
     id,

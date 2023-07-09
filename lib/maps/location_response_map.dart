@@ -5,6 +5,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart' as lib;
 import 'package:kasie_transie_library/providers/kasie_providers.dart';
+import 'package:kasie_transie_library/utils/device_location_bloc.dart';
+import 'package:kasie_transie_library/utils/local_finder.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -66,13 +68,20 @@ class LocationResponseMapState extends State<LocationResponseMap> {
     });
     user = await prefs.getUser();
     try {
-      routes = await listApiDog.findAssociationRoutesByLocation(
-          LocationFinderParameter(
-              associationId: user!.associationId,
-              latitude: widget.locationResponse.position!.coordinates[1],
-              limit: 50,
-              longitude: widget.locationResponse.position!.coordinates[0],
-              radiusInKM: 5.0));
+      final loc = await locationBloc.getLocation();
+      routes = await localFinder.findNearestRoutes(latitude: loc.latitude,
+          longitude: loc.longitude, radiusInMetres: 5000);
+      var marks = await localFinder.findNearestRouteLandmarks(latitude: loc.latitude,
+          longitude: loc.longitude, radiusInMetres: 5000);
+      pp('$mm ... marks: ${marks.length}');
+
+      // routes = await listApiDog.findAssociationRoutesByLocation(
+      //     LocationFinderParameter(
+      //         associationId: user!.associationId,
+      //         latitude: widget.locationResponse.position!.coordinates[1],
+      //         limit: 50,
+      //         longitude: widget.locationResponse.position!.coordinates[0],
+      //         radiusInKM: 5.0));
       pp('$mm ... routes: ${routes.length}');
       if (routes.isNotEmpty) {
         pp('$mm  check for null: ${routes.first.name} color: ${routes.first.color}');

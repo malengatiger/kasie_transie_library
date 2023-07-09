@@ -43,8 +43,10 @@ class CarDetailsState extends State<CarDetails>
       arrivalsText,
       departuresText,
       heartbeatText,
-      daysText, locationRequestSent,
+      daysText,
+      locationRequestSent,
       historyCars,
+      requestMedia,
       dispatchesText;
   int arrivals = 0, departures = 0, heartbeats = 0, dispatches = 0;
   late StreamSubscription<lib.LocationResponse> respSub;
@@ -80,13 +82,16 @@ class CarDetailsState extends State<CarDetails>
     // await navigateWithScale(LocationResponseMap(locationResponse: locationResponse!), context);
     if (mounted) {
       busyWithMap = true;
-      await Navigator.of(context).push(MaterialPageRoute(builder: (ctx){
-            return LocationResponseMap(locationResponse: locationResponse!,);
-          }));
+      await Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+        return LocationResponseMap(
+          locationResponse: locationResponse!,
+        );
+      }));
     }
     pp('\n\n$mm _navigateToMap: .... ${E.blueDot} back from map: ${locationResponse!.vehicleReg!}');
     busyWithMap = false;
   }
+
   void _setTexts() async {
     var c = await prefs.getColorAndLocale();
     numberOfCars = await translator.translate('numberOfCars', c.locale);
@@ -100,7 +105,10 @@ class CarDetailsState extends State<CarDetails>
     requestLocation = await translator.translate('requestLocation', c.locale);
     numberOfDays = await translator.translate('numberOfDays', c.locale);
     tapToClose = await translator.translate('tapToClose', c.locale);
-    locationRequestSent = await translator.translate('locationRequestSent', c.locale);
+    requestMedia = await translator.translate('requestMedia', c.locale);
+
+    locationRequestSent =
+        await translator.translate('locationRequestSent', c.locale);
 
     setState(() {});
   }
@@ -171,8 +179,9 @@ class CarDetailsState extends State<CarDetails>
         showSnackBar(
             padding: 4,
             duration: const Duration(seconds: 5),
-            message: locationRequestSent == null?
-            'Vehicle Location Request has been sent': locationRequestSent!,
+            message: locationRequestSent == null
+                ? 'Vehicle Location Request has been sent'
+                : locationRequestSent!,
             context: context);
       }
     } catch (e) {
@@ -181,6 +190,25 @@ class CarDetailsState extends State<CarDetails>
     setState(() {
       busy = false;
     });
+  }
+
+  void _sendMediaRequest() async {
+    pp('$mm r_sendMediaRequest ...........');
+    final user = await prefs.getUser();
+    final m = lib.VehicleMediaRequest(
+      ObjectId(),
+      vehicleReg: widget.vehicle.vehicleReg,
+      vehicleId: widget.vehicle.vehicleId,
+      userId: user!.userId,
+      created: DateTime.now().toUtc().toIso8601String(),
+      associationId: user.associationId,
+      addVideo: true,
+      requesterId: user.userId,
+      requesterName: user.name,
+    );
+    final result = await dataApiDog.addVehicleMediaRequest(m);
+    pp('$mm result of backend call ...');
+    myPrettyJsonPrint(result.toJson());
   }
 
   @override
@@ -275,6 +303,19 @@ class CarDetailsState extends State<CarDetails>
                           child: Text(requestLocation == null
                               ? 'Request Current Location'
                               : requestLocation!),
+                        )),
+                    const SizedBox(
+                      height: 32,
+                    ),
+                    ElevatedButton(
+                        onPressed: () {
+                          _sendMediaRequest();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(requestMedia == null
+                              ? 'Request Photo/Video'
+                              : requestMedia!),
                         )),
                     const SizedBox(
                       height: 32,

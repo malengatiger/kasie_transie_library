@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:geolocator/geolocator.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart';
+import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/initializer.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
@@ -19,7 +20,6 @@ class LocalFinder {
       required double longitude,
       required double radiusInMetres}) async {
     final routeLandmarks = listApiDog.realm.all<RouteLandmark>();
-    pp('$mm findNearestRouteLandmark, found all in realm: ${routeLandmarks.length}');
 
     final map = HashMap<double, RouteLandmark>();
     for (var value in routeLandmarks) {
@@ -35,8 +35,7 @@ class LocalFinder {
     if (list.isNotEmpty) {
       final m = map[list.first];
       if (list.first <= radiusInMetres) {
-        pp('$mm findNearestRouteLandmarks, found:');
-        myPrettyJsonPrint(m!.toJson());
+        pp('$mm findNearestRouteLandmarks, found: ${E.redDot} ${m!.landmarkName} route: ${m!.routeName}');
         return m;
       }
     }
@@ -47,6 +46,8 @@ class LocalFinder {
       {required double latitude,
       required double longitude,
       required double radiusInMetres}) async {
+    final start = DateTime.now();
+
     final routeLandmarks = listApiDog.realm.all<RouteLandmark>();
     pp('$mm findNearestRouteLandmarks, found all in realm: ${routeLandmarks.length}');
 
@@ -59,7 +60,7 @@ class LocalFinder {
           value.position!.coordinates[0]);
       map[dist] = value;
     }
-    final lrs = <RouteLandmark>[];
+    var lrs = <RouteLandmark>[];
     List list = map.keys.toList();
     list.sort();
     if (list.isNotEmpty) {
@@ -69,7 +70,18 @@ class LocalFinder {
         }
       }
     }
+    var hashMap = HashMap<String, RouteLandmark>();
+    for (var element in lrs) {
+      hashMap[element.routeId!] = element;
+    }
+    lrs = hashMap.values.toList();
     pp('$mm findNearestRouteLandmarks, found: ${lrs.length}');
+
+    final end = DateTime.now();
+
+    pp('\n\n$mm findNearestRouteLandmarks, ${E.leaf2}${E.leaf2}${E.leaf2} '
+        'time elapsed: ${end.difference(start).inMilliseconds} milliseconds ${E.redDot}\n\n');
+
     return lrs;
   }
 
@@ -77,13 +89,37 @@ class LocalFinder {
       {required double latitude,
       required double longitude,
       required double radiusInMetres}) async {
-    final routePoints = listApiDog.realm.all<RoutePoint>();
+    pp('\n\n$mm ............... starting findNearestRoutes ...');
+    final start = DateTime.now();
+    var routeLandmarks = await findNearestRouteLandmarks(
+        latitude: latitude,
+        longitude: longitude,
+        radiusInMetres: radiusInMetres);
+    var rList = <Route>[];
+    for (var rk in routeLandmarks) {
+      final rt = await listApiDog.getRoute(rk.routeId!);
+      if (rt != null) {
+        rList.add(rt);
+      }
+    }
+    final end0 = DateTime.now();
+
+    if (rList.isNotEmpty) {
+      pp('\n\n$mm ............... found routes from landmarks, '
+          '${E.redDot} returning with ${rList.length}  routes...');
+      pp('$mm findNearestRoutes: ${rList.length} routes ${E.leaf2}${E.leaf2}${E.leaf2} '
+          'time elapsed: ${end0.difference(start).inMilliseconds} milliseconds ${E.redDot}\n\n');
+      return rList;
+    }
+    var routePoints = listApiDog.realm.all<RoutePoint>();
     pp('$mm findNearestRoutes, radiusInMetres: $radiusInMetres metres');
     pp('$mm findNearestRoutes, found all points in realm: ${routePoints.length} points');
-    // final user = await prefs.getUser();
-    // if (routePoints.isEmpty) {
-    //   await initializer.initialize();
-    // }
+    final user = await prefs.getUser();
+    if (routePoints.isEmpty) {
+      final routes = await routesIsolate.getRoutes(user!.associationId!);
+      pp('$mm .. routes found ${routes.length}, will try again ...');
+      routePoints = listApiDog.realm.all<RoutePoint>();
+    }
 
     final map = HashMap<double, RoutePoint>();
     for (var value in routePoints) {
@@ -123,6 +159,10 @@ class LocalFinder {
     }
     final fList = map2.values.toList();
     pp('$mm findNearestRoutes, found: ${fList.length} routes');
+    final end = DateTime.now();
+    pp('\n\n$mm findNearestRoutes, ${E.leaf2}${E.leaf2}${E.leaf2} '
+        'time elapsed: ${end.difference(start).inSeconds} seconds\n\n');
+
     return fList;
   }
 }

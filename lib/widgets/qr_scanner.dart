@@ -99,7 +99,7 @@ class QRScannerState extends State<QRScanner>
     pp('$mm _buildQrView ... get qr widget');
 
     return permissionStatus!.isGranted
-        ? SizedBox(
+        ? Container(color: Colors.black,
             width: 300,
             height: 300,
             child: QRView(
@@ -107,9 +107,9 @@ class QRScannerState extends State<QRScanner>
               onQRViewCreated: _onQRViewCreated,
               overlay: QrScannerOverlayShape(
                   borderColor: Theme.of(context).primaryColor,
-                  borderRadius: 10,
+                  borderRadius: 16,
                   borderLength: 30,
-                  borderWidth: 10,
+                  borderWidth: 16,
                   cutOutSize: 300),
               onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
             ),

@@ -52,8 +52,6 @@ H
 K
 lib/l10n/locale_keys.g.dart,3/6/366b7b77a469ef644a1c811ce8b36b66d935bed8
 N
-lib/utils/navigator_utils.dart,e/2/e23a49c7f56ad4b570f6167926139edd864f4804
-N
 binary/macos/realm_version.txt,d/0/d01c4d5c5d010952ec1bad64a385b230d7bc5943
 L
 lib/utils/error_handler.dart,1/0/10a99e756989f9692ff3b288cdfdb0dc6a40787b
@@ -75,8 +73,6 @@ R
 "lib/providers/kasie_providers.dart,4/4/444f3d43023add5c821968865c0b4250a3a678a2
 R
 "lib/isolates/landmark_isolate.dart,f/c/fc6db5720b1b00c776a396d6ea90e8b204ce1e2f
-P
- lib/widgets/dispatch_widget.dart,4/b/4ba0e2443a5d602521acfd543eb0df7c9f62120a
 V
 &lib/widgets/route_landmark_widget.dart,4/f/4fdec60ce96af16dc741bed3b58ce8dca449d65c
 M
@@ -85,8 +81,6 @@ R
 "lib/isolates/dispatch_isolate.dart,a/7/a71f0e60cb52599660eb8c7812f089ed5a71ae67
 K
 lib/bloc/cache_manager.dart,f/6/f6af9dc2c14cc2d983ed952cbc52421867d334ab
-K
-lib/utils/local_finder.dart,5/5/552372b167342b7b8c4258298bc2e7f7db25359f
 X
 (lib/isolates/country_cities_isolate.dart,6/c/6c5f4ef676527601b6dee97fc7714324a6e132a5
 S
@@ -101,3 +95,55 @@ O
 lib/widgets/locale_chooser.dart,2/1/2163e20a8caaa58fc903d0996eaede998c75d511
 N
 lib/data/color_and_locale.dart,5/4/54dcc551d38ac6efc527fd0c230bfbc8ce668b1a
+J
+lib/utils/initializer.dart,0/5/0508e09f255e04bf41621c065dbb59e0df1465a8
+Q
+!lib/utils/initialiazer_cover.dart,6/c/6cffa59198fcb326d2e0ec3d874f44755ad3905f
+8
+cmds.txt,9/6/96aabe83f58456692f5d448a6988674171d63b89
+Q
+!lib/l10n/translation_handler.dart,6/8/68d04abc6150923db0a7f3d8e7767b64bd6103db
+G
+lib/data/route_bag.dart,2/0/204f51ea209b239b34c4c12539e8e22a0a8a27f1
+H
+lib/data/route_pair.dart,6/8/68ac186f202a24cbf6967001ce5244b5d870d833
+[
++lib/widgets/language_and_color_chooser.dart,e/0/e084d864c6026e18c64f9423376c69244ac839b1
+Q
+!lib/bloc/the_great_geofencer.dart,3/3/33fd05829ffcd10dde65b5496aec5a77788d5522
+H
+lib/bloc/theme_bloc.dart,f/6/f67048e6e712a43d23400d457095afdd941be33a
+M
+lib/bloc/dispatch_helper.dart,e/c/ec2900543724ef57a746746c5d53acbf07698314
+I
+lib/data/counter_bag.dart,4/8/481833efe8214297e08c077fe7f4fa2c4fa7cb38
+E
+lib/data/big_bag.dart,1/7/178212d9172943ef10dde785d5c4cec618b33f34
+N
+lib/widgets/number_widget.dart,0/0/0037e7ac3953b0efde7a95a449c158df22e9ddd1
+J
+lib/utils/environment.dart,2/9/29aa30c893fdd0dcb85853c0a069b2d7d001deae
+F
+lib/bloc/app_auth.dart,2/e/2e8ace8db1fde91611d0c739cd6d716a3f5ac924
+T
+$lib/maps/association_route_maps.dart,0/1/01800237c9a2f12c0c89a2070b4fc191bb6a0972
+N
+lib/widgets/counts_widget.dart,1/f/1f6d04625b8abdac21c95e6101f9d61b63be4651
+O
+lib/widgets/days_drop_down.dart,2/4/24257c964b8f8500da5a8d61bf1c600e439dceeb
+L
+lib/messaging/heartbeat.dart,b/1/b14f98b7711cc4bb9ca72552b2ac79fb8d7dfc73
+Y
+)lib/utils/device_background_location.dart,1/e/1efc5ba4b8bb851e5c438dac3827db57b42c5c29
+J
+lib/bloc/data_api_dog.dart,0/f/0f27426890d5956a726f9c74637bb8749dbd74bb
+E
+lib/data/schemas.dart,5/8/58d969c07e26acfd1069cc807eb292b050451ec3
+G
+lib/data/schemas.g.dart,a/e/ae9d36def259da82b2fd0cef34dd7fbd434adbfb
+O
+lib/widgets/video_controls.dart,7/1/7152269918f5bd6cdeabc702e27da83992bbd3fa
+O
+lib/auth/phone_auth_signin.dart,e/d/ed017848211d6cf1bb53695f5d95a2b3310634cf
+O
+lib/auth/email_auth_signin.dart,2/a/2a121924df2544ed1851a2a61b5ca978703d1370

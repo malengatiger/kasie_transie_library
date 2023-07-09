@@ -19,8 +19,7 @@ import 'package:video_thumbnail/video_thumbnail.dart' as vt;
 
 
 pp(dynamic msg) {
-  var fmt = DateFormat('dd/MM/HH:mm:ss');
-  var time = fmt.format(DateTime.now());
+  var time = DateTime.now().toIso8601String();
   if (kReleaseMode) {
     return;
   }

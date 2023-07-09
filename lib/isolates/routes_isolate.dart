@@ -55,7 +55,8 @@ class RoutesIsolate {
     try {
       final token = await appAuth.getAuthToken();
       if (token != null) {
-        var bag = DonkeyBag(associationId, KasieEnvironment.getUrl(), token);
+        final url = '${ KasieEnvironment.getUrl()}getAssociationRoutes?associationId=$associationId';
+        var bag = DonkeyBag(associationId, url, token);
         List mRoutes = await _handleRoutes(bag);
         pp('$xy hey Joe, do yo know where you are? ${E.redDot} ');
 
@@ -204,7 +205,7 @@ class RoutesIsolate {
 const xyz = '🌀🌀🌀🌀🌀🌀🌀🌀🌀 HeavyTaskForRoutes: 🍎🍎';
 
 Future<String> _heavyTaskForRoutes(DonkeyBag bag) async {
-  pp('$xyz _heavyTaskForRoutes starting .................');
+  pp('$xyz _heavyTaskForRoutes starting ................. ${bag.url}');
 
   List resp = await _httpGet(bag.url, bag.token);
   final jsonList = jsonEncode(resp);
