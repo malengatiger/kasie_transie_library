@@ -434,6 +434,40 @@ LocationRequest buildLocationRequest(Map j) {
   );
   return m;
 }
+AmbassadorCheckIn buildAmbassadorCheckIn(Map j) {
+  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  var m = AmbassadorCheckIn(
+    id,
+    userId: j['userId'],
+    vehicleId: j['vehicleId'],
+    associationId: j['associationId'],
+    vehicleReg: j['vehicleReg'],
+    userName: j['userName'],
+    created: j['created'],
+    position: buildPosition(j['position']),
+
+  );
+  return m;
+}
+AmbassadorPassengerCount buildAmbassadorPassengerCount(Map j) {
+  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  var m = AmbassadorPassengerCount(
+    id,
+    userId: j['userId'],
+    vehicleId: j['vehicleId'],
+    associationId: j['associationId'],
+    vehicleReg: j['vehicleReg'],
+    userName: j['userName'],
+    created: j['created'],
+    position: buildPosition(j['position']),
+    routeId: j['routeId'],
+    routeName: j['routeName'],
+    passengersIn: j['passengersIn'],
+    passengersOut: j['passengersOut'],
+    currentPassengers: j['currentPassengers'],
+  );
+  return m;
+}
 
 LocationResponse buildLocationResponse(Map j) {
   var id = rm.ObjectId.fromHexString(j['_id'] as String);

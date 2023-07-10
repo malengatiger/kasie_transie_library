@@ -2995,6 +2995,259 @@ class RouteInfo extends _RouteInfo
   }
 }
 
+class AmbassadorPassengerCount extends _AmbassadorPassengerCount
+    with RealmEntity, RealmObjectBase, RealmObject {
+  AmbassadorPassengerCount(
+    ObjectId id, {
+    String? vehicleId,
+    String? vehicleReg,
+    String? userId,
+    String? userName,
+    String? created,
+    String? associationId,
+    String? routeId,
+    String? routeName,
+    int? passengersIn,
+    int? passengersOut,
+    int? currentPassengers,
+    Position? position,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'vehicleId', vehicleId);
+    RealmObjectBase.set(this, 'vehicleReg', vehicleReg);
+    RealmObjectBase.set(this, 'userId', userId);
+    RealmObjectBase.set(this, 'userName', userName);
+    RealmObjectBase.set(this, 'created', created);
+    RealmObjectBase.set(this, 'associationId', associationId);
+    RealmObjectBase.set(this, 'routeId', routeId);
+    RealmObjectBase.set(this, 'routeName', routeName);
+    RealmObjectBase.set(this, 'passengersIn', passengersIn);
+    RealmObjectBase.set(this, 'passengersOut', passengersOut);
+    RealmObjectBase.set(this, 'currentPassengers', currentPassengers);
+    RealmObjectBase.set(this, 'position', position);
+  }
+
+  AmbassadorPassengerCount._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get vehicleId =>
+      RealmObjectBase.get<String>(this, 'vehicleId') as String?;
+  @override
+  set vehicleId(String? value) => RealmObjectBase.set(this, 'vehicleId', value);
+
+  @override
+  String? get vehicleReg =>
+      RealmObjectBase.get<String>(this, 'vehicleReg') as String?;
+  @override
+  set vehicleReg(String? value) =>
+      RealmObjectBase.set(this, 'vehicleReg', value);
+
+  @override
+  String? get userId => RealmObjectBase.get<String>(this, 'userId') as String?;
+  @override
+  set userId(String? value) => RealmObjectBase.set(this, 'userId', value);
+
+  @override
+  String? get userName =>
+      RealmObjectBase.get<String>(this, 'userName') as String?;
+  @override
+  set userName(String? value) => RealmObjectBase.set(this, 'userName', value);
+
+  @override
+  String? get created =>
+      RealmObjectBase.get<String>(this, 'created') as String?;
+  @override
+  set created(String? value) => RealmObjectBase.set(this, 'created', value);
+
+  @override
+  String? get associationId =>
+      RealmObjectBase.get<String>(this, 'associationId') as String?;
+  @override
+  set associationId(String? value) =>
+      RealmObjectBase.set(this, 'associationId', value);
+
+  @override
+  String? get routeId =>
+      RealmObjectBase.get<String>(this, 'routeId') as String?;
+  @override
+  set routeId(String? value) => RealmObjectBase.set(this, 'routeId', value);
+
+  @override
+  String? get routeName =>
+      RealmObjectBase.get<String>(this, 'routeName') as String?;
+  @override
+  set routeName(String? value) => RealmObjectBase.set(this, 'routeName', value);
+
+  @override
+  int? get passengersIn =>
+      RealmObjectBase.get<int>(this, 'passengersIn') as int?;
+  @override
+  set passengersIn(int? value) =>
+      RealmObjectBase.set(this, 'passengersIn', value);
+
+  @override
+  int? get passengersOut =>
+      RealmObjectBase.get<int>(this, 'passengersOut') as int?;
+  @override
+  set passengersOut(int? value) =>
+      RealmObjectBase.set(this, 'passengersOut', value);
+
+  @override
+  int? get currentPassengers =>
+      RealmObjectBase.get<int>(this, 'currentPassengers') as int?;
+  @override
+  set currentPassengers(int? value) =>
+      RealmObjectBase.set(this, 'currentPassengers', value);
+
+  @override
+  Position? get position =>
+      RealmObjectBase.get<Position>(this, 'position') as Position?;
+  @override
+  set position(covariant Position? value) =>
+      RealmObjectBase.set(this, 'position', value);
+
+  @override
+  Stream<RealmObjectChanges<AmbassadorPassengerCount>> get changes =>
+      RealmObjectBase.getChanges<AmbassadorPassengerCount>(this);
+
+  @override
+  AmbassadorPassengerCount freeze() =>
+      RealmObjectBase.freezeObject<AmbassadorPassengerCount>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(AmbassadorPassengerCount._);
+    return const SchemaObject(ObjectType.realmObject, AmbassadorPassengerCount,
+        'AmbassadorPassengerCount', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('vehicleId', RealmPropertyType.string,
+          optional: true, indexType: RealmIndexType.regular),
+      SchemaProperty('vehicleReg', RealmPropertyType.string,
+          optional: true, indexType: RealmIndexType.regular),
+      SchemaProperty('userId', RealmPropertyType.string, optional: true),
+      SchemaProperty('userName', RealmPropertyType.string, optional: true),
+      SchemaProperty('created', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationId', RealmPropertyType.string, optional: true),
+      SchemaProperty('routeId', RealmPropertyType.string, optional: true),
+      SchemaProperty('routeName', RealmPropertyType.string, optional: true),
+      SchemaProperty('passengersIn', RealmPropertyType.int, optional: true),
+      SchemaProperty('passengersOut', RealmPropertyType.int, optional: true),
+      SchemaProperty('currentPassengers', RealmPropertyType.int,
+          optional: true),
+      SchemaProperty('position', RealmPropertyType.object,
+          optional: true, linkTarget: 'Position'),
+    ]);
+  }
+}
+
+class AmbassadorCheckIn extends _AmbassadorCheckIn
+    with RealmEntity, RealmObjectBase, RealmObject {
+  AmbassadorCheckIn(
+    ObjectId id, {
+    String? vehicleId,
+    String? vehicleReg,
+    String? userId,
+    String? userName,
+    String? created,
+    String? associationId,
+    Position? position,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'vehicleId', vehicleId);
+    RealmObjectBase.set(this, 'vehicleReg', vehicleReg);
+    RealmObjectBase.set(this, 'userId', userId);
+    RealmObjectBase.set(this, 'userName', userName);
+    RealmObjectBase.set(this, 'created', created);
+    RealmObjectBase.set(this, 'associationId', associationId);
+    RealmObjectBase.set(this, 'position', position);
+  }
+
+  AmbassadorCheckIn._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get vehicleId =>
+      RealmObjectBase.get<String>(this, 'vehicleId') as String?;
+  @override
+  set vehicleId(String? value) => RealmObjectBase.set(this, 'vehicleId', value);
+
+  @override
+  String? get vehicleReg =>
+      RealmObjectBase.get<String>(this, 'vehicleReg') as String?;
+  @override
+  set vehicleReg(String? value) =>
+      RealmObjectBase.set(this, 'vehicleReg', value);
+
+  @override
+  String? get userId => RealmObjectBase.get<String>(this, 'userId') as String?;
+  @override
+  set userId(String? value) => RealmObjectBase.set(this, 'userId', value);
+
+  @override
+  String? get userName =>
+      RealmObjectBase.get<String>(this, 'userName') as String?;
+  @override
+  set userName(String? value) => RealmObjectBase.set(this, 'userName', value);
+
+  @override
+  String? get created =>
+      RealmObjectBase.get<String>(this, 'created') as String?;
+  @override
+  set created(String? value) => RealmObjectBase.set(this, 'created', value);
+
+  @override
+  String? get associationId =>
+      RealmObjectBase.get<String>(this, 'associationId') as String?;
+  @override
+  set associationId(String? value) =>
+      RealmObjectBase.set(this, 'associationId', value);
+
+  @override
+  Position? get position =>
+      RealmObjectBase.get<Position>(this, 'position') as Position?;
+  @override
+  set position(covariant Position? value) =>
+      RealmObjectBase.set(this, 'position', value);
+
+  @override
+  Stream<RealmObjectChanges<AmbassadorCheckIn>> get changes =>
+      RealmObjectBase.getChanges<AmbassadorCheckIn>(this);
+
+  @override
+  AmbassadorCheckIn freeze() =>
+      RealmObjectBase.freezeObject<AmbassadorCheckIn>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(AmbassadorCheckIn._);
+    return const SchemaObject(
+        ObjectType.realmObject, AmbassadorCheckIn, 'AmbassadorCheckIn', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('vehicleId', RealmPropertyType.string,
+          optional: true, indexType: RealmIndexType.regular),
+      SchemaProperty('vehicleReg', RealmPropertyType.string,
+          optional: true, indexType: RealmIndexType.regular),
+      SchemaProperty('userId', RealmPropertyType.string, optional: true),
+      SchemaProperty('userName', RealmPropertyType.string, optional: true),
+      SchemaProperty('created', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationId', RealmPropertyType.string, optional: true),
+      SchemaProperty('position', RealmPropertyType.object,
+          optional: true, linkTarget: 'Position'),
+    ]);
+  }
+}
+
 class LocationRequest extends _LocationRequest
     with RealmEntity, RealmObjectBase, RealmObject {
   LocationRequest(

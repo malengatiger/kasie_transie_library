@@ -46,6 +46,8 @@ final config = rm.Configuration.local(
     VehicleVideo.schema,
     VehicleMediaRequest.schema,
     RouteUpdateRequest.schema,
+    AmbassadorPassengerCount.schema,
+    AmbassadorCheckIn.schema,
   ],
 );
 final ListApiDog listApiDog = ListApiDog(
@@ -273,13 +275,13 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<DispatchRecord>> getMarshalDispatchRecords(
-      String userId, bool refresh) async {
+  Future<List<DispatchRecord>> getMarshalDispatchRecords({
+      required String userId,  required bool refresh,  required int days}) async {
     rm.RealmResults<DispatchRecord> results =
         realm.query<DispatchRecord>('marshalId == \$0', [userId]);
     final list = <DispatchRecord>[];
     if (refresh || results.isEmpty) {
-      return await getMarshalDispatchesFromBackend(userId);
+      return await getMarshalDispatchesFromBackend(userId, days);
     }
 
     for (var element in results) {
@@ -404,8 +406,10 @@ class ListApiDog {
   }
 
   Future<List<DispatchRecord>> getMarshalDispatchesFromBackend(
-      String userId) async {
-    final cmd = '${url}getMarshalDispatchRecords?userId=$userId';
+      String userId, int days) async {
+
+    final startDate = DateTime.now().toUtc().subtract(Duration(days: days));
+    final cmd = '${url}getMarshalDispatchRecords?userId=$userId&startDate=$startDate';
     List resp = await _sendHttpGET(cmd);
     var list = <DispatchRecord>[];
     for (var vehicleJson in resp) {
@@ -584,6 +588,32 @@ class ListApiDog {
     }
     return localList;
   }
+  Future<List<AmbassadorPassengerCount>> getAmbassadorPassengerCountsByVehicle(
+      {required String vehicleId, required bool refresh, required String startDate}) async {
+    var localList = <AmbassadorPassengerCount>[];
+    rm.RealmResults<AmbassadorPassengerCount> results =
+    realm.query<AmbassadorPassengerCount>("vehicleId == \$0", [vehicleId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        localList.add(element);
+      }
+    }
+    pp('$mm AmbassadorPassengerCounts from realm:: ${localList.length}');
+    if (localList.isNotEmpty && !refresh) {
+      return localList;
+    }
+    //
+    try {
+      localList = await _getAmbassadorPassengerCountsFromBackend(vehicleId: vehicleId, startDate: startDate);
+      pp('$mm VehicleVideos from backend:: ${localList.length}');
+      realm.write(() {
+        realm.addAll<AmbassadorPassengerCount>(localList, update: true);
+      });
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
 
   Future<List<VehicleMediaRequest>> getVehicleMediaRequests(
       String vehicleId, bool refresh) async {
@@ -732,6 +762,20 @@ class ListApiDog {
     }
 
     pp('$mm VehicleVideos found: ${list.length}');
+    return list;
+  }
+
+  Future<List<AmbassadorPassengerCount>> _getAmbassadorPassengerCountsFromBackend(
+      {required String vehicleId, required String startDate}) async {
+    final list = <AmbassadorPassengerCount>[];
+    final cmd = '${url}getVehicleAmbassadorPassengerCounts?vehicleId=$vehicleId&startDate=$startDate';
+    List resp = await _sendHttpGET(cmd);
+    for (var value in resp) {
+      var r = buildAmbassadorPassengerCount(value);
+      list.add(r);
+    }
+
+    pp('$mm AmbassadorPassengerCounts found: ${list.length}');
     return list;
   }
 

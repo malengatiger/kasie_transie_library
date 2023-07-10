@@ -178,27 +178,27 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
                 ),
               ),
             )
-          : SizedBox(height: height,
-            child: Row(
-              children: [
-                SizedBox(
-                    width: 200,
-                    child: ColorGrid(
-                        colors: colors, onColorChosen: (c){
-                      onColorChosen(c);
-                    })),
-                const SizedBox(
-                  width: 2,
-                ),
-                SizedBox(
-                  width: 160,
-                  child: LanguageList(
-                      languageBags: languageBags,
-                      onLanguageChosen: (l){
-                        onLanguageChosen(l);
-                      }),
-                ),
-              ],
+          : Center(
+            child: SizedBox(height: height,
+              child: Row(
+                children: [
+                  SizedBox(
+                      width: 172,
+                      child: ColorGrid(
+                          colors: colors, onColorChosen: (c){
+                        onColorChosen(c);
+                      })),
+                  const SizedBox(width: 8,),
+                  SizedBox(
+                    width: 172,
+                    child: LanguageList(
+                        languageBags: languageBags,
+                        onLanguageChosen: (l){
+                          onLanguageChosen(l);
+                        }),
+                  ),
+                ],
+              ),
             ),
           ),
     ));
@@ -218,7 +218,7 @@ class LanguageList extends StatelessWidget {
       shape: getRoundedBorder(radius: 16),
       elevation: 4,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(4.0),
         child: bd.Badge(
           badgeContent: Text('${languageBags.length}'),
           position: bd.BadgePosition.bottomEnd(bottom: -2, end: -12),

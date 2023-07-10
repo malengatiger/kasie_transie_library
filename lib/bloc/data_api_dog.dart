@@ -385,6 +385,39 @@ class DataApiDog {
     return r;
   }
 
+  Future<AmbassadorCheckIn> addAmbassadorCheckIn(AmbassadorCheckIn checkIn) async {
+    final bag = checkIn.toJson();
+    final cmd = '${url}addAmbassadorCheckIn';
+
+    final res = await _callPost(cmd, bag);
+    final r = buildAmbassadorCheckIn(res);
+
+    listApiDog.realm.write(() {
+      listApiDog.realm.add<AmbassadorCheckIn>(r, update: true);
+    });
+    pp('$mm AmbassadorCheckIn added to database ...');
+    myPrettyJsonPrint(res);
+
+    return r;
+  }
+  Future<AmbassadorPassengerCount> addAmbassadorPassengerCount(AmbassadorPassengerCount count) async {
+    final bag = count.toJson();
+    final cmd = '${url}addAmbassadorPassengerCount';
+
+    final res = await _callPost(cmd, bag);
+    final r = buildAmbassadorPassengerCount(res);
+
+    listApiDog.realm.write(() {
+      listApiDog.realm.add<AmbassadorPassengerCount>(r, update: true);
+    });
+    pp('$mm AmbassadorPassengerCount added to database ...');
+    myPrettyJsonPrint(res);
+
+    return r;
+  }
+
+
+
 
   Future _callPost(String mUrl, Map? bag) async {
     String? mBag;

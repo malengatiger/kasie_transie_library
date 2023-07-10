@@ -5,7 +5,6 @@ import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart';
 import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
-import 'package:kasie_transie_library/utils/initializer.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 
 import 'functions.dart';
@@ -85,6 +84,30 @@ class LocalFinder {
     return lrs;
   }
 
+  Future<Route?> findNearestRoute(
+      {required double latitude,
+      required double longitude,
+      required double radiusInMetres}) async {
+    pp('\n\n$mm ............... starting findNearestRoute ...');
+
+    var routeLandmarks = await findNearestRouteLandmarks(
+        latitude: latitude,
+        longitude: longitude,
+        radiusInMetres: radiusInMetres);
+
+    if (routeLandmarks.isNotEmpty) {
+      final rt = await listApiDog.getRoute(routeLandmarks.first.routeId!);
+      return rt;
+    } else {
+      final user = await prefs.getUser();
+      if (user != null) {
+        routesIsolate.getRoutes(user.associationId!);
+      }
+    }
+
+    return null;
+  }
+
   Future<List<Route>> findNearestRoutes(
       {required double latitude,
       required double longitude,
@@ -110,6 +133,11 @@ class LocalFinder {
       pp('$mm findNearestRoutes: ${rList.length} routes ${E.leaf2}${E.leaf2}${E.leaf2} '
           'time elapsed: ${end0.difference(start).inMilliseconds} milliseconds ${E.redDot}\n\n');
       return rList;
+    } else {
+      final user = await prefs.getUser();
+      if (user != null) {
+        routesIsolate.getRoutes(user.associationId!);
+      }
     }
     var routePoints = listApiDog.realm.all<RoutePoint>();
     pp('$mm findNearestRoutes, radiusInMetres: $radiusInMetres metres');

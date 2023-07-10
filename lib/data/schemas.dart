@@ -758,6 +758,72 @@ class _RouteInfo {
 }
 
 @RealmModel()
+class _AmbassadorPassengerCount {
+  @PrimaryKey()
+  late ObjectId id;
+  @Indexed()
+  String? vehicleId, vehicleReg;
+  String? userId;
+  String? userName;
+  String? created;
+  String? associationId;
+  String? routeId;
+  String? routeName;
+  int? passengersIn;
+  int? passengersOut;
+  int? currentPassengers;
+  _Position? position;
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {
+      '_id': id.hexString,
+      'userId': userId,
+      'vehicleId': vehicleId,
+      'userName': userName,
+      'vehicleReg': vehicleReg,
+      'created': created,
+      'associationId': associationId,
+
+      'routeId': routeId,
+      'routeName': routeName,
+      'passengersIn': passengersIn,
+      'passengersOut': passengersOut,
+      'currentPassengers': currentPassengers,
+      'position': position == null ? null : position!.toJson(),
+
+    };
+    return map;
+  }
+}
+
+@RealmModel()
+class _AmbassadorCheckIn {
+  @PrimaryKey()
+  late ObjectId id;
+  @Indexed()
+  String? vehicleId, vehicleReg;
+  String? userId;
+  String? userName;
+  String? created;
+  String? associationId;
+  _Position? position;
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {
+      '_id': id.hexString,
+      'userId': userId,
+      'vehicleId': vehicleId,
+      'userName': userName,
+      'vehicleReg': vehicleReg,
+      'created': created,
+      'associationId': associationId,
+      'position': position == null ? null : position!.toJson(),
+
+    };
+    return map;
+  }
+}
+@RealmModel()
 class _LocationRequest {
   @PrimaryKey()
   late ObjectId id;
