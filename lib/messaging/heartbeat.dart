@@ -1,12 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:realm/realm.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
+import '../isolates/heartbeat_isolate.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
 import '../utils/parsers.dart';
@@ -38,8 +42,26 @@ class Heartbeat {
   }
 
   Future addHeartbeat() async {
+    var car = await prefs.getCar();
+
+    if (car == null) {
+      try {
+            await Firebase.initializeApp();
+            final prefs1 = await SharedPreferences.getInstance();
+            prefs1.reload(); // The magic line
+            var string = prefs1.getString('car');
+            if (string == null) {
+              pp('... ${E.redDot}${E.redDot}${E.redDot} car is null in background ... 1');
+              return;
+            } else {
+              final json = jsonDecode(string);
+              car = buildVehicle(json);
+            }
+          } catch (e) {
+            pp(e);
+          }
+    }
     final loc = await locationBloc.getLocation();
-    final car = await prefs.getCar();
     if (car == null) {
       return;
     }
@@ -53,6 +75,7 @@ class Heartbeat {
 
   static VehicleHeartbeat getHeartbeat({required Vehicle car,
     required double latitude, required double longitude}) {
+
     final heartbeat = VehicleHeartbeat(ObjectId(),
         ownerName: car.ownerName,
         ownerId: car.ownerId,
@@ -80,8 +103,8 @@ const cc = '🔴🔴🔴🔴🔴🔴🌀🌀 Workmanager Heartbeat:  🌀🌀�
 void callbackDispatcher() {
   pp("$cc callbackDispatcher ....");
   Workmanager().executeTask((task, inputData) {
-    pp("$cc Native called background task ..... addHeartbeat: $inputData");
-    heartbeat.addHeartbeat();
+    pp("$cc Native called background task ..... addHeartbeat, call isolate ...");
+    heartbeatIsolate.addHeartbeat();
     return Future.value(true);
   });
 }

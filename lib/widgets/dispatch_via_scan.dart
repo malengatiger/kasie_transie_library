@@ -320,20 +320,12 @@ class DispatchViaScanState extends State<DispatchViaScan>
           landmarkName: mark?.landmarkName,
           landmarkId: mark?.landmarkId);
       //
-      pp('$mm ... _doDispatch: dispatch to be added:  ');
       dispatches.insert(0, m);
       dispatchHelper.sendDispatch(m);
       _clearFields();
-      final result = await dispatchIsolate.addDispatchRecord(m);
-      pp('$mm ... _doDispatch added?????????????:  ${result.vehicleReg}');
+      dispatchIsolate.addDispatchRecord(m);
     } catch (e) {
       pp(e);
-      if (mounted) {
-        showSnackBar(
-            padding: 16,
-            message: 'Error dispatching taxi: $e',
-            context: context);
-      }
     }
     setState(() {
       busy = false;

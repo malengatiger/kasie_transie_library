@@ -3,151 +3,86 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/app_auth.dart';
 import 'package:kasie_transie_library/bloc/cache_manager.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart';
+import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/parsers.dart';
+import 'package:kasie_transie_library/utils/prefs.dart';
+import 'package:realm/realm.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
 import '../utils/kasie_exception.dart';
 
-final DispatchIsolate dispatchIsolate = DispatchIsolate();
+final HeartbeatIsolate heartbeatIsolate = HeartbeatIsolate();
 
-class DispatchIsolate {
-  final xy = '☕️☕️☕️☕️ Dispatch Isolate Isolate Functions: 🍎🍎';
-
-
-  Future addFailedAmbassadorPassengerCounts() async {
-    pp('\n\n\n$xy ............................ addFailedAmbassadorPassengerCounts ....');
-    final token = await appAuth.getAuthToken();
-
-    if (token != null) {
-      try {
-        final list = await cacheManager.getAmbassadorCounts();
-        for (var value in list) {
-          var s = jsonEncode(value);
-          final bag = DispatchBag(s, KasieEnvironment.getUrl(), token);
-          pp('$xy  add failed cached AmbassadorPassengerCount to backend; using isolate ... ');
-          await _handleAmbassadorCount(bag);
-        }
-        pp('\n\n\n$xy ..... done processing ${list.length} Failed AmbassadorPassengerCounts records ....\n\n');
-
-      } catch (e) {
-        pp(e);
-        return;
-      }
-      await cacheManager.deleteAmbassadorCounts();
-    } else {
-      pp('$xy ${E.redDot}${E.redDot}${E.redDot}${E.redDot} no Firebase token found!!!! ${E.redDot}');
-    }
-
-  }
-
-  Future addFailedDispatchRecords() async {
-    pp('\n\n\n$xy ............................ addDispatchRecords ....');
-    final token = await appAuth.getAuthToken();
-
-    if (token != null) {
-      try {
-        final list = await cacheManager.getDispatchRecords();
-        for (var value in list) {
-                var s = jsonEncode(value);
-                final bag = DispatchBag(s, KasieEnvironment.getUrl(), token);
-                pp('$xy  add failed cached dispatchRecord to backend; using isolate ... ');
-                final m = await _handleDispatch(bag);
-              }
-        pp('\n\n\n$xy ..... done saving ${list.length} dispatch records ....\n\n');
-
-      } catch (e) {
-        pp(e);
-        return;
-      }
-
-      await cacheManager.deleteDispatchRecords();
-    } else {
-      pp('$xy ${E.redDot}${E.redDot}${E.redDot}${E.redDot} no Firebase token found!!!! ${E.redDot}');
-    }
-
-  }
-  Future<AmbassadorPassengerCount> addAmbassadorPassengerCount(AmbassadorPassengerCount count) async {
-    pp('\n\n\n$xy ............................ addAmbassadorPassengerCount ....');
-    final token = await appAuth.getAuthToken();
-
-    if (token != null) {
-      try {
-        final string = jsonEncode(count.toJson());
-        final bag = DispatchBag(string, KasieEnvironment.getUrl(), token);
-        pp('$xy  save new AmbassadorPassengerCount to backend; using isolate ... ');
-        final m = await _handleAmbassadorCount(bag);
-        pp('\n\n\n$xy ..... done adding ${m.vehicleReg} AmbassadorPassengerCount  ....\n\n');
-        return m;
-      } catch (e) {
-        await cacheManager.saveAmbassadorPassengerCount(count);
-        pp(e);
-      }
-
-    } else {
-      pp('$xy ${E.redDot}${E.redDot}${E.redDot}${E.redDot} no Firebase token found!!!! ${E.redDot}');
-    }
-    throw Exception('Failed to add AmbassadorPassengerCount');
-  }
-  Future<DispatchRecord> addDispatchRecord(DispatchRecord dispatchRecord) async {
+class HeartbeatIsolate {
+  final xy = '☕️☕️☕️☕️ HeartbeatIsolate Functions: 🍎🍎';
+  Future addHeartbeat() async {
     pp('\n\n\n$xy ............................ addDispatchRecord ....');
-    final token = await appAuth.getAuthToken();
+    try {
+      final token = await appAuth.getAuthToken();
+      var car = await prefs.getCar();
+      final loc = await locationBloc.getLocation();
+      if (car == null) {
+        try {
+          await Firebase.initializeApp();
+          final prefs1 = await SharedPreferences.getInstance();
+          prefs1.reload(); // The magic line
+          var string = prefs1.getString('car');
+          if (string == null) {
+            pp('... ${E.redDot}${E.redDot}${E.redDot} car is null in background ... 1');
+            return;
+          } else {
+            final json = jsonDecode(string);
+            car = buildVehicle(json);
+          }
+        } catch (e) {
+          pp(e);
+        }
+      }
 
-    if (token != null) {
-      final mJson = dispatchRecord.toJson();
-      final string = jsonEncode(mJson);
-      final bag = DispatchBag(string, KasieEnvironment.getUrl(), token);
-      pp('$xy  save new dispatch to backend; using isolate ... ');
-      final m = await _handleDispatch(bag);
-      pp('\n\n\n$xy ..... done saving ${m.vehicleReg} dispatch record ....\n\n');
-      return m;
+      if (token != null) {
+            final string = jsonEncode(car!.toJson());
+            final bag = HeartbeatBag(carJson: string, url: KasieEnvironment.getUrl(),
+                token: token, latitude: loc.latitude, longitude: loc.longitude);
+            pp('$xy  save new heartbeat to backend; using isolate ... ');
+            final m = await _handleHeartbeat(bag);
+            pp('\n\n\n$xy ..... done saving ${m.vehicleReg} heartbeat record ....\n\n');
+            return m;
 
-    } else {
-      pp('$xy ${E.redDot}${E.redDot}${E.redDot}${E.redDot} no Firebase token found!!!! ${E.redDot}');
+          } else {
+            pp('$xy ${E.redDot}${E.redDot}${E.redDot}${E.redDot} no Firebase token found!!!! ${E.redDot}');
+          }
+    } catch (e) {
+      pp(e);
     }
-    throw Exception('Failed to add DispatchRecord');
+    throw Exception('Failed to add heartbeat');
   }
 
 
-  Future<AmbassadorPassengerCount> _handleAmbassadorCount(DispatchBag bag) async {
-    pp('$xy ................ _handleAmbassadorCount .... ');
+  Future<VehicleHeartbeat> _handleHeartbeat(HeartbeatBag bag) async {
+    pp('$xy ................ _handleHeartbeat .... ');
     final start = DateTime.now();
-    final s = await Isolate.run(() async => _heavyTaskForAmbassadorCount(bag));
+    final s = await Isolate.run(() async => _heavyTaskForHeartbeat(bag));
     final mJson = jsonDecode(s);
-    final ambCount = buildAmbassadorPassengerCount(mJson);
+    final heartbeat = buildVehicleHeartbeat(mJson);
 
-    pp('$xy _handleAmbassadorCount attempting to cache ${ambCount.vehicleReg} ambCount.... ');
+    pp('$xy _handleHeartbeat attempting to cache ${heartbeat.vehicleReg} heartbeat.... ');
 
     listApiDog.realm.write(() {
-      listApiDog.realm.add<AmbassadorPassengerCount>(ambCount, update: true);
+      listApiDog.realm.add<VehicleHeartbeat>(heartbeat, update: true);
     });
     var end = DateTime.now();
-    pp('$xy should have cached ${ambCount.vehicleReg} AmbassadorPassengerCount in realm; elapsed time: '
+    pp('$xy should have cached ${heartbeat.vehicleReg} Heartbeat in realm; elapsed time: '
         '${end.difference(start).inSeconds} seconds');
-    return ambCount;
-  }
-  Future<DispatchRecord> _handleDispatch(DispatchBag bag) async {
-    pp('$xy ................ _handleDispatch .... ');
-    final start = DateTime.now();
-    final s = await Isolate.run(() async => _heavyTaskForDispatch(bag));
-    final mJson = jsonDecode(s);
-    final dispatch = buildDispatchRecord(mJson);
-
-    pp('$xy _handleDispatches attempting to cache ${dispatch.vehicleReg} dispatch.... ');
-
-    listApiDog.realm.write(() {
-      listApiDog.realm.add<DispatchRecord>(dispatch, update: true);
-    });
-    var end = DateTime.now();
-    pp('$xy should have cached ${dispatch.vehicleReg} DispatchRecords in realm; elapsed time: '
-        '${end.difference(start).inSeconds} seconds');
-    return dispatch;
+    return heartbeat;
   }
 
 }
@@ -155,46 +90,40 @@ class DispatchIsolate {
 ///Isolate to handle dispatches
 const xyz = '🌀🌀🌀🌀🌀🌀🌀🌀🌀 HeavyTaskForDispatches: 🍎🍎';
 @pragma('vm:entry-point')
-Future<String> _heavyTaskForDispatches(DispatchesBag dispatchBag) async {
-  pp('$xyz _heavyTaskForDispatches starting ................. ${dispatchBag.url} ${dispatchBag.token}');
+Future<String> _heavyTaskForHeartbeat(HeartbeatBag hb) async {
+  pp('$xyz _heavyTaskForHeartbeat starting .................');
 
-  final bag = jsonDecode(dispatchBag.dispatchesJson);
+  final m = jsonDecode(hb.carJson);
+  final car = buildVehicle(m);
+  final heartbeat = VehicleHeartbeat(ObjectId(),
+      ownerName: car.ownerName,
+      ownerId: car.ownerId,
+      associationId: car.associationId,
+      vehicleReg: car.vehicleReg,
+      vehicleId: car.vehicleId,
+      model: car.model,
+      make: car.make,
+      created: DateTime.now().toUtc().toIso8601String(),
+      longDate: DateTime.now().toUtc().millisecondsSinceEpoch,
+      vehicleHeartbeatId: Uuid.v4().toString(),
+      position: Position(
+        type: point,
+        coordinates: [hb.longitude, hb.latitude],
+        latitude: hb.latitude,
+        longitude: hb.longitude,
+      ));
+
+  final bag = heartbeat.toJson();
   final cmd =
-      '${dispatchBag.url}addDispatchRecords';
-  List resp = await _httpPost(cmd, bag, dispatchBag.token);
-  final jsonList = jsonEncode(resp);
-  pp('$xyz _heavyTaskForDispatches returning raw string .................');
+      '${hb.url}addHeartbeat';
+  final resp = await httpPost(cmd, bag, hb.token);
+  final result = jsonEncode(resp);
+  pp('$xyz _heavyTaskForHeartbeat returning raw string .................');
 
-  return jsonList;
-}
-@pragma('vm:entry-point')
-Future<String> _heavyTaskForDispatch(DispatchBag dispatchBag) async {
-  pp('$xyz _heavyTaskForDispatch starting .................');
-
-  final bag = jsonDecode(dispatchBag.json);
-  final cmd =
-      '${dispatchBag.url}addDispatchRecord';
-  final resp = await _httpPost(cmd, bag, dispatchBag.token);
-  final jsonList = jsonEncode(resp);
-  pp('$xyz _heavyTaskForDispatch returning raw string .................');
-
-  return jsonList;
-}
-@pragma('vm:entry-point')
-Future<String> _heavyTaskForAmbassadorCount(DispatchBag dispatchBag) async {
-  pp('$xyz _heavyTaskForAmbassadorCounts starting .................');
-
-  final bag = jsonDecode(dispatchBag.json);
-  final cmd =
-      '${dispatchBag.url}addAmbassadorPassengerCount';
-  final resp = await _httpPost(cmd, bag, dispatchBag.token);
-  final jsonList = jsonEncode(resp);
-  pp('$xyz _heavyTaskForAmbassadorCounts returning raw string .................');
-
-  return jsonList;
+  return result;
 }
 
-Future _httpPost(String mUrl, Map? bag, String token) async {
+Future httpPost(String mUrl, Map? bag, String token) async {
   String? mBag;
   if (bag != null) {
     mBag = json.encode(bag);
@@ -274,8 +203,7 @@ Future _httpPost(String mUrl, Map? bag, String token) async {
   }
 }
 
-
-Future _httpGet(String mUrl, String token) async {
+Future httpGet(String mUrl, String token) async {
   pp('$xyz _httpGet: 🔆 🔆 🔆 calling : 💙 $mUrl  💙');
   var start = DateTime.now();
   Map<String, String> headers = {
@@ -367,14 +295,13 @@ Future _httpGet(String mUrl, String token) async {
 
 final http.Client client = http.Client();
 
-class DispatchesBag {
-  late String dispatchesJson, url, token;
-  DispatchesBag(this.dispatchesJson, this.url, this.token);
-}
 
-class DispatchBag {
-  late String json, url, token;
-  DispatchBag(this.json, this.url, this.token);
+class HeartbeatBag {
+  late String carJson, url, token;
+  late double latitude, longitude;
+
+  HeartbeatBag({
+      required this.carJson,  required  this.url,  required this.token,  required this.latitude,  required this.longitude});
 }
 
 

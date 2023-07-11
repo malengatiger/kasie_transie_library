@@ -91,14 +91,22 @@ class DataApiDog {
     pp('$mm UserGeofenceEvent added to database: $res');
   }
 
-  Future<DispatchRecord> addDispatchRecord(DispatchRecord event) async {
-    final bag = event.toJson();
-    final cmd = '${url}addDispatchRecord';
-    final res = await _callPost(cmd, bag);
-    final r = buildDispatchRecord(res);
-    pp('$mm DispatchRecord added to database: $res');
-    myPrettyJsonPrint(res);
-    return r;
+  Future addDispatchRecord(DispatchRecord dispatchRecord) async {
+    try {
+      final bag = dispatchRecord.toJson();
+      final cmd = '${url}addDispatchRecord';
+      final res = await _callPost(cmd, bag);
+      final r = buildDispatchRecord(res);
+      listApiDog.realm.write(() {
+        listApiDog.realm.add<DispatchRecord>(r, update: true);
+      });
+      pp('$mm DispatchRecord added to database: $res');
+      myPrettyJsonPrint(res);
+      return r;
+    } catch (e) {
+      await cacheManager.saveDispatchRecord(dispatchRecord);
+      pp(e);
+    }
   }
 
   Future addVehicleArrival(VehicleArrival event) async {
@@ -354,6 +362,7 @@ class DataApiDog {
 
     return r;
   }
+
   Future<RouteUpdateRequest> addRouteUpdateRequest (RouteUpdateRequest routeUpdateRequest) async {
     final bag = routeUpdateRequest.toJson();
     final cmd = '${url}addRouteUpdateRequest';
@@ -369,6 +378,7 @@ class DataApiDog {
 
     return r;
   }
+
   Future<VehicleVideo> addVehicleVideo(VehicleVideo vehicleVideo) async {
     final bag = vehicleVideo.toJson();
     final cmd = '${url}addVehicleVideo';
@@ -404,16 +414,21 @@ class DataApiDog {
     final bag = count.toJson();
     final cmd = '${url}addAmbassadorPassengerCount';
 
-    final res = await _callPost(cmd, bag);
-    final r = buildAmbassadorPassengerCount(res);
+    try {
+      final res = await _callPost(cmd, bag);
+      final r = buildAmbassadorPassengerCount(res);
+      listApiDog.realm.write(() {
+            listApiDog.realm.add<AmbassadorPassengerCount>(r, update: true);
+          });
+      pp('$mm AmbassadorPassengerCount added to database ...');
+      myPrettyJsonPrint(res);
+      return r;
 
-    listApiDog.realm.write(() {
-      listApiDog.realm.add<AmbassadorPassengerCount>(r, update: true);
-    });
-    pp('$mm AmbassadorPassengerCount added to database ...');
-    myPrettyJsonPrint(res);
-
-    return r;
+    } catch (e) {
+      pp(e);
+      cacheManager.saveAmbassadorPassengerCount(count);
+    }
+    return count;
   }
 
 

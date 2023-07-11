@@ -10,6 +10,8 @@ import 'package:kasie_transie_library/utils/initializer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
+import '../utils/beeper.dart';
+
 class QRScanner extends StatefulWidget {
   const QRScanner(
       {Key? key,
@@ -65,6 +67,7 @@ class QRScannerState extends State<QRScanner>
 
   void _returnScannedData(dynamic map) async {
     pp('$mm _returnScannedData : ${E.leaf2}${E.leaf2}${E.leaf2}');
+
 
     qrViewController!.resumeCamera();
 

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart' as lib;
@@ -40,13 +41,36 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
   bool busy = false;
   bool showAllCounts = false;
   lib.User? user;
+  String? passengersInText,
+      passengerCounter,
+      passengersOutText,
+      currentPassengersText,
+      saveCounts;
+
+  Future _setTexts() async {
+    final c = await prefs.getColorAndLocale();
+    passengersInText = await translator.translate('passengersIn', c.locale);
+    passengersOutText = await translator.translate('passengersOut', c.locale);
+    currentPassengersText =
+        await translator.translate('currentPassengers', c.locale);
+    saveCounts = await translator.translate('saveCounts', c.locale);
+    passengerCounter = await translator.translate('passengerCount', c.locale);
+    passengersInText = await translator.translate('passengersIn', c.locale);
+    setState(() {});
+  }
 
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
-    _setTexts();
-    _getVehiclePassengerCounts(false);
+    _control();
+  }
+
+  void _control() async {
+    await _setTexts();
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _getVehiclePassengerCounts(false);
+    });
   }
 
   @override
@@ -81,6 +105,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
     });
   }
 
+  String? lastDate;
   void _submitCounts() async {
     pp('$mm .. _submitCounts ...');
     setState(() {
@@ -90,29 +115,38 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
     try {
       final loc = await locationBloc.getLocation();
       final passengerCount = lib.AmbassadorPassengerCount(
-            ObjectId(),
-            associationId: user!.associationId,
-            created: DateTime.now().toUtc().toIso8601String(),
-            userId: user!.userId,
-            vehicleId: widget.vehicle.vehicleId,
-            vehicleReg: widget.vehicle.vehicleReg,
-            userName: user!.name,
-            currentPassengers: currentPassengers,
-            passengersIn: passengersIn,
-            passengersOut: passengersOut,
-            position: lib.Position(
-              type: point,
-              coordinates: [loc.longitude, loc.latitude],
-              latitude: loc.latitude,
-              longitude: loc.latitude,
-            ),
-            routeId: widget.route.routeId,
-            routeName: widget.route.name,
-          );
+        ObjectId(),
+        associationId: user!.associationId,
+        created: DateTime.now().toUtc().toIso8601String(),
+        userId: user!.userId,
+        vehicleId: widget.vehicle.vehicleId,
+        vehicleReg: widget.vehicle.vehicleReg,
+        userName: user!.name,
+        currentPassengers: currentPassengers,
+        passengersIn: passengersIn,
+        passengersOut: passengersOut,
+        position: lib.Position(
+          type: point,
+          coordinates: [loc.longitude, loc.latitude],
+          latitude: loc.latitude,
+          longitude: loc.latitude,
+        ),
+        routeId: widget.route.routeId,
+        routeName: widget.route.name,
+      );
 
-      final res = await dataApiDog.addAmbassadorPassengerCount(passengerCount);
-      pp('$mm .. _submitCounts is back with  ...');
-      myPrettyJsonPrint(res.toJson());
+      dataApiDog.addAmbassadorPassengerCount(passengerCount);
+      pp('$mm .. _submitCounts seems OK!');
+      var format = DateFormat.Hms();
+      lastDate = format.format(DateTime.now());
+      passengersOut = 0;
+      passengersIn = 0;
+      if (mounted) {
+        showToast(
+            duration: const Duration(seconds: 2),
+            message: 'Passenger Counts saved, thank you!',
+            context: context);
+      }
     } catch (e) {
       pp(e);
     }
@@ -122,20 +156,6 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
   }
 
   int passengersIn = 0, passengersOut = 0, currentPassengers = 0;
-  String? vehicleMedia,
-      allPhotosVideos,
-      photosAndVideosNow,
-      takePhotos,
-      passengerCounter,
-      makeVideos;
-  Future _setTexts() async {
-    final c = await prefs.getColorAndLocale();
-    final loc = c.locale;
-    vehicleMedia = await translator.translate('vehicleMedia', loc);
-    allPhotosVideos = await translator.translate('allPhotosVideos', loc);
-    takePhotos = await translator.translate('takePhotos', loc);
-    makeVideos = await translator.translate('makeVideos', loc);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +226,9 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Text(
-                              'Passengers In',
+                              passengersInText == null
+                                  ? 'Passengers In'
+                                  : passengersInText!,
                               style: myTextStyleSmall(context),
                             ),
                             const SizedBox(
@@ -247,7 +269,9 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Text(
-                              'Passengers Out',
+                              passengersOutText == null
+                                  ? 'Passengers Out'
+                                  : passengersOutText!,
                               style: myTextStyleSmall(context),
                             ),
                             const SizedBox(
@@ -288,7 +312,9 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Text(
-                              'Current Passengers',
+                              currentPassengersText == null
+                                  ? 'Current Passengers'
+                                  : currentPassengersText!,
                               style: myTextStyleSmall(context),
                             ),
                             const SizedBox(
@@ -324,11 +350,30 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                         onPressed: () {
                           _submitCounts();
                         },
-                        child: const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Text('Save Counts'),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                              saveCounts == null ? 'Save Counts' : saveCounts!),
                         )),
                   ),
+                  const SizedBox(
+                    height: 24,
+                  ),
+                  lastDate == null
+                      ? const SizedBox()
+                      : Row(
+                          children: [
+                            const Text('Last Count'),
+                            const SizedBox(
+                              width: 20,
+                            ),
+                            Text(
+                              '$lastDate',
+                              style: myTextStyleMediumLargeWithColor(
+                                  context, Theme.of(context).primaryColor, 24),
+                            ),
+                          ],
+                        ),
                 ],
               ),
             ),

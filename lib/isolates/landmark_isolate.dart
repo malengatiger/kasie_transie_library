@@ -67,7 +67,7 @@ class LandmarkIsolate {
 
 /// Landmark processing isolate
 ///
-
+@pragma('vm:entry-point')
 Future<int> _heavyTaskForLandmark(
     LandmarkParameters parameters) async {
   pp('\n$xyz ............ _heavyTaskForLandmark starting ...');

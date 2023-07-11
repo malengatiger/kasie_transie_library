@@ -46,7 +46,9 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
     try {
       final loc = await locationBloc.getLocation();
       routes = await localFinder.findNearestRoutes(
-              latitude: loc.latitude, longitude: loc.longitude, radiusInMetres: 100);
+          latitude: loc.latitude,
+          longitude: loc.longitude,
+          radiusInMetres: 100);
     } catch (e) {
       pp(e);
     }
@@ -55,6 +57,7 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
       busy = false;
     });
   }
+
   void navigateToPassengerCount() async {
     if (selectedRoute == null) {
       showSnackBar(message: 'Please select Route', context: context);
@@ -63,7 +66,8 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
     pp('$mm ... navigate to VehicleMediaHandler ... for car: ${vehicle!.vehicleReg}');
     Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
       return VehiclePassengerCount(
-        vehicle: vehicle!, route: selectedRoute!,
+        vehicle: vehicle!,
+        route: selectedRoute!,
       );
     }));
   }
@@ -79,34 +83,40 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
         _showRoutes = true;
       });
     }
-
   }
 
   void onError() {}
-  String? passengerCounts, scanVehicle, scanTheVehicle, startPassengerCount, noVehicleScanned;
+  String? passengerCounts,
+      selectRoute,
+      scanVehicle,
+      scanTheVehicle,
+      startPassengerCount,
+      noVehicleScanned;
 
   void _setTexts() async {
     pp('$mm ... _setTexts ...');
     final c = await prefs.getColorAndLocale();
-    passengerCounts = await translator.translate('passengerCounts', c.locale);
+    passengerCounts = await translator.translate('passengerCount', c.locale);
     scanVehicle = await translator.translate('scanVehicle', c.locale);
     scanTheVehicle = await translator.translate('scanTheVehicle', c.locale);
-    startPassengerCount = await translator.translate('startPassengerCount', c.locale);
+    startPassengerCount =
+        await translator.translate('startPassengerCount', c.locale);
     noVehicleScanned = await translator.translate('noVehicleScanned', c.locale);
+    selectRoute = await translator.translate('selectRoute', c.locale);
+
     pp('$mm ... _setTexts ... setting state, passengerCounts: $passengerCounts with locale: ${c.locale}');
 
-    setState(() {
-
-    });
+    setState(() {});
   }
+
   bool _showRoutes = false;
   @override
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
       appBar: AppBar(
-        title:  Text(passengerCounts == null?
-            'Passenger Counts':passengerCounts!),
+        title: Text(
+            passengerCounts == null ? 'Passenger Counts' : passengerCounts!),
         bottom: PreferredSize(
             preferredSize: const Size.fromHeight(380),
             child: Column(
@@ -114,20 +124,22 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
                 const SizedBox(
                   height: 8,
                 ),
-                Text(scanVehicle == null?
-                  'Scan Vehicle':scanVehicle!,
+                Text(
+                  scanVehicle == null ? 'Scan Vehicle' : scanVehicle!,
                   style: myTextStyleMediumLargeWithColor(
                       context, Theme.of(context).primaryColor, 28),
                 ),
-                Text(scanTheVehicle == null?
-                  'Scan the vehicle that you want to work with': scanTheVehicle!,
+                Text(
+                  scanTheVehicle == null
+                      ? 'Scan the vehicle that you want to work with'
+                      : scanTheVehicle!,
                   style: myTextStyleSmall(context),
                 ),
                 const SizedBox(
                   height: 32,
                 ),
                 GestureDetector(
-                  onTap: (){
+                  onTap: () {
                     pp('$mm .... will try to restart a scan ...');
                   },
                   child: QRScanner(
@@ -138,7 +150,8 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
                       onCarScanned(car);
                     },
                     onUserScanned: (u) {},
-                    onError: onError, quitAfterScan: true,
+                    onError: onError,
+                    quitAfterScan: true,
                   ),
                 ),
                 const SizedBox(
@@ -157,87 +170,119 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
                   height: 8,
                 ),
                 vehicle != null
-                    ? Column(mainAxisAlignment: MainAxisAlignment.center,
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const SizedBox(
                             height: 20,
                           ),
-                          Row(mainAxisAlignment: MainAxisAlignment.center,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 '${vehicle!.vehicleReg}',
-                                style: myTextStyleMediumLargeWithColor(
-                                    context, Theme.of(context).primaryColor, 40),
+                                style: myTextStyleMediumLargeWithColor(context,
+                                    Theme.of(context).primaryColor, 40),
                               ),
                             ],
                           ),
                           const SizedBox(
                             height: 24,
                           ),
-                          selectedRoute == null? TextButton(onPressed: () {
-                            setState(() {
-                              _showRoutes = true;
-                            });
-                          },
-                          child: const Text('Please select Route')): TextButton( onPressed: () {
-                            setState(() {
-                              _showRoutes = true;
-                            });
-                          },
-                          child: Text('${selectedRoute!.name}', style: myTextStyleMediumBold(context),)),
+                          selectedRoute == null
+                              ? TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _showRoutes = true;
+                                    });
+                                  },
+                                  child: Text(selectRoute == null
+                                      ? 'Please select Route'
+                                      : selectRoute!))
+                              : TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _showRoutes = true;
+                                    });
+                                  },
+                                  child: Text(
+                                    '${selectedRoute!.name}',
+                                    style: myTextStyleMediumBold(context),
+                                  )),
                           const SizedBox(
                             height: 24,
                           ),
                           ElevatedButton(
-                            style: const ButtonStyle(
-                              elevation: MaterialStatePropertyAll(8.0)
-                            ),
+                              style: const ButtonStyle(
+                                  elevation: MaterialStatePropertyAll(8.0)),
                               onPressed: () {
                                 navigateToPassengerCount();
                               },
-                              child:  Padding(
+                              child: Padding(
                                 padding: const EdgeInsets.all(16.0),
-                                child: Text(startPassengerCount == null?
-                                    'Start Passenger Count': startPassengerCount!),
+                                child: Text(startPassengerCount == null
+                                    ? 'Start Passenger Count'
+                                    : startPassengerCount!),
                               )),
                         ],
                       )
-                    : Text(noVehicleScanned == null?
-                        'No Vehicle Scanned yet':noVehicleScanned!,
+                    : Text(
+                        noVehicleScanned == null
+                            ? 'No Vehicle Scanned yet'
+                            : noVehicleScanned!,
                         style: myTextStyleMediumLargeWithColor(
                             context, Colors.grey.shade700, 17),
                       ),
               ],
             ),
           ),
-          _showRoutes? Positioned(child: SizedBox(height: 300, child: Card(
-            shape: getRoundedBorder(radius: 16),
-            elevation: 4,
-            child: ListView.builder(
-                itemCount: routes.length,
-                itemBuilder: (_,index){
-                  final route = routes.elementAt(index);
-                  return GestureDetector(
-                    onTap: (){
-                      setState(() {
-                        selectedRoute = route;
-                        _showRoutes = false;
-                      });
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          _showRoutes
+              ? Positioned(
+                  child: SizedBox(
+                      height: 300,
                       child: Card(
                         shape: getRoundedBorder(radius: 16),
-                        elevation: 8,
-                        child: ListTile(
-                          leading:  Icon(Icons.airport_shuttle, color: Theme.of(context).primaryColor,),
-                          title: Text('${route.name}'),
+                        elevation: 2,
+                        child: Column(
+                          children: [
+                            const SizedBox(
+                              height: 24,
+                            ),
+                            Expanded(
+                              child: ListView.builder(
+                                  itemCount: routes.length,
+                                  itemBuilder: (_, index) {
+                                    final route = routes.elementAt(index);
+                                    return GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          selectedRoute = route;
+                                          _showRoutes = false;
+                                        });
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8.0),
+                                        child: Card(
+                                          shape: getRoundedBorder(radius: 16),
+                                          elevation: 8,
+                                          child: ListTile(
+                                            leading: Icon(
+                                              Icons.airport_shuttle,
+                                              color: Theme.of(context)
+                                                  .primaryColor,
+                                            ),
+                                            title: Text('${route.name}', style: myTextStyleSmall(context),),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                            ),
+                          ],
                         ),
-                      ),
-                    ),
-                  );
-                }),
-          ))): const SizedBox(),
+                      )))
+              : const SizedBox(),
         ],
       ),
     ));

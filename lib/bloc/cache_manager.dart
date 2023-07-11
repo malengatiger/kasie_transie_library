@@ -8,6 +8,7 @@ import '../data/schemas.dart';
 import '../utils/functions.dart';
 
 final CacheManager cacheManager = CacheManager();
+
 class CacheManager {
   static const mm = '☕️☕️☕️☕️☕️ CacheManager: ☕️☕️';
 
@@ -21,8 +22,8 @@ class CacheManager {
     await prefs.setString('appErrors', saveMe);
 
     pp("$mm saveAppError: SAVED: 🌽 ${list.length} errors in cache $mm");
-
   }
+
   Future deleteAppErrors() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -37,6 +38,7 @@ class CacheManager {
     final list = await _getAppErrorList();
     return list.appErrors;
   }
+
   Future<AppErrorList> _getAppErrorList() async {
     var prefs = await SharedPreferences.getInstance();
     var string = prefs.getString('appErrors');
@@ -54,55 +56,73 @@ class CacheManager {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final list = await getDispatchRecords();
     list.add(dispatchRecord);
-    final m =DispatchRecordList(list);
+    final m = DispatchRecordList(list);
     final mJson = m.toJson();
     final saveMe = jsonEncode(mJson);
     await prefs.setString('dispatchRecords', saveMe);
 
     pp("$mm saveDispatchRecord: SAVED: 🌽 ${list.length} DispatchRecords in cache $mm");
-
   }
-  Future deleteDispatchRecords() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    final m = DispatchRecordList([]);
+  Future saveAmbassadorPassengerCount(AmbassadorPassengerCount count) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final list = await getAmbassadorCounts();
+    list.add(count);
+    final m = AmbassadorPassengerCountList(list);
     final mJson = m.toJson();
     final saveMe = jsonEncode(mJson);
-    await prefs.setString('dispatchRecords', saveMe);
+    await prefs.setString('counts', saveMe);
+
+    pp("$mm saveAmbassadorPassengerCount: SAVED: 🌽 ${list.length} saveAmbassadorPassengerCount in cache $mm");
+  }
+
+  Future deleteDispatchRecords() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('dispatchRecords');
     pp('$mm deleteDispatchRecords happened ....');
   }
 
-  Future<String> getDispatchRecordString() async {
-    final list = await _getDispatchRecordList();
-    return jsonEncode(list);
-  }
   Future<List<DispatchRecord>> getDispatchRecords() async {
-    final list = await _getDispatchRecordList();
-    return list.dispatchRecords;
-  }
-  Future<DispatchRecordList> _getDispatchRecordList() async {
     var prefs = await SharedPreferences.getInstance();
     var string = prefs.getString('dispatchRecords');
     if (string == null) {
-      return DispatchRecordList([]);
+      return [];
     }
     var jx = json.decode(string);
     var list = DispatchRecordList.fromJson(jx);
     pp("$mm  ${list.dispatchRecords.length} DispatchRecords retrieved");
-    return list;
+    return list.dispatchRecords;
+  }
+
+  Future deleteAmbassadorCounts() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    ;
+    await prefs.remove('counts');
+    pp(' 🔷🔷 deleteAmbassadorCounts happened ....');
+  }
+
+  Future<List<AmbassadorPassengerCount>> getAmbassadorCounts() async {
+    var prefs = await SharedPreferences.getInstance();
+    var string = prefs.getString('counts');
+    if (string == null) {
+      return [];
+    }
+    var jx = json.decode(string);
+    var list = AmbassadorPassengerCountList.fromJson(jx);
+    pp(" 🔷🔷  ${list.counts.length} AmbassadorPassengerCounts retrieved");
+    return list.counts;
   }
 }
 
-
 class AppErrorList {
   List<AppError> appErrors = [];
-
   AppErrorList(this.appErrors);
 
   AppErrorList.fromJson(Map data) {
     List list = data['appErrors'];
     for (var value in list) {
-      final m = AppError(ObjectId.fromHexString(value['_id'] as String),
+      final m = AppError(
+        ObjectId.fromHexString(value['_id'] as String),
         created: value['created'],
         userId: value['userId'],
         associationId: value['associationId'],
@@ -130,6 +150,7 @@ class AppErrorList {
     return map;
   }
 }
+
 //
 class DispatchRecordList {
   List<DispatchRecord> dispatchRecords = [];
@@ -139,7 +160,7 @@ class DispatchRecordList {
   DispatchRecordList.fromJson(Map data) {
     List list = data['dispatchRecords'];
     for (var value in list) {
-      final m = buildLocalDispatchRecord(value);
+      final m = buildDispatchRecord(value);
       dispatchRecords.add(m);
     }
   }
@@ -154,25 +175,27 @@ class DispatchRecordList {
     return map;
   }
 }
-DispatchRecord buildLocalDispatchRecord(Map j) {
-  var m = DispatchRecord(
-    ObjectId(),
-    vehicleId: j['vehicleId'],
-    vehicleReg: j['vehicleReg'],
-    associationId: j['associationId'],
-    associationName: j['associationName'],
-    created: j['created'],
-    dispatchRecordId: j['dispatchRecordId'],
-    passengers: j['passengers'],
-    ownerId: j['ownerId'],
-    marshalId: j['marshalId'],
-    marshalName: j['marshalName'],
-    vehicleArrivalId: j['vehicleArrivalId'],
-    dispatched: j['dispatched'],
-    geoHash: j['geoHash'],
-    routeName: j['routeName'],
-    landmarkId: j['landmarkId'],
-    position: buildPosition(j['position']),
-  );
-  return m;
+
+class AmbassadorPassengerCountList {
+  List<AmbassadorPassengerCount> counts = [];
+
+  AmbassadorPassengerCountList(this.counts);
+
+  AmbassadorPassengerCountList.fromJson(Map data) {
+    List list = data['counts'];
+    for (var value in list) {
+      final m = buildAmbassadorPassengerCount(value);
+      counts.add(m);
+    }
+  }
+  Map<String, dynamic> toJson() {
+    final list = [];
+    for (var err in counts) {
+      list.add(err.toJson());
+    }
+    Map<String, dynamic> map = {
+      'counts': list,
+    };
+    return map;
+  }
 }

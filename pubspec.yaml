@@ -57,6 +57,7 @@ dependencies:
   native_device_orientation: ^1.1.4
   image: ^4.0.17
   video_thumbnail: ^0.5.3
+  beep_player: ^0.0.1
   flutter_polyline_points:
   flutter_dotenv:
 

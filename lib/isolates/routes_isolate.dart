@@ -203,7 +203,7 @@ class RoutesIsolate {
 
 ///Isolate to get association routes
 const xyz = '🌀🌀🌀🌀🌀🌀🌀🌀🌀 HeavyTaskForRoutes: 🍎🍎';
-
+@pragma('vm:entry-point')
 Future<String> _heavyTaskForRoutes(DonkeyBag bag) async {
   pp('$xyz _heavyTaskForRoutes starting ................. ${bag.url}');
 
@@ -213,7 +213,7 @@ Future<String> _heavyTaskForRoutes(DonkeyBag bag) async {
 
   return jsonList;
 }
-
+@pragma('vm:entry-point')
 Future<String> _heavyTaskForRoutePoints(BunnyBag bag) async {
   pp('$xyz _heavyTaskForRoutePoints starting ................associationId:  ${bag.associationId} .');
 
@@ -227,7 +227,7 @@ Future<String> _heavyTaskForRoutePoints(BunnyBag bag) async {
 
   return jsonList;
 }
-
+@pragma('vm:entry-point')
 Future<String> _heavyTaskForRouteLandmarks(BunnyBag bag) async {
   pp('$xyz _heavyTaskForRouteLandmarks starting .................associationId: ${bag.associationId} .');
 
@@ -240,7 +240,7 @@ Future<String> _heavyTaskForRouteLandmarks(BunnyBag bag) async {
   pp('$xyz Association RouteLandmarks for all routes: ${routeLandmarks.length}');
   return jsonList;
 }
-
+@pragma('vm:entry-point')
 Future<String> _heavyTaskForRouteCities(BunnyBag bag) async {
   pp('$xyz _heavyTaskForRouteCities starting ................. associationId; ${bag.associationId} .');
 
@@ -253,7 +253,7 @@ Future<String> _heavyTaskForRouteCities(BunnyBag bag) async {
   pp('$xyz Association RouteCities for all routes: ${routeCities.length}');
   return jsonList;
 }
-
+@pragma('vm:entry-point')
 Future<String> _heavyTaskForSingleRoute(BirdieBag bag) async {
   pp('$xyz _heavyTaskForSingleRoute starting ................. associationId; ${bag.associationId} ');
 

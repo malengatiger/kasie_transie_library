@@ -34,15 +34,35 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
   final photoThumbFiles = <File>[];
   bool busy = false;
   bool showAllPhotos = false;
-
+  String? vehicleMedia,
+      allPhotosVideos,
+      photosAndVideosNow,
+      takePhotos,
+      makeVideos;
+  Future _setTexts() async {
+    final c = await prefs.getColorAndLocale();
+    final loc = c.locale;
+    vehicleMedia = await translator.translate('vehicleMedia', loc);
+    allPhotosVideos = await translator.translate('allPhotosVideos', loc);
+    takePhotos = await translator.translate('takePhotos', loc);
+    makeVideos = await translator.translate('makeVideos', loc);
+  }
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
-    _setTexts();
-    _getVehiclePhotos(false);
+    _controlSetup();
   }
 
+  void _controlSetup() async {
+    await _setTexts();
+    setState(() {
+
+    });
+    Future.delayed(const Duration(milliseconds: 200), (){
+      _getVehiclePhotos(false);
+    });
+  }
   @override
   void dispose() {
     _controller.dispose();
@@ -110,19 +130,7 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
     navigateWithScale(VehiclePhotoWidget(vehiclePhoto: photo), context);
   }
 
-  String? vehicleMedia,
-      allPhotosVideos,
-      photosAndVideosNow,
-      takePhotos,
-      makeVideos;
-  Future _setTexts() async {
-    final c = await prefs.getColorAndLocale();
-    final loc = c.locale;
-    vehicleMedia = await translator.translate('vehicleMedia', loc);
-    allPhotosVideos = await translator.translate('allPhotosVideos', loc);
-    takePhotos = await translator.translate('takePhotos', loc);
-    makeVideos = await translator.translate('makeVideos', loc);
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -325,7 +333,7 @@ class MediaChooser extends StatelessWidget {
       height: 120,
       width: 300,
       child: Card(
-        color: Colors.black26,
+        color: Colors.black54,
         shape: getRoundedBorder(radius: 16),
         elevation: 8,
         child: Column(
