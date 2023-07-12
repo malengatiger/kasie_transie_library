@@ -22,7 +22,7 @@ class DispatchIsolate {
 
 
   Future addFailedAmbassadorPassengerCounts() async {
-    pp('\n\n\n$xy ............................ addFailedAmbassadorPassengerCounts ....');
+    pp('\n$xy ............................ addFailedAmbassadorPassengerCounts ....');
     final token = await appAuth.getAuthToken();
 
     if (token != null) {
@@ -34,7 +34,7 @@ class DispatchIsolate {
           pp('$xy  add failed cached AmbassadorPassengerCount to backend; using isolate ... ');
           await _handleAmbassadorCount(bag);
         }
-        pp('\n\n\n$xy ..... done processing ${list.length} Failed AmbassadorPassengerCounts records ....\n\n');
+        pp('$xy ..... done processing ${list.length} Failed AmbassadorPassengerCounts records ....\n');
 
       } catch (e) {
         pp(e);
@@ -48,7 +48,7 @@ class DispatchIsolate {
   }
 
   Future addFailedDispatchRecords() async {
-    pp('\n\n\n$xy ............................ addDispatchRecords ....');
+    pp('\n$xy ............................ addFailedDispatchRecords ....');
     final token = await appAuth.getAuthToken();
 
     if (token != null) {
@@ -60,7 +60,7 @@ class DispatchIsolate {
                 pp('$xy  add failed cached dispatchRecord to backend; using isolate ... ');
                 final m = await _handleDispatch(bag);
               }
-        pp('\n\n\n$xy ..... done saving ${list.length} dispatch records ....\n\n');
+        pp('$xy ..... done saving ${list.length} dispatch records ....\n');
 
       } catch (e) {
         pp(e);
@@ -74,7 +74,7 @@ class DispatchIsolate {
 
   }
   Future<AmbassadorPassengerCount> addAmbassadorPassengerCount(AmbassadorPassengerCount count) async {
-    pp('\n\n\n$xy ............................ addAmbassadorPassengerCount ....');
+    pp('\n$xy ............................ addAmbassadorPassengerCount ....');
     final token = await appAuth.getAuthToken();
 
     if (token != null) {
@@ -83,7 +83,7 @@ class DispatchIsolate {
         final bag = DispatchBag(string, KasieEnvironment.getUrl(), token);
         pp('$xy  save new AmbassadorPassengerCount to backend; using isolate ... ');
         final m = await _handleAmbassadorCount(bag);
-        pp('\n\n\n$xy ..... done adding ${m.vehicleReg} AmbassadorPassengerCount  ....\n\n');
+        pp('$xy ..... done adding ${m.vehicleReg} AmbassadorPassengerCount  ....\n');
         return m;
       } catch (e) {
         await cacheManager.saveAmbassadorPassengerCount(count);
@@ -96,7 +96,7 @@ class DispatchIsolate {
     throw Exception('Failed to add AmbassadorPassengerCount');
   }
   Future<DispatchRecord> addDispatchRecord(DispatchRecord dispatchRecord) async {
-    pp('\n\n\n$xy ............................ addDispatchRecord ....');
+    pp('\n$xy ............................ addDispatchRecord ....');
     final token = await appAuth.getAuthToken();
 
     if (token != null) {

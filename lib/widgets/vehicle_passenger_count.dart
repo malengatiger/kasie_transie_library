@@ -17,6 +17,7 @@ import 'package:kasie_transie_library/widgets/video_recorder.dart';
 import 'package:badges/badges.dart' as bd;
 import 'package:realm/realm.dart';
 
+import '../maps/route_map.dart';
 import '../utils/parsers.dart';
 
 class VehiclePassengerCount extends StatefulWidget {
@@ -38,6 +39,8 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
   static const mm = ' 🔷🔷🔷🔷🔷🔷 VehiclePassengerCount 🔷';
   var passengerCounts = <lib.AmbassadorPassengerCount>[];
 
+  var currentCounts = <lib.AmbassadorPassengerCount>[];
+
   bool busy = false;
   bool showAllCounts = false;
   lib.User? user;
@@ -45,6 +48,9 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
       passengerCounter,
       passengersOutText,
       currentPassengersText,
+      passengerCountsaved,
+      lastCount,
+      errorCount,
       saveCounts;
 
   Future _setTexts() async {
@@ -55,7 +61,11 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
         await translator.translate('currentPassengers', c.locale);
     saveCounts = await translator.translate('saveCounts', c.locale);
     passengerCounter = await translator.translate('passengerCount', c.locale);
-    passengersInText = await translator.translate('passengersIn', c.locale);
+    lastCount = await translator.translate('lastCount', c.locale);
+    passengerCountsaved =
+        await translator.translate('passengerCountsaved', c.locale);
+    errorCount = await translator.translate('errorCount', c.locale);
+
     setState(() {});
   }
 
@@ -141,10 +151,16 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
       lastDate = format.format(DateTime.now());
       passengersOut = 0;
       passengersIn = 0;
+      currentCounts.add(passengerCount);
+      _calculateCurrentPassengers();
       if (mounted) {
         showToast(
             duration: const Duration(seconds: 2),
-            message: 'Passenger Counts saved, thank you!',
+            padding: 20,
+            backgroundColor: Theme.of(context).primaryColorDark,
+            message: passengerCountsaved == null
+                ? 'Passenger Counts saved, thank you!'
+                : passengerCountsaved!,
             context: context);
       }
     } catch (e) {
@@ -152,34 +168,79 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
     }
     setState(() {
       busy = false;
+      showSubmit = false;
     });
   }
 
+  void _navigateToPhotoHandler() {
+    pp('$mm ... _navigateToPhotoHandler');
+
+    navigateWithScale(
+        PhotoHandler(
+            vehicle: widget.vehicle,
+            onPhotoTaken: (file, thumb) {
+              pp('$mm photo and thumbnail files returned from handler');
+            }),
+        context);
+  }
+
+  void _calculateCurrentPassengers() {
+    pp('$mm ... _calculateCurrentPassengers');
+    if (currentCounts.isEmpty) {
+      return;
+    }
+    if (currentCounts.length == 1) {
+      setState(() {
+        currentPassengers = currentCounts.first.passengersIn!;
+      });
+      return;
+    }
+    //
+    var startPassengers = 0;
+    for (var count in currentCounts) {
+      startPassengers += count.passengersIn!;
+      startPassengers -= count.passengersOut!;
+    }
+    currentPassengers = startPassengers;
+  }
+
   int passengersIn = 0, passengersOut = 0, currentPassengers = 0;
+  bool showSubmit = false;
+
+  void _navigateToRouteMap() {
+    navigateWithScale(RouteMap(route: widget.route), context);
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
       appBar: AppBar(
+        leading: const SizedBox(),
         title: Text(
             passengerCounter == null ? 'Passenger Counter' : passengerCounter!),
         actions: [
           IconButton(
               onPressed: () {
-                setState(() {
-                  showAllCounts = !showAllCounts;
-                });
-                if (showAllCounts) {
-                  _getVehiclePassengerCounts(true);
-                }
+                _navigateToPhotoHandler();
               },
-              icon: const Icon(Icons.list)),
+              icon: Icon(
+                Icons.camera_alt,
+                color: Theme.of(context).primaryColor,
+              )),
           IconButton(
               onPressed: () {
-                _getVehiclePassengerCounts(true);
+                _navigateToRouteMap();
               },
-              icon: const Icon(Icons.refresh)),
+              icon: Icon(Icons.map, color: Theme.of(context).primaryColor)),
+          IconButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              icon: Icon(
+                Icons.close,
+                color: Theme.of(context).primaryColor,
+              )),
         ],
       ),
       body: Stack(
@@ -238,9 +299,10 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                                 onNumberPicked: (number) {
                                   setState(() {
                                     passengersIn = number;
+                                    showSubmit = true;
                                   });
                                 },
-                                color: Colors.green.shade700,
+                                color: Colors.green.shade800,
                                 fontSize: 28),
                             const SizedBox(
                               width: 24,
@@ -279,8 +341,20 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                             ),
                             NumberDropDown(
                                 onNumberPicked: (number) {
+                                  if (number > currentPassengers) {
+                                    showSnackBar(
+                                        duration: const Duration(seconds: 10),
+                                        backgroundColor:
+                                            Theme.of(context).primaryColorDark,
+                                        message: errorCount == null
+                                            ? "There can be more than the current number of people in the taxi. Please check the number and try again "
+                                            : errorCount!,
+                                        context: context);
+                                    return;
+                                  }
                                   setState(() {
                                     passengersOut = number;
+                                    showSubmit = true;
                                   });
                                 },
                                 color: Colors.red.shade700,
@@ -309,7 +383,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               currentPassengersText == null
@@ -318,19 +392,20 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                               style: myTextStyleSmall(context),
                             ),
                             const SizedBox(
-                              width: 24,
+                              width: 8,
                             ),
-                            NumberDropDown(
-                                onNumberPicked: (number) {
-                                  setState(() {
-                                    currentPassengers = number;
-                                  });
-                                },
-                                color: Colors.blue.shade700,
-                                fontSize: 28),
-                            const SizedBox(
-                              width: 24,
-                            ),
+                            // NumberDropDown(
+                            //     onNumberPicked: (number) {
+                            //       setState(() {
+                            //         currentPassengers = number;
+                            //         showSubmit = true;
+                            //       });
+                            //     },
+                            //     color: Colors.blue.shade700,
+                            //     fontSize: 28),
+                            // const SizedBox(
+                            //   width: 24,
+                            // ),
                             Text(
                               '$currentPassengers',
                               style: myTextStyleMediumLargeWithColor(
@@ -344,26 +419,33 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                   const SizedBox(
                     height: 48,
                   ),
-                  SizedBox(
-                    width: 300,
-                    child: ElevatedButton(
-                        onPressed: () {
-                          _submitCounts();
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Text(
-                              saveCounts == null ? 'Save Counts' : saveCounts!),
-                        )),
-                  ),
+                  showSubmit
+                      ? SizedBox(
+                          width: 300,
+                          child: ElevatedButton(
+                              style: const ButtonStyle(
+                                elevation: MaterialStatePropertyAll(8.0),
+                              ),
+                              onPressed: () {
+                                _submitCounts();
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text(saveCounts == null
+                                    ? 'Save Counts'
+                                    : saveCounts!),
+                              )),
+                        )
+                      : const SizedBox(),
                   const SizedBox(
-                    height: 24,
+                    height: 32,
                   ),
                   lastDate == null
                       ? const SizedBox()
                       : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text('Last Count'),
+                            Text(lastCount == null ? 'Last Count' : lastCount!),
                             const SizedBox(
                               width: 20,
                             ),

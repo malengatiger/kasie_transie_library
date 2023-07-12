@@ -604,8 +604,35 @@ class ListApiDog {
     }
     //
     try {
-      localList = await _getAmbassadorPassengerCountsFromBackend(vehicleId: vehicleId, startDate: startDate);
-      pp('$mm VehicleVideos from backend:: ${localList.length}');
+      localList = await _getVehicleAmbassadorPassengerCountsFromBackend(vehicleId: vehicleId, startDate: startDate);
+      pp('$mm AmbassadorPassengerCounts from backend:: ${localList.length}');
+      realm.write(() {
+        realm.addAll<AmbassadorPassengerCount>(localList, update: true);
+      });
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
+
+  Future<List<AmbassadorPassengerCount>> getAmbassadorPassengerCountsByUser(
+      {required String userId, required bool refresh, required String startDate}) async {
+    var localList = <AmbassadorPassengerCount>[];
+    rm.RealmResults<AmbassadorPassengerCount> results =
+    realm.query<AmbassadorPassengerCount>("userId == \$0", [userId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        localList.add(element);
+      }
+    }
+    pp('$mm AmbassadorPassengerCounts from realm:: ${localList.length}');
+    if (localList.isNotEmpty && !refresh) {
+      return localList;
+    }
+    //
+    try {
+      localList = await _getUserAmbassadorPassengerCountsFromBackend(userId: userId, startDate: startDate);
+      pp('$mm AmbassadorPassengerCounts from backend:: ${localList.length}');
       realm.write(() {
         realm.addAll<AmbassadorPassengerCount>(localList, update: true);
       });
@@ -765,7 +792,7 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<AmbassadorPassengerCount>> _getAmbassadorPassengerCountsFromBackend(
+  Future<List<AmbassadorPassengerCount>> _getVehicleAmbassadorPassengerCountsFromBackend(
       {required String vehicleId, required String startDate}) async {
     final list = <AmbassadorPassengerCount>[];
     final cmd = '${url}getVehicleAmbassadorPassengerCounts?vehicleId=$vehicleId&startDate=$startDate';
@@ -775,7 +802,20 @@ class ListApiDog {
       list.add(r);
     }
 
-    pp('$mm AmbassadorPassengerCounts found: ${list.length}');
+    pp('$mm vehicle AmbassadorPassengerCounts found: ${list.length}');
+    return list;
+  }
+  Future<List<AmbassadorPassengerCount>> _getUserAmbassadorPassengerCountsFromBackend(
+      {required String userId, required String startDate}) async {
+    final list = <AmbassadorPassengerCount>[];
+    final cmd = '${url}getUserAmbassadorPassengerCounts?vehicleId=$userId&startDate=$startDate';
+    List resp = await _sendHttpGET(cmd);
+    for (var value in resp) {
+      var r = buildAmbassadorPassengerCount(value);
+      list.add(r);
+    }
+
+    pp('$mm user AmbassadorPassengerCounts found: ${list.length}');
     return list;
   }
 

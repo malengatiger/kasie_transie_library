@@ -7,29 +7,35 @@ import 'package:geolocator/geolocator.dart' as geo;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/local_finder.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 
-class AssociationRouteMaps extends StatefulWidget {
-  const AssociationRouteMaps({
+import '../utils/emojis.dart';
+
+class RouteMap extends StatefulWidget {
+  const RouteMap({
     Key? key,
+    required this.route,
   }) : super(key: key);
 
+  final lib.Route route;
   @override
-  AssociationRouteMapsState createState() => AssociationRouteMapsState();
+  RouteMapState createState() => RouteMapState();
 }
 
-class AssociationRouteMapsState extends State<AssociationRouteMaps> {
-  static const defaultZoom = 16.0;
+class RouteMapState extends State<RouteMap> {
+  static const defaultZoom = 14.0;
   final Completer<GoogleMapController> _mapController = Completer();
 
+  //Latitude: -25.7605348, Longitude: 27.8525771
   CameraPosition? _myCurrentCameraPosition = const CameraPosition(
-    target: LatLng(-25.8656, 27.7564),
+    target: LatLng(-25.7605348, 27.8525771),
     zoom: defaultZoom,
   );
-  static const mm = '😡😡😡😡😡😡😡 AssociationRouteMaps: 💪 ';
+  static const mm = '😡😡😡😡😡😡😡 RouteMap: 💪 ';
   final _key = GlobalKey<ScaffoldState>();
   bool busy = false;
   bool isHybrid = true;
@@ -50,47 +56,28 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   Color color = Colors.black;
   var routeLandmarks = <lib.RouteLandmark>[];
   int landmarkIndex = 0;
-  var routes = <lib.Route>[];
 
   @override
   void initState() {
     super.initState();
-    _buildLandmarkIcons();
-    _getCurrentLocation();
+    _setTexts();
     _getUser();
   }
 
-  Future _getRoutes() async {
-    setState(() {
-      busy = true;
-    });
-    try {
-      _user = await prefs.getUser();
-      final loc = await locationBloc.getLocation();
-      pp('\n\n$mm .......... findAssociationRoutesByLocation ...');
+  String? waitingForGPS, youAreHere, currentLocation;
 
-      routes = await localFinder.findNearestRoutes(latitude: loc.latitude, longitude: loc.longitude,
-          radiusInMetres: 1000 * 100);
-
-    } catch (e) {
-      pp(e);
-      showSnackBar(
-          backgroundColor: Colors.pink[300],
-          textStyle: myTextStyleMediumBlack(context),
-          message: 'Error: $e',
-          context: context);
-    }
-    setState(() {
-      busy = false;
-    });
+  void _setTexts() async {
+    final c = await prefs.getColorAndLocale();
+    waitingForGPS = await translator.translate('errorCount', c.locale);
+    youAreHere = await translator.translate('youAreHere', c.locale);
+    currentLocation = await translator.translate('currentLocation', c.locale);
   }
 
-  void _getRouteMap(lib.Route route) async {
-    color = getColor(route.color!);
-    await _getRoutePoints(route, false);
-    await _getRouteLandmarks(route, false);
+  void _getRouteMap() async {
+    color = getColor(widget.route.color!);
+    await _getRoutePoints(widget.route, false);
+    await _getRouteLandmarks(widget.route, false);
     await _buildMap();
-    _zoomToBeginningOfRoute(route);
   }
 
   @override
@@ -106,27 +93,29 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
         await listApiDog.getRouteLandmarks(route.routeId!, refresh);
     pp('$mm _getRouteLandmarks ...  route: ${route.name}; found: ${routeLandmarks.length} ');
 
-    landmarkIndex = 0;
-    for (var landmark in routeLandmarks) {
-      final latLng = LatLng(landmark.position!.coordinates.last,
-          landmark.position!.coordinates.first);
-      _markers.add(Marker(
-          markerId: MarkerId('${landmark.landmarkId}'),
-          icon: numberMarkers.elementAt(landmarkIndex),
-          onTap: () {
-            pp('$mm .............. marker tapped: $index');
-          },
-          infoWindow: InfoWindow(
-              snippet:
-                  '\nThis landmark is part of the route:\n ${route.name}\n\n',
-              title: '🍎 ${landmark.landmarkName}',
-              onTap: () {
-                pp('$mm ............. infoWindow tapped, point index: $index');
-                //_deleteLandmark(landmark);
-              }),
-          position: latLng));
-      landmarkIndex++;
-    }
+    await _buildLandmarkIcons(routeLandmarks.length);
+
+    // landmarkIndex = 0;
+    // for (var landmark in routeLandmarks) {
+    //   final latLng = LatLng(landmark.position!.coordinates.last,
+    //       landmark.position!.coordinates.first);
+    //   _markers.add(Marker(
+    //       markerId: MarkerId('${landmark.landmarkId}'),
+    //       icon: numberMarkers.elementAt(landmarkIndex),
+    //       onTap: () {
+    //         pp('$mm .............. marker tapped: $index');
+    //       },
+    //       infoWindow: InfoWindow(
+    //           snippet:
+    //               '\nThis landmark is part of the route:\n ${route.name}\n\n',
+    //           title: '🍎 ${landmark.landmarkName}',
+    //           onTap: () {
+    //             pp('$mm ............. infoWindow tapped, point index: $index');
+    //             //_deleteLandmark(landmark);
+    //           }),
+    //       position: latLng));
+    //   landmarkIndex++;
+    // }
     setState(() {});
   }
 
@@ -193,27 +182,32 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     _addPolyLine();
     landmarkIndex = 0;
     for (var rl in routeLandmarks) {
-      _markers.add(Marker(markerId: MarkerId(rl.landmarkId!),
-      icon: numberMarkers.elementAt(landmarkIndex),
-      position: LatLng(rl.position!.coordinates[1], rl.position!.coordinates[0]),
-        infoWindow: InfoWindow(
-          title: rl.landmarkName,
-          snippet: '🍎Part of ${rl.routeName}'
-        )
-      ));
+      _markers.add(Marker(
+          markerId: MarkerId(rl.landmarkId!),
+          icon: numberMarkers.elementAt(landmarkIndex),
+          position:
+              LatLng(rl.position!.coordinates[1], rl.position!.coordinates[0]),
+          infoWindow: InfoWindow(
+              title: rl.landmarkName, snippet: '🍎Part of ${rl.routeName}')));
       landmarkIndex++;
     }
+    //add current location
+    await _buildCarIcon();
+    final loc = await locationBloc.getLocation();
+    final latLng = LatLng(loc.latitude, loc.longitude);
+
+    _markers.add(Marker(
+        markerId: const MarkerId('myLocation'),
+        position: latLng,
+        zIndex: 1.0,
+        infoWindow: InfoWindow(
+            title:
+                currentLocation == null ? 'Current Location' : currentLocation!,
+            snippet: youAreHere == null ? 'You are here at ' : youAreHere!)));
+
+    _zoomToCurrentLocation(loc.latitude, loc.longitude);
+    pp('$mm ....................... ${E.redDot} my location $loc');
     setState(() {});
-    var point = existingRoutePoints.first;
-    var latLng = LatLng(
-        point.position!.coordinates.last, point.position!.coordinates.first);
-    _myCurrentCameraPosition = CameraPosition(
-      target: latLng,
-      zoom: defaultZoom,
-    );
-    final GoogleMapController controller = await _mapController.future;
-    controller.animateCamera(
-        CameraUpdate.newCameraPosition(_myCurrentCameraPosition!));
   }
 
   Future _getUser() async {
@@ -227,10 +221,10 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     pp('$mm custom marker 💜 assets/markers/dot2.png created');
   }
 
-  Future _getCurrentLocation() async {
+  Future _getMyLocation() async {
     pp('$mm .......... get current location ....');
     _currentPosition = await locationBloc.getLocation();
-
+    _putCarOnMap();
     pp('$mm .......... get current location ....  🍎 found: ${_currentPosition!.toJson()}');
     _myCurrentCameraPosition = CameraPosition(
       target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
@@ -239,28 +233,53 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     setState(() {});
   }
 
-  Future<void> _zoomToBeginningOfRoute(lib.Route route) async {
-    if (route.routeStartEnd != null) {
+  Future<void> _zoomToCurrentLocation(double latitude, double longitude) async {
+
       final latLng = LatLng(
-          route.routeStartEnd!.startCityPosition!.coordinates.last,
-          route.routeStartEnd!.startCityPosition!.coordinates.first);
-      var cameraPos = CameraPosition(target: latLng, zoom: 11.0);
+          latitude,
+          longitude);
+      var cameraPos = CameraPosition(target: latLng, zoom: defaultZoom);
       final GoogleMapController controller = await _mapController.future;
       controller.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
       setState(() {});
-    }
+
   }
 
   int index = 0;
   final numberMarkers = <BitmapDescriptor>[];
 
-  Future _buildLandmarkIcons() async {
-    for (var i = 0; i < 100; i++) {
+  void _putCarOnMap() {
+    pp('$mm .......... _putCarOnMap ....  🍎 put it here: ${_currentPosition!.toJson()}');
+
+    var latLng =
+        LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
+    _markers.add(Marker(
+      markerId: MarkerId('${DateTime.now().millisecondsSinceEpoch}'),
+      // icon: carIcon,
+      zIndex: 1.0,
+      position: latLng,
+      infoWindow:
+          const InfoWindow(title: 'Current Location', snippet: 'You are here'),
+    ));
+    pp('$mm .......... _putCarOnMap ....  🍎 set state');
+
+    setState(() {});
+  }
+
+  Future _buildLandmarkIcons(int number) async {
+    for (var i = 0; i < number; i++) {
       var intList =
           await getBytesFromAsset("assets/numbers/number_${i + 1}.png", 84);
       numberMarkers.add(BitmapDescriptor.fromBytes(intList));
     }
     pp('$mm have built ${numberMarkers.length} markers for landmarks');
+  }
+
+  late BitmapDescriptor carIcon;
+  Future _buildCarIcon() async {
+    var intList = await getBytesFromAsset("assets/numbers/number_0.png", 84);
+    carIcon = BitmapDescriptor.fromBytes(intList);
+    pp('$mm have built car marker ');
   }
 
   _clearMap() {
@@ -288,56 +307,23 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     setState(() {});
   }
 
-  void _refreshRoute(lib.Route route) async {
-    pp('$mm .... _refreshRoute ....');
-    setState(() {
-      busy = true;
-    });
-    try {
-      final bag = await listApiDog.refreshRoute(route.routeId!);
-      existingRoutePoints = bag.routePoints;
-      _buildMap();
-      if (mounted) {
-        showSnackBar(
-            padding: 20,
-            backgroundColor: Theme.of(context).primaryColorLight,
-            message: 'Route has been refreshed',
-            context: context);
-      }
-    } catch (e) {
-      pp(e);
-      showSnackBar(message: 'Error: $e', context: context);
-    }
-    setState(() {
-      busy = true;
-    });
-  }
-
   lib.Route? routeSelected;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Row(mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Expanded(
-                child: RouteDropDown(
-                    routes: routes,
-                    onRoutePicked: (r) {
-                      setState(() {
-                        routeSelected = r;
-                      });
-                      _getRouteMap(r);
-                    }),
-              ),
-            ],
+          title: Text(
+            '${widget.route.name}',
+            style: myTextStyleSmall(context),
           ),
         ),
         key: _key,
         body: _myCurrentCameraPosition == null
             ? Center(
                 child: Text(
-                  'Waiting for GPS location ...',
+                  waitingForGPS == null
+                      ? 'Waiting for GPS location ...'
+                      : waitingForGPS!,
                   style: myTextStyleMediumBold(context),
                 ),
               )
@@ -352,10 +338,10 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
                   onTap: (latLng) {
                     pp('$mm .......... on map tapped : $latLng .');
                   },
-                  onMapCreated: (GoogleMapController controller) {
+                  onMapCreated: (GoogleMapController controller) async {
                     pp('$mm .......... on onMapCreated .....');
                     _mapController.complete(controller);
-                    _getRoutes();
+                    _getRouteMap();
                   },
                 ),
                 Positioned(
@@ -375,30 +361,6 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
                               Icons.album_outlined,
                               color: isHybrid ? Colors.yellow : Colors.white,
                             )),
-                      ),
-                    )),
-                Positioned(
-                    right: 12,
-                    top: 40,
-                    child: Card(
-                      elevation: 8,
-                      shape: getRoundedBorder(radius: 12),
-                      child: Row(
-                        children: [
-                          IconButton(
-                              onPressed: () {
-                                if (routeSelected != null) {
-                                  _refreshRoute(routeSelected!);
-                                }
-                              },
-                              icon: Icon(
-                                Icons.toggle_on,
-                                color: Theme.of(context).primaryColor,
-                              )),
-                          const SizedBox(
-                            width: 28,
-                          ),
-                        ],
                       ),
                     )),
                 busy
@@ -432,11 +394,18 @@ class RouteDropDown extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = <DropdownMenuItem<lib.Route>>[];
     for (var r in routes) {
-      items.add(DropdownMenuItem<lib.Route>(value: r, 
-          child: Text(r.name!, style: myTextStyleSmall(context),)));
+      items.add(DropdownMenuItem<lib.Route>(
+          value: r,
+          child: Text(
+            r.name!,
+            style: myTextStyleSmall(context),
+          )));
     }
     return DropdownButton(
-        hint:  Text('Select Route', style: myTextStyleSmall(context),),
+        hint: Text(
+          'Select Route',
+          style: myTextStyleSmall(context),
+        ),
         items: items,
         onChanged: (r) {
           if (r != null) {

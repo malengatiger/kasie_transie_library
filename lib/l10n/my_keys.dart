@@ -11,7 +11,7 @@ class MyKeys {
   }
 
   static _buildMap() {
-    hashMap['cancel'] = 'Cancel';
+    hashMap['Cancel'] = 'Cancel';
     hashMap['addCity'] = 'addCity';
     hashMap['addNewRoute'] = 'addNewRoute';
     hashMap['af'] = 'af';
@@ -30,6 +30,7 @@ class MyKeys {
     hashMap['createNewPlace'] = 'createNewPlace';
     hashMap['createNewRoute'] = 'createNewRoute';
     hashMap['createOrUpdate'] = 'createOrUpdate';
+    hashMap['currentLocation'] = 'currentLocation';
     hashMap['currentPassengers'] = 'currentPassengers';
     hashMap['dashboard'] = 'dashboard';
     hashMap['dataLoader'] = 'dataLoader';
@@ -40,6 +41,7 @@ class MyKeys {
     hashMap['dispatch'] = 'dispatch';
     hashMap['dispatchError'] = 'dispatchError';
     hashMap['dispatchFailed'] = 'dispatchFailed';
+    hashMap['dispatchSaved'] = 'dispatchSaved';
     hashMap['dispatchTaxi'] = 'dispatchTaxi';
     hashMap['dispatchWithScan'] = 'dispatchWithScan';
     hashMap['dispatches'] = 'dispatches';
@@ -59,6 +61,7 @@ class MyKeys {
     hashMap['enterPhone'] = 'enterPhone';
     hashMap['enterPlace'] = 'enterPlace';
     hashMap['enterRouteName'] = 'enterRouteName';
+    hashMap['errorCount'] = 'errorCount';
     hashMap['errorGettingData'] = 'errorGettingData';
     hashMap['errorNetwork'] = 'errorNetwork';
     hashMap['errorScanner'] = 'errorScanner';
@@ -78,6 +81,7 @@ class MyKeys {
     hashMap['initializingResources'] = 'initializingResources';
     hashMap['landmarkIsPart'] = 'landmarkIsPart';
     hashMap['landmarks'] = 'landmarks';
+    hashMap['lastCount'] = 'lastCount';
     hashMap['loading'] = 'loading';
     hashMap['loadingRoutes'] = 'loadingRoutes';
     hashMap['locationRequestSent'] = 'locationRequestSent';
@@ -99,8 +103,10 @@ class MyKeys {
     hashMap['ownerDash'] = 'ownerDash';
     hashMap['ownerUnknown'] = 'ownerUnknown';
     hashMap['passengerCount'] = 'passengerCount';
+    hashMap['passengerCountsaved'] = 'passengerCountsaved';
     hashMap['passengers'] = 'passengers';
     hashMap['passengersIn'] = 'passengersIn';
+    hashMap['passengersInTaxi'] = 'passengersInTaxi';
     hashMap['passengersOut'] = 'passengersOut';
     hashMap['password'] = 'password';
     hashMap['phoneAuth'] = 'phoneAuth';
@@ -203,6 +209,7 @@ class MyKeys {
     hashMap['xh'] = 'xh';
     hashMap['yes'] = 'yes';
     hashMap['yo'] = 'yo';
+    hashMap['youAreHere'] = 'youAreHere';
     hashMap['zh'] = 'zh';
     hashMap['zu'] = 'zu';
 
