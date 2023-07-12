@@ -6,11 +6,14 @@ class BigBag {
   List<DispatchRecord> dispatchRecords = [];
   List<VehicleHeartbeat> vehicleHeartbeats = [];
   List<VehicleDeparture> vehicleDepartures = [];
+  List<AmbassadorPassengerCount> passengerCounts = [];
+
 
   BigBag(
       {required this.vehicleArrivals,
       required this.vehicleDepartures,
       required this.dispatchRecords,
+        required this.passengerCounts,
       required this.vehicleHeartbeats});
 
   BigBag.fromJson(Map data) {
@@ -29,6 +32,10 @@ class BigBag {
     List di = data['dispatchRecords'];
     for (var value in di) {
       dispatchRecords.add(buildDispatchRecord(value));
+    }
+    List pc = data['passengerCounts'];
+    for (var value in pc) {
+      passengerCounts.add(buildAmbassadorPassengerCount(value));
     }
   }
 }

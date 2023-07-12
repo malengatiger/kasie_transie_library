@@ -431,6 +431,8 @@ LocationRequest buildLocationRequest(Map j) {
     vehicleReg: j['vehicleReg'],
     userName: j['userName'],
     created: j['created'],
+
+
   );
   return m;
 }
@@ -459,6 +461,8 @@ AmbassadorPassengerCount buildAmbassadorPassengerCount(Map j) {
     vehicleReg: j['vehicleReg'],
     userName: j['userName'],
     created: j['created'],
+    ownerId: j['ownerId'],
+    ownerName: j['ownerName'],
     position: buildPosition(j['position']),
     routeId: j['routeId'],
     routeName: j['routeName'],

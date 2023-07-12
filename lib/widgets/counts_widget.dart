@@ -14,11 +14,11 @@ class CountsGridWidget extends StatelessWidget {
     required this.arrivals,
     required this.departures,
     required this.heartbeats,
-    required this.dispatches,
+    required this.dispatches, required this.passengerCountsText, required this.passengerCounts,
   }) : super(key: key);
 
-  final String arrivalsText, departuresText, dispatchesText, heartbeatText;
-  final int arrivals, departures, heartbeats, dispatches;
+  final String arrivalsText, departuresText, dispatchesText, heartbeatText, passengerCountsText;
+  final int arrivals, departures, heartbeats, dispatches, passengerCounts;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -27,6 +27,10 @@ class CountsGridWidget extends StatelessWidget {
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2, crossAxisSpacing: 2, mainAxisSpacing: 2),
         children: [
+          NumberWidget(
+            title: passengerCountsText,
+            number: passengerCounts,
+          ),
           NumberWidget(
             title: arrivalsText,
             number: arrivals,

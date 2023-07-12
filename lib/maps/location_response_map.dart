@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart' as lib;
-import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/local_finder.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
@@ -39,7 +38,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
   var routePoints = [<lib.RoutePoint>[]];
   var routeLandmarks = [<lib.RouteLandmark>[]];
 
-  String? locationResponseText, dateText, taxiCurrentLocation;
+  String? locationResponseText, dateText, taxiCurrentLocation, loadingRoutes;
   final _markerIcons = <List<BitmapDescriptor>>[];
   lib.User? user;
   var bags = <RouteDataBag>[];
@@ -74,14 +73,6 @@ class LocationResponseMapState extends State<LocationResponseMap> {
       var marks = await localFinder.findNearestRouteLandmarks(latitude: loc.latitude,
           longitude: loc.longitude, radiusInMetres: 5000);
       pp('$mm ... marks: ${marks.length}');
-
-      // routes = await listApiDog.findAssociationRoutesByLocation(
-      //     LocationFinderParameter(
-      //         associationId: user!.associationId,
-      //         latitude: widget.locationResponse.position!.coordinates[1],
-      //         limit: 50,
-      //         longitude: widget.locationResponse.position!.coordinates[0],
-      //         radiusInKM: 5.0));
       pp('$mm ... routes: ${routes.length}');
       if (routes.isNotEmpty) {
         pp('$mm  check for null: ${routes.first.name} color: ${routes.first.color}');
@@ -219,8 +210,12 @@ class LocationResponseMapState extends State<LocationResponseMap> {
     locationResponseText =
         await translator.translate('locationResponse', locale);
     dateText = await translator.translate('date', locale);
+    loadingRoutes = await translator.translate('loadingRoutes', locale);
     taxiCurrentLocation =
         await translator.translate('taxiCurrentLocation', locale);
+    setState(() {
+
+    });
   }
 
   @override
@@ -254,21 +249,23 @@ class LocationResponseMapState extends State<LocationResponseMap> {
           // ],
         ),
         body: busy
-            ? const Center(
+            ?  Center(
                 child: Card(
+                  elevation: 8,
+                  shape: getRoundedBorder(radius: 16),
                   child: SizedBox(
                     width: 300,
                     height: 300,
                     child: Column(
                       children: [
-                        SizedBox(
+                        const SizedBox(
                           height: 72,
                         ),
-                        CircularProgressIndicator(),
-                        SizedBox(
+                        const CircularProgressIndicator(),
+                        const SizedBox(
                           height: 24,
                         ),
-                        Text('Loading route data ...'),
+                        Text(loadingRoutes == null? 'Loading route data ...': loadingRoutes!),
                       ],
                     ),
                   ),

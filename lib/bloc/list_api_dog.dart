@@ -106,17 +106,18 @@ class ListApiDog {
   }
 
   Future<bool> initializeRealm() async {
-    pp('$mm ........ initialize Realm with Device Sync ....');
+    pp('$mm ........ initialize Realm without Device Sync ....');
     app = rm.App(rm.AppConfiguration(realmAppId));
     realmUser = app.currentUser ?? await app.logIn(rm.Credentials.anonymous());
 
     try {
       rm.Realm.logger.level = rm.RealmLogLevel.detail;
 
-      pp('\n\n$mm RealmApp configured  🥬 🥬 🥬 🥬; realmUser : $realmUser'
+      pp('\n\n$mm RealmApp configured  🥬 🥬 🥬 🥬; realmUser : ${realmUser.app.toString()}'
           '\n🌎🌎state: ${realmUser.state.name} '
           '\n🌎🌎accessToken: ${realmUser.accessToken} '
-          '\n🌎🌎id:${realmUser.id} \n🌎🌎name:${realmUser.profile.name}');
+          '\n🌎🌎id:${realmUser.id} '
+          '\n🌎🌎name:${realmUser.profile.name}');
 
       for (final schema in realm.schema) {
         pp('$mm RealmApp configured; schema : 🍎🍎${schema.name}');
@@ -174,7 +175,8 @@ class ListApiDog {
     pp('$mm getOwnersBag: '
         '\n vehicleHeartbeats: ${bag.vehicleHeartbeats.length} '
         '\n vehicleArrivals: ${bag.vehicleArrivals.length} '
-        '\n vehicleHeartbeats: ${bag.vehicleHeartbeats.length} '
+        '\n dispatchRecords: ${bag.dispatchRecords.length} '
+        '\n passengerCounts: ${bag.passengerCounts.length} '
         '\n vehicleDepartures: ${bag.vehicleDepartures.length}');
 
     return bag;
@@ -275,8 +277,10 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<DispatchRecord>> getMarshalDispatchRecords({
-      required String userId,  required bool refresh,  required int days}) async {
+  Future<List<DispatchRecord>> getMarshalDispatchRecords(
+      {required String userId,
+      required bool refresh,
+      required int days}) async {
     rm.RealmResults<DispatchRecord> results =
         realm.query<DispatchRecord>('marshalId == \$0', [userId]);
     final list = <DispatchRecord>[];
@@ -391,6 +395,9 @@ class ListApiDog {
 
   Future<List<Vehicle>> getOwnerCarsFromBackend(String userId) async {
     final cmd = '${url}getOwnerVehicles?userIdId=$userId';
+    if (userId == null) {
+      throw Exception('What the hell? No user');
+    }
     List resp = await _sendHttpGET(cmd);
     var list = <Vehicle>[];
     for (var vehicleJson in resp) {
@@ -407,9 +414,9 @@ class ListApiDog {
 
   Future<List<DispatchRecord>> getMarshalDispatchesFromBackend(
       String userId, int days) async {
-
     final startDate = DateTime.now().toUtc().subtract(Duration(days: days));
-    final cmd = '${url}getMarshalDispatchRecords?userId=$userId&startDate=$startDate';
+    final cmd =
+        '${url}getMarshalDispatchRecords?userId=$userId&startDate=$startDate';
     List resp = await _sendHttpGET(cmd);
     var list = <DispatchRecord>[];
     for (var vehicleJson in resp) {
@@ -588,11 +595,14 @@ class ListApiDog {
     }
     return localList;
   }
+
   Future<List<AmbassadorPassengerCount>> getAmbassadorPassengerCountsByVehicle(
-      {required String vehicleId, required bool refresh, required String startDate}) async {
+      {required String vehicleId,
+      required bool refresh,
+      required String startDate}) async {
     var localList = <AmbassadorPassengerCount>[];
     rm.RealmResults<AmbassadorPassengerCount> results =
-    realm.query<AmbassadorPassengerCount>("vehicleId == \$0", [vehicleId]);
+        realm.query<AmbassadorPassengerCount>("vehicleId == \$0", [vehicleId]);
     if (results.isNotEmpty) {
       for (var element in results) {
         localList.add(element);
@@ -604,7 +614,8 @@ class ListApiDog {
     }
     //
     try {
-      localList = await _getVehicleAmbassadorPassengerCountsFromBackend(vehicleId: vehicleId, startDate: startDate);
+      localList = await _getVehicleAmbassadorPassengerCountsFromBackend(
+          vehicleId: vehicleId, startDate: startDate);
       pp('$mm AmbassadorPassengerCounts from backend:: ${localList.length}');
       realm.write(() {
         realm.addAll<AmbassadorPassengerCount>(localList, update: true);
@@ -616,10 +627,12 @@ class ListApiDog {
   }
 
   Future<List<AmbassadorPassengerCount>> getAmbassadorPassengerCountsByUser(
-      {required String userId, required bool refresh, required String startDate}) async {
+      {required String userId,
+      required bool refresh,
+      required String startDate}) async {
     var localList = <AmbassadorPassengerCount>[];
     rm.RealmResults<AmbassadorPassengerCount> results =
-    realm.query<AmbassadorPassengerCount>("userId == \$0", [userId]);
+        realm.query<AmbassadorPassengerCount>("userId == \$0", [userId]);
     if (results.isNotEmpty) {
       for (var element in results) {
         localList.add(element);
@@ -631,7 +644,8 @@ class ListApiDog {
     }
     //
     try {
-      localList = await _getUserAmbassadorPassengerCountsFromBackend(userId: userId, startDate: startDate);
+      localList = await _getUserAmbassadorPassengerCountsFromBackend(
+          userId: userId, startDate: startDate);
       pp('$mm AmbassadorPassengerCounts from backend:: ${localList.length}');
       realm.write(() {
         realm.addAll<AmbassadorPassengerCount>(localList, update: true);
@@ -792,10 +806,12 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<AmbassadorPassengerCount>> _getVehicleAmbassadorPassengerCountsFromBackend(
-      {required String vehicleId, required String startDate}) async {
+  Future<List<AmbassadorPassengerCount>>
+      _getVehicleAmbassadorPassengerCountsFromBackend(
+          {required String vehicleId, required String startDate}) async {
     final list = <AmbassadorPassengerCount>[];
-    final cmd = '${url}getVehicleAmbassadorPassengerCounts?vehicleId=$vehicleId&startDate=$startDate';
+    final cmd =
+        '${url}getVehicleAmbassadorPassengerCounts?vehicleId=$vehicleId&startDate=$startDate';
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
       var r = buildAmbassadorPassengerCount(value);
@@ -805,10 +821,13 @@ class ListApiDog {
     pp('$mm vehicle AmbassadorPassengerCounts found: ${list.length}');
     return list;
   }
-  Future<List<AmbassadorPassengerCount>> _getUserAmbassadorPassengerCountsFromBackend(
-      {required String userId, required String startDate}) async {
+
+  Future<List<AmbassadorPassengerCount>>
+      _getUserAmbassadorPassengerCountsFromBackend(
+          {required String userId, required String startDate}) async {
     final list = <AmbassadorPassengerCount>[];
-    final cmd = '${url}getUserAmbassadorPassengerCounts?vehicleId=$userId&startDate=$startDate';
+    final cmd =
+        '${url}getUserAmbassadorPassengerCounts?vehicleId=$userId&startDate=$startDate';
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
       var r = buildAmbassadorPassengerCount(value);

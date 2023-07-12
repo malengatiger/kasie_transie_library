@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart' as lib;
 import 'package:kasie_transie_library/isolates/routes_isolate.dart';
+import 'package:kasie_transie_library/messaging/local_notif.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
@@ -97,8 +98,10 @@ class FCMBloc {
       pp('$mm onMessageOpenedApp:  $red A new onMessageOpenedApp event was published! ${message.data}');
     });
 
-    pp("\n\n$mm FCM : FIREBASE MESSAGING initialization done! - ${E.nice} "
-        "will subscribeToTopics() ...........................");
+    LocalNotificationService.initialize();
+    pp("\n\n$mm FCM : FIREBASE MESSAGING initialization done! "
+        "- ${E.nice} ${E.nice} ${E.nice} "
+        " apps will subscribeToTopics() ...........................");
   }
 
   String getMessageType(fb.RemoteMessage message) {
@@ -130,7 +133,10 @@ class FCMBloc {
     } else if (message.data['vehicleMediaRequest'] != null) {
       pp("$mm onMessage: $red vehicleMediaRequest message has arrived!  ... $red ");
       type = 'vehicleMediaRequest';
-    } else {
+    } else if (message.data['passengerCount'] != null){
+      pp("$mm onMessage: $red passengerCount message has arrived!  ... $red ");
+      type = 'passengerCount';
+    } else{
       pp("$mm onMessage: $red unknown message has arrived!  ... $red ");
       return 'unknown';
     }
@@ -156,7 +162,7 @@ class FCMBloc {
     if (associationId == null) {
       return;
     }
-    pp("$newMM subscribeToTopics: $red subscribe to all KasieTransie FCM topics ... ");
+    pp("\n\n$newMM subscribeToTopics: $red subscribe to all KasieTransie FCM topics ... ");
 
     await firebaseMessaging.subscribeToTopic('vehicle_changes_$associationId');
     pp('$newMM ..... FCM: subscribed to vehicle_changes_$associationId');
@@ -172,6 +178,10 @@ class FCMBloc {
     //
     await firebaseMessaging.subscribeToTopic('dispatchRecord_$associationId');
     pp('$newMM ..... FCM: subscribed to dispatchRecord_$associationId');
+    //
+    await firebaseMessaging.subscribeToTopic('passengerCount_$associationId');
+    pp('$newMM ..... FCM: subscribed to passengerCount_$associationId');
+
     //
     await firebaseMessaging.subscribeToTopic('locationResponse_$associationId');
     pp('$newMM ..... FCM: subscribed to locationResponse_$associationId');
@@ -232,21 +242,24 @@ class FCMBloc {
           }
         }
         break;
+      case 'passengerCount':
+        final va = map['passengerCount'];
+        final x = jsonDecode(va);
+        final kk = buildAmbassadorPassengerCount(x);
+        _processPassengerCount(kk);
+        break;
       case 'locationRequest':
         final va = map['locationRequest'];
         final x = jsonDecode(va);
         //todo - respond if it the request is for you
         final locReq = buildLocationRequest(x);
-        _locationRequestStreamController.sink.add(locReq);
-        _respondToLocationRequest(locReq);
+        _processLocationRequest(locReq);
         break;
       case 'locationResponse':
         final va = map['locationResponse'];
         final x = jsonDecode(va);
-        pp('$newMM ${E.redDot} location response raw: check registration ... ${E.redDot}\n$x');
         final resp = buildLocationResponse(x);
-        pp('$newMM ... to be put into _locationResponseStreamController ... check for null');
-        _locationResponseStreamController.sink.add(resp);
+        _processLocationResponse(resp);
         break;
       case 'userGeofenceEvent':
         final va = map['userGeofenceEvent'];
@@ -257,47 +270,77 @@ class FCMBloc {
         final va = map['vehicleMediaRequest'];
         final x = jsonDecode(va);
         final req = buildVehicleMediaRequest(x);
-        //todo - check if I need this message?
-        if (user != null) {
-          if (user!.userId == req.userId) {
-            pp('\n$newMM ... IGNORE ... this is my own request ....');
-          } else {
-            pp('\n\n$newMM ... ACCEPT ... refreshing assoc requests ${E.blueDot} ...');
-            final startDate = DateTime.now()
-                .toUtc()
-                .subtract(const Duration(hours: 4))
-                .toIso8601String();
-            await listApiDog.getAssociationVehicleMediaRequests(
-                req.associationId!, startDate, true);
-            _vehicleMediaRequestStreamController.sink.add(req);
-          }
-        }
-        if (car != null) {
-          if (car!.vehicleId == req.vehicleId) {
-            pp('\n\n$newMM ... ACCEPT ... this request is for me! ${E.blueDot} '
-                'what now, Boss? ...');
-            _vehicleMediaRequestStreamController.sink.add(req);
-          }
-        }
-
+        _processMediaRequest(req);
         break;
       case 'routeUpdateRequest':
         final va = map['routeUpdateRequest'];
         final x = jsonDecode(va);
         final req = buildRouteUpdateRequest(x);
-        pp('$newMM ... updating local cache with refreshed route ');
-        await routesIsolate.getRoute(req.associationId!, req.routeId!);
-        _routeUpdateRequestStreamController.sink.add(req);
+       _processRouteUpdate(req);
         break;
     }
   }
 
-  void _respondToLocationRequest(lib.LocationRequest request) async {
-    pp('$newMM checking if location request is for me');
+  void _processRouteUpdate(lib.RouteUpdateRequest req) async {
+    pp('$newMM ... updating local cache with refreshed route ');
+    await routesIsolate.getRoute(req.associationId!, req.routeId!);
+    _routeUpdateRequestStreamController.sink.add(req);
+  }
+
+  void _processLocationResponse(lib.LocationResponse resp) async {
+    if (user == null) {
+      return;
+    }
+    if (user!.userId == resp.userId) {
+      _locationResponseStreamController.sink.add(resp);
+    }
+
+  }
+
+  void _processMediaRequest(lib.VehicleMediaRequest req) async {
+    if (user != null) {
+      if (user!.userId == req.userId) {
+        pp('\n$newMM ... IGNORE ... this is my own request ....');
+      } else {
+        pp('\n\n$newMM ... ACCEPT ... refreshing assoc requests ${E.blueDot} ...');
+        final startDate = DateTime.now()
+            .toUtc()
+            .subtract(const Duration(hours: 4))
+            .toIso8601String();
+        await listApiDog.getAssociationVehicleMediaRequests(
+            req.associationId!, startDate, true);
+        _vehicleMediaRequestStreamController.sink.add(req);
+      }
+    }
+    if (car != null) {
+      if (car!.vehicleId == req.vehicleId) {
+        pp('\n\n$newMM ... ACCEPT ... this request is for me! ${E.blueDot} '
+            'what now, Boss? ...');
+        _vehicleMediaRequestStreamController.sink.add(req);
+      }
+    }
+  }
+
+  void _processPassengerCount(lib.AmbassadorPassengerCount kk) {
+    pp('$mm _processPassengerCount ... ${E.redDot} check ownerId : ${kk.userId} - userId: ${user!.userId}');
+    if (user!.userId == kk.ownerId) {
+      _passengerCountStreamController.sink.add(kk);
+      pp('$mm _processPassengerCount: _passengerCountStreamController '
+          'has a new AmbassadorPassengerCount: ');
+      myPrettyJsonPrint(kk.toJson());
+      return;
+    }
+    if (user!.userType == 'ASSOCIATION_OFFICIAL') {
+      _passengerCountStreamController.sink.add(kk);
+      return;
+    }
+  }
+
+  void _processLocationRequest(lib.LocationRequest request) async {
+    pp('$newMM checking if vehicle location request is for me ...');
     final car = await prefs.getCar();
     if (car == null) {
-      pp('$newMM location request is NOT for me. ${E.redDot}${E.redDot}${E.redDot} '
-          'CAR is NULL. What the fuck!');
+      pp('$newMM location request is NOT for me. ${E.redDot}${E.redDot}${E.redDot} '   );
       return;
     }
     if (request.vehicleId == car.vehicleId) {
@@ -338,45 +381,49 @@ class FCMBloc {
         'route refreshed: ${E.nice}${E.nice} ${bag.route!.name} ${E.nice}\n');
   }
 
+  void onDidReceiveNotificationResponse(NotificationResponse details) {
+    pp("$newMM onDidReceiveNotificationResponse: $red details: ${details.payload} ");
+  }
+
   final StreamController<String> _routeChangesStreamController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   Stream<String> get routeChangesStream => _routeChangesStreamController.stream;
 
   final StreamController<String> _vehicleChangesStreamController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   Stream<String> get vehicleChangesStream =>
       _vehicleChangesStreamController.stream;
 
   final StreamController<lib.VehicleDeparture>
-      _vehicleDepartureStreamController = StreamController.broadcast();
+  _vehicleDepartureStreamController = StreamController.broadcast();
 
   Stream<lib.VehicleDeparture> get vehicleDepartureStream =>
       _vehicleDepartureStreamController.stream;
 
   final StreamController<lib.VehicleArrival> _vehicleArrivalStreamController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   Stream<lib.VehicleArrival> get vehicleArrivalStream =>
       _vehicleArrivalStreamController.stream;
 
   final StreamController<lib.DispatchRecord> _dispatchStreamController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   Stream<lib.DispatchRecord> get dispatchStream =>
       _dispatchStreamController.stream;
 
   final StreamController<lib.UserGeofenceEvent> _userGeofenceStreamController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   Stream<lib.UserGeofenceEvent> get userGeofenceStream =>
       _userGeofenceStreamController.stream;
 
   final StreamController<lib.VehicleMediaRequest>
-      _vehicleMediaRequestStreamController = StreamController.broadcast();
+  _vehicleMediaRequestStreamController = StreamController.broadcast();
   final StreamController<lib.RouteUpdateRequest>
-      _routeUpdateRequestStreamController = StreamController.broadcast();
+  _routeUpdateRequestStreamController = StreamController.broadcast();
 
   Stream<lib.RouteUpdateRequest> get routeUpdateRequestStream =>
       _routeUpdateRequestStreamController.stream;
@@ -385,20 +432,24 @@ class FCMBloc {
       _vehicleMediaRequestStreamController.stream;
 
   final StreamController<lib.LocationRequest> _locationRequestStreamController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   Stream<lib.LocationRequest> get locationRequestStream =>
       _locationRequestStreamController.stream;
 
   final StreamController<lib.LocationResponse>
-      _locationResponseStreamController = StreamController.broadcast();
+  _locationResponseStreamController = StreamController.broadcast();
 
   Stream<lib.LocationResponse> get locationResponseStream =>
       _locationResponseStreamController.stream;
 
-  void onDidReceiveNotificationResponse(NotificationResponse details) {
-    pp("$newMM onDidReceiveNotificationResponse: $red details: ${details.payload} ");
-  }
+  final StreamController<lib.AmbassadorPassengerCount>
+  _passengerCountStreamController = StreamController.broadcast();
+
+  Stream<lib.AmbassadorPassengerCount> get passengerCountStream =>
+      _passengerCountStreamController.stream;
+
+
 }
 
 var mxx = ' 💙💙Background Processing 💙💙';
@@ -421,6 +472,7 @@ Future<void> kasieFirebaseMessagingBackgroundHandler(
     pp('\n$mxx unable to get auth token ${E.redDot}${E.redDot}${E.redDot}');
     return;
   }
+  LocalNotificationService.display(message);
   //todo - prefs in background don't work!!!!
   final prefs1 = await SharedPreferences.getInstance();
   prefs1.reload(); // The magic line

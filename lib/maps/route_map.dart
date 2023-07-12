@@ -32,7 +32,7 @@ class RouteMapState extends State<RouteMap> {
 
   //Latitude: -25.7605348, Longitude: 27.8525771
   CameraPosition? _myCurrentCameraPosition = const CameraPosition(
-    target: LatLng(-25.7605348, 27.8525771),
+    target: LatLng(-25.7805348, 27.8225771),
     zoom: defaultZoom,
   );
   static const mm = '😡😡😡😡😡😡😡 RouteMap: 💪 ';

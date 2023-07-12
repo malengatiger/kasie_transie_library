@@ -25,12 +25,12 @@ class Heartbeat {
   void startHeartbeat() async {
     pp('\n\n$mm start Heartbeat ............................................');
     final sett = await prefs.getSettings();
-    int seconds = 600; //10 minutes
+    int seconds = 300; //10 minutes
     if (sett != null) {
       seconds = sett.heartbeatIntervalSeconds!;
       //todo - remove after test - check default settings
-      if (seconds < 600) {
-        seconds = 600;
+      if (seconds < 300) {
+        seconds = 300;
       }
     }
     await addHeartbeat();

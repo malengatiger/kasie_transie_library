@@ -135,6 +135,8 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
         currentPassengers: currentPassengers,
         passengersIn: passengersIn,
         passengersOut: passengersOut,
+        ownerId: widget.vehicle.ownerId,
+        ownerName: widget.vehicle.ownerName,
         position: lib.Position(
           type: point,
           coordinates: [loc.longitude, loc.latitude],
@@ -493,7 +495,7 @@ class NumberDropDown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<DropdownMenuItem<int>> items = [];
-    for (var i = 0; i < 20; i++) {
+    for (var i = 0; i < 51; i++) {
       items.add(DropdownMenuItem(
           value: i,
           child: Text(

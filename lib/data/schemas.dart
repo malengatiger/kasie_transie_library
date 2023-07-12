@@ -769,6 +769,8 @@ class _AmbassadorPassengerCount {
   String? associationId;
   String? routeId;
   String? routeName;
+  String? ownerId;
+  String? ownerName;
   int? passengersIn;
   int? passengersOut;
   int? currentPassengers;
@@ -783,7 +785,8 @@ class _AmbassadorPassengerCount {
       'vehicleReg': vehicleReg,
       'created': created,
       'associationId': associationId,
-
+      'ownerId': ownerId,
+      'ownerName': ownerName,
       'routeId': routeId,
       'routeName': routeName,
       'passengersIn': passengersIn,
@@ -834,6 +837,7 @@ class _LocationRequest {
   String? created;
   String? associationId;
 
+
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {
       '_id': id.hexString,
@@ -843,6 +847,7 @@ class _LocationRequest {
       'vehicleReg': vehicleReg,
       'created': created,
       'associationId': associationId,
+
     };
     return map;
   }

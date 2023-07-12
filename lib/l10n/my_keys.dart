@@ -83,7 +83,10 @@ class MyKeys {
     hashMap['landmarks'] = 'landmarks';
     hashMap['lastCount'] = 'lastCount';
     hashMap['loading'] = 'loading';
+    hashMap['loadingOwnerData'] = 'loadingOwnerData';
+    hashMap['loadingPassengerData'] = 'loadingPassengerData';
     hashMap['loadingRoutes'] = 'loadingRoutes';
+    hashMap['loadingVehicleData'] = 'loadingVehicleData';
     hashMap['locationRequestSent'] = 'locationRequestSent';
     hashMap['locationResponse'] = 'locationResponse';
     hashMap['makeVideos'] = 'makeVideos';
@@ -186,6 +189,8 @@ class MyKeys {
     hashMap['taxiRoutes'] = 'taxiRoutes';
     hashMap['thanks'] = 'thanks';
     hashMap['thisMayTake'] = 'thisMayTake';
+    hashMap['thisMayTakeMinutes'] = 'thisMayTakeMinutes';
+    hashMap['thisMayTakeSeconds'] = 'thisMayTakeSeconds';
     hashMap['timeElapsed'] = 'timeElapsed';
     hashMap['totalPassenger'] = 'totalPassenger';
     hashMap['ts'] = 'ts';

@@ -3007,6 +3007,8 @@ class AmbassadorPassengerCount extends _AmbassadorPassengerCount
     String? associationId,
     String? routeId,
     String? routeName,
+    String? ownerId,
+    String? ownerName,
     int? passengersIn,
     int? passengersOut,
     int? currentPassengers,
@@ -3021,6 +3023,8 @@ class AmbassadorPassengerCount extends _AmbassadorPassengerCount
     RealmObjectBase.set(this, 'associationId', associationId);
     RealmObjectBase.set(this, 'routeId', routeId);
     RealmObjectBase.set(this, 'routeName', routeName);
+    RealmObjectBase.set(this, 'ownerId', ownerId);
+    RealmObjectBase.set(this, 'ownerName', ownerName);
     RealmObjectBase.set(this, 'passengersIn', passengersIn);
     RealmObjectBase.set(this, 'passengersOut', passengersOut);
     RealmObjectBase.set(this, 'currentPassengers', currentPassengers);
@@ -3084,6 +3088,18 @@ class AmbassadorPassengerCount extends _AmbassadorPassengerCount
   set routeName(String? value) => RealmObjectBase.set(this, 'routeName', value);
 
   @override
+  String? get ownerId =>
+      RealmObjectBase.get<String>(this, 'ownerId') as String?;
+  @override
+  set ownerId(String? value) => RealmObjectBase.set(this, 'ownerId', value);
+
+  @override
+  String? get ownerName =>
+      RealmObjectBase.get<String>(this, 'ownerName') as String?;
+  @override
+  set ownerName(String? value) => RealmObjectBase.set(this, 'ownerName', value);
+
+  @override
   int? get passengersIn =>
       RealmObjectBase.get<int>(this, 'passengersIn') as int?;
   @override
@@ -3136,6 +3152,8 @@ class AmbassadorPassengerCount extends _AmbassadorPassengerCount
       SchemaProperty('associationId', RealmPropertyType.string, optional: true),
       SchemaProperty('routeId', RealmPropertyType.string, optional: true),
       SchemaProperty('routeName', RealmPropertyType.string, optional: true),
+      SchemaProperty('ownerId', RealmPropertyType.string, optional: true),
+      SchemaProperty('ownerName', RealmPropertyType.string, optional: true),
       SchemaProperty('passengersIn', RealmPropertyType.int, optional: true),
       SchemaProperty('passengersOut', RealmPropertyType.int, optional: true),
       SchemaProperty('currentPassengers', RealmPropertyType.int,

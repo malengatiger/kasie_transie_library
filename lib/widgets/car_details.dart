@@ -36,7 +36,7 @@ class CarDetailsState extends State<CarDetails>
   late AnimationController _controller;
   static const mm = '🐦🐦🐦🐦🐦🐦🐦 CarDetails 🍎🍎';
   var counts = <CounterBag>[];
-  int days = 30;
+  int days = 1;
   bool busy = false;
   String? ownerDashboard,
       numberOfCars,
@@ -47,9 +47,23 @@ class CarDetailsState extends State<CarDetails>
       locationRequestSent,
       historyCars,
       requestMedia,
+      passengerCountsText,
       dispatchesText;
-  int arrivals = 0, departures = 0, heartbeats = 0, dispatches = 0;
+  int arrivals = 0,
+      departures = 0,
+      heartbeats = 0,
+      dispatches = 0,
+      totalPassengers = 0;
   late StreamSubscription<lib.LocationResponse> respSub;
+  late StreamSubscription<lib.DispatchRecord> dispatchStreamSub;
+  late StreamSubscription<lib.AmbassadorPassengerCount> passengerStreamSub;
+  @override
+  void dispose() {
+    dispatchStreamSub.cancel();
+    passengerStreamSub.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -61,13 +75,38 @@ class CarDetailsState extends State<CarDetails>
   }
 
   lib.LocationResponse? locationResponse;
-
+  String? routeName;
   void _listen() async {
     respSub = fcmBloc.locationResponseStream.listen((event) {
       pp('\n\n\n$mm locationResponseStream delivered: ${E.leaf2} ${event.vehicleReg} at ${DateTime.now().toIso8601String()}');
       locationResponse = event;
       if (mounted) {
         _navigateToMap();
+      }
+    });
+    dispatchStreamSub =
+        fcmBloc.dispatchStream.listen((lib.DispatchRecord dRec) {
+      pp('$mm ... fcmBloc.dispatchStream delivered dispatch for: ${dRec.vehicleReg}');
+      if (dRec.vehicleId == widget.vehicle.vehicleId) {
+        dispatches++;
+        routeName = dRec.routeName;
+        totalPassengers += dRec.passengers!;
+
+        if (mounted) {
+          setState(() {});
+        }
+      }
+    });
+    passengerStreamSub = fcmBloc.passengerCountStream
+        .listen((lib.AmbassadorPassengerCount cunt) {
+      pp('$mm ... fcmBloc.passengerCountStream delivered count for: ${cunt.vehicleReg}');
+      if (cunt.vehicleId == widget.vehicle.vehicleId) {
+        totalPassengers += cunt.passengersIn!;
+        routeName = cunt.routeName;
+
+        if (mounted) {
+          setState(() {});
+        }
       }
     });
   }
@@ -106,6 +145,7 @@ class CarDetailsState extends State<CarDetails>
     numberOfDays = await translator.translate('numberOfDays', c.locale);
     tapToClose = await translator.translate('tapToClose', c.locale);
     requestMedia = await translator.translate('requestMedia', c.locale);
+    passengerCountsText = await translator.translate('passengersIn', c.locale);
 
     locationRequestSent =
         await translator.translate('locationRequestSent', c.locale);
@@ -113,6 +153,7 @@ class CarDetailsState extends State<CarDetails>
     setState(() {});
   }
 
+  var paCounts = <lib.AmbassadorPassengerCount>[];
   void _getData() async {
     pp('$mm ... getData ...');
     setState(() {
@@ -122,6 +163,15 @@ class CarDetailsState extends State<CarDetails>
       final m = DateTime.now().toUtc().subtract(Duration(days: days));
       counts = await listApiDog.getVehicleCountsByDate(
           widget.vehicle.vehicleId!, m.toIso8601String());
+      paCounts = await listApiDog.getAmbassadorPassengerCountsByVehicle(
+          vehicleId: widget.vehicle.vehicleId!,
+          refresh: true,
+          startDate: m.toIso8601String());
+      totalPassengers = 0;
+      for (var pa in paCounts) {
+        totalPassengers += pa.passengersIn!;
+      }
+
       pp('$mm ... counts retrieved ...');
       for (var c in counts) {
         switch (c.description) {
@@ -137,6 +187,9 @@ class CarDetailsState extends State<CarDetails>
           case 'DispatchRecord':
             dispatches = c.count!;
             break;
+          case 'AmbassadorPassengerCount':
+            totalPassengers = c.count!;
+            break;
         }
       }
     } catch (e) {
@@ -149,12 +202,6 @@ class CarDetailsState extends State<CarDetails>
   }
 
   String? tapToClose, numberOfDays, requestLocation;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   void _sendLocationRequest() async {
     pp('$mm ............... _sendLocationRequest ...');
@@ -244,6 +291,16 @@ class CarDetailsState extends State<CarDetails>
                       style: myTextStyleTiny(context),
                     ),
                     const SizedBox(
+                      height: 8,
+                    ),
+                    routeName == null
+                        ? const SizedBox()
+                        : Text(
+                            routeName!,
+                            style: myTextStyleMediumLargeWithColor(context,
+                                Theme.of(context).primaryColorLight, 16),
+                          ),
+                    const SizedBox(
                       height: 24,
                     ),
                     Row(
@@ -275,7 +332,7 @@ class CarDetailsState extends State<CarDetails>
                       ],
                     ),
                     const SizedBox(
-                      height: 12,
+                      height: 0,
                     ),
                     Expanded(
                       child: Padding(
@@ -291,6 +348,8 @@ class CarDetailsState extends State<CarDetails>
                                 departures: departures,
                                 heartbeats: heartbeats,
                                 dispatches: dispatches,
+                                passengerCountsText: passengerCountsText!,
+                                passengerCounts: totalPassengers,
                               ),
                       ),
                     ),

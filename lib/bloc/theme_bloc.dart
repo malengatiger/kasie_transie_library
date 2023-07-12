@@ -31,11 +31,11 @@ class ThemeBloc {
   _initialize() async {
     colorAndLocale = await prefs.getColorAndLocale();
     colorAndLocale ??= ColorAndLocale(themeIndex: 0, locale: 'en');
-    pp('$mm initialize: acquired settings: ....theme index: ${colorAndLocale!.themeIndex}');
+    pp('\n$mm initialize: acquired settings: ....theme index: ${colorAndLocale!.themeIndex}');
     pp('$mm initialize: locale = ${colorAndLocale!.locale} ... '
         'themeIndex: ${colorAndLocale!.themeIndex} in the stream');
-
     themeStreamController.sink.add(colorAndLocale!);
+    pp('\n$mm initialize: things should be done - settings sent to themeStreamController');
   }
 
   ThemeBag getTheme(int index) {
@@ -48,7 +48,6 @@ class ThemeBloc {
 
     pp('$mm changeToTheme has put a colorAndLocale on the themeStreamController');
   }
-
 
   int getThemeCount() {
     return SchemeUtil.getThemeCount();

@@ -26,6 +26,7 @@ class HeartbeatIsolate {
   final xy = '☕️☕️☕️☕️ HeartbeatIsolate Functions: 🍎🍎';
   Future addHeartbeat() async {
     pp('\n\n\n$xy ............................ addDispatchRecord ....');
+    await Firebase.initializeApp();
     try {
       final token = await appAuth.getAuthToken();
       var car = await prefs.getCar();
@@ -93,6 +94,7 @@ const xyz = '🌀🌀🌀🌀🌀🌀🌀🌀🌀 HeavyTaskForDispatches: 🍎�
 Future<String> _heavyTaskForHeartbeat(HeartbeatBag hb) async {
   pp('$xyz _heavyTaskForHeartbeat starting .................');
 
+  await Firebase.initializeApp();
   final m = jsonDecode(hb.carJson);
   final car = buildVehicle(m);
   final heartbeat = VehicleHeartbeat(ObjectId(),

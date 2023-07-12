@@ -107,20 +107,14 @@ H
 lib/data/route_pair.dart,6/8/68ac186f202a24cbf6967001ce5244b5d870d833
 Q
 !lib/bloc/the_great_geofencer.dart,3/3/33fd05829ffcd10dde65b5496aec5a77788d5522
-H
-lib/bloc/theme_bloc.dart,f/6/f67048e6e712a43d23400d457095afdd941be33a
 I
 lib/data/counter_bag.dart,4/8/481833efe8214297e08c077fe7f4fa2c4fa7cb38
 N
 lib/widgets/number_widget.dart,0/0/0037e7ac3953b0efde7a95a449c158df22e9ddd1
-E
-lib/data/big_bag.dart,1/7/178212d9172943ef10dde785d5c4cec618b33f34
 J
 lib/utils/environment.dart,2/9/29aa30c893fdd0dcb85853c0a069b2d7d001deae
 O
 lib/widgets/days_drop_down.dart,2/4/24257c964b8f8500da5a8d61bf1c600e439dceeb
-N
-lib/widgets/counts_widget.dart,1/f/1f6d04625b8abdac21c95e6101f9d61b63be4651
 F
 lib/bloc/app_auth.dart,2/e/2e8ace8db1fde91611d0c739cd6d716a3f5ac924
 Y
@@ -143,20 +137,12 @@ N
 lib/widgets/photo_handler.dart,0/d/0d9722f04fac14afa5b744911acbcd9f1ac461d4
 I
 lib/widgets/car_list.dart,f/0/f0233c62522d48a0b42e5da2c1b51fd989f748d9
-S
-#lib/maps/location_response_map.dart,6/5/655cc572da548cc96be1776f121da9a500982f67
-L
-lib/widgets/car_details.dart,a/1/a189b392f16310a1a2150cc33b61cdb40f1c9bef
 [
 +lib/widgets/language_and_color_chooser.dart,e/0/e084d864c6026e18c64f9423376c69244ac839b1
 N
 lib/widgets/media_chooser.dart,2/9/290e65034cbc1aefdcac798c56a444e10b6fde1b
-G
-lib/data/schemas.g.dart,a/e/ae9d36def259da82b2fd0cef34dd7fbd434adbfb
 L
 lib/widgets/splash_page.dart,8/f/8fb2b2b5b076d244f28c5692a1763f9a33c22a4f
-F
-lib/utils/parsers.dart,f/d/fdd3bbae621bfbda008d330ec565412416ae2e53
 P
  lib/widgets/passenger_count.dart,1/6/16cb11aa1b0f3ab6fd72912a464dfcbcefa771ee
 O
@@ -165,8 +151,6 @@ M
 lib/bloc/dispatch_helper.dart,e/c/ec2900543724ef57a746746c5d53acbf07698314
 H
 lib/utils/functions.dart,b/0/b0a619b39b8dd6d9cb3842f9eccbadb6212c8b3f
-K
-lib/messaging/fcm_bloc.dart,a/b/abc3ce0d0007de42374e4acee2f4babe2f6f7f47
 R
 "lib/isolates/landmark_isolate.dart,f/c/fc6db5720b1b00c776a396d6ea90e8b204ce1e2f
 J
@@ -177,5 +161,23 @@ K
 pubspec.yaml,e/8/e8e045469170189f1d6ef12576bd01af132b1018
 P
  lib/isolates/routes_isolate.dart,7/8/78980e2a94aef9580fd5b37776a3b16effe93c3c
+K
+lib/utils/local_finder.dart,5/5/552372b167342b7b8c4258298bc2e7f7db25359f
+R
+"lib/widgets/dispatch_via_scan.dart,0/a/0af55ab6da40991ab159a4de49b6ee3709863540
+W
+'lib/widgets/scan_vehicle_for_media.dart,5/a/5a5d5c599f57ff5c13f5a519714b9f472721a97d
+K
+lib/widgets/qr_scanner.dart,d/c/dcd6abbd4e9bba1d0f8e378698cdb2845aa4e1fc
+V
+&lib/widgets/vehicle_media_handler.dart,3/8/386ea43bc84d81be989eb586a9a9b3a44502adbc
+X
+(lib/widgets/scan_vehicle_for_counts.dart,5/1/51ec5fbe05cf255ce870861080b7ad1bf26e7701
+S
+#.idea/libraries/Flutter_Plugins.xml,e/8/e8bbc0fdfcefee9aa7b463c83a8a480b92333860
+T
+$lib/maps/association_route_maps.dart,0/1/01800237c9a2f12c0c89a2070b4fc191bb6a0972
+R
+"lib/isolates/dispatch_isolate.dart,a/7/a71f0e60cb52599660eb8c7812f089ed5a71ae67
 E
 lib/utils/beeper.dart,b/2/b28d3a52a3c4043540c53d1d5d1075f13244da9f
