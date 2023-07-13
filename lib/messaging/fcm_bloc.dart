@@ -40,7 +40,7 @@ class FCMBloc {
   lib.Vehicle? car;
 
   Future initialize() async {
-    pp('$mm ... FirebaseMessaging initialize starting ... ');
+    pp('\n$mm ... FirebaseMessaging initialize starting ... ');
     user = await prefs.getUser();
     car = await prefs.getCar();
     fb.NotificationSettings notificationSettings =
@@ -57,14 +57,10 @@ class FCMBloc {
     pp('$mm FCM : User granted permission?, authorizationStatus: ${notificationSettings.authorizationStatus}');
 
     firebaseMessaging.setAutoInitEnabled(true);
-
     firebaseMessaging.onTokenRefresh.listen((newToken) {
       pp("$mm listener onTokenRefresh: 🍎🍎🍎 update user: token: $newToken ... 🍎🍎");
-      // user!.fcmRegistration = newToken;
-      // dataApiDog.updateUser(user!);
-    });
 
-    // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
+    });
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('app_icon');
 
@@ -85,9 +81,6 @@ class FCMBloc {
         onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
 
     fb.FirebaseMessaging.onMessage.listen((fb.RemoteMessage message) {
-      // RemoteNotification? notification = message.notification;
-      // AndroidNotification? android = message.notification?.android;
-      //
       processFCMMessage(message, getMessageType(message));
     });
 
@@ -288,6 +281,8 @@ class FCMBloc {
   }
 
   void _processLocationResponse(lib.LocationResponse resp) async {
+    pp('$newMM ... _processLocationResponse ... ');
+    myPrettyJsonPrint(resp.toJson());
     if (user == null) {
       return;
     }
@@ -449,17 +444,17 @@ class FCMBloc {
   Stream<lib.AmbassadorPassengerCount> get passengerCountStream =>
       _passengerCountStreamController.stream;
 
-
 }
 
-var mxx = ' 💙💙Background Processing 💙💙';
+var mxx = '💙💙💙💙💙💙 Background Processing 💙💙💙💙💙💙';
 
 ///Handling FCM messages in the background
 ///
 Future<void> kasieFirebaseMessagingBackgroundHandler(
     fb.RemoteMessage message) async {
-  pp("\n\n\n🍎🍎🍎🍎🍎🍎🍎🍎 kasieFirebaseMessagingBackgroundHandler: "
-      "data: ${message.data}, will handle it happily! 🍎🍎🍎🍎");
+  pp("\n\n\n$mxx kasieFirebaseMessagingBackgroundHandler: "
+      "🍎🍎🍎🍎 data: ${message.data}, will handle it happily! 🍎🍎🍎🍎");
+  myPrettyJsonPrint(message.data);
 
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
   String appName = packageInfo.appName;
@@ -472,17 +467,20 @@ Future<void> kasieFirebaseMessagingBackgroundHandler(
     pp('\n$mxx unable to get auth token ${E.redDot}${E.redDot}${E.redDot}');
     return;
   }
-  LocalNotificationService.display(message);
+  //LocalNotificationService.display(message);
   //todo - prefs in background don't work!!!!
+  lib.Vehicle? car;
   final prefs1 = await SharedPreferences.getInstance();
   prefs1.reload(); // The magic line
   var string = prefs1.getString('car');
   if (string == null) {
-    pp('... ${E.redDot}${E.redDot}${E.redDot} car is null in background ... 1');
+    pp('\n\n$mxx ... ${E.redDot}${E.redDot}${E.redDot} car is null in background ... 1\n\n');
     return;
   }
   var jx = json.decode(string);
-  var car = buildVehicle(jx);
+  car = buildVehicle(jx);
+  pp('$mxx ... this car is responding while in background');
+  myPrettyJsonPrint(car.toJson());
   final map = message.data;
 
   if (map['locationRequest'] != null) {

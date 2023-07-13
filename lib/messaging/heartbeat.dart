@@ -103,7 +103,7 @@ const cc = '🔴🔴🔴🔴🔴🔴🌀🌀 Workmanager Heartbeat:  🌀🌀�
 void callbackDispatcher() {
   pp("$cc Workmanager background callbackDispatcher ....");
   Workmanager().executeTask((task, inputData) {
-    pp("$cc Native called background task ..... addHeartbeat, call isolate ...");
+    pp("$cc Native called background task ..... addHeartbeat, call heartbeatIsolate.addHeartbeat ...");
     heartbeatIsolate.addHeartbeat();
     return Future.value(true);
   });

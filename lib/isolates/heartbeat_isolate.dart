@@ -25,8 +25,10 @@ final HeartbeatIsolate heartbeatIsolate = HeartbeatIsolate();
 class HeartbeatIsolate {
   final xy = '☕️☕️☕️☕️ HeartbeatIsolate Functions: 🍎🍎';
   Future addHeartbeat() async {
-    pp('\n\n\n$xy ............................ addDispatchRecord ....');
-    await Firebase.initializeApp();
+    pp('\n\n\n$xy ............................ addHeartbeat ....');
+    var res = await Firebase.initializeApp();
+    pp('\n\n$xy Firebase.initializeApp .. seems ok! ...');
+
     try {
       final token = await appAuth.getAuthToken();
       var car = await prefs.getCar();
@@ -38,7 +40,7 @@ class HeartbeatIsolate {
           prefs1.reload(); // The magic line
           var string = prefs1.getString('car');
           if (string == null) {
-            pp('... ${E.redDot}${E.redDot}${E.redDot} car is null in background ... 1');
+            pp('$xy ... ${E.redDot}${E.redDot}${E.redDot} car is null in background ... 1');
             return;
           } else {
             final json = jsonDecode(string);
