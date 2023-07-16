@@ -140,6 +140,20 @@ class ListApiDog {
     myPrettyJsonPrint(resp);
     return user;
   }
+  Future<User?> getUserByEmail(String email) async {
+    final cmd = '${url}getUserByEmail?email=$email';
+    try {
+      final resp = await _sendHttpGET(cmd);
+      final user = buildUser(resp);
+
+      pp('$mm getUserByEmail found this user: ${user.name} ');
+      myPrettyJsonPrint(resp);
+      return user;
+    } catch (e) {
+      pp(e);
+      rethrow;
+    }
+  }
 
   Future<Association> getAssociationById(String associationId) async {
     final res =

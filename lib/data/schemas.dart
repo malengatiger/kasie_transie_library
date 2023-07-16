@@ -718,6 +718,7 @@ class _User {
   String? associationId;
   String? associationName;
   String? fcmToken;
+  String? password;
   String? email;
   String? cellphone, thumbnailUrl, imageUrl;
 
@@ -726,6 +727,7 @@ class _User {
       '_id': id.hexString,
       'userType': userType,
       'userId': userId,
+      'password': password,
       'lastName': lastName,
       'firstName': firstName,
       'countryId': countryId,

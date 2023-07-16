@@ -446,10 +446,12 @@ class FCMBloc {
 
 }
 
-var mxx = '💙💙💙💙💙💙 Background Processing 💙💙💙💙💙💙';
 
 ///Handling FCM messages in the background
 ///
+String? myName;
+var mxx = '💙💙💙💙💙💙 Background Processing: $myName 💙💙💙💙💙💙';
+
 Future<void> kasieFirebaseMessagingBackgroundHandler(
     fb.RemoteMessage message) async {
   pp("\n\n\n$mxx kasieFirebaseMessagingBackgroundHandler: "
@@ -457,8 +459,7 @@ Future<void> kasieFirebaseMessagingBackgroundHandler(
   myPrettyJsonPrint(message.data);
 
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  String appName = packageInfo.appName;
-  mxx = '$mxx$appName: ';
+  myName = packageInfo.appName;
 
   await Firebase.initializeApp();
   pp('$mxx ... Firebase.initializeApp done and dusted!');

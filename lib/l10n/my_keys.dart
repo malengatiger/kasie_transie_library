@@ -38,6 +38,7 @@ class MyKeys {
     hashMap['days'] = 'days';
     hashMap['de'] = 'de';
     hashMap['departures'] = 'departures';
+    hashMap['desc'] = 'desc';
     hashMap['dispatch'] = 'dispatch';
     hashMap['dispatchError'] = 'dispatchError';
     hashMap['dispatchFailed'] = 'dispatchFailed';
@@ -52,6 +53,7 @@ class MyKeys {
     hashMap['emailAddress'] = 'emailAddress';
     hashMap['emailAuth'] = 'emailAuth';
     hashMap['emailAuthFailed'] = 'emailAuthFailed';
+    hashMap['emailAuthTitle'] = 'emailAuthTitle';
     hashMap['emailSignIn'] = 'emailSignIn';
     hashMap['en'] = 'en';
     hashMap['endOfRoute'] = 'endOfRoute';
@@ -62,6 +64,7 @@ class MyKeys {
     hashMap['enterPlace'] = 'enterPlace';
     hashMap['enterRouteName'] = 'enterRouteName';
     hashMap['errorCount'] = 'errorCount';
+    hashMap['errorEmailVerification'] = 'errorEmailVerification';
     hashMap['errorGettingData'] = 'errorGettingData';
     hashMap['errorNetwork'] = 'errorNetwork';
     hashMap['errorScanner'] = 'errorScanner';
@@ -117,6 +120,7 @@ class MyKeys {
     hashMap['phoneSignIn'] = 'phoneSignIn';
     hashMap['photosAndVideosNow'] = 'photosAndVideosNow';
     hashMap['placeMaker'] = 'placeMaker';
+    hashMap['pleaseEnterEmail'] = 'pleaseEnterEmail';
     hashMap['pleaseEnterRouteName'] = 'pleaseEnterRouteName';
     hashMap['pleaseSelectRoute'] = 'pleaseSelectRoute';
     hashMap['pleaseTakePhotosVideos'] = 'pleaseTakePhotosVideos';
@@ -156,6 +160,7 @@ class MyKeys {
     hashMap['search'] = 'search';
     hashMap['searchVehicles'] = 'searchVehicles';
     hashMap['selectAss'] = 'selectAss';
+    hashMap['selectLangColor'] = 'selectLangColor';
     hashMap['selectRoute'] = 'selectRoute';
     hashMap['selectSignInKind'] = 'selectSignInKind';
     hashMap['selectStartEnd'] = 'selectStartEnd';
@@ -175,6 +180,8 @@ class MyKeys {
     hashMap['startPhotoVideo'] = 'startPhotoVideo';
     hashMap['startVideo'] = 'startVideo';
     hashMap['stopVideo'] = 'stopVideo';
+    hashMap['submitText'] = 'submitText';
+    hashMap['successEmailVerification'] = 'successEmailVerification';
     hashMap['sw'] = 'sw';
     hashMap['takePhotos'] = 'takePhotos';
     hashMap['takePicture'] = 'takePicture';

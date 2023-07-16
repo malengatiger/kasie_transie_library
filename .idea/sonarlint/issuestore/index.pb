@@ -40,8 +40,6 @@ V
 ]
 -macos/Flutter/GeneratedPluginRegistrant.swift,0/2/021794e7deab8f440a40813c70fb58a0cddd4d00
 N
-lib/utils/kasie_exception.dart,b/b/bb23b0771d428b91650b02ea2b4bd0866a3ea69d
-N
 lib/kasie_transie_library.dart,2/a/2a60fe657c707b70eaf223174645121c4252a475
 T
 $test/kasie_transie_library_test.dart,f/2/f2bc32df8ed6ba37ace5cbaa900f6630102c5057
@@ -67,8 +65,6 @@ N
 lib/data/route_point_list.dart,5/4/54a444dc3014bf4246be841fe332300f8c8a3df1
 V
 &lib/data/calculated_distance_list.dart,1/1/11569e35f6e7041043625f061a6bda0a543236ba
-O
-lib/widgets/vehicle_detail.dart,c/d/cdfbce6e4a2c2931b70a6f3690263a67d48c9b61
 R
 "lib/providers/kasie_providers.dart,4/4/444f3d43023add5c821968865c0b4250a3a678a2
 V
@@ -107,8 +103,6 @@ I
 lib/data/counter_bag.dart,4/8/481833efe8214297e08c077fe7f4fa2c4fa7cb38
 N
 lib/widgets/number_widget.dart,0/0/0037e7ac3953b0efde7a95a449c158df22e9ddd1
-J
-lib/utils/environment.dart,2/9/29aa30c893fdd0dcb85853c0a069b2d7d001deae
 F
 lib/bloc/app_auth.dart,2/e/2e8ace8db1fde91611d0c739cd6d716a3f5ac924
 O
@@ -129,10 +123,6 @@ O
 lib/widgets/video_recorder.dart,9/5/95953590932746b255086260840da669ccf73b13
 P
  lib/widgets/dispatch_widget.dart,4/b/4ba0e2443a5d602521acfd543eb0df7c9f62120a
-D
-lib/utils/prefs.dart,0/6/062ed39b477cbfc674db4a3f8539e7725e506c8c
-I
-lib/widgets/car_list.dart,f/0/f0233c62522d48a0b42e5da2c1b51fd989f748d9
 N
 lib/widgets/photo_handler.dart,0/d/0d9722f04fac14afa5b744911acbcd9f1ac461d4
 U
@@ -153,12 +143,8 @@ H
 lib/utils/functions.dart,b/0/b0a619b39b8dd6d9cb3842f9eccbadb6212c8b3f
 K
 lib/bloc/cache_manager.dart,f/6/f6af9dc2c14cc2d983ed952cbc52421867d334ab
-J
-lib/bloc/data_api_dog.dart,0/f/0f27426890d5956a726f9c74637bb8749dbd74bb
 R
 "lib/isolates/landmark_isolate.dart,f/c/fc6db5720b1b00c776a396d6ea90e8b204ce1e2f
-<
-pubspec.yaml,e/8/e8e045469170189f1d6ef12576bd01af132b1018
 P
  lib/isolates/routes_isolate.dart,7/8/78980e2a94aef9580fd5b37776a3b16effe93c3c
 K
@@ -171,8 +157,6 @@ K
 lib/widgets/qr_scanner.dart,d/c/dcd6abbd4e9bba1d0f8e378698cdb2845aa4e1fc
 V
 &lib/widgets/vehicle_media_handler.dart,3/8/386ea43bc84d81be989eb586a9a9b3a44502adbc
-S
-#.idea/libraries/Flutter_Plugins.xml,e/8/e8bbc0fdfcefee9aa7b463c83a8a480b92333860
 R
 "lib/isolates/dispatch_isolate.dart,a/7/a71f0e60cb52599660eb8c7812f089ed5a71ae67
 X
@@ -181,3 +165,29 @@ E
 lib/utils/beeper.dart,b/2/b28d3a52a3c4043540c53d1d5d1075f13244da9f
 T
 $lib/maps/association_route_maps.dart,0/1/01800237c9a2f12c0c89a2070b4fc191bb6a0972
+E
+lib/data/big_bag.dart,1/7/178212d9172943ef10dde785d5c4cec618b33f34
+N
+lib/widgets/counts_widget.dart,1/f/1f6d04625b8abdac21c95e6101f9d61b63be4651
+N
+lib/messaging/local_notif.dart,f/0/f09c0c2140c1b24d775040751afcb61b0822b516
+G
+lib/maps/route_map.dart,2/2/22e25f57eafdd3301ea12f679d4ad89a86eac11b
+H
+lib/bloc/theme_bloc.dart,f/6/f67048e6e712a43d23400d457095afdd941be33a
+M
+lib/widgets/timer_widget.dart,a/d/ad0a5f4fcc22c914e010ea84a29f99dbb725be1a
+I
+lib/widgets/car_list.dart,f/0/f0233c62522d48a0b42e5da2c1b51fd989f748d9
+X
+(lib/widgets/vehicle_passenger_count.dart,1/e/1e150cc923625b6c01d58a86b17e2b2011a2a6f9
+L
+lib/messaging/heartbeat.dart,b/1/b14f98b7711cc4bb9ca72552b2ac79fb8d7dfc73
+S
+#lib/isolates/heartbeat_isolate.dart,0/7/074153afea844e3edf30fad1db73f573a9bcd942
+S
+#lib/maps/location_response_map.dart,6/5/655cc572da548cc96be1776f121da9a500982f67
+L
+lib/widgets/car_details.dart,a/1/a189b392f16310a1a2150cc33b61cdb40f1c9bef
+N
+lib/utils/kasie_exception.dart,b/b/bb23b0771d428b91650b02ea2b4bd0866a3ea69d

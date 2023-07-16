@@ -190,6 +190,16 @@ class DataApiDog {
     return r;
   }
 
+  Future<User> updateUser(User user) async {
+    final bag = user.toJson();
+    final cmd = '${url}updateUser';
+    final res = await _callPost(cmd, bag);
+    pp('$mm user updated on mongo database ...');
+    myPrettyJsonPrint(res);
+    final r = buildUser(res);
+    return r;
+  }
+
   Future<City> addCity(City city) async {
     final bag = city.toJson();
     final cmd = '${url}addCity';

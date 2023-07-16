@@ -57,6 +57,7 @@ User buildUser(Map map) {
     imageUrl: map['imageUrl'],
     thumbnailUrl: map['thumbnailUrl'],
     userType: map['userType'],
+    password: map['password'],
     email: map['email'],
     cellphone: map['cellphone'],
     gender: map['gender'],

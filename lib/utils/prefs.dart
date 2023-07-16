@@ -187,4 +187,17 @@ class Prefs {
     pp("🌽 🌽 🌽 Prefs: getAssociation 🧩  ${car.associationName} retrieved");
     return car;
   }
+
+  Future saveEmail(String email) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('email', email);
+    pp("🌽 🌽 🌽 Prefs: Email:  SAVED: 🌽 $email 🌽 🌽 🌽");
+    return;
+  }
+  Future<String?> getEmail() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final s = prefs.getString('email');
+    pp("🌽 🌽 🌽 Prefs: Email:  RETRIEVED: 🌽 $s 🌽 🌽 🌽");
+    return s;
+  }
 }

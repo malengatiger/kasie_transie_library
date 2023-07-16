@@ -2814,6 +2814,7 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
     String? associationId,
     String? associationName,
     String? fcmToken,
+    String? password,
     String? email,
     String? cellphone,
     String? thumbnailUrl,
@@ -2829,6 +2830,7 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'associationId', associationId);
     RealmObjectBase.set(this, 'associationName', associationName);
     RealmObjectBase.set(this, 'fcmToken', fcmToken);
+    RealmObjectBase.set(this, 'password', password);
     RealmObjectBase.set(this, 'email', email);
     RealmObjectBase.set(this, 'cellphone', cellphone);
     RealmObjectBase.set(this, 'thumbnailUrl', thumbnailUrl);
@@ -2897,6 +2899,12 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
   set fcmToken(String? value) => RealmObjectBase.set(this, 'fcmToken', value);
 
   @override
+  String? get password =>
+      RealmObjectBase.get<String>(this, 'password') as String?;
+  @override
+  set password(String? value) => RealmObjectBase.set(this, 'password', value);
+
+  @override
   String? get email => RealmObjectBase.get<String>(this, 'email') as String?;
   @override
   set email(String? value) => RealmObjectBase.set(this, 'email', value);
@@ -2944,6 +2952,7 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('associationName', RealmPropertyType.string,
           optional: true),
       SchemaProperty('fcmToken', RealmPropertyType.string, optional: true),
+      SchemaProperty('password', RealmPropertyType.string, optional: true),
       SchemaProperty('email', RealmPropertyType.string, optional: true),
       SchemaProperty('cellphone', RealmPropertyType.string, optional: true),
       SchemaProperty('thumbnailUrl', RealmPropertyType.string, optional: true),
