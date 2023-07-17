@@ -14,6 +14,7 @@ import '../data/route_bag.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
 import '../utils/kasie_exception.dart';
+import 'heartbeat_isolate.dart';
 
 final RoutesIsolate routesIsolate = RoutesIsolate();
 
@@ -45,7 +46,6 @@ class RoutesIsolate {
           'returning ${routeBag.route!.name} ${E.leaf2} fresh and new!\n\n');
       return routeBag.route!;
     }
-
   }
 
   Future<List<Route>> getRoutes(String associationId) async {
@@ -55,7 +55,8 @@ class RoutesIsolate {
     try {
       final token = await appAuth.getAuthToken();
       if (token != null) {
-        final url = '${ KasieEnvironment.getUrl()}getAssociationRoutes?associationId=$associationId';
+        final url =
+            '${KasieEnvironment.getUrl()}getAssociationRoutes?associationId=$associationId';
         var bag = DonkeyBag(associationId, url, token);
         List mRoutes = await _handleRoutes(bag);
         pp('$xy hey Joe, do yo know where you are? ${E.redDot} ');
@@ -75,8 +76,7 @@ class RoutesIsolate {
             '${KasieEnvironment.getUrl()}getAssociationRouteLandmarks?associationId=${bag.associationId}';
         await _handleRouteLandmarks(routeIds, bag);
 
-        bag.url =
-            '${KasieEnvironment.getUrl()}getAssociationRoutePoints?associationId=${bag.associationId}';
+        bag.url = '${KasieEnvironment.getUrl()}';
         await _handleRoutePoints(routeIds, bag);
 
         bag.url =
@@ -157,7 +157,7 @@ class RoutesIsolate {
     pp('$xy ................ _handleRoutePoints .... ');
     final start = DateTime.now();
 
-    var bunny = BunnyBag(bag.associationId, bag.url, bag.token);
+    var bunny = RoutePointsBag(routeIds, bag.url, bag.token);
     final sx = await Isolate.run(() async => _heavyTaskForRoutePoints(bunny));
     var mRoutePoints = <RoutePoint>[];
     final list2 = jsonDecode(sx);
@@ -213,20 +213,48 @@ Future<String> _heavyTaskForRoutes(DonkeyBag bag) async {
 
   return jsonList;
 }
+
 @pragma('vm:entry-point')
-Future<String> _heavyTaskForRoutePoints(BunnyBag bag) async {
-  pp('$xyz _heavyTaskForRoutePoints starting ................associationId:  ${bag.associationId} .');
+Future<String> _heavyTaskForRoutePoints(RoutePointsBag bag) async {
+  pp('$xyz _heavyTaskForRoutePoints starting ................routeIds:  ${bag.routeIds.length} .');
 
   final points = [];
   final token = bag.token;
-  List resp = await _httpGet(bag.url, token);
-  points.addAll(resp);
+  for (var id in bag.routeIds) {
+    points.addAll(await _processRoute(id, bag.url, token));
+    pp('$xyz RoutePoints for routes processed so far ... ${E.appleGreen} total: ${points.length}');
+  }
+
   final jsonList = jsonEncode(points);
   pp('$xyz Association RoutePoints for all routes: ${points.length}');
   pp('$xyz _heavyTaskForRoutePoints returning raw string .................');
 
   return jsonList;
 }
+
+Future<List> _processRoute(String routeId, String url, String token) async {
+  pp('\n\n$xyz _processRoute routeId: $routeId');
+
+  int page = 0;
+  bool stop = false;
+  final points = [];
+
+  while (stop == false) {
+    final mUrl = '${url}getRoutePoints?routeId=$routeId&page=$page';
+    List resp = await httpGet(mUrl, token);
+    pp('$xyz page of RoutePoints for routeId: $routeId: ${resp.length}');
+
+    if (resp.isEmpty) {
+      stop = true;
+    }
+    points.addAll(resp);
+    page++;
+  }
+
+  pp('$xyz RoutePoints for routeId: $routeId: ${points.length}\n\n');
+  return points;
+}
+
 @pragma('vm:entry-point')
 Future<String> _heavyTaskForRouteLandmarks(BunnyBag bag) async {
   pp('$xyz _heavyTaskForRouteLandmarks starting .................associationId: ${bag.associationId} .');
@@ -240,6 +268,7 @@ Future<String> _heavyTaskForRouteLandmarks(BunnyBag bag) async {
   pp('$xyz Association RouteLandmarks for all routes: ${routeLandmarks.length}');
   return jsonList;
 }
+
 @pragma('vm:entry-point')
 Future<String> _heavyTaskForRouteCities(BunnyBag bag) async {
   pp('$xyz _heavyTaskForRouteCities starting ................. associationId; ${bag.associationId} .');
@@ -253,6 +282,7 @@ Future<String> _heavyTaskForRouteCities(BunnyBag bag) async {
   pp('$xyz Association RouteCities for all routes: ${routeCities.length}');
   return jsonList;
 }
+
 @pragma('vm:entry-point')
 Future<String> _heavyTaskForSingleRoute(BirdieBag bag) async {
   pp('$xyz _heavyTaskForSingleRoute starting ................. associationId; ${bag.associationId} ');
@@ -369,6 +399,13 @@ class DonkeyBag {
   late String associationId, url, token;
 
   DonkeyBag(this.associationId, this.url, this.token);
+}
+
+class RoutePointsBag {
+  late List<String> routeIds;
+  late String url, token;
+
+  RoutePointsBag(this.routeIds, this.url, this.token);
 }
 
 class BunnyBag {

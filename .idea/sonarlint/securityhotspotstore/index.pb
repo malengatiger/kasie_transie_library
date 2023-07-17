@@ -141,8 +141,6 @@ R
 "lib/isolates/landmark_isolate.dart,f/c/fc6db5720b1b00c776a396d6ea90e8b204ce1e2f
 K
 lib/bloc/cache_manager.dart,f/6/f6af9dc2c14cc2d983ed952cbc52421867d334ab
-P
- lib/isolates/routes_isolate.dart,7/8/78980e2a94aef9580fd5b37776a3b16effe93c3c
 K
 lib/utils/local_finder.dart,5/5/552372b167342b7b8c4258298bc2e7f7db25359f
 R
@@ -173,8 +171,6 @@ S
 #lib/maps/location_response_map.dart,6/5/655cc572da548cc96be1776f121da9a500982f67
 G
 lib/maps/route_map.dart,2/2/22e25f57eafdd3301ea12f679d4ad89a86eac11b
-M
-lib/widgets/timer_widget.dart,a/d/ad0a5f4fcc22c914e010ea84a29f99dbb725be1a
 L
 lib/widgets/car_details.dart,a/1/a189b392f16310a1a2150cc33b61cdb40f1c9bef
 I
@@ -185,3 +181,21 @@ S
 #lib/isolates/heartbeat_isolate.dart,0/7/074153afea844e3edf30fad1db73f573a9bcd942
 N
 lib/utils/kasie_exception.dart,b/b/bb23b0771d428b91650b02ea2b4bd0866a3ea69d
+G
+lib/data/schemas.g.dart,a/e/ae9d36def259da82b2fd0cef34dd7fbd434adbfb
+D
+lib/utils/prefs.dart,0/6/062ed39b477cbfc674db4a3f8539e7725e506c8c
+K
+lib/messaging/fcm_bloc.dart,a/b/abc3ce0d0007de42374e4acee2f4babe2f6f7f47
+J
+lib/utils/environment.dart,2/9/29aa30c893fdd0dcb85853c0a069b2d7d001deae
+E
+lib/data/schemas.dart,5/8/58d969c07e26acfd1069cc807eb292b050451ec3
+[
++lib/widgets/language_and_color_chooser.dart,e/0/e084d864c6026e18c64f9423376c69244ac839b1
+H
+lib/utils/functions.dart,b/0/b0a619b39b8dd6d9cb3842f9eccbadb6212c8b3f
+S
+#.idea/libraries/Flutter_Plugins.xml,e/8/e8bbc0fdfcefee9aa7b463c83a8a480b92333860
+H
+lib/bloc/theme_bloc.dart,f/6/f67048e6e712a43d23400d457095afdd941be33a

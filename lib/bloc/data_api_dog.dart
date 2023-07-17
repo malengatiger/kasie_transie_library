@@ -191,10 +191,13 @@ class DataApiDog {
   }
 
   Future<User> updateUser(User user) async {
-    final bag = user.toJson();
+    pp('$mm .................................'
+        'user to be updated on mongo database ${E.redDot} check that user is passed ...');
+
+    myPrettyJsonPrint(user.toJson());
     final cmd = '${url}updateUser';
-    final res = await _callPost(cmd, bag);
-    pp('$mm user updated on mongo database ...');
+    final res = await _callPost(cmd, user.toJson());
+    pp('$mm user updated on mongo database ... ${E.redDot} check if password present');
     myPrettyJsonPrint(res);
     final r = buildUser(res);
     return r;
@@ -451,8 +454,11 @@ class DataApiDog {
     }
     var start = DateTime.now();
     var token = await appAuth.getAuthToken();
-
+    if (token == null) {
+      throw Exception('No fucking token!');
+    }
     headers['Authorization'] = 'Bearer $token';
+    pp('$mm body of request: $mBag');
     try {
       var resp = await client
           .post(

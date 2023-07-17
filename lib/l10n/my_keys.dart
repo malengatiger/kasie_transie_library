@@ -58,6 +58,7 @@ class MyKeys {
     hashMap['emailAuth'] = 'emailAuth';
     hashMap['emailAuthFailed'] = 'emailAuthFailed';
     hashMap['emailAuthTitle'] = 'emailAuthTitle';
+    hashMap['emailNotFound'] = 'emailNotFound';
     hashMap['emailSignIn'] = 'emailSignIn';
     hashMap['en'] = 'en';
     hashMap['endOfRoute'] = 'endOfRoute';
@@ -207,6 +208,7 @@ class MyKeys {
     hashMap['taxiRouteViewer'] = 'taxiRouteViewer';
     hashMap['taxiRoutes'] = 'taxiRoutes';
     hashMap['thanks'] = 'thanks';
+    hashMap['thanksForWaiting'] = 'thanksForWaiting';
     hashMap['thisMayTake'] = 'thisMayTake';
     hashMap['thisMayTakeMinutes'] = 'thisMayTakeMinutes';
     hashMap['thisMayTakeSeconds'] = 'thisMayTakeSeconds';
@@ -225,6 +227,7 @@ class MyKeys {
     hashMap['videoUploading'] = 'videoUploading';
     hashMap['viewRouteMap'] = 'viewRouteMap';
     hashMap['waiting'] = 'waiting';
+    hashMap['waitingForEmail'] = 'waitingForEmail';
     hashMap['waitingForGPS'] = 'waitingForGPS';
     hashMap['waitingToRecordVideo'] = 'waitingToRecordVideo';
     hashMap['weHelp'] = 'weHelp';

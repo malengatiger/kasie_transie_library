@@ -51,7 +51,7 @@ class TimerWidgetState extends State<TimerWidget>
       height: 600,
       child: Card(
         shape: getRoundedBorder(radius: 16),
-        elevation: 8,
+        elevation: 12,
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(

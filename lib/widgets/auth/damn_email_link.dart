@@ -3,13 +3,20 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:kasie_transie_library/bloc/data_api_dog.dart';
+import 'package:kasie_transie_library/bloc/list_api_dog.dart';
+import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/language_and_color_chooser.dart';
+import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import 'package:open_mail_app/open_mail_app.dart' as mail;
+import 'package:flutter_dotenv/flutter_dotenv.dart' as dot;
+
+import '../../isolates/vehicles_isolate.dart';
 
 late EmailLinkAuthProvider emailLinkAuthProvider;
 const mex = '🔷🔷🔷🔷EmailLinkAuthProvider 🔷🔷🔷🔷';
@@ -68,7 +75,7 @@ class DamnEmailLinkState extends State<DamnEmailLink>
     implements EmailLinkAuthListener {
   late AnimationController _controller;
   static const mm = '😡😡😡😡😡😡😡 DamnEmailLink: 💪 ';
-  var emailController = TextEditingController(text: "jackmalengata@gmail.com");
+  var emailController = TextEditingController();
 
   final actionCodeSettings = ActionCodeSettings(
     url: 'https://kasietransie2023.page.link/1gGs',
@@ -87,19 +94,37 @@ class DamnEmailLinkState extends State<DamnEmailLink>
       emailAddress,
       submitText,
       desc,
+      signedIn = 'Signed In',
       errorEmailVerification,
       successEmailVerification,
+      loading = 'Loading ...',
       emailAuthTitle;
   String openMailApp = "Open Mail App";
   String noMailApps = "No mail apps installed";
   String ok = 'OK';
+  String waitingForEmail = 'Waiting for Email';
   String pleaseCheckEmail = "Check email";
+  bool busy = false;
+  late String adminEmail, adminPassword;
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
     _setTexts();
     emailLinkAuthProvider.authListener = this;
+    _check();
+  }
+
+  Future<void> _check() async {
+    await dot.dotenv.load();
+    adminEmail = dot.dotenv.get('EMAIL');
+    adminPassword = dot.dotenv.get('PASSWORD');
+
+    if (FirebaseAuth.instance.currentUser != null) {
+      if (mounted) {
+        Navigator.of(context).pop(true);
+      }
+    }
   }
 
   void _getEmail() async {
@@ -107,11 +132,11 @@ class DamnEmailLinkState extends State<DamnEmailLink>
     if (emailResult != null) {
       pp('$mm emailResult: ${emailResult.email} - ${emailResult.type}');
       emailController.text = emailResult.email;
-      setState(() {});
+      _sendEmail();
     }
   }
 
-  _setTexts() async {
+  void _setTexts() async {
     final c = await prefs.getColorAndLocale();
     emailAuthTitle = await translator.translate('emailAuthTitle', c.locale);
     desc = await translator.translate('desc', c.locale);
@@ -127,6 +152,11 @@ class DamnEmailLinkState extends State<DamnEmailLink>
     openMailApp = await translator.translate('openMailApp', c.locale);
     noMailApps = await translator.translate('noMailApps', c.locale);
     ok = await translator.translate('ok', c.locale);
+    signedIn = await translator.translate('signedIn', c.locale);
+    loading = await translator.translate('loading', c.locale);
+    waitingForEmail = await translator.translate('waitingForEmail', c.locale);
+
+
     pleaseCheckEmail = await translator.translate('pleaseCheckEmail', c.locale);
     setState(() {});
     Future.delayed(const Duration(milliseconds: 100), () {
@@ -134,19 +164,79 @@ class DamnEmailLinkState extends State<DamnEmailLink>
     });
   }
 
-  _chooseColor() async {
+  void _chooseColor() async {
     await navigateWithScale(const LanguageAndColorChooser(), context);
     _setTexts();
   }
 
-  _sendEmail() async {
-    pp('$mm ... _sendEmail ....');
+  void _sendEmail() async {
+    pp('\n\n$mm ... _sendEmail checking if email is known ....');
+    setState(() {
+      busy = true;
+    });
+
+    final email = emailController.value.text;
+    final adminCreds = await FirebaseAuth.instance
+        .signInWithEmailAndPassword(email: adminEmail, password: adminPassword);
 
     try {
-      final email = emailController.value.text;
-      pp('$mm emailLinkAuthProvider: ${emailLinkAuthProvider.providerId}');
-      await prefs.saveEmail(email);
-      emailLinkAuthProvider.sendLink(email);
+      if (adminCreds.user != null) {
+        pp('$mm ... admin user logged in: creds: $adminCreds');
+        final user = await listApiDog.getUserByEmail(email);
+        if (user != null) {
+          await prefs.saveUser(user);
+          await prefs.saveEmail(email);
+          user.password = 'pass123';
+          final mUser = await dataApiDog.updateUser(user);
+          await FirebaseAuth.instance.signOut();
+          final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
+              email: email, password: mUser.password!);
+          await prefs.saveUser(user);
+          pp('$mm ... signInWithEmailAndPassword: $email should be cool, Boss! ${E.blueDot} check cred: $cred');
+          if (cred.user != null) {
+            pp('$mm ... signInWithEmailAndPassword: ${E.leaf2} USER IS SIGNED IN!!! will send email with link, '
+                'but will start routesIsolate and vehicleIsolate ....');
+
+            vehicleIsolate.getVehicles(mUser.associationId!);
+            routesIsolate.getRoutes(mUser.associationId!);
+
+            try {
+              pp('$mm emailLinkAuthProvider: ${emailLinkAuthProvider.providerId} '
+                  '${E.diamond} start listening for email link tap! '
+                  '${E.diamond}${E.diamond}${E.diamond}');
+
+              FirebaseDynamicLinks.instance.onLink
+                  .listen((dynamicLinkData) async {
+                final Uri deepLink = dynamicLinkData.link;
+                bool isEmailLink = FirebaseAuth.instance
+                    .isSignInWithEmailLink(deepLink.toString());
+                pp('\n\n$mm ...... deepLink is email link? $isEmailLink ${E.appleGreen}');
+                pp(dynamicLinkData.asMap());
+                setState(() {
+                  busy = false;
+                });
+                if (isEmailLink) {
+                  showSnackBar(
+                      message: signedIn!,
+                      duration: const Duration(seconds: 10),
+                      context: context);
+                  Navigator.of(context).pop(true);
+                } else {
+                  await FirebaseAuth.instance.signOut();
+                }
+              });
+              Future.delayed(const Duration(seconds: 10), () {
+                emailLinkAuthProvider.sendLink(email);
+                // if (mounted) {
+                //   Navigator.of(context).pop(true);
+                // }
+              });
+            } catch (e) {
+              pp(e);
+            }
+          }
+        }
+      }
     } catch (e) {
       pp(e);
     }
@@ -162,94 +252,104 @@ class DamnEmailLinkState extends State<DamnEmailLink>
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-      appBar: AppBar(
-        title:
-            Text(emailAuthTitle == null ? 'Email Link Auth' : emailAuthTitle!),
-      ),
-      body: Column(
-        children: [
-          const SizedBox(
-            height: 48,
-          ),
-          Form(
-            key: formKey,
-            child: Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      const SizedBox(
-                        height: 48,
-                      ),
-                      Text(
-                        desc == null ? 'Description' : desc!,
-                        style: myTextStyleMediumLargeWithColor(
-                            context, Theme.of(context).primaryColorLight, 16),
-                      ),
-                      const SizedBox(
-                        height: 24,
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          _chooseColor();
-                        },
-                        child: Text(
-                          selectLangColor == null
-                              ? 'Select language and color'
-                              : selectLangColor!,
-                          style: myTextStyleSmall(context),
+            appBar: AppBar(
+              title: Text(
+                  emailAuthTitle == null ? 'Email Link Auth' : emailAuthTitle!),
+            ),
+            body: Stack(
+              children: [
+                Column(
+                  children: [
+                    const SizedBox(
+                      height: 48,
+                    ),
+                    Form(
+                      key: formKey,
+                      child: Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                const SizedBox(
+                                  height: 48,
+                                ),
+                                Text(
+                                  desc == null ? 'Description' : desc!,
+                                  style: myTextStyleMediumLargeWithColor(
+                                      context,
+                                      Theme.of(context).primaryColorLight,
+                                      16),
+                                ),
+                                const SizedBox(
+                                  height: 24,
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    _chooseColor();
+                                  },
+                                  child: Text(
+                                    selectLangColor == null
+                                        ? 'Select language and color'
+                                        : selectLangColor!,
+                                    style: myTextStyleSmall(context),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 48,
+                                ),
+                                TextFormField(
+                                  controller: emailController,
+                                  validator: (value) {
+                                    pp('$mm ...validator value: $value - pleaseEnterEmail: $pleaseEnterEmail');
+                                    if (value == null || value.isEmpty) {
+                                      return pleaseEnterEmail;
+                                    }
+                                    return null;
+                                  },
+                                  decoration: InputDecoration(
+                                      label: Text(emailAddress == null
+                                          ? 'Email Address'
+                                          : emailAddress!),
+                                      hintText: pleaseEnterEmail == null
+                                          ? 'Please enter your email address'
+                                          : pleaseEnterEmail!),
+                                ),
+                                const SizedBox(
+                                  height: 48,
+                                ),
+                                ElevatedButton(
+                                    onPressed: () {
+                                      if (formKey.currentState!.validate()) {
+                                        _sendEmail();
+                                      }
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(20.0),
+                                      child: Text(submitText == null
+                                          ? 'Submit'
+                                          : submitText!),
+                                    )),
+                                const SizedBox(
+                                  height: 48,
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(
-                        height: 48,
-                      ),
-                      TextFormField(
-                        controller: emailController,
-                        validator: (value) {
-                          pp('$mm ...validator value: $value - pleaseEnterEmail: $pleaseEnterEmail');
-                          if (value == null || value.isEmpty) {
-                            return pleaseEnterEmail;
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(
-                            label: Text(emailAddress == null
-                                ? 'Email Address'
-                                : emailAddress!),
-                            hintText: pleaseEnterEmail == null
-                                ? 'Please enter your email address'
-                                : pleaseEnterEmail!),
-                      ),
-                      const SizedBox(
-                        height: 48,
-                      ),
-                      ElevatedButton(
-                          onPressed: () {
-                            if (formKey.currentState!.validate()) {
-                              _sendEmail();
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: Text(
-                                submitText == null ? 'Submit' : submitText!),
-                          )),
-                      const SizedBox(
-                        height: 48,
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(
+                      height: 12,
+                    ),
+                  ],
                 ),
-              ),
-            ),
-          ),
-          const SizedBox(
-            height: 12,
-          ),
-        ],
-      ),
-    ));
+                busy
+                    ? Positioned(
+                        child: Center(child: TimerWidget(title: waitingForEmail!)))
+                    : const SizedBox(),
+              ],
+            )));
   }
 
   @override
