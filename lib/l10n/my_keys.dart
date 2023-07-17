@@ -24,6 +24,9 @@ class MyKeys {
     hashMap['calculateRouteDistance'] = 'calculateRouteDistance';
     hashMap['cancel'] = 'cancel';
     hashMap['carQRCode'] = 'carQRCode';
+    hashMap['changeLanguage'] = 'changeLanguage';
+    hashMap['changeLanguageOrColor'] = 'changeLanguageOrColor';
+    hashMap['checkEmail'] = 'checkEmail';
     hashMap['confirmDispatch'] = 'confirmDispatch';
     hashMap['countPassengers'] = 'countPassengers';
     hashMap['countsSaved'] = 'countsSaved';
@@ -46,6 +49,7 @@ class MyKeys {
     hashMap['dispatchTaxi'] = 'dispatchTaxi';
     hashMap['dispatchWithScan'] = 'dispatchWithScan';
     hashMap['dispatches'] = 'dispatches';
+    hashMap['doesNotChange'] = 'doesNotChange';
     hashMap['done'] = 'done';
     hashMap['driver'] = 'driver';
     hashMap['duplicateAss'] = 'duplicateAss';
@@ -73,6 +77,7 @@ class MyKeys {
     hashMap['es'] = 'es';
     hashMap['fetch'] = 'fetch';
     hashMap['fileSize'] = 'fileSize';
+    hashMap['firstTime'] = 'firstTime';
     hashMap['fr'] = 'fr';
     hashMap['getDirections'] = 'getDirections';
     hashMap['heartbeats'] = 'heartbeats';
@@ -100,11 +105,15 @@ class MyKeys {
     hashMap['no'] = 'no';
     hashMap['noLandmarks'] = 'noLandmarks';
     hashMap['noLocation'] = 'noLocation';
+    hashMap['noMailApps'] = 'noMailApps';
     hashMap['noRoutesFound'] = 'noRoutesFound';
     hashMap['noVehicleScanned'] = 'noVehicleScanned';
+    hashMap['notRegistered'] = 'notRegistered';
     hashMap['numberDispatches'] = 'numberDispatches';
     hashMap['numberOfCars'] = 'numberOfCars';
     hashMap['numberOfDays'] = 'numberOfDays';
+    hashMap['ok'] = 'ok';
+    hashMap['openMailApp'] = 'openMailApp';
     hashMap['owner'] = 'owner';
     hashMap['ownerDash'] = 'ownerDash';
     hashMap['ownerUnknown'] = 'ownerUnknown';
@@ -120,6 +129,7 @@ class MyKeys {
     hashMap['phoneSignIn'] = 'phoneSignIn';
     hashMap['photosAndVideosNow'] = 'photosAndVideosNow';
     hashMap['placeMaker'] = 'placeMaker';
+    hashMap['pleaseCheckEmail'] = 'pleaseCheckEmail';
     hashMap['pleaseEnterEmail'] = 'pleaseEnterEmail';
     hashMap['pleaseEnterRouteName'] = 'pleaseEnterRouteName';
     hashMap['pleaseSelectRoute'] = 'pleaseSelectRoute';
@@ -170,11 +180,13 @@ class MyKeys {
     hashMap['sendDispatch'] = 'sendDispatch';
     hashMap['sendRouteMessage'] = 'sendRouteMessage';
     hashMap['serverUnreachable'] = 'serverUnreachable';
+    hashMap['signInComplete'] = 'signInComplete';
     hashMap['signInWithEmail'] = 'signInWithEmail';
     hashMap['signInWithPhone'] = 'signInWithPhone';
     hashMap['signedIn'] = 'signedIn';
     hashMap['sn'] = 'sn';
     hashMap['st'] = 'st';
+    hashMap['startEmailLinkSignin'] = 'startEmailLinkSignin';
     hashMap['startOfRoute'] = 'startOfRoute';
     hashMap['startPassengerCount'] = 'startPassengerCount';
     hashMap['startPhotoVideo'] = 'startPhotoVideo';

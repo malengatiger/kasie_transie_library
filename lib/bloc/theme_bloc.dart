@@ -31,7 +31,7 @@ class ThemeBloc {
   _initialize() async {
     colorAndLocale = await prefs.getColorAndLocale();
     colorAndLocale ??= ColorAndLocale(themeIndex: 0, locale: 'en');
-    pp('\n$mm initialize: acquired settings: ....theme index: ${colorAndLocale!.themeIndex}');
+    pp('\n$mm initialize: theme index: ${colorAndLocale!.themeIndex}');
     pp('$mm initialize: locale = ${colorAndLocale!.locale} ... '
         'themeIndex: ${colorAndLocale!.themeIndex} in the stream');
     themeStreamController.sink.add(colorAndLocale!);
@@ -122,14 +122,15 @@ class SchemeUtil {
     _themeBags.clear();
 
     _themeBags.add(ThemeBag(
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.green),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.green)));
+
+    _themeBags.add(ThemeBag(
         lightTheme: FlexThemeData.light(scheme: FlexScheme.redWine),
         darkTheme: FlexThemeData.dark(scheme: FlexScheme.redWine)));
     _themeBags.add(ThemeBag(
         lightTheme: FlexThemeData.light(scheme: FlexScheme.barossa),
         darkTheme: FlexThemeData.dark(scheme: FlexScheme.barossa)));
-    _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.green),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.green)));
 
     _themeBags.add(ThemeBag(
         lightTheme: FlexThemeData.light(scheme: FlexScheme.mallardGreen),

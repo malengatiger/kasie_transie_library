@@ -127,8 +127,6 @@ N
 lib/widgets/photo_handler.dart,0/d/0d9722f04fac14afa5b744911acbcd9f1ac461d4
 U
 %lib/widgets/vehicle_photo_widget.dart,e/c/ecc8fdd2ef378e9eea3d4d2ad3aefe23a07966f2
-[
-+lib/widgets/language_and_color_chooser.dart,e/0/e084d864c6026e18c64f9423376c69244ac839b1
 N
 lib/widgets/media_chooser.dart,2/9/290e65034cbc1aefdcac798c56a444e10b6fde1b
 O
@@ -139,8 +137,6 @@ P
  lib/widgets/passenger_count.dart,1/6/16cb11aa1b0f3ab6fd72912a464dfcbcefa771ee
 M
 lib/bloc/dispatch_helper.dart,e/c/ec2900543724ef57a746746c5d53acbf07698314
-H
-lib/utils/functions.dart,b/0/b0a619b39b8dd6d9cb3842f9eccbadb6212c8b3f
 K
 lib/bloc/cache_manager.dart,f/6/f6af9dc2c14cc2d983ed952cbc52421867d334ab
 R
@@ -173,8 +169,6 @@ N
 lib/messaging/local_notif.dart,f/0/f09c0c2140c1b24d775040751afcb61b0822b516
 G
 lib/maps/route_map.dart,2/2/22e25f57eafdd3301ea12f679d4ad89a86eac11b
-H
-lib/bloc/theme_bloc.dart,f/6/f67048e6e712a43d23400d457095afdd941be33a
 M
 lib/widgets/timer_widget.dart,a/d/ad0a5f4fcc22c914e010ea84a29f99dbb725be1a
 I

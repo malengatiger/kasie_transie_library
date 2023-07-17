@@ -131,7 +131,7 @@ class ListApiDog {
     return false;
   }
 
-  Future<User> getUserById(String userId) async {
+  Future<User?> getUserById(String userId) async {
     final cmd = '${url}getUserById?userId=$userId';
     final resp = await _sendHttpGET(cmd);
     final user = buildUser(resp);
@@ -841,7 +841,7 @@ class ListApiDog {
           {required String userId, required String startDate}) async {
     final list = <AmbassadorPassengerCount>[];
     final cmd =
-        '${url}getUserAmbassadorPassengerCounts?vehicleId=$userId&startDate=$startDate';
+        '${url}getUserAmbassadorPassengerCounts?userId=$userId&startDate=$startDate';
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
       var r = buildAmbassadorPassengerCount(value);

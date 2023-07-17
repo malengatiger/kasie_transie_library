@@ -127,8 +127,6 @@ U
 %lib/widgets/vehicle_photo_widget.dart,e/c/ecc8fdd2ef378e9eea3d4d2ad3aefe23a07966f2
 N
 lib/widgets/photo_handler.dart,0/d/0d9722f04fac14afa5b744911acbcd9f1ac461d4
-[
-+lib/widgets/language_and_color_chooser.dart,e/0/e084d864c6026e18c64f9423376c69244ac839b1
 N
 lib/widgets/media_chooser.dart,2/9/290e65034cbc1aefdcac798c56a444e10b6fde1b
 L
@@ -139,8 +137,6 @@ O
 lib/widgets/media_reminder.dart,e/a/ea37a7c407af8a8e111f9e37ad13f55b291bcdf3
 M
 lib/bloc/dispatch_helper.dart,e/c/ec2900543724ef57a746746c5d53acbf07698314
-H
-lib/utils/functions.dart,b/0/b0a619b39b8dd6d9cb3842f9eccbadb6212c8b3f
 R
 "lib/isolates/landmark_isolate.dart,f/c/fc6db5720b1b00c776a396d6ea90e8b204ce1e2f
 K
@@ -173,8 +169,6 @@ N
 lib/widgets/counts_widget.dart,1/f/1f6d04625b8abdac21c95e6101f9d61b63be4651
 E
 lib/data/big_bag.dart,1/7/178212d9172943ef10dde785d5c4cec618b33f34
-H
-lib/bloc/theme_bloc.dart,f/6/f67048e6e712a43d23400d457095afdd941be33a
 S
 #lib/maps/location_response_map.dart,6/5/655cc572da548cc96be1776f121da9a500982f67
 G

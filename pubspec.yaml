@@ -58,8 +58,19 @@ dependencies:
   image: ^4.0.17
   video_thumbnail: ^0.5.3
   beep_player: ^0.0.1
+  open_mail_app: ^0.4.5
+  firebase_dynamic_links: ^5.3.4
+  get: ^4.6.5
+  flutter_easyloading: ^3.0.5
+  firebase_ui_auth: ^1.6.0
+  account_picker: ^2.1.0
+  sms_autofill: ^2.3.0
+  numeric_keyboard: ^1.1.0
+
+  url_launcher:
   flutter_polyline_points:
   flutter_dotenv:
+
 
 
   dots_indicator:
