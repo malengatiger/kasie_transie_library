@@ -2,12 +2,15 @@ import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart' as ui;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
+import 'package:mobile_number/mobile_number.dart';
 
 import '../../auth/phone_auth_signin.dart';
 import '../../bloc/list_api_dog.dart';
 import '../../data/schemas.dart' as lib;
 import '../../isolates/routes_isolate.dart';
+import '../../isolates/vehicles_isolate.dart';
 import '../../l10n/translation_handler.dart';
 import '../../utils/emojis.dart';
 import '../../utils/functions.dart';
@@ -46,8 +49,34 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification>
     provider = ui.PhoneAuthProvider();
     provider.auth = fb.FirebaseAuth.instance;
     provider.authListener = this;
+    initMobileNumberState();
   }
+// Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initMobileNumberState() async {
+    if (!await MobileNumber.hasPhonePermission) {
+      await MobileNumber.requestPhonePermission;
+      return;
+    }
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      final mobileNumber = (await MobileNumber.mobileNumber)!;
+      final simCard = (await MobileNumber.getSimCards)!;
+      pp('$mm ................. mobileNumber: $mobileNumber');
+      if (simCard.isNotEmpty) {
+        pp('$mm ... ${simCard.first.carrierName} SIM CARD .... ');
+        myPrettyJsonPrint(simCard.first.toMap());
+      }
+    } on PlatformException catch (e) {
+      debugPrint(" ${E.redDot}Failed to get mobile number because of '${e.message}'");
+    }
 
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {});
+  }
   Future _setTexts() async {
     final sett = await prefs.getSettings();
     if (sett == null) {
@@ -113,22 +142,27 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification>
         pp('$mm KasieTransie user found on database:  🍎 ${mUser.toJson()} 🍎');
         await prefs.saveUser(mUser);
         final ass = await listApiDog.getAssociationById(mUser.associationId!);
-        final cars =
-            await listApiDog.getAssociationVehicles(mUser.associationId!, true);
-        pp('$mm KasieTransie cars found on database:  🍎 ${cars.length} 🍎');
-        final countries = await listApiDog.getCountries();
-        pp('$mm KasieTransie countries found on database:  🍎 ${countries.length} 🍎');
-        await routesIsolate.getRoutes(mUser.associationId!);
+        await prefs.saveAssociation(ass);
 
-        lib.Country? myCountry;
-        for (var country in countries) {
-          if (country.countryId == ass.countryId!) {
-            myCountry = country;
-            await prefs.saveCountry(myCountry);
-            break;
+        try {
+          await vehicleIsolate.getVehicles(mUser.associationId!);
+          await routesIsolate.getRoutes(mUser.associationId!);
+          final countries = await listApiDog.getCountries();
+          lib.Country? myCountry;
+          for (var country in countries) {
+            if (country.countryId == ass.countryId!) {
+              myCountry = country;
+              await prefs.saveCountry(myCountry);
+              break;
+            }
           }
+          pp('$mm KasieTransie countries found on database:  🍎 ${countries.length} 🍎');
+          pp('$mm KasieTransie; my country the beloved:  🍎 ${myCountry!.name!} 🍎');
+        } catch (e) {
+          pp(e);
         }
-        pp('$mm KasieTransie; my country the beloved:  🍎 ${myCountry!.name!} 🍎');
+
+
       } else {
         if (mounted) {
           showSnackBar(
@@ -194,82 +228,7 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification>
   // lib.User? user;
   SignInStrings? signInStrings;
   bool verificationFailed = false;
-  bool _codeHasBeenSent = false;
   String? phoneVerificationId;
-
-  // void _verifyPhoneNumber() async {
-  //   pp('$mm _start: ....... Verifying phone number ...');
-  //   setState(() {
-  //     busy = true;
-  //   });
-  //
-  //
-  //   await firebaseAuth.verifyPhoneNumber(
-  //       phoneNumber: cellphoneNumber,
-  //       timeout: const Duration(seconds: 90),
-  //       verificationCompleted: (PhoneAuthCredential phoneAuthCredential) {
-  //         pp('$mm ......... verificationCompleted: $phoneAuthCredential');
-  //         var message = phoneAuthCredential.smsCode ?? "";
-  //         if (message.isNotEmpty) {
-  //           codeController.text = message;
-  //         }
-  //         if (mounted) {
-  //           setState(() {
-  //             verificationCompleted = true;
-  //             busy = false;
-  //           });
-  //           showSnackBar(
-  //               backgroundColor: Theme.of(context).colorScheme.background,
-  //               textStyle: myTextStyleMedium(context),
-  //               message: signInStrings == null
-  //                   ? 'Verification completed. Thank you!'
-  //                   : signInStrings!.verifyComplete,
-  //               context: context);
-  //         }
-  //       },
-  //       verificationFailed: (FirebaseAuthException error) {
-  //         pp('\n$mm verificationFailed : $error \n');
-  //         if (mounted) {
-  //           setState(() {
-  //             verificationFailed = true;
-  //             busy = false;
-  //           });
-  //           showSnackBar(
-  //               backgroundColor: Theme.of(context).colorScheme.background,
-  //               textStyle: myTextStyleMedium(context),
-  //               message: signInStrings == null
-  //                   ? 'Verification failed. Please try later'
-  //                   : signInStrings!.verifyFailed,
-  //               context: context);
-  //         }
-  //       },
-  //       codeSent: (String verificationId, int? forceResendingToken) {
-  //         pp('$mm onCodeSent: 🔵 verificationId: $verificationId 🔵 will set state ...');
-  //         phoneVerificationId = verificationId;
-  //         if (mounted) {
-  //           pp('$mm setting state  _codeHasBeenSent to true');
-  //           setState(() {
-  //             _codeHasBeenSent = true;
-  //             busy = false;
-  //           });
-  //         }
-  //       },
-  //       codeAutoRetrievalTimeout: (String verificationId) {
-  //         pp('$mm codeAutoRetrievalTimeout verificationId: $verificationId');
-  //         if (mounted) {
-  //           setState(() {
-  //             busy = false;
-  //             _codeHasBeenSent = false;
-  //           });
-  //           showSnackBar(
-  //               message: signInStrings == null
-  //                   ? 'Code retrieval failed, please try again'
-  //                   : signInStrings!.verifyFailed,
-  //               context: context);
-  //           Navigator.of(context).pop();
-  //         }
-  //       });
-  // }
 
   @override
   void onVerificationCompleted(fb.PhoneAuthCredential credential) {
@@ -364,7 +323,7 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification>
   }
 
   @override
-  void onSignedIn(fb.UserCredential credential) {
+  Future<void> onSignedIn(fb.UserCredential credential) async {
     pp('\n\n$mm ...... onSignedIn: ${E.blueDot} credential: $credential ${E.leaf}${E.leaf}${E.leaf}');
 
     Navigator.of(context).pop();

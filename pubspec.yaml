@@ -66,6 +66,7 @@ dependencies:
   account_picker: ^2.1.0
   sms_autofill: ^2.3.0
   numeric_keyboard: ^1.1.0
+  mobile_number: ^2.1.1
 
   url_launcher:
   flutter_polyline_points:
