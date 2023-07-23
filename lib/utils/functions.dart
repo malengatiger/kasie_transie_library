@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/date_symbol_data_file.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -15,8 +17,7 @@ import 'dart:ui' as ui;
 import 'package:image/image.dart' as img;
 import 'emojis.dart';
 import 'package:video_thumbnail/video_thumbnail.dart' as vt;
-
-
+import 'package:image/image.dart' as img;
 
 pp(dynamic msg) {
   var time = getFormattedDateHour(DateTime.now().toIso8601String());
@@ -33,7 +34,7 @@ pp(dynamic msg) {
 }
 
 Future<String> getFmtDate(String date, String locale) async {
-  await initializeDateFormatting("en","somefile");
+  await initializeDateFormatting("en", "somefile");
   String mLocale = getValidLocale(locale);
   Future.delayed(const Duration(milliseconds: 10));
 
@@ -48,6 +49,7 @@ Future<String> getFmtDate(String date, String locale) async {
     return result;
   }
 }
+
 String getFormattedDate(String date) {
   try {
     DateTime d = DateTime.parse(date);
@@ -57,6 +59,7 @@ String getFormattedDate(String date) {
     return date;
   }
 }
+
 String getFormattedDateLong(String date) {
   try {
     DateTime d = DateTime.parse(date);
@@ -66,6 +69,7 @@ String getFormattedDateLong(String date) {
     return date;
   }
 }
+
 String getStringColor(Color color) {
   var stringColor = 'black';
   switch (color) {
@@ -143,11 +147,24 @@ Color getColor(String stringColor) {
       return Colors.black;
   }
 }
+
 Random random = Random(DateTime.now().millisecondsSinceEpoch);
 
 (Color, String) getRandomColor() {
-  final colors = ['white', 'red', 'black', 'amber', 'yellow','pink','purple',
-    'green', 'teal', 'indigo', 'blue', 'orange'];
+  final colors = [
+    'white',
+    'red',
+    'black',
+    'amber',
+    'yellow',
+    'pink',
+    'purple',
+    'green',
+    'teal',
+    'indigo',
+    'blue',
+    'orange'
+  ];
   final index = random.nextInt(colors.length - 1);
   final stringColor = colors.elementAt(index);
   switch (stringColor) {
@@ -156,7 +173,7 @@ Random random = Random(DateTime.now().millisecondsSinceEpoch);
     case 'red':
       return (Colors.red, 'red');
     case 'black':
-      return (Colors.black,'black');
+      return (Colors.black, 'black');
     case 'amber':
       return (Colors.amber, 'amber');
     case 'yellow':
@@ -166,7 +183,7 @@ Random random = Random(DateTime.now().millisecondsSinceEpoch);
     case 'purple':
       return (Colors.purple, 'purple');
     case 'green':
-      return (Colors.green,'green');
+      return (Colors.green, 'green');
     case 'teal':
       return (Colors.teal, 'teal');
     case 'indigo':
@@ -194,6 +211,7 @@ Future<File> getPhotoThumbnail({required File file}) async {
   pp('🔷🔷 photo thumbnail generated: 😡 ${(len / 1024).toStringAsFixed(1)} KB');
   return thumb;
 }
+
 Future<File> getVideoThumbnail(File file) async {
   final Directory directory = await getApplicationDocumentsDirectory();
   var path = 'possibleVideoThumb_${DateTime.now().toIso8601String()}.jpg';
@@ -216,6 +234,7 @@ Future<File> getVideoThumbnail(File file) async {
     return m;
   }
 }
+
 Future<File> getImageFileFromAssets(String path) async {
   final byteData = await rootBundle.load('assets/$path');
 
@@ -225,10 +244,12 @@ Future<File> getImageFileFromAssets(String path) async {
 
   return file;
 }
+
 String getDeviceType() {
   final data = MediaQueryData.fromView(WidgetsBinding.instance.window);
   return data.size.shortestSide < 600 ? 'phone' : 'tablet';
 }
+
 String getThisDeviceType() {
   final data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
   return data.size.shortestSide < 600 ? 'phone' : 'tablet';
@@ -257,6 +278,7 @@ String getFormattedDateHour(String date) {
     return format.format(d);
   }
 }
+
 String getValidLocale(String locale) {
   switch (locale) {
     case 'af':
@@ -299,6 +321,7 @@ String getFormattedTime({required int timeInSeconds}) {
   String second = sec.toString().length <= 1 ? "0$sec" : "$sec";
   return "$minute : $second";
 }
+
 Color getTextColorForBackground(Color backgroundColor) {
   if (ThemeData.estimateBrightnessForColor(backgroundColor) ==
       Brightness.dark) {
@@ -311,6 +334,7 @@ Color getTextColorForBackground(Color backgroundColor) {
 getRoundedBorder({required double radius}) {
   return RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius));
 }
+
 getDefaultRoundedBorder() {
   return RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0));
 }
@@ -402,12 +426,12 @@ TextStyle myTextStyleMedium(BuildContext context) {
     fontWeight: FontWeight.normal,
   );
 }
+
 TextStyle myTextStyleMediumBlack(BuildContext context) {
   return GoogleFonts.lato(
-    textStyle: Theme.of(context).textTheme.bodyMedium,
-    fontWeight: FontWeight.normal,
-    color: Colors.black
-  );
+      textStyle: Theme.of(context).textTheme.bodyMedium,
+      fontWeight: FontWeight.normal,
+      color: Colors.black);
 }
 
 TextStyle myTextStyleSubtitle(BuildContext context) {
@@ -455,12 +479,12 @@ TextStyle myTextStyleMediumBold(BuildContext context) {
   );
 }
 
-TextStyle myTextStyleMediumBoldWithColor({required  BuildContext context, required  Color color,
-  double? fontSize}) {
+TextStyle myTextStyleMediumBoldWithColor(
+    {required BuildContext context, required Color color, double? fontSize}) {
   return GoogleFonts.lato(
     textStyle: Theme.of(context).textTheme.headlineMedium,
     fontWeight: FontWeight.w900,
-    fontSize: fontSize == null? 18.0 : fontSize!,
+    fontSize: fontSize == null ? 18.0 : fontSize!,
     color: color,
   );
 }
@@ -518,7 +542,7 @@ TextStyle myTextStyleMediumLarge(BuildContext context, double? size) {
   return GoogleFonts.roboto(
       textStyle: Theme.of(context).textTheme.headlineLarge,
       fontWeight: FontWeight.w900,
-      fontSize: size == null? 24: size!);
+      fontSize: size == null ? 24 : size!);
 }
 
 TextStyle myTextStyleMediumLargeWithSize(BuildContext context, double size) {
@@ -527,7 +551,9 @@ TextStyle myTextStyleMediumLargeWithSize(BuildContext context, double size) {
       fontWeight: FontWeight.w900,
       fontSize: size);
 }
-TextStyle myTextStyleMediumLargeWithColor(BuildContext context, Color color, double size) {
+
+TextStyle myTextStyleMediumLargeWithColor(
+    BuildContext context, Color color, double size) {
   return GoogleFonts.roboto(
       textStyle: Theme.of(context).textTheme.headlineLarge,
       fontWeight: FontWeight.w900,
@@ -617,7 +643,9 @@ TextStyle myNumberStyleLargerPrimaryColor(BuildContext context) {
       fontWeight: FontWeight.w900,
       fontSize: 28);
 }
-TextStyle myNumberStyleLargerWithColor(Color color, double fontSize, BuildContext context) {
+
+TextStyle myNumberStyleLargerWithColor(
+    Color color, double fontSize, BuildContext context) {
   return GoogleFonts.secularOne(
       textStyle: Theme.of(context).textTheme.titleLarge,
       color: color,
@@ -671,6 +699,7 @@ void prettyJson(String input) {
   var prettyString = encoder.convert(object);
   prettyString.split('\n').forEach((element) => myPrint(element));
 }
+
 void myPrettyJsonPrint(Map map) {
   printPrettyJson(map);
 }
@@ -703,23 +732,64 @@ showSnackBar(
     ),
   ));
 }
+
 Future<Uint8List> getBytesFromAsset(String path, int width) async {
   ByteData data = await rootBundle.load(path);
   ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
       targetWidth: width);
   ui.FrameInfo fi = await codec.getNextFrame();
-  return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
-      .buffer
-      .asUint8List();
+  var byteData = await fi.image.toByteData(format: ui.ImageByteFormat.png);
+
+  return byteData!.buffer.asUint8List();
 }
+
+Future<BitmapDescriptor> getBitmapDescriptor(
+    {required String path, required int width, required String color}) async {
+  ByteData data = await rootBundle.load(path);
+  ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+      targetWidth: width);
+  ui.FrameInfo fi = await codec.getNextFrame();
+  var byteData = await fi.image.toByteData(format: ui.ImageByteFormat.png);
+
+  Uint8List m = byteData!.buffer.asUint8List();
+  // img.colorOffset(
+  //   doneImg!,
+  //   red: rgb!.red,
+  //   green: rgb.green,
+  //   blue: rgb.blue,
+  // );
+  // doneImg = img.copyResize(doneImg, width: width);
+  // final Uint8List doneIconColorful =
+  //     Uint8List.fromList(img.encodePng(doneImg));
+  BitmapDescriptor doneBM = BitmapDescriptor.fromBytes(m);
+
+  return doneBM;
+}
+
+final colorHashMap = HashMap<String, MyRGB>();
+void _buildColorHashMap() {
+  colorHashMap.clear();
+  colorHashMap['red'] = MyRGB(red: 255, green: 0, blue: 0);
+  colorHashMap['white'] = MyRGB(red: 255, green: 255, blue: 255);
+  colorHashMap['black'] = MyRGB(red: 0, green: 0, blue: 0);
+  colorHashMap['pink'] = MyRGB(red: 255, green: 20, blue: 147);
+  colorHashMap['blue'] = MyRGB(red: 0, green: 0, blue: 255);
+  colorHashMap['teal'] = MyRGB(red: 0, green: 128, blue: 128);
+  colorHashMap['green'] = MyRGB(red: 0, green: 128, blue: 0);
+  colorHashMap['amber'] = MyRGB(red: 255, green: 215, blue: 0);
+  colorHashMap['indigo'] = MyRGB(red: 75, green: 0, blue: 130);
+  colorHashMap['purple'] = MyRGB(red: 128, green: 0, blue: 128);
+  colorHashMap['yellow'] = MyRGB(red: 255, green: 255, blue: 0);
+}
+
 showToast(
     {required String message,
-      required BuildContext context,
-      Color? backgroundColor,
-      TextStyle? textStyle,
-      Duration? duration,
-      double? padding,
-      ToastGravity? toastGravity}) {
+    required BuildContext context,
+    Color? backgroundColor,
+    TextStyle? textStyle,
+    Duration? duration,
+    double? padding,
+    ToastGravity? toastGravity}) {
   FToast fToast = FToast();
   const mm = 'FunctionsAndShit: 💀 💀 💀 💀 💀 : ';
   try {
@@ -730,8 +800,7 @@ showToast(
   Widget toastContainer = Container(
     width: 320,
     padding: EdgeInsets.symmetric(
-        horizontal: padding ?? 8.0,
-        vertical: padding ?? 8.0),
+        horizontal: padding ?? 8.0, vertical: padding ?? 8.0),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(8.0),
       color: backgroundColor ?? Colors.white,
@@ -789,3 +858,9 @@ const lorem =
     'reducing the reliance on manual processes and paperwork, and improving the ability to make informed decisions and respond to changes in real-time. '
     'Overall, utilizing mobile devices and cloud platforms can provide a '
     'powerful solution for monitoring and managing various initiatives in a more efficient and effective manner.';
+
+class MyRGB {
+  late int red, green, blue;
+
+  MyRGB({required this.red, required this.green, required this.blue});
+}

@@ -215,11 +215,13 @@ class MyKeys {
     hashMap['selectStart'] = 'selectStart';
     hashMap['selectStartEnd'] = 'selectStartEnd';
     hashMap['selectVehicle'] = 'selectVehicle';
+    hashMap['selectedRoutes'] = 'selectedRoutes';
     hashMap['sendCode'] = 'sendCode';
     hashMap['sendCreds'] = 'sendCreds';
     hashMap['sendDispatch'] = 'sendDispatch';
     hashMap['sendRouteMessage'] = 'sendRouteMessage';
     hashMap['serverUnreachable'] = 'serverUnreachable';
+    hashMap['show Routes'] = 'show Routes';
     hashMap['signInComplete'] = 'signInComplete';
     hashMap['signInWithEmail'] = 'signInWithEmail';
     hashMap['signInWithPhone'] = 'signInWithPhone';

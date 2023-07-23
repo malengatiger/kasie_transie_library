@@ -22,11 +22,13 @@ class RoutesIsolate {
   final xy = '☕️☕️☕️☕️☕️ Routes Isolate Functions: 🍎🍎';
 
   Future<List<RoutePoint>> getRoutePoints(String routeId, bool refresh) async {
-    pp('$xy get routePoints for $routeId  ... ');
+    pp('$xy get routePoints for $routeId  ... refresh: $refresh');
     var mList = <RoutePoint>[];
 
     final res = listApiDog.realm.query<RoutePoint>('routeId == \$0',[routeId]);
     mList = res.toList();
+    pp('$xy get routePoints found ${mList.length}  ... ');
+
     if (mList.isEmpty || refresh) {
      mList = await _danceForOneRoute(routeId);
     }

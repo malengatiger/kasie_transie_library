@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart' as poly;
@@ -12,6 +13,7 @@ import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/local_finder.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
+import 'package:kasie_transie_library/widgets/route_widgets/multi_route_chooser.dart';
 
 import '../isolates/routes_isolate.dart';
 
@@ -24,12 +26,13 @@ class AssociationRouteMaps extends StatefulWidget {
   }) : super(key: key);
 
   final double? latitude, longitude, radiusInMetres;
+
   @override
   AssociationRouteMapsState createState() => AssociationRouteMapsState();
 }
 
 class AssociationRouteMapsState extends State<AssociationRouteMaps> {
-  static const defaultZoom = 10.0;
+  static const defaultZoom = 14.0;
   final Completer<GoogleMapController> _mapController = Completer();
 
   CameraPosition? _myCurrentCameraPosition = const CameraPosition(
@@ -83,7 +86,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
             latitude: widget.latitude!,
             longitude: widget.longitude!,
             radiusInMetres:
-                widget.radiusInMetres == null ? 2000 : widget.radiusInMetres!);
+            widget.radiusInMetres == null ? 2000 : widget.radiusInMetres!);
       } else {
         pp('\n\n$mm .......... get all Association Routes ...');
         routes = await listApiDog
@@ -100,58 +103,82 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     setState(() {
       busy = false;
     });
-    _showRouteDialog();
+    // _showMultiRouteDialog();
 
   }
 
-  void _showRouteDialog() async {
-    showDialog(
-        context: context,
-        builder: (ctx) {
-          return SizedBox(width: 480,
-            child: Card(
-              shape: getDefaultRoundedBorder(),
-              elevation: 8,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ListView.builder(
-                    itemCount: routes.length,
-                    itemBuilder: (ctx, index) {
-                      final route = routes.elementAt(index);
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            routeSelected = route;
-                          });
-                          Navigator.of(context).pop();
-                          _getRouteMap(route);
-                        },
-                        child: Card(
-                          shape: getRoundedBorder(radius: 12),
-                          elevation: 12,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text(
-                              '${route.name}',
-                              style: myTextStyleSmall(context),
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-              ),
-            ),
-          );
-        });
+  var routesPicked = <lib.Route>[];
+
+  void _showMultiRouteDialog() async {
+    showDialog(context: context, builder: (ctx) {
+      return AlertDialog(
+        title: Text(
+            'Select Routes', style: myTextStyleMediumLargeWithColor(context,
+            Theme
+                .of(context)
+                .primaryColorLight, 24)),
+        content: MultiRouteChooser(onRoutesPicked: (routesPicked) {
+          setState(() {
+            this.routesPicked = routesPicked;
+          });
+          Navigator.of(context).pop();
+          _buildHashMap();
+        }),
+      );
+    });
   }
 
-  void _getRouteMap(lib.Route route) async {
-    color = getColor(route.color!);
-    await _getRoutePoints(route, false);
-    await _getRouteLandmarks(route, false);
-    await _buildMap();
-    _zoomToBeginningOfRoute(route);
-  }
+  // void _showRouteDialog() async {
+  //   final type = getThisDeviceType();
+  //   showDialog(
+  //       context: context,
+  //       builder: (ctx) {
+  //         return AlertDialog(
+  //           content: SizedBox(width: 300, height: type == 'phone'? 300: 500,
+  //             child: Card(
+  //               shape: getDefaultRoundedBorder(),
+  //               elevation: 8,
+  //               child: Padding(
+  //                 padding: const EdgeInsets.all(16.0),
+  //                 child: ListView.builder(
+  //                     itemCount: routes.length,
+  //                     itemBuilder: (ctx, index) {
+  //                       final route = routes.elementAt(index);
+  //                       return GestureDetector(
+  //                         onTap: () {
+  //                           setState(() {
+  //                             routeSelected = route;
+  //                           });
+  //                           Navigator.of(context).pop();
+  //                           _getRouteMap(route);
+  //                         },
+  //                         child: Card(
+  //                           shape: getRoundedBorder(radius: 12),
+  //                           elevation: 12,
+  //                           child: Padding(
+  //                             padding: const EdgeInsets.all(8.0),
+  //                             child: Text(
+  //                               '${route.name}',
+  //                               style: myTextStyleSmall(context),
+  //                             ),
+  //                           ),
+  //                         ),
+  //                       );
+  //                     }),
+  //               ),
+  //             ),
+  //           ),
+  //         );
+  //       });
+  // }
+
+  // void _getRouteMap(lib.Route route) async {
+  //   color = getColor(route.color!);
+  //   await _getRoutePoints(route, false);
+  //   await _getRouteLandmarks(route, false);
+  //   await _buildMap();
+  //   _zoomToBeginningOfRoute(route);
+  // }
 
   @override
   void dispose() {
@@ -163,8 +190,9 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
 
   Future _getRouteLandmarks(lib.Route route, bool refresh) async {
     routeLandmarks =
-        await listApiDog.getRouteLandmarks(route.routeId!, refresh);
-    pp('$mm _getRouteLandmarks ...  route: ${route.name}; found: ${routeLandmarks.length} ');
+    await listApiDog.getRouteLandmarks(route.routeId!, refresh);
+    pp('$mm _getRouteLandmarks ...  route: ${route
+        .name}; found: ${routeLandmarks.length} ');
 
     landmarkIndex = 0;
     for (var landmark in routeLandmarks) {
@@ -178,7 +206,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
           },
           infoWindow: InfoWindow(
               snippet:
-                  '\nThis landmark is part of the route:\n ${route.name}\n\n',
+              '\nThis landmark is part of the route:\n ${route.name}\n\n',
               title: '🍎 ${landmark.landmarkName}',
               onTap: () {
                 pp('$mm ............. infoWindow tapped, point index: $index');
@@ -240,40 +268,40 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     });
   }
 
-  Future<void> _buildMap() async {
-    pp('$mm .......... existingRoutePoints ....  🍎 found: '
-        '${existingRoutePoints.length} points');
-    if (existingRoutePoints.isEmpty) {
-      setState(() {
-        busy = false;
-      });
-      _showNoPointsDialog();
-      //return;
-    }
-    _addPolyLine();
-    landmarkIndex = 0;
-    for (var rl in routeLandmarks) {
-      _markers.add(Marker(
-          markerId: MarkerId(rl.landmarkId!),
-          icon: numberMarkers.elementAt(landmarkIndex),
-          position:
-              LatLng(rl.position!.coordinates[1], rl.position!.coordinates[0]),
-          infoWindow: InfoWindow(
-              title: rl.landmarkName, snippet: '🍎Part of ${rl.routeName}')));
-      landmarkIndex++;
-    }
-    setState(() {});
-    var point = existingRoutePoints.first;
-    var latLng = LatLng(
-        point.position!.coordinates.last, point.position!.coordinates.first);
-    _myCurrentCameraPosition = CameraPosition(
-      target: latLng,
-      zoom: defaultZoom,
-    );
-    final GoogleMapController controller = await _mapController.future;
-    controller.animateCamera(
-        CameraUpdate.newCameraPosition(_myCurrentCameraPosition!));
-  }
+  // Future<void> _buildMap() async {
+  //   pp('$mm .......... existingRoutePoints ....  🍎 found: '
+  //       '${existingRoutePoints.length} points');
+  //   if (existingRoutePoints.isEmpty) {
+  //     setState(() {
+  //       busy = false;
+  //     });
+  //     _showNoPointsDialog();
+  //     //return;
+  //   }
+  //   _addPolyLine();
+  //   landmarkIndex = 0;
+  //   for (var rl in routeLandmarks) {
+  //     _markers.add(Marker(
+  //         markerId: MarkerId(rl.landmarkId!),
+  //         icon: numberMarkers.elementAt(landmarkIndex),
+  //         position:
+  //             LatLng(rl.position!.coordinates[1], rl.position!.coordinates[0]),
+  //         infoWindow: InfoWindow(
+  //             title: rl.landmarkName, snippet: '🍎Part of ${rl.routeName}')));
+  //     landmarkIndex++;
+  //   }
+  //   setState(() {});
+  //   var point = existingRoutePoints.first;
+  //   var latLng = LatLng(
+  //       point.position!.coordinates.last, point.position!.coordinates.first);
+  //   _myCurrentCameraPosition = CameraPosition(
+  //     target: latLng,
+  //     zoom: defaultZoom,
+  //   );
+  //   final GoogleMapController controller = await _mapController.future;
+  //   controller.animateCamera(
+  //       CameraUpdate.newCameraPosition(_myCurrentCameraPosition!));
+  // }
 
   Future _getUser() async {
     _user = await prefs.getUser();
@@ -290,7 +318,8 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     pp('$mm .......... get current location ....');
     _currentPosition = await locationBloc.getLocation();
 
-    pp('$mm .......... get current location ....  🍎 found: ${_currentPosition!.toJson()}');
+    pp('$mm .......... get current location ....  🍎 found: ${_currentPosition!
+        .toJson()}');
     _myCurrentCameraPosition = CameraPosition(
       target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
       zoom: defaultZoom,
@@ -316,7 +345,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   Future _buildLandmarkIcons() async {
     for (var i = 0; i < 100; i++) {
       var intList =
-          await getBytesFromAsset("assets/numbers/number_${i + 1}.png", 84);
+      await getBytesFromAsset("assets/numbers/number_${i + 1}.png", 84);
       numberMarkers.add(BitmapDescriptor.fromBytes(intList));
     }
     pp('$mm have built ${numberMarkers.length} markers for landmarks');
@@ -327,16 +356,42 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     _markers.clear();
   }
 
-  void _addPolyLine() {
-    pp('$mm .......... _addPolyLine ....... .');
-    _polyLines.clear();
+  void _addLandmarks(List<lib.RouteLandmark> routeLandmarks,
+      List<BitmapDescriptor> icons) {
+    pp('$mm .......... _addLandmarks ....... .');
+
+    int landmarkIndex = 0;
+    for (var routeLandmark in routeLandmarks) {
+      _markers.add(Marker(
+          markerId: MarkerId(routeLandmark.landmarkId!),
+          icon: icons.elementAt(landmarkIndex),
+          position:
+          LatLng(routeLandmark.position!.coordinates[1],
+              routeLandmark.position!.coordinates[0]),
+          infoWindow: InfoWindow(
+              title: routeLandmark.landmarkName,
+              snippet: '🍎Part of ${routeLandmark.routeName}')));
+      landmarkIndex++;
+    }
+  }
+
+  Random random = Random(DateTime
+      .now()
+      .millisecondsSinceEpoch);
+  var widthIndex = 0;
+
+  void _addPolyLine(List<lib.RoutePoint> points, Color color) {
+    pp('$mm .......... _addPolyLine ....... points: ${points.length}.');
     var mPoints = <LatLng>[];
-    existingRoutePoints.sort((a, b) => a.index!.compareTo(b.index!));
-    for (var rp in existingRoutePoints) {
+    points.sort((a, b) => a.index!.compareTo(b.index!));
+    for (var rp in points) {
       mPoints.add(LatLng(
           rp.position!.coordinates.last, rp.position!.coordinates.first));
     }
-    _clearMap();
+    int width = (widthIndex + 1) * 6;
+    if (width > 12) {
+      width = 10;
+    }
     var polyLine = Polyline(
         color: color,
         width: 8,
@@ -344,129 +399,143 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
         polylineId: PolylineId(DateTime.now().toIso8601String()));
 
     _polyLines.add(polyLine);
+    widthIndex++;
     setState(() {});
   }
 
-  void _refreshRoute(lib.Route route) async {
-    pp('$mm .... _refreshRoute ....');
-    setState(() {
-      busy = true;
-    });
-    try {
-      final bag = await listApiDog.refreshRoute(route.routeId!);
-      existingRoutePoints = bag.routePoints;
-      _buildMap();
-      if (mounted) {
-        showSnackBar(
-            padding: 20,
-            backgroundColor: Theme.of(context).primaryColorLight,
-            message: 'Route has been refreshed',
-            context: context);
+  lib.Route? routeSelected;
+  final hashMap = HashMap<String, MapBag>();
+
+  void _buildHashMap() async {
+    pp('$mm ... _buildHashMap: routesPicked: ${routesPicked.length}');
+    for (var route in routesPicked) {
+      final points = await routesIsolate.getRoutePoints(route.routeId!, false);
+      final marks = await listApiDog.getRouteLandmarks(route.routeId!, false);
+      final icons = <BitmapDescriptor>[];
+      for (var i = 0; i < marks.length; i++) {
+        final icon = await getBitmapDescriptor(
+            path: "assets/numbers/number_${i + 1}.png",
+            width: 84, color: route.color!);
+        icons.add(icon);
       }
-    } catch (e) {
-      pp(e);
-      showSnackBar(message: 'Error: $e', context: context);
+      final bag = MapBag(route, points, marks, icons);
+      hashMap[route.routeId!] = bag;
     }
-    setState(() {
-      busy = true;
-    });
+    pp('$mm ... _buildHashMap: hashMap built: ${hashMap.length}');
+
+    _markers.clear();
+    _polyLines.clear();
+
+    for (var bag in hashMap.values.toList()) {
+      _addPolyLine(bag.routePoints, getColor(bag.route.color!));
+      _addLandmarks(bag.routeLandmarks, bag.landmarkIcons);
+    }
+    if (hashMap.isNotEmpty) {
+      _zoomToBeginningOfRoute(hashMap.values
+          .toList()
+          .first
+          .route);
+    }
   }
 
-  lib.Route? routeSelected;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: TextButton(onPressed: () {
-            _showRouteDialog();
-          },
-          child: Text('${routes.length} Routes')),
+          title: ElevatedButton(
+              style: const ButtonStyle(
+                elevation: MaterialStatePropertyAll(8.0),
+              ),
+              onPressed: () {
+                _showMultiRouteDialog();
+              },
+              child: Text('${routes.length} Routes')),
         ),
         key: _key,
         body: _myCurrentCameraPosition == null
             ? Center(
-                child: Text(
-                  'Waiting for GPS location ...',
-                  style: myTextStyleMediumBold(context),
-                ),
-              )
+          child: Text(
+            'Waiting for GPS location ...',
+            style: myTextStyleMediumBold(context),
+          ),
+        )
             : Stack(children: [
-                GoogleMap(
-                  mapType: isHybrid ? MapType.hybrid : MapType.normal,
-                  myLocationEnabled: true,
-                  markers: _markers,
-                  circles: _circles,
-                  polylines: _polyLines,
-                  initialCameraPosition: _myCurrentCameraPosition!,
-                  onTap: (latLng) {
-                    pp('$mm .......... on map tapped : $latLng .');
-                  },
-                  onMapCreated: (GoogleMapController controller) {
-                    pp('$mm .......... on onMapCreated .....');
-                    _mapController.complete(controller);
-                    _getRoutes();
-                  },
+          GoogleMap(
+            mapType: isHybrid ? MapType.hybrid : MapType.normal,
+            myLocationEnabled: true,
+            markers: _markers,
+            circles: _circles,
+            polylines: _polyLines,
+            initialCameraPosition: _myCurrentCameraPosition!,
+            onTap: (latLng) {
+              pp('$mm .......... on map tapped : $latLng .');
+            },
+            onMapCreated: (GoogleMapController controller) {
+              pp('$mm .......... on onMapCreated .....');
+              _mapController.complete(controller);
+              _getRoutes();
+            },
+          ),
+          Positioned(
+              right: 12,
+              top: 120,
+              child: Container(
+                color: Colors.black45,
+                child: Padding(
+                  padding: const EdgeInsets.all(0.0),
+                  child: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          isHybrid = !isHybrid;
+                        });
+                      },
+                      icon: Icon(
+                        Icons.album_outlined,
+                        color: isHybrid ? Colors.yellow : Colors.white,
+                      )),
                 ),
-                Positioned(
-                    right: 12,
-                    top: 120,
-                    child: Container(
-                      color: Colors.black45,
-                      child: Padding(
-                        padding: const EdgeInsets.all(0.0),
-                        child: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                isHybrid = !isHybrid;
-                              });
-                            },
-                            icon: Icon(
-                              Icons.album_outlined,
-                              color: isHybrid ? Colors.yellow : Colors.white,
-                            )),
-                      ),
-                    )),
-                Positioned(
-                    right: 12,
-                    top: 40,
-                    child: Card(
-                      elevation: 8,
-                      shape: getRoundedBorder(radius: 12),
-                      child: Row(
-                        children: [
-                          IconButton(
-                              onPressed: () {
-                                if (routeSelected != null) {
-                                  _refreshRoute(routeSelected!);
-                                }
-                              },
-                              icon: Icon(
-                                Icons.toggle_on,
-                                color: Theme.of(context).primaryColor,
-                              )),
-                          const SizedBox(
-                            width: 28,
-                          ),
-                        ],
-                      ),
-                    )),
-                busy
-                    ? const Positioned(
-                        top: 160,
-                        left: 48,
-                        child: Center(
-                          child: SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 12,
-                              backgroundColor: Colors.pink,
-                            ),
-                          ),
-                        ),
-                      )
-                    : const SizedBox(),
-              ]));
+              )),
+          // Positioned(
+          //     right: 12,
+          //     top: 40,
+          //     child: Card(
+          //       elevation: 8,
+          //       shape: getRoundedBorder(radius: 12),
+          //       child: Row(
+          //         children: [
+          //           IconButton(
+          //               onPressed: () {
+          //                 if (routeSelected != null) {
+          //                   _refreshRoute(routeSelected!);
+          //                 }
+          //               },
+          //               icon: Icon(
+          //                 Icons.toggle_on,
+          //                 color: Theme.of(context).primaryColor,
+          //               )),
+          //           const SizedBox(
+          //             width: 28,
+          //           ),
+          //         ],
+          //       ),
+          //     )),
+          busy
+              ? const Positioned(
+            top: 160,
+            left: 48,
+            child: Center(
+              child: SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 12,
+                  backgroundColor: Colors.pink,
+                ),
+              ),
+            ),
+          )
+              : const SizedBox(),
+        ]));
   }
 }
 
@@ -500,4 +569,13 @@ class RouteDropDown extends StatelessWidget {
           }
         });
   }
+}
+
+class MapBag {
+  late lib.Route route;
+  List<lib.RoutePoint> routePoints = [];
+  List<lib.RouteLandmark> routeLandmarks = [];
+  List<BitmapDescriptor> landmarkIcons = [];
+
+  MapBag(this.route, this.routePoints, this.routeLandmarks, this.landmarkIcons);
 }
