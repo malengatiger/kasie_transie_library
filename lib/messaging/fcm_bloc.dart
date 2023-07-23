@@ -20,6 +20,7 @@ import 'package:realm/realm.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../bloc/list_api_dog.dart';
+import '../data/constants.dart';
 import '../utils/error_handler.dart';
 import '../utils/functions.dart';
 import '../utils/kasie_exception.dart';
@@ -59,7 +60,6 @@ class FCMBloc {
     firebaseMessaging.setAutoInitEnabled(true);
     firebaseMessaging.onTokenRefresh.listen((newToken) {
       pp("$mm listener onTokenRefresh: 🍎🍎🍎 update user: token: $newToken ... 🍎🍎");
-
     });
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('app_icon');
@@ -126,10 +126,10 @@ class FCMBloc {
     } else if (message.data['vehicleMediaRequest'] != null) {
       pp("$mm onMessage: $red vehicleMediaRequest message has arrived!  ... $red ");
       type = 'vehicleMediaRequest';
-    } else if (message.data['passengerCount'] != null){
+    } else if (message.data['passengerCount'] != null) {
       pp("$mm onMessage: $red passengerCount message has arrived!  ... $red ");
       type = 'passengerCount';
-    } else{
+    } else {
       pp("$mm onMessage: $red unknown message has arrived!  ... $red ");
       return 'unknown';
     }
@@ -228,9 +228,9 @@ class FCMBloc {
         final x = jsonDecode(va);
         final kk = buildDispatchRecord(x);
         if (user != null) {
-          if (user!.userId == kk.marshalId
-              || user!.userId == kk.ownerId
-              || user!.userType == 'ASSOCIATION_OFFICIAL') {
+          if (user!.userId == kk.marshalId ||
+              user!.userId == kk.ownerId ||
+              user!.userType == 'ASSOCIATION_OFFICIAL') {
             _dispatchStreamController.sink.add(kk);
           }
         }
@@ -269,7 +269,7 @@ class FCMBloc {
         final va = map['routeUpdateRequest'];
         final x = jsonDecode(va);
         final req = buildRouteUpdateRequest(x);
-       _processRouteUpdate(req);
+        _processRouteUpdate(req);
         break;
     }
   }
@@ -289,7 +289,6 @@ class FCMBloc {
     if (user!.userId == resp.userId) {
       _locationResponseStreamController.sink.add(resp);
     }
-
   }
 
   void _processMediaRequest(lib.VehicleMediaRequest req) async {
@@ -335,7 +334,7 @@ class FCMBloc {
     pp('$newMM checking if vehicle location request is for me ...');
     final car = await prefs.getCar();
     if (car == null) {
-      pp('$newMM location request is NOT for me. ${E.redDot}${E.redDot}${E.redDot} '   );
+      pp('$newMM location request is NOT for me. ${E.redDot}${E.redDot}${E.redDot} ');
       return;
     }
     if (request.vehicleId == car.vehicleId) {
@@ -381,44 +380,44 @@ class FCMBloc {
   }
 
   final StreamController<String> _routeChangesStreamController =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
   Stream<String> get routeChangesStream => _routeChangesStreamController.stream;
 
   final StreamController<String> _vehicleChangesStreamController =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
   Stream<String> get vehicleChangesStream =>
       _vehicleChangesStreamController.stream;
 
   final StreamController<lib.VehicleDeparture>
-  _vehicleDepartureStreamController = StreamController.broadcast();
+      _vehicleDepartureStreamController = StreamController.broadcast();
 
   Stream<lib.VehicleDeparture> get vehicleDepartureStream =>
       _vehicleDepartureStreamController.stream;
 
   final StreamController<lib.VehicleArrival> _vehicleArrivalStreamController =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
   Stream<lib.VehicleArrival> get vehicleArrivalStream =>
       _vehicleArrivalStreamController.stream;
 
   final StreamController<lib.DispatchRecord> _dispatchStreamController =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
   Stream<lib.DispatchRecord> get dispatchStream =>
       _dispatchStreamController.stream;
 
   final StreamController<lib.UserGeofenceEvent> _userGeofenceStreamController =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
   Stream<lib.UserGeofenceEvent> get userGeofenceStream =>
       _userGeofenceStreamController.stream;
 
   final StreamController<lib.VehicleMediaRequest>
-  _vehicleMediaRequestStreamController = StreamController.broadcast();
+      _vehicleMediaRequestStreamController = StreamController.broadcast();
   final StreamController<lib.RouteUpdateRequest>
-  _routeUpdateRequestStreamController = StreamController.broadcast();
+      _routeUpdateRequestStreamController = StreamController.broadcast();
 
   Stream<lib.RouteUpdateRequest> get routeUpdateRequestStream =>
       _routeUpdateRequestStreamController.stream;
@@ -427,30 +426,28 @@ class FCMBloc {
       _vehicleMediaRequestStreamController.stream;
 
   final StreamController<lib.LocationRequest> _locationRequestStreamController =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
   Stream<lib.LocationRequest> get locationRequestStream =>
       _locationRequestStreamController.stream;
 
   final StreamController<lib.LocationResponse>
-  _locationResponseStreamController = StreamController.broadcast();
+      _locationResponseStreamController = StreamController.broadcast();
 
   Stream<lib.LocationResponse> get locationResponseStream =>
       _locationResponseStreamController.stream;
 
   final StreamController<lib.AmbassadorPassengerCount>
-  _passengerCountStreamController = StreamController.broadcast();
+      _passengerCountStreamController = StreamController.broadcast();
 
   Stream<lib.AmbassadorPassengerCount> get passengerCountStream =>
       _passengerCountStreamController.stream;
-
 }
-
 
 ///Handling FCM messages in the background
 ///
 String? myName;
-var mxx = '💙💙💙💙💙💙 Background Processing: $myName 💙💙💙💙💙💙';
+var mxx = '💙💙💙💙💙💙 Background Processing:  💙💙💙💙💙💙';
 
 Future<void> kasieFirebaseMessagingBackgroundHandler(
     fb.RemoteMessage message) async {
@@ -460,44 +457,111 @@ Future<void> kasieFirebaseMessagingBackgroundHandler(
 
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
   myName = packageInfo.appName;
+  pp('$mxx .... App Name: $myName');
 
-  await Firebase.initializeApp();
-  pp('$mxx ... Firebase.initializeApp done and dusted!');
-  var myToken = await FirebaseAuth.instance.currentUser?.getIdToken();
-  if (myToken == null) {
-    pp('\n$mxx unable to get auth token ${E.redDot}${E.redDot}${E.redDot}');
-    return;
+  final map = message.data;
+
+  if (map['locationRequest'] != null) {
+    handleLocationRequest(map);
   }
-  //LocalNotificationService.display(message);
-  //todo - prefs in background don't work!!!!
+
+  if (map['dispatchRecord'] != null) {
+    handleDispatch(map);
+  }
+
+  if (map['passengerCount'] != null) {
+    handlePassengerCount(map);
+  }
+
+}
+
+
+void handlePassengerCount(Map<String, dynamic> map) async {
+  final user = await _getUser(map);
+
+  if (user != null) {
+    final passengerCount = buildAmbassadorPassengerCount(map);
+
+    if (user.userType == Constants.OWNER) {
+      if (user.userId == passengerCount.ownerId) {
+        cachePassengerCount(passengerCount);
+      }
+    }
+
+    if (user.userType == Constants.ASSOCIATION_OFFICIAL) {
+      cachePassengerCount(passengerCount);
+    }
+  }
+}
+void handleDispatch(Map<String, dynamic> map) async {
+  final user = await _getUser(map);
+
+  if (user != null) {
+    final dispatchRecord = buildDispatchRecord(map);
+
+    if (user.userType == Constants.OWNER) {
+      if (user.userId == dispatchRecord.ownerId) {
+        cacheDispatchRecord(dispatchRecord);
+      }
+    }
+
+    if (user.userType == Constants.ASSOCIATION_OFFICIAL) {
+      cacheDispatchRecord(dispatchRecord);
+    }
+  }
+}
+void cachePassengerCount(lib.AmbassadorPassengerCount object) {
+  listApiDog.realm.write(() {
+    listApiDog.realm.add<lib.AmbassadorPassengerCount>(object);
+  });
+}
+void cacheDispatchRecord(lib.DispatchRecord object) {
+  listApiDog.realm.write(() {
+    listApiDog.realm.add<lib.DispatchRecord>(object);
+  });
+}
+
+Future<lib.User?> _getUser(Map map) async {
+  lib.User? user;
+  final prefs1 = await SharedPreferences.getInstance();
+  prefs1.reload(); // The magic line
+  var string = prefs1.getString('user');
+  if (string == null) {
+    pp('\n\n$mxx ... ${E.redDot}${E.redDot}${E.redDot} user is null in background ... \n\n');
+    return null;
+  }
+  var jx = json.decode(string);
+  user = buildUser(jx);
+  pp('$mxx ... this user is responding while in background');
+  myPrettyJsonPrint(user.toJson());
+
+  return user;
+}
+
+void handleLocationRequest(Map map) async {
   lib.Vehicle? car;
   final prefs1 = await SharedPreferences.getInstance();
   prefs1.reload(); // The magic line
   var string = prefs1.getString('car');
   if (string == null) {
-    pp('\n\n$mxx ... ${E.redDot}${E.redDot}${E.redDot} car is null in background ... 1\n\n');
+    pp('\n\n$mxx ... ${E.redDot}${E.redDot}${E.redDot} car is null in background ... \n\n');
     return;
   }
   var jx = json.decode(string);
   car = buildVehicle(jx);
   pp('$mxx ... this car is responding while in background');
   myPrettyJsonPrint(car.toJson());
-  final map = message.data;
 
-  if (map['locationRequest'] != null) {
-    final va = map['locationRequest'];
-    final x = jsonDecode(va);
-    final locReq = buildLocationRequest(x);
-    if (car.vehicleId == locReq.vehicleId) {
-      pp('\n\n$mxx ... this request is for me .... ${E.blueDot} gotta respond!');
-      _respondToLocationRequest(request: locReq, token: myToken, car: car);
-    }
-  } else {
-    pp('$mxx ... this is a non location request message, ignored for now!');
+  final va = map['locationRequest'];
+  final x = jsonDecode(va);
+  final locReq = buildLocationRequest(x);
+  if (car.vehicleId == locReq.vehicleId) {
+    pp('\n\n$mxx ... this request is for me .... ${E.blueDot} gotta respond!');
+    respondToLocationRequest(request: locReq, token: 'myToken', car: car);
   }
 }
 
-void _respondToLocationRequest(
+void respondToLocationRequest(
     {required lib.LocationRequest request,
     required String token,
     required lib.Vehicle car}) async {

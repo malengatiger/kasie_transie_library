@@ -286,6 +286,8 @@ Vehicle buildVehicle(Map vehicleJson) {
     countryId: vehicleJson['countryId'],
     dateInstalled: vehicleJson['dateInstalled'],
     ownerId: vehicleJson['ownerId'],
+    passengerCapacity: vehicleJson['passengerCapacity'],
+
     ownerName: vehicleJson['ownerName'],
   );
   return m;

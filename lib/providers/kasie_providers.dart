@@ -13,13 +13,13 @@ final countryProvider = riv.FutureProvider<List<Country>>((ref) async {
   return res;
 });
 //
-final countryCitiesProvider = riv.FutureProvider.family<List<City>, String>((ref,
-    countryId) async {
-  final res = await listApiDog.getCountryCities(countryId);
-  pp('$bb countryCitiesProvider did the job: ${res
-      .length} country cities found.');
-  return res;
-});
+// final countryCitiesProvider = riv.FutureProvider.family<List<City>, String>((ref,
+//     countryId) async {
+//   // final res = await listApiDog.getCountryCities(countryId);
+//   // pp('$bb countryCitiesProvider did the job: ${res
+//   //     .length} country cities found.');
+//   // return res;
+// });
 //
 final nearbyCitiesProvider = riv.FutureProvider.family<
     List<City>,
@@ -40,12 +40,12 @@ final routesProvider = riv.FutureProvider.family<List<Route>,
   return res;
 });
 //
-final routePointProvider = riv.FutureProvider.family<List<RoutePoint>, String>((ref,
-    routeId) async {
-  final res = await listApiDog.getRoutePoints(routeId, false);
-  pp('$bb routePointProvider did the job: ${res.length} routePoints found.');
-  return res;
-});
+// final routePointProvider = riv.FutureProvider.family<List<RoutePoint>, String>((ref,
+//     routeId) async {
+//   final res = await listApiDog.getRoutePoints(routeId, false);
+//   pp('$bb routePointProvider did the job: ${res.length} routePoints found.');
+//   return res;
+// });
 //
 final routeLandmarkProvider = riv.FutureProvider.family<List<RouteLandmark>, String>((ref,
     routeId) async {

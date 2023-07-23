@@ -38,7 +38,7 @@ class _MySmsCodeInputState extends State<MySmsCodeInput> {
     final errorController = StreamController<ErrorAnimationType>();
     return Card(
       elevation: 8,
-      shape: getRoundedBorder(radius: 16),
+      shape: getDefaultRoundedBorder(),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -63,7 +63,7 @@ class _MySmsCodeInputState extends State<MySmsCodeInput> {
             ),
             Card(
               elevation: 8,
-              shape: getRoundedBorder(radius: 16),
+              shape: getDefaultRoundedBorder(),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: PinCodeTextField(

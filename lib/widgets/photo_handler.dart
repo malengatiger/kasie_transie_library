@@ -270,7 +270,7 @@ class PhotoHandlerState extends State<PhotoHandler>
                 child: Card(
                   elevation: 4,
                   color: Colors.black38,
-                  shape: getRoundedBorder(radius: 16),
+                  shape: getDefaultRoundedBorder(),
                   child: Column(
                     children: [
                       const SizedBox(

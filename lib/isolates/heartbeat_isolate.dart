@@ -26,10 +26,11 @@ class HeartbeatIsolate {
   final xy = '☕️☕️☕️☕️ HeartbeatIsolate Functions: 🍎🍎';
   Future addHeartbeat() async {
     pp('\n\n\n$xy ............................ addHeartbeat ....');
-    var res = await Firebase.initializeApp();
-    pp('\n\n$xy Firebase.initializeApp .. seems ok! ...');
 
     try {
+      var res = await Firebase.initializeApp();
+      pp('\n\n$xy Firebase.initializeApp .. seems ok! ... app: ${res.name}');
+
       final token = await appAuth.getAuthToken();
       var car = await prefs.getCar();
       final loc = await locationBloc.getLocation();
@@ -47,6 +48,7 @@ class HeartbeatIsolate {
             car = buildVehicle(json);
           }
         } catch (e) {
+          pp('$xy  addHeartbeat fell down and cried like a baby! ${E.redDot}');
           pp(e);
         }
       }

@@ -24,7 +24,7 @@ class ColorPad extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Card(
-          shape: getRoundedBorder(radius: 16),
+          shape: getDefaultRoundedBorder(),
           elevation: 6,
           child: Padding(
             padding: const EdgeInsets.all(16.0),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class ColorPicker extends StatelessWidget {
   const ColorPicker({Key? key, required this.onColorPicked}) : super(key: key);
+
   final Function(String, Color) onColorPicked;
 
   @override

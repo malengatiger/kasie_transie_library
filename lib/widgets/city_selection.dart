@@ -6,8 +6,10 @@ import 'package:responsive_builder/responsive_builder.dart' as responsive;
 
 import '../../../l10n/translation_handler.dart';
 import '../data/schemas.dart' as lib;
+import '../maps/city_creator_map.dart';
 import '../utils/device_location_bloc.dart';
 import '../utils/functions.dart';
+import '../utils/navigator_utils.dart';
 import '../utils/prefs.dart';
 
 class CityChooser extends StatefulWidget {
@@ -127,7 +129,7 @@ class _CitySearchState extends State<CitySearch> {
   bool busy = false;
   lib.User? user;
 
-  String? countriesText, search, searchCountries;
+  String? countriesText, search, searchCountries, searchingCities;
   final _textEditingController = TextEditingController();
 
   void _runFilter(String text) {
@@ -157,7 +159,7 @@ class _CitySearchState extends State<CitySearch> {
   }
 
   lib.City? _findCity(String name) {
-    pp('$mm ... find city by name $name from ${widget.cities.length}');
+    // pp('$mm ... find city by name $name from ${widget.cities.length}');
     for (var city in widget.cities) {
       if (city.name!.toLowerCase() == name.toLowerCase()) {
         return city;
@@ -206,7 +208,7 @@ class _CitySearchState extends State<CitySearch> {
     }
 
     return Card(
-      shape: getRoundedBorder(radius: 16),
+      shape: getDefaultRoundedBorder(),
       elevation: 6,
       child: Padding(
         padding:  EdgeInsets.all(leftPadding),
@@ -228,7 +230,7 @@ class _CitySearchState extends State<CitySearch> {
             ),
             Row(mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(width: 300,
+                SizedBox(width: 220,
                   child: SearchBar(
                     controller: _textEditingController,
                     leading: IconButton(
@@ -244,11 +246,15 @@ class _CitySearchState extends State<CitySearch> {
                     },
                   ),
                 ),
-                const SizedBox(width: 24,),
+                const SizedBox(width: 2,),
                 bd.Badge(
-                  badgeContent: Text('${_citiesToDisplay.length}'),
+                  badgeContent: Text('${_citiesToDisplay.length}', style: myTextStyleTiny(context),),
                   badgeStyle: const bd.BadgeStyle(padding: EdgeInsets.all(8.0)),
                 ),
+                const SizedBox(width: 4,),
+                IconButton(onPressed: (){
+                  navigateWithSlide(const CityCreatorMap(), context);
+                }, icon: Icon(Icons.add, color: Theme.of(context).primaryColor,))
               ],
             ),
             const SizedBox(
@@ -265,7 +271,7 @@ class _CitySearchState extends State<CitySearch> {
                       },
                       child: Card(
                         elevation: 2,
-                        shape: getRoundedBorder(radius: 16),
+                        shape: getDefaultRoundedBorder(),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Text('${city.name}'),

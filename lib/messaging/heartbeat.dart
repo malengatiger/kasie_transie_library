@@ -8,9 +8,7 @@ import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:realm/realm.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:workmanager/workmanager.dart';
 
-import '../isolates/heartbeat_isolate.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
 import '../utils/parsers.dart';
@@ -23,7 +21,7 @@ class Heartbeat {
   late Timer timer;
 
   void startHeartbeat() async {
-    pp('\n\n$mm start Heartbeat ............................................');
+    pp('\n\n$mm start Heartbeat ................... are we falling here? .........................');
     final sett = await prefs.getSettings();
     int seconds = 300; //10 minutes
     if (sett != null) {
@@ -33,7 +31,7 @@ class Heartbeat {
         seconds = 300;
       }
     }
-    await addHeartbeat();
+    // await addHeartbeat();
     pp('$mm Heartbeat ......... timer will start with tick of ${E.leaf} $seconds seconds  ${E.leaf}');
 
     timer = Timer.periodic(Duration(seconds: seconds), (timer) {
@@ -68,9 +66,14 @@ class Heartbeat {
 
 
     final heartbeat = getHeartbeat(car: car, latitude: loc.latitude, longitude: loc.longitude);
-    await dataApiDog.addVehicleHeartbeat(heartbeat);
-    pp('\n\n$mm VehicleHeartbeat added to database, registration: ${car.vehicleReg} '
-        'at ${DateTime.now().toIso8601String()}');
+
+    try {
+      await dataApiDog.addVehicleHeartbeat(heartbeat);
+      pp('\n\n$mm VehicleHeartbeat added to database, registration: ${car.vehicleReg} '
+              'at ${DateTime.now().toIso8601String()}');
+    } catch (e) {
+      pp(e);
+    }
   }
 
   static VehicleHeartbeat getHeartbeat({required Vehicle car,
@@ -97,14 +100,4 @@ class Heartbeat {
     return heartbeat;
   }
 }
-const cc = '🔴🔴🔴🔴🔴🔴🌀🌀 Workmanager Heartbeat:  🌀🌀🔴🔴🔴🔴';
-
-@pragma('vm:entry-point') // Mandatory if the App is obfuscated or using Flutter 3.1+
-void callbackDispatcher() {
-  pp("$cc Workmanager background callbackDispatcher ....");
-  Workmanager().executeTask((task, inputData) {
-    pp("$cc Native called background task ..... addHeartbeat, call heartbeatIsolate.addHeartbeat ...");
-    heartbeatIsolate.addHeartbeat();
-    return Future.value(true);
-  });
-}
+// const cc = '🔴🔴🔴🔴🔴🔴🌀🌀 Workmanager Heartbeat:  🌀🌀🔴🔴🔴🔴';

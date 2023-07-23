@@ -250,7 +250,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Card(
-              shape: getRoundedBorder(radius: 16),
+              shape: getDefaultRoundedBorder(),
               elevation: 4,
               child: Column(
                 children: [
@@ -281,7 +281,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Card(
-                      shape: getRoundedBorder(radius: 16),
+                      shape: getDefaultRoundedBorder(),
                       elevation: 8,
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -325,7 +325,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Card(
-                      shape: getRoundedBorder(radius: 16),
+                      shape: getDefaultRoundedBorder(),
                       elevation: 8,
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -380,7 +380,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Card(
-                      shape: getRoundedBorder(radius: 16),
+                      shape: getDefaultRoundedBorder(),
                       elevation: 8,
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),

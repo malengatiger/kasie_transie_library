@@ -56,7 +56,6 @@ class ThemeBloc {
   closeStream() {
     themeStreamController.close();
   }
-
 }
 
 class SchemeUtil {
@@ -91,6 +90,7 @@ class SchemeUtil {
     }
     return colors;
   }
+
   static List<ColorFromTheme> getLightThemeColors() {
     final colors = <ColorFromTheme>[];
     var index = 0;
@@ -103,9 +103,11 @@ class SchemeUtil {
 
   static ColorFromTheme getColorFromTheme(ColorAndLocale colorAndLocale) {
     var bag = getThemeByIndex(colorAndLocale.themeIndex);
-    final cft = ColorFromTheme(bag.darkTheme.primaryColor, colorAndLocale.themeIndex);
+    final cft =
+        ColorFromTheme(bag.darkTheme.primaryColor, colorAndLocale.themeIndex);
     return cft;
   }
+
   static ThemeBag getRandomTheme() {
     if (_themeBags.isEmpty) _setThemes();
     var index = _rand.nextInt(_themeBags.length - 1);
@@ -120,6 +122,9 @@ class SchemeUtil {
 
   static void _setThemes() {
     _themeBags.clear();
+    _themeBags.add(ThemeBag(
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.deepBlue),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.deepBlue)));
 
     _themeBags.add(ThemeBag(
         lightTheme: FlexThemeData.light(scheme: FlexScheme.green),
@@ -155,9 +160,6 @@ class SchemeUtil {
     _themeBags.add(ThemeBag(
         lightTheme: FlexThemeData.light(scheme: FlexScheme.indigo),
         darkTheme: FlexThemeData.dark(scheme: FlexScheme.indigo)));
-    _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.deepBlue),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.deepBlue)));
     _themeBags.add(ThemeBag(
         lightTheme: FlexThemeData.light(scheme: FlexScheme.hippieBlue),
         darkTheme: FlexThemeData.dark(scheme: FlexScheme.hippieBlue)));
@@ -226,8 +228,6 @@ class SchemeUtil {
         darkTheme: FlexThemeData.dark(scheme: FlexScheme.aquaBlue)));
     _themeBags.add(
         ThemeBag(lightTheme: getMyThemeLight(), darkTheme: getMyThemeDark()));
-
-
   }
 }
 
@@ -236,8 +236,8 @@ class ColorFromTheme {
   late int themeIndex;
 
   ColorFromTheme(this.color, this.themeIndex);
-
 }
+
 class ThemeBag {
   late final ThemeData lightTheme;
   late final ThemeData darkTheme;

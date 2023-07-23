@@ -3,24 +3,38 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart' as ui;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:kasie_transie_library/data/color_and_locale.dart';
+import 'package:kasie_transie_library/widgets/auth/sign_in_landing.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
-import 'package:mobile_number/mobile_number.dart';
 
 import '../../auth/phone_auth_signin.dart';
 import '../../bloc/list_api_dog.dart';
 import '../../data/schemas.dart' as lib;
+import '../../isolates/country_cities_isolate.dart';
 import '../../isolates/routes_isolate.dart';
 import '../../isolates/vehicles_isolate.dart';
 import '../../l10n/translation_handler.dart';
 import '../../utils/emojis.dart';
 import '../../utils/functions.dart';
+import '../../utils/navigator_utils.dart';
 import '../../utils/prefs.dart';
+import '../language_and_color_chooser.dart';
 import 'my_sms_code_input.dart';
 
 late ui.PhoneAuthProvider phoneAuthProvider;
 
 class CustomPhoneVerification extends StatefulWidget {
-  const CustomPhoneVerification({super.key});
+  const CustomPhoneVerification(
+      {super.key,
+      required this.onUserAuthenticated,
+      required this.onError,
+      required this.onCancel,
+      required this.onLanguageChosen});
+
+  final Function(lib.User) onUserAuthenticated;
+  final Function onError;
+  final Function onCancel;
+  final Function onLanguageChosen;
 
   @override
   State<CustomPhoneVerification> createState() =>
@@ -40,52 +54,46 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification>
   fb.ConfirmationResult? confirmationResult;
 
   String loading = 'Loading data';
-  String waiting = 'Wait data';
+  String waiting = 'Wait data', notRegistered = '';
+  bool _showVerifier = false;
+  bool busy = false;
+  bool verificationCompleted = false;
+  final firebaseAuth = fb.FirebaseAuth.instance;
+  final phoneController = TextEditingController(text: "+19095550008");
+  final codeController = TextEditingController(text: "123456");
+
+  // lib.User? user;
+  SignInStrings? signInStrings;
+  bool verificationFailed = false;
+  String? phoneVerificationId;
+  String changeLanguage = 'Change Language or Color';
+  String signInWithPhone = 'Sign in with your phone';
+  String firstTime = 'This is the first time here ...';
+  String welcome = 'Welcome!';
 
   @override
   void initState() {
     super.initState();
-    _setTexts();
+    _control();
     provider = ui.PhoneAuthProvider();
     provider.auth = fb.FirebaseAuth.instance;
     provider.authListener = this;
-    initMobileNumberState();
   }
-// Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initMobileNumberState() async {
-    if (!await MobileNumber.hasPhonePermission) {
-      await MobileNumber.requestPhonePermission;
-      return;
-    }
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      final mobileNumber = (await MobileNumber.mobileNumber)!;
-      final simCard = (await MobileNumber.getSimCards)!;
-      pp('$mm ................. mobileNumber: $mobileNumber');
-      if (simCard.isNotEmpty) {
-        pp('$mm ... ${simCard.first.carrierName} SIM CARD .... ');
-        myPrettyJsonPrint(simCard.first.toMap());
-      }
-    } on PlatformException catch (e) {
-      debugPrint(" ${E.redDot}Failed to get mobile number because of '${e.message}'");
-    }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {});
+  void _control() async {
+    await _setTexts();
   }
+
   Future _setTexts() async {
-    final sett = await prefs.getSettings();
-    if (sett == null) {
-      return;
-    }
-    signInStrings = await SignInStrings.getTranslated(sett);
+    // signInStrings = await SignInStrings.getTranslated(sett);
     final c = await prefs.getColorAndLocale();
-    loading = await translator.translate(loading, c.locale);
-    waiting = await translator.translate(waiting, c.locale);
+    loading = await translator.translate('loading', c.locale);
+    waiting = await translator.translate('waiting', c.locale);
+    notRegistered = await translator.translate('notRegistered', c.locale);
+    firstTime = await translator.translate('firstTime', c.locale);
+    changeLanguage = await translator.translate('changeLanguage', c.locale);
+    welcome = await translator.translate('welcome', c.locale);
+    signInWithPhone = await translator.translate('signInWithPhone', c.locale);
 
     setState(() {});
   }
@@ -105,25 +113,20 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification>
       [int? forceResendToken]) async {
     this.verificationId = verificationId;
     pp('\n\n$mm ...................... ${E.redDot} onCodeSent; verificationId: $verificationId');
-    final res = await _danceWithFirebase();
-    if (res == 0 && mounted) {
-      pp('$mm ${E.leaf2}${E.leaf2}${E.leaf2}${E.leaf2} ${E.leaf2} about to pop!');
-      Navigator.of(context).pop(true);
-    }
+    _initializeData();
   }
 
   bool initializing = false;
-  Future _danceWithFirebase() async {
-    pp('$mm ...................... ${E.redDot} _danceWithFirebase; '
+  Future _initializeData() async {
+    pp('$mm ...................... ${E.redDot} _initializeData; '
         '\n ${E.blueDot} verificationId: $verificationId ${E.blueDot} smsCode: $smsCode');
     if (smsCode == null) {
-      pp('$mm ...................... ${E.redDot} _danceWithFirebase; quitting, sms-code is null');
+      pp('$mm ...................... ${E.redDot} _initializeData; quitting, sms-code is null');
       return;
     }
 
     setState(() {
       initializing = true;
-      //child = TimerWidget(title: loading, subTitle: loadingRoutes,);
     });
     fb.UserCredential? userCred;
 
@@ -133,13 +136,16 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification>
       userCred =
           await fb.FirebaseAuth.instance.signInWithCredential(authCredential);
       pp('\n$mm user signed in to firebase? userCred: $userCred');
+
       lib.User? mUser;
       pp('$mm seeking to acquire this user from the Kasie database by their id: 🌀🌀🌀${userCred.user?.uid}');
       if (userCred.user != null) {
         mUser = await listApiDog.getUserById(userCred.user!.uid);
       }
+
       if (mUser != null) {
-        pp('$mm KasieTransie user found on database:  🍎 ${mUser.toJson()} 🍎');
+        pp('$mm KasieTransie user found on database:  🍎 ${mUser.name} 🍎');
+        myPrettyJsonPrint(mUser.toJson());
         await prefs.saveUser(mUser);
         final ass = await listApiDog.getAssociationById(mUser.associationId!);
         await prefs.saveAssociation(ass);
@@ -153,25 +159,24 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification>
             if (country.countryId == ass.countryId!) {
               myCountry = country;
               await prefs.saveCountry(myCountry);
+
               break;
             }
           }
+          //
           pp('$mm KasieTransie countries found on database:  🍎 ${countries.length} 🍎');
           pp('$mm KasieTransie; my country the beloved:  🍎 ${myCountry!.name!} 🍎');
+          await countryCitiesIsolate.getCountryCities(myCountry.countryId!);
+          //
+          setState(() {
+            initializing = false;
+          });
+          widget.onUserAuthenticated(mUser);
         } catch (e) {
           pp(e);
         }
-
-
       } else {
-        if (mounted) {
-          showSnackBar(
-              padding: 20,
-              duration: const Duration(seconds: 5),
-              message: 'User not found',
-              context: context);
-          return 9;
-        }
+        widget.onError();
       }
     } catch (e) {
       pp(e);
@@ -198,37 +203,12 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification>
           this.smsCode = smsCode;
           if (verificationId != null) {
             pp('$mm ...onSMSCodeRequested:  verificationId: $verificationId');
-            final res = await _danceWithFirebase();
-            if (res == 0 && mounted) {
-              Navigator.of(context).pop(true);
-            }
+            await _initializeData();
           }
-          // final res = await _danceWithFirebase();
-          // if (res == 0 && mounted) {
-          //   Navigator.of(context).pop(true);
-          // }
-
-          // provider.verifySMSCode(
-          //     action: AuthAction.signIn,
-          //     verificationId: verificationId,
-          //     code: smsCode,
-          //     confirmationResult: confirmationResult);
-          //_verifyPhoneNumber();
         },
       );
     });
   }
-
-  bool busy = false;
-  bool verificationCompleted = false;
-  final firebaseAuth = fb.FirebaseAuth.instance;
-  final phoneController = TextEditingController(text: "+19095550008");
-  final codeController = TextEditingController(text: "123456");
-
-  // lib.User? user;
-  SignInStrings? signInStrings;
-  bool verificationFailed = false;
-  String? phoneVerificationId;
 
   @override
   void onVerificationCompleted(fb.PhoneAuthCredential credential) {
@@ -237,31 +217,76 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification>
     provider.onCredentialReceived(credential, AuthAction.signIn);
   }
 
+  ColorAndLocale? colorAndLocale;
+
+  Future _navigateToColor() async {
+    pp('$mm _navigateToColor ......');
+    await navigateWithScale(LanguageAndColorChooser(
+      onLanguageChosen: () async {
+        await _setTexts();
+        widget.onLanguageChosen();
+      },
+    ), context);
+    colorAndLocale = await prefs.getColorAndLocale();
+    await _setTexts();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-      appBar: AppBar(
-        title:  Text(signInStrings == null? 'Phone Authentication': signInStrings!.phoneAuth),
-      ),
-      body: Center(
-          child: Padding(
-        padding: const EdgeInsets.all(2.0),
-        child: Padding(
-          padding: const EdgeInsets.all(2.0),
-          child: Stack(
-            children: [
-              child,
-              initializing
-                  ? Positioned(
-                      child: TimerWidget(
-                      title: loading,
-                    ))
-                  : const SizedBox()
-            ],
-          ),
-        ),
-      )),
+      // appBar: AppBar(
+      //   title: Text(signInStrings == null
+      //       ? 'Phone Authentication'
+      //       : signInStrings!.phoneAuth),
+      // ),
+      body: _showVerifier
+          ? Center(
+              child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Padding(
+                padding: const EdgeInsets.all(2.0),
+                child: Stack(
+                  children: [
+                    child,
+                    initializing
+                        ? Positioned(
+                            left: 2,
+                            right: 2,
+                            top: 8,
+                            bottom: 8,
+                            child: TimerWidget(
+                              title: loading,
+                            ))
+                        : const SizedBox()
+                  ],
+                ),
+              ),
+            ))
+          : Center(
+              child: Card(
+                shape: getDefaultRoundedBorder(),
+                elevation: 8,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SignInLanding(
+                      welcome: welcome,
+                      firstTime: firstTime,
+                      changeLanguage: changeLanguage,
+                      signInWithPhone: signInWithPhone,
+                      startEmailLinkSignin: '',
+                      onNavigateToEmailAuth: () {},
+                      onNavigateToPhoneAuth: () {
+                        setState(() {
+                          _showVerifier = true;
+                        });
+                      },
+                      onNavigateToColor: () {
+                        _navigateToColor();
+                      }),
+                ),
+              ),
+            ),
     ));
   }
 
@@ -286,17 +311,12 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification>
   @override
   void onCanceled() {
     pp('$mm ... onCanceled');
-
-    setState(() {
-      child = const Text("Phone verification cancelled");
-    });
+    widget.onCancel();
   }
 
   @override
   void onCredentialLinked(fb.AuthCredential credential) {
     pp('$mm ... onCredentialLinked ... navigate to ??? credential: $credential');
-
-    //Navigator.of(context).pushReplacementNamed('/profile');
   }
 
   @override
@@ -324,9 +344,8 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification>
 
   @override
   Future<void> onSignedIn(fb.UserCredential credential) async {
-    pp('\n\n$mm ...... onSignedIn: ${E.blueDot} credential: $credential ${E.leaf}${E.leaf}${E.leaf}');
-
-    Navigator.of(context).pop();
+    pp('\n\n$mm ...... onSignedIn: ${E.blueDot} credential: '
+        '$credential ${E.leaf}${E.leaf}${E.leaf} - doin nuthin!');
   }
 
   @override

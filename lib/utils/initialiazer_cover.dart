@@ -87,7 +87,7 @@ class InitializerCoverState extends State<InitializerCover>
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Card(
-            shape: getRoundedBorder(radius: 16),
+            shape: getDefaultRoundedBorder(),
             elevation: 8,
             child: Padding(
               padding: const EdgeInsets.all(16.0),

@@ -41,6 +41,33 @@ class LocalFinder {
     return null;
   }
 
+  Future<RoutePoint?> findNearestRoutePoint(
+      {required double latitude,
+        required double longitude,
+        required double radiusInMetres}) async {
+    final routePoints = listApiDog.realm.all<RoutePoint>();
+
+    final map = HashMap<double, RoutePoint>();
+    for (var value in routePoints) {
+      final dist = GeolocatorPlatform.instance.distanceBetween(
+          latitude,
+          longitude,
+          value.position!.coordinates[1],
+          value.position!.coordinates[0]);
+      map[dist] = value;
+    }
+    List list = map.keys.toList();
+    list.sort();
+    if (list.isNotEmpty) {
+      final m = map[list.first];
+      if (list.first <= radiusInMetres) {
+        pp('$mm findNearestRoutePoint, found: ${E.redDot} index: ${m!.index} route: ${m!.routeName}');
+        return m;
+      }
+    }
+    return null;
+  }
+
   Future<List<RouteLandmark>> findNearestRouteLandmarks(
       {required double latitude,
       required double longitude,
@@ -193,4 +220,57 @@ class LocalFinder {
 
     return fList;
   }
+
+  Future<List<City>> findNearestCities(
+      {required double latitude,
+      required double longitude,
+      required double radiusInMetres}) async {
+    final start = DateTime.now();
+
+    final cities = listApiDog.realm.all<City>();
+    pp('$mm findNearestCities, found all in realm: ${cities.length}');
+
+    final map = HashMap<double, City>();
+    for (var value in cities) {
+      final dist = GeolocatorPlatform.instance.distanceBetween(
+          latitude,
+          longitude,
+          value.position!.coordinates[1],
+          value.position!.coordinates[0]);
+      if (dist <= radiusInMetres) {
+        map[dist] = value;
+      }
+    }
+    pp('$mm findNearestCities, ${E.appleRed} cities found within radius: ${map.length}');
+
+    final cityDistances = <CityDistance>[];
+    map.forEach((key, value) {
+      final cd = CityDistance(key, value);
+      cityDistances.add(cd);
+    });
+    cityDistances
+        .sort((a, b) => a.distanceInMetres.compareTo(b.distanceInMetres));
+    var citiesFound = <City>[];
+
+    if (cityDistances.isNotEmpty) {
+      for (var distance in cityDistances) {
+        citiesFound.add(distance.city);
+      }
+    }
+
+    pp('$mm findNearestCities, found: ${citiesFound.length}');
+    final end = DateTime.now();
+
+    pp('\n\n$mm findNearestCities, ${E.leaf2}${E.leaf2}${E.leaf2} '
+        'time elapsed: ${end.difference(start).inMilliseconds} milliseconds ${E.redDot}\n\n');
+
+    return citiesFound;
+  }
+}
+
+class CityDistance {
+  late double distanceInMetres;
+  late City city;
+
+  CityDistance(this.distanceInMetres, this.city);
 }

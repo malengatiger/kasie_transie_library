@@ -9,6 +9,7 @@ import 'package:kasie_transie_library/utils/local_finder.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../isolates/routes_isolate.dart';
 import '../l10n/translation_handler.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
@@ -80,7 +81,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
 
       for (var value in routes) {
         final lrs = await listApiDog.getRouteLandmarks(value.routeId!, false);
-        final points = await listApiDog.getRoutePoints(value.routeId!, false);
+        final points =await routesIsolate.getRoutePoints(value.routeId!, false);
         final bag = RouteDataBag(
             route: value, routeLandmarks: lrs, routePoints: points);
         bags.add(bag);
@@ -252,7 +253,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
             ?  Center(
                 child: Card(
                   elevation: 8,
-                  shape: getRoundedBorder(radius: 16),
+                  shape: getDefaultRoundedBorder(),
                   child: SizedBox(
                     width: 300,
                     height: 300,
@@ -292,7 +293,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
                       Navigator.of(context).pop();
                     },
                     child: Card(
-                      shape: getRoundedBorder(radius: 16),
+                      shape: getDefaultRoundedBorder(),
                       color: Colors.black38,
                       elevation: 8,
                       child: SizedBox(

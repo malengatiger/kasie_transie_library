@@ -4,9 +4,9 @@ import '../utils/emojis.dart';
 import '../utils/functions.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart' as env;
 
-
 final AppAuth appAuth = AppAuth(FirebaseAuth.instance);
 String? fcmToken;
+
 class AppAuth {
   static const locks = '🔐🔐🔐🔐🔐🔐🔐🔐 AppAuth: ';
   final FirebaseAuth? firebaseAuth;
@@ -14,18 +14,22 @@ class AppAuth {
   AppAuth(this.firebaseAuth);
 
   Future<String?> getAuthToken() async {
-    String? token;
-    if (firebaseAuth!.currentUser != null) {
-      token = await firebaseAuth!.currentUser!.getIdToken();
+    try {
+      String? token;
+      if (firebaseAuth!.currentUser != null) {
+        token = await firebaseAuth!.currentUser!.getIdToken();
+      }
+      if (token != null) {
+        pp('$locks getAuthToken has a 🌸🌸 GOOD!! 🌸🌸 Firebase id token 🍎');
+      } else {
+        pp('$locks getAuthToken has fallen down. ${E.redDot}${E.redDot}${E.redDot}  Firebase id token not found 🍎');
+      }
+      fcmToken = token;
+      return token;
+    } catch (e) {
+      pp(e);
     }
-    if (token != null) {
-      // pp('$locks getAuthToken has a 🌸🌸 GOOD!! 🌸🌸 Firebase id token 🍎');
-    } else {
-      pp('$locks getAuthToken has fallen down. ${E.redDot}${E.redDot}${E.redDot}  Firebase id token not found 🍎');
-
-    }
-    fcmToken = token;
-    return token;
+    return '';
   }
 
   Future signInVehicle() async {
@@ -49,5 +53,4 @@ class AppAuth {
       throw Exception('Firebase vehicle authentication failed');
     }
   }
-
 }

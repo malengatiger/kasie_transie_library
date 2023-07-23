@@ -7,22 +7,29 @@ import 'package:geolocator/geolocator.dart' as geo;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/local_finder.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 
+import '../isolates/routes_isolate.dart';
+
 class AssociationRouteMaps extends StatefulWidget {
   const AssociationRouteMaps({
     Key? key,
+    this.latitude,
+    this.longitude,
+    this.radiusInMetres,
   }) : super(key: key);
 
+  final double? latitude, longitude, radiusInMetres;
   @override
   AssociationRouteMapsState createState() => AssociationRouteMapsState();
 }
 
 class AssociationRouteMapsState extends State<AssociationRouteMaps> {
-  static const defaultZoom = 16.0;
+  static const defaultZoom = 10.0;
   final Completer<GoogleMapController> _mapController = Completer();
 
   CameraPosition? _myCurrentCameraPosition = const CameraPosition(
@@ -55,6 +62,10 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   @override
   void initState() {
     super.initState();
+    _control();
+  }
+
+  void _control() async {
     _buildLandmarkIcons();
     _getCurrentLocation();
     _getUser();
@@ -66,16 +77,22 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     });
     try {
       _user = await prefs.getUser();
-      final loc = await locationBloc.getLocation();
-      pp('\n\n$mm .......... findAssociationRoutesByLocation ...');
-
-      routes = await localFinder.findNearestRoutes(latitude: loc.latitude, longitude: loc.longitude,
-          radiusInMetres: 1000 * 100);
-
+      if (widget.latitude != null && widget.longitude != null) {
+        pp('\n\n$mm .......... find Association Routes by location ...');
+        routes = await localFinder.findNearestRoutes(
+            latitude: widget.latitude!,
+            longitude: widget.longitude!,
+            radiusInMetres:
+                widget.radiusInMetres == null ? 2000 : widget.radiusInMetres!);
+      } else {
+        pp('\n\n$mm .......... get all Association Routes ...');
+        routes = await listApiDog
+            .getRoutes(AssociationParameter(_user!.associationId!, false));
+      }
     } catch (e) {
       pp(e);
       showSnackBar(
-          backgroundColor: Colors.pink[300],
+          backgroundColor: Colors.amber[700],
           textStyle: myTextStyleMediumBlack(context),
           message: 'Error: $e',
           context: context);
@@ -83,6 +100,49 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     setState(() {
       busy = false;
     });
+    _showRouteDialog();
+
+  }
+
+  void _showRouteDialog() async {
+    showDialog(
+        context: context,
+        builder: (ctx) {
+          return SizedBox(width: 480,
+            child: Card(
+              shape: getDefaultRoundedBorder(),
+              elevation: 8,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ListView.builder(
+                    itemCount: routes.length,
+                    itemBuilder: (ctx, index) {
+                      final route = routes.elementAt(index);
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            routeSelected = route;
+                          });
+                          Navigator.of(context).pop();
+                          _getRouteMap(route);
+                        },
+                        child: Card(
+                          shape: getRoundedBorder(radius: 12),
+                          elevation: 12,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text(
+                              '${route.name}',
+                              style: myTextStyleSmall(context),
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+              ),
+            ),
+          );
+        });
   }
 
   void _getRouteMap(lib.Route route) async {
@@ -141,7 +201,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
               style: myTextStyleLarge(context),
             ),
             content: Card(
-              shape: getRoundedBorder(radius: 16),
+              shape: getDefaultRoundedBorder(),
               child: const Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text('This route has not been completely defined yet.'),
@@ -171,7 +231,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
       _user = await prefs.getUser();
       pp('$mm getting existing RoutePoints .......');
       existingRoutePoints =
-          await listApiDog.getRoutePoints(route.routeId!, refresh);
+      await routesIsolate.getRoutePoints(routeSelected!.routeId!, refresh);
     } catch (e) {
       pp(e);
     }
@@ -193,14 +253,13 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     _addPolyLine();
     landmarkIndex = 0;
     for (var rl in routeLandmarks) {
-      _markers.add(Marker(markerId: MarkerId(rl.landmarkId!),
-      icon: numberMarkers.elementAt(landmarkIndex),
-      position: LatLng(rl.position!.coordinates[1], rl.position!.coordinates[0]),
-        infoWindow: InfoWindow(
-          title: rl.landmarkName,
-          snippet: '🍎Part of ${rl.routeName}'
-        )
-      ));
+      _markers.add(Marker(
+          markerId: MarkerId(rl.landmarkId!),
+          icon: numberMarkers.elementAt(landmarkIndex),
+          position:
+              LatLng(rl.position!.coordinates[1], rl.position!.coordinates[0]),
+          infoWindow: InfoWindow(
+              title: rl.landmarkName, snippet: '🍎Part of ${rl.routeName}')));
       landmarkIndex++;
     }
     setState(() {});
@@ -244,7 +303,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
       final latLng = LatLng(
           route.routeStartEnd!.startCityPosition!.coordinates.last,
           route.routeStartEnd!.startCityPosition!.coordinates.first);
-      var cameraPos = CameraPosition(target: latLng, zoom: 11.0);
+      var cameraPos = CameraPosition(target: latLng, zoom: 12.0);
       final GoogleMapController controller = await _mapController.future;
       controller.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
       setState(() {});
@@ -318,20 +377,10 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Row(mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Expanded(
-                child: RouteDropDown(
-                    routes: routes,
-                    onRoutePicked: (r) {
-                      setState(() {
-                        routeSelected = r;
-                      });
-                      _getRouteMap(r);
-                    }),
-              ),
-            ],
-          ),
+          title: TextButton(onPressed: () {
+            _showRouteDialog();
+          },
+          child: Text('${routes.length} Routes')),
         ),
         key: _key,
         body: _myCurrentCameraPosition == null
@@ -432,11 +481,18 @@ class RouteDropDown extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = <DropdownMenuItem<lib.Route>>[];
     for (var r in routes) {
-      items.add(DropdownMenuItem<lib.Route>(value: r, 
-          child: Text(r.name!, style: myTextStyleSmall(context),)));
+      items.add(DropdownMenuItem<lib.Route>(
+          value: r,
+          child: Text(
+            r.name!,
+            style: myTextStyleSmall(context),
+          )));
     }
     return DropdownButton(
-        hint:  Text('Select Route', style: myTextStyleSmall(context),),
+        hint: Text(
+          'Select Route',
+          style: myTextStyleSmall(context),
+        ),
         items: items,
         onChanged: (r) {
           if (r != null) {

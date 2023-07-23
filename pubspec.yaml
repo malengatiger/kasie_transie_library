@@ -50,7 +50,6 @@ dependencies:
   equatable: ^2.0.5
   permission_handler: ^10.3.0
   qr_code_scanner: ^1.0.1
-  workmanager: ^0.5.1
   audioplayers: ^4.1.0
   geojson: ^1.0.0
   location: ^4.4.0
@@ -67,6 +66,7 @@ dependencies:
   sms_autofill: ^2.3.0
   numeric_keyboard: ^1.1.0
   mobile_number: ^2.1.1
+  flutter_analog_clock: ^1.0.3
 
   url_launcher:
   flutter_polyline_points:

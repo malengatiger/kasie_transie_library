@@ -29,7 +29,7 @@ class TotalWidget extends StatelessWidget {
           onTapped();
         },
         child: Card(
-          shape: getRoundedBorder(radius: 16),
+          shape: getDefaultRoundedBorder(),
           elevation: 8,
           child: Center(
             child: SizedBox(

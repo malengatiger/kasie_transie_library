@@ -7,6 +7,7 @@ import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
+import 'package:realm/realm.dart' as rlm;
 
 import '../data/calculated_distance_list.dart';
 import '../data/route_point_list.dart';
@@ -173,6 +174,7 @@ class DataApiDog {
       items.add(buildCalculatedDistance(cd));
     }
     listApiDog.realm.write(() {
+      listApiDog.realm.deleteAll<CalculatedDistance>();
       listApiDog.realm.addAll<CalculatedDistance>(items);
     });
     pp('$mm calc distances cached: ${items.length}');
@@ -192,14 +194,41 @@ class DataApiDog {
 
   Future<User> updateUser(User user) async {
     pp('$mm .................................'
-        'user to be updated on mongo database ${E.redDot} check that user is passed ...');
+        'user to be updated on mongo database ${E.redDot} '
+        'check that user is passed ...');
 
     myPrettyJsonPrint(user.toJson());
     final cmd = '${url}updateUser';
     final res = await _callPost(cmd, user.toJson());
-    pp('$mm user updated on mongo database ... ${E.redDot} check if password present');
+    pp('$mm user updated on mongo database ... ${E.redDot} '
+        'check if password present');
     myPrettyJsonPrint(res);
     final r = buildUser(res);
+
+    listApiDog.realm.write(() {
+      listApiDog.realm.add<User>(r, update: true);
+    });
+
+    return r;
+  }
+
+  Future<Vehicle> updateVehicle(Vehicle car) async {
+    pp('$mm .................................'
+        'car to be updated on mongo database ${E.redDot} '
+        'check that car is passed ...');
+    myPrettyJsonPrint(car.toJson());
+
+    final cmd = '${url}updateVehicle';
+    final res = await _callPost(cmd, car.toJson());
+    pp('$mm car updated on mongo database ... ${E.redDot} '
+        'check if owner fields present');
+    myPrettyJsonPrint(res);
+    final r = buildVehicle(res);
+
+    listApiDog.realm.write(() {
+      listApiDog.realm.add<Vehicle>(r, update: true);
+    });
+
     return r;
   }
 
@@ -306,6 +335,39 @@ class DataApiDog {
     return res;
   }
 
+  Future<List<RoutePoint>> deleteRoutePointsFromIndex(String routeId, int index) async {
+    final cmd = '${url}deleteRoutePointsFromIndex?routeId=$routeId&index=$index';
+    List res = await _sendHttpGET(cmd);
+    pp('$mm deleteRoutePointsFromIndex happened ... returned ');
+    List<RoutePoint> routePoints = [];
+
+    try {
+      rlm.RealmResults<RoutePoint> existing = listApiDog.realm.query('routeId == \$0',[routeId]);
+      for (var element in existing) {
+        routePoints.add(element);
+      }
+      for (var point in routePoints) {
+        listApiDog.realm.write(() {
+          listApiDog.realm.delete<RoutePoint>(point);
+        });
+      }
+      routePoints.clear();
+      for (var value in res) {
+        routePoints.add(buildRoutePoint(value));
+      }
+
+      listApiDog.realm.write(() {
+        listApiDog.realm.addAll<RoutePoint>(routePoints);
+      });
+      pp('$mm remaining routePoints cached: ${routePoints.length} ');
+
+    } catch (e) {
+      pp(e);
+    }
+
+    return routePoints;
+  }
+
   Future deleteLandmark(String landmarkId) async {
     final cmd = '${url}deleteLandmark?landmarkId=$landmarkId';
     final res = await _sendHttpGET(cmd);
@@ -360,6 +422,7 @@ class DataApiDog {
 
     return r;
   }
+
   Future<VehicleMediaRequest> addVehicleMediaRequest(VehicleMediaRequest vehicleMediaRequest) async {
     final bag = vehicleMediaRequest.toJson();
     final cmd = '${url}addVehicleMediaRequest';
@@ -423,6 +486,7 @@ class DataApiDog {
 
     return r;
   }
+
   Future<AmbassadorPassengerCount> addAmbassadorPassengerCount(AmbassadorPassengerCount count) async {
     final bag = count.toJson();
     final cmd = '${url}addAmbassadorPassengerCount';
@@ -458,7 +522,6 @@ class DataApiDog {
       throw Exception('No fucking token!');
     }
     headers['Authorization'] = 'Bearer $token';
-    pp('$mm body of request: $mBag');
     try {
       var resp = await client
           .post(

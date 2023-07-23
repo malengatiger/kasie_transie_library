@@ -143,6 +143,42 @@ Color getColor(String stringColor) {
       return Colors.black;
   }
 }
+Random random = Random(DateTime.now().millisecondsSinceEpoch);
+
+(Color, String) getRandomColor() {
+  final colors = ['white', 'red', 'black', 'amber', 'yellow','pink','purple',
+    'green', 'teal', 'indigo', 'blue', 'orange'];
+  final index = random.nextInt(colors.length - 1);
+  final stringColor = colors.elementAt(index);
+  switch (stringColor) {
+    case 'white':
+      return (Colors.white, 'white');
+    case 'red':
+      return (Colors.red, 'red');
+    case 'black':
+      return (Colors.black,'black');
+    case 'amber':
+      return (Colors.amber, 'amber');
+    case 'yellow':
+      return (Colors.yellow, 'yellow');
+    case 'pink':
+      return (Colors.pink, 'pink');
+    case 'purple':
+      return (Colors.purple, 'purple');
+    case 'green':
+      return (Colors.green,'green');
+    case 'teal':
+      return (Colors.teal, 'teal');
+    case 'indigo':
+      return (Colors.indigo, 'indigo');
+    case 'blue':
+      return (Colors.blue, 'blue');
+    case 'orange':
+      return (Colors.orange, 'orange');
+    default:
+      return (Colors.black, 'black');
+  }
+}
 
 Future<File> getPhotoThumbnail({required File file}) async {
   final Directory directory = await getApplicationDocumentsDirectory();
@@ -274,6 +310,9 @@ Color getTextColorForBackground(Color backgroundColor) {
 
 getRoundedBorder({required double radius}) {
   return RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius));
+}
+getDefaultRoundedBorder() {
+  return RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0));
 }
 
 TextStyle myTextStyleSmall(BuildContext context) {

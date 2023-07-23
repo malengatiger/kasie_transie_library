@@ -388,7 +388,7 @@ class VideoRecorderState extends State<VideoRecorder>
                             left: 20,
                             right: 20,
                             child: Card(
-                              shape: getRoundedBorder(radius: 16),
+                              shape: getDefaultRoundedBorder(),
                               child: SizedBox(
                                 height: 400,
                                 child: Padding(
@@ -484,7 +484,7 @@ class VideoRecorderState extends State<VideoRecorder>
                     right: 48,
                     top: 8,
                     child: Card(
-                      shape: getRoundedBorder(radius: 16),
+                      shape: getDefaultRoundedBorder(),
                       color: Colors.black12,
                       elevation: 8,
                       child: Padding(
@@ -520,7 +520,7 @@ class VideoRecorderState extends State<VideoRecorder>
       tablet: (ctx) {
         return Card(
           elevation: 8,
-          shape: getRoundedBorder(radius: 16),
+          shape: getDefaultRoundedBorder(),
           child: SizedBox(
             width: 600,
             height: 600,
@@ -619,7 +619,7 @@ class VideoRecorderState extends State<VideoRecorder>
                     right: 8,
                     top: 8,
                     child: Card(
-                      shape: getRoundedBorder(radius: 16),
+                      shape: getDefaultRoundedBorder(),
                       color: Colors.black12,
                       elevation: 8,
                       child: Padding(
@@ -699,7 +699,7 @@ class VideoRecorderControls extends StatelessWidget {
       width: 360,
       child: Card(
         elevation: 8,
-        shape: getRoundedBorder(radius: 16),
+        shape: getDefaultRoundedBorder(),
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Row(

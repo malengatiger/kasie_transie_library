@@ -11,7 +11,7 @@ class RouteWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-        shape: getRoundedBorder(radius: 16),
+        shape: getDefaultRoundedBorder(),
         elevation: 8,
         child: ListTile(
           title: Text('${route.name}'),

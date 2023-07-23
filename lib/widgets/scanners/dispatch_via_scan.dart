@@ -18,7 +18,7 @@ import 'package:kasie_transie_library/widgets/route_widget.dart';
 import 'package:badges/badges.dart' as bd;
 import 'package:realm/realm.dart';
 
-import 'media_reminder.dart';
+import '../media_reminder.dart';
 
 
 class DispatchViaScan extends StatefulWidget {
@@ -189,7 +189,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
         builder: (ctx) {
           return AlertDialog(
             elevation: 16.0,
-            shape: getRoundedBorder(radius: 16),
+            shape: getDefaultRoundedBorder(),
             title: Text(
               dispatchTaxi == null ? 'Dispatch Taxi?' : dispatchTaxi!,
               style: myTextStyleMediumLargeWithColor(
@@ -263,11 +263,12 @@ class DispatchViaScanState extends State<DispatchViaScan>
                 padding: const EdgeInsets.all(16.0),
                 child: ElevatedButton(
                     onPressed: () {
-                      Navigator.of(context).pop();
                       setState(() {
                         _showRoutes = false;
                       });
                       _sendTheDispatchRecord();
+                      Navigator.of(context).pop();
+
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -363,7 +364,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Card(
-                shape: getRoundedBorder(radius: 16),
+                shape: getDefaultRoundedBorder(),
                 elevation: 4,
                 child: Column(
                   children: [
@@ -423,7 +424,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
                         : Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: Card(
-                              shape: getRoundedBorder(radius: 16),
+                              shape: getDefaultRoundedBorder(),
                               elevation: 12,
                               child: QRScanner(
                                   onCarScanned: onCarScanned,
@@ -467,7 +468,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
                     right: 4,
                     child: Center(
                       child: Card(
-                        shape: getRoundedBorder(radius: 16),
+                        shape: getDefaultRoundedBorder(),
                         elevation: 8,
                         child: SizedBox(
                           height: 300,

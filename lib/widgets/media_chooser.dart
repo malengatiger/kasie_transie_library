@@ -22,7 +22,7 @@ class MediaChooser extends StatelessWidget {
       width: 300,
       child: Card(
         color: Colors.black26,
-        shape: getRoundedBorder(radius: 16),
+        shape: getDefaultRoundedBorder(),
         elevation: 8,
         child: Column(
           children: [

@@ -180,7 +180,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
                 width: 480,
                 height: 640,
                 child: Card(
-                  shape: getRoundedBorder(radius: 16),
+                  shape: getDefaultRoundedBorder(),
                   elevation: 8,
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),

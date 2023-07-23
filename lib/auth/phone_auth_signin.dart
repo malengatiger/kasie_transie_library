@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/material.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
+import 'package:kasie_transie_library/isolates/country_cities_isolate.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
@@ -118,6 +119,7 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
         }
         pp('$mm KasieTransie users found on database:  🍎 ${users.length} 🍎');
         pp('$mm KasieTransie my country:  🍎 ${myCountry!.name!} 🍎');
+        countryCitiesIsolate.getCountryCities(myCountry.countryId!);
         setState(() {
           initializing = true;
         });
@@ -257,7 +259,7 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
             padding: const EdgeInsets.all(16.0),
             child: Card(
               elevation: 4,
-              shape: getRoundedBorder(radius: 16),
+              shape: getDefaultRoundedBorder(),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: SingleChildScrollView(

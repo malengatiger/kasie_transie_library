@@ -33,7 +33,7 @@ class _SplashWidgetState extends State<SplashWidget> {
         duration: const Duration(milliseconds: 3000),
         child: Card(
           elevation: 24.0,
-          // shape: getRoundedBorder(radius: 16),
+          // shape: getDefaultRoundedBorder(),
           child: Column(
             children: [
               const SizedBox(

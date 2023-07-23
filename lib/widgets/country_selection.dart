@@ -278,7 +278,7 @@ class _CountrySearchState extends State<CountrySearch> {
                       },
                       child: Card(
                         elevation: 2,
-                        shape: getRoundedBorder(radius: 16),
+                        shape: getDefaultRoundedBorder(),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Text('${cntry.name}'),

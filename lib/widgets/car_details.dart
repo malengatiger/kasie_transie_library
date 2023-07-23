@@ -44,7 +44,7 @@ class CarDetailsState extends State<CarDetails>
       departuresText,
       heartbeatText,
       daysText,
-      locationRequestSent,
+      locationRequestSent, photoRequestSent = 'Photo request sent',
       historyCars,
       requestMedia,
       passengerCountsText,
@@ -146,6 +146,7 @@ class CarDetailsState extends State<CarDetails>
     tapToClose = await translator.translate('tapToClose', c.locale);
     requestMedia = await translator.translate('requestMedia', c.locale);
     passengerCountsText = await translator.translate('passengersIn', c.locale);
+    photoRequestSent = await translator.translate('photoRequestSent', c.locale);
 
     locationRequestSent =
         await translator.translate('locationRequestSent', c.locale);
@@ -226,6 +227,7 @@ class CarDetailsState extends State<CarDetails>
         showSnackBar(
             padding: 4,
             duration: const Duration(seconds: 5),
+            textStyle: myTextStyleSmallBlack(context),
             message: locationRequestSent == null
                 ? 'Vehicle Location Request has been sent'
                 : locationRequestSent!,
@@ -256,6 +258,16 @@ class CarDetailsState extends State<CarDetails>
     final result = await dataApiDog.addVehicleMediaRequest(m);
     pp('$mm result of backend call ...');
     myPrettyJsonPrint(result.toJson());
+    if (mounted) {
+      showSnackBar(
+          padding: 4,
+          duration: const Duration(seconds: 5),
+          textStyle: myTextStyleSmallBlack(context),
+          message: photoRequestSent == null
+              ? 'Vehicle Photos Request has been sent'
+              : photoRequestSent!,
+          context: context);
+    }
   }
 
   @override
@@ -272,7 +284,7 @@ class CarDetailsState extends State<CarDetails>
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Card(
-                shape: getRoundedBorder(radius: 16),
+                shape: getDefaultRoundedBorder(),
                 elevation: 4,
                 child: Column(
                   children: [

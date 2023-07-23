@@ -3,8 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart' as dot;
+import 'package:kasie_transie_library/bloc/app_auth.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
+import 'package:kasie_transie_library/data/schemas.dart' as lib;
 import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
@@ -14,7 +17,6 @@ import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/language_and_color_chooser.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import 'package:open_mail_app/open_mail_app.dart' as mail;
-import 'package:flutter_dotenv/flutter_dotenv.dart' as dot;
 
 import '../../isolates/vehicles_isolate.dart';
 
@@ -64,7 +66,9 @@ Future<void> initializeEmailLinkProvider(ActionCodeSettings action) async {
 }
 
 class DamnEmailLink extends StatefulWidget {
-  const DamnEmailLink({Key? key}) : super(key: key);
+  const DamnEmailLink({Key? key, required this.onLanguageChosen}) : super(key: key);
+
+  final Function onLanguageChosen;
 
   @override
   DamnEmailLinkState createState() => DamnEmailLinkState();
@@ -106,19 +110,19 @@ class DamnEmailLinkState extends State<DamnEmailLink>
   String pleaseCheckEmail = "Check email";
   bool busy = false;
   late String adminEmail, adminPassword;
+
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
-    _setTexts();
     emailLinkAuthProvider.authListener = this;
     _check();
   }
 
   Future<void> _check() async {
     await dot.dotenv.load();
-    adminEmail = dot.dotenv.get('EMAIL');
-    adminPassword = dot.dotenv.get('PASSWORD');
+
+    await _setTexts();
 
     if (FirebaseAuth.instance.currentUser != null) {
       if (mounted) {
@@ -136,7 +140,7 @@ class DamnEmailLinkState extends State<DamnEmailLink>
     }
   }
 
-  void _setTexts() async {
+  Future _setTexts() async {
     final c = await prefs.getColorAndLocale();
     emailAuthTitle = await translator.translate('emailAuthTitle', c.locale);
     desc = await translator.translate('desc', c.locale);
@@ -156,7 +160,6 @@ class DamnEmailLinkState extends State<DamnEmailLink>
     loading = await translator.translate('loading', c.locale);
     waitingForEmail = await translator.translate('waitingForEmail', c.locale);
 
-
     pleaseCheckEmail = await translator.translate('pleaseCheckEmail', c.locale);
     setState(() {});
     Future.delayed(const Duration(milliseconds: 100), () {
@@ -165,81 +168,124 @@ class DamnEmailLinkState extends State<DamnEmailLink>
   }
 
   void _chooseColor() async {
-    await navigateWithScale(const LanguageAndColorChooser(), context);
+    await navigateWithScale( LanguageAndColorChooser(onLanguageChosen: (){
+      _setTexts();
+      widget.onLanguageChosen();
+    },), context);
     _setTexts();
   }
 
   void _sendEmail() async {
     pp('\n\n$mm ... _sendEmail checking if email is known ....');
-    setState(() {
-      busy = true;
-    });
+
+    adminEmail = dot.dotenv.get('EMAIL');
+    adminPassword = dot.dotenv.get('PASSWORD');
 
     final email = emailController.value.text;
+    if (email.isEmpty) {
+      {
+        showSnackBar(message: 'Please enter email', context: context);
+        return;
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        busy = true;
+      });
+    }
+    //use admin user to get the basics set up
     final adminCreds = await FirebaseAuth.instance
         .signInWithEmailAndPassword(email: adminEmail, password: adminPassword);
-
+    final tok = await appAuth.getAuthToken();
+    pp(tok);
     try {
       if (adminCreds.user != null) {
-        pp('$mm ... admin user logged in: creds: $adminCreds');
-        final user = await listApiDog.getUserByEmail(email);
-        if (user != null) {
-          await prefs.saveUser(user);
-          await prefs.saveEmail(email);
-          user.password = 'pass123';
-          final mUser = await dataApiDog.updateUser(user);
+        pp('\n$mm ...................................'
+            ' admin user logged in: creds: $adminCreds getUserByEmail: $email');
+        final userFromRemote = await listApiDog.getUserByEmail(email);
+        if (userFromRemote != null) {
+          userFromRemote.password = 'pass123';
+          final mUser = await dataApiDog.updateUser(userFromRemote);
+          //sign out the admin userFromRemote ... then sign in new userFromRemote
           await FirebaseAuth.instance.signOut();
+          pp('\n$mm ...................................'
+              ' ${E.redDot} admin user logged out!');
+          //sign in the device updated user
           final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
-              email: email, password: mUser.password!);
-          await prefs.saveUser(user);
-          pp('$mm ... signInWithEmailAndPassword: $email should be cool, Boss! ${E.blueDot} check cred: $cred');
+              email: mUser.email!, password: mUser.password!);
+
           if (cred.user != null) {
             pp('$mm ... signInWithEmailAndPassword: ${E.leaf2} USER IS SIGNED IN!!! will send email with link, '
                 'but will start routesIsolate and vehicleIsolate ....');
-
-            vehicleIsolate.getVehicles(mUser.associationId!);
-            routesIsolate.getRoutes(mUser.associationId!);
+            await prefs.saveEmail(email);
+            await prefs.saveUser(userFromRemote);
+            await vehicleIsolate.getVehicles(mUser.associationId!);
+            await routesIsolate.getRoutes(mUser.associationId!);
 
             try {
               pp('$mm emailLinkAuthProvider: ${emailLinkAuthProvider.providerId} '
-                  '${E.diamond} start listening for email link tap! '
+                  '${E.diamond} ......... start listening for email link tap! '
                   '${E.diamond}${E.diamond}${E.diamond}');
 
               FirebaseDynamicLinks.instance.onLink
                   .listen((dynamicLinkData) async {
-                final Uri deepLink = dynamicLinkData.link;
-                bool isEmailLink = FirebaseAuth.instance
-                    .isSignInWithEmailLink(deepLink.toString());
-                pp('\n\n$mm ...... deepLink is email link? $isEmailLink ${E.appleGreen}');
-                pp(dynamicLinkData.asMap());
-                setState(() {
-                  busy = false;
-                });
-                if (isEmailLink) {
-                  showSnackBar(
-                      message: signedIn!,
-                      duration: const Duration(seconds: 10),
-                      context: context);
-                  Navigator.of(context).pop(true);
-                } else {
-                  await FirebaseAuth.instance.signOut();
-                }
+                await _signInWitheReceivedEmailLink(dynamicLinkData, mUser);
               });
+
+              //send the link .....
               Future.delayed(const Duration(seconds: 10), () {
                 emailLinkAuthProvider.sendLink(email);
-                // if (mounted) {
-                //   Navigator.of(context).pop(true);
-                // }
               });
             } catch (e) {
               pp(e);
+              _displayError();
             }
           }
         }
       }
     } catch (e) {
       pp(e);
+      _displayError();
     }
+  }
+
+  Future<void> _signInWitheReceivedEmailLink(
+      PendingDynamicLinkData dynamicLinkData, lib.User mUser) async {
+    final Uri deepLink = dynamicLinkData.link;
+    bool isEmailLink =
+        FirebaseAuth.instance.isSignInWithEmailLink(deepLink.toString());
+    pp('\n\n$mm ...... Yebo! ${E.leaf} ${E.leaf}${E.leaf}${E.leaf}'
+        ' deepLink is email link? $isEmailLink ${E.appleGreen}');
+    myPrettyJsonPrint(dynamicLinkData.asMap());
+    setState(() {
+      busy = false;
+    });
+    if (isEmailLink) {
+      showSnackBar(
+          message: signedIn!,
+          textStyle: myTextStyleSmallBlack(context),
+          duration: const Duration(seconds: 10),
+          context: context);
+
+      if (FirebaseAuth.instance.currentUser == null) {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: mUser.email!, password: mUser.password!);
+      }
+      if (mounted) {
+        Navigator.of(context).pop(true);
+      }
+    } else {
+      _displayError();
+      Navigator.of(context).pop(false);
+    }
+  }
+
+  void _displayError() {
+    showSnackBar(
+        message: 'Sign in failed',
+        duration: const Duration(seconds: 10),
+        context: context);
   }
 
   @override
@@ -346,7 +392,8 @@ class DamnEmailLinkState extends State<DamnEmailLink>
                 ),
                 busy
                     ? Positioned(
-                        child: Center(child: TimerWidget(title: waitingForEmail!)))
+                        child:
+                            Center(child: TimerWidget(title: waitingForEmail)))
                     : const SizedBox(),
               ],
             )));

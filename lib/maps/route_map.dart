@@ -13,6 +13,7 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/local_finder.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 
+import '../isolates/routes_isolate.dart';
 import '../utils/emojis.dart';
 
 class RouteMap extends StatefulWidget {
@@ -130,7 +131,7 @@ class RouteMapState extends State<RouteMap> {
               style: myTextStyleLarge(context),
             ),
             content: Card(
-              shape: getRoundedBorder(radius: 16),
+              shape: getDefaultRoundedBorder(),
               child: const Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text('This route has not been completely defined yet.'),
@@ -160,7 +161,7 @@ class RouteMapState extends State<RouteMap> {
       _user = await prefs.getUser();
       pp('$mm getting existing RoutePoints .......');
       existingRoutePoints =
-          await listApiDog.getRoutePoints(route.routeId!, refresh);
+      await routesIsolate.getRoutePoints(route.routeId!, refresh);
     } catch (e) {
       pp(e);
     }

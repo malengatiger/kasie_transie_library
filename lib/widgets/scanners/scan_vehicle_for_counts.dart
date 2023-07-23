@@ -8,7 +8,7 @@ import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/qr_scanner.dart';
 import 'package:kasie_transie_library/widgets/vehicle_passenger_count.dart';
 
-import '../utils/emojis.dart';
+import '../../utils/emojis.dart';
 
 class ScanVehicleForCounts extends StatefulWidget {
   const ScanVehicleForCounts({Key? key}) : super(key: key);
@@ -301,7 +301,7 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
                   child: SizedBox(
                       height: 300,
                       child: Card(
-                        shape: getRoundedBorder(radius: 16),
+                        shape: getDefaultRoundedBorder(),
                         elevation: 2,
                         child: Column(
                           children: [
@@ -321,7 +321,7 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 8.0),
                                         child: Card(
-                                          shape: getRoundedBorder(radius: 16),
+                                          shape: getDefaultRoundedBorder(),
                                           elevation: 8,
                                           child: ListTile(
                                             leading: Icon(

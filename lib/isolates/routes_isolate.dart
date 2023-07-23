@@ -19,7 +19,48 @@ import 'heartbeat_isolate.dart';
 final RoutesIsolate routesIsolate = RoutesIsolate();
 
 class RoutesIsolate {
-  final xy = '☕️☕️☕️☕️☕️☕️☕️☕️☕️ Routes Isolate Functions: 🍎🍎';
+  final xy = '☕️☕️☕️☕️☕️ Routes Isolate Functions: 🍎🍎';
+
+  Future<List<RoutePoint>> getRoutePoints(String routeId, bool refresh) async {
+    pp('$xy get routePoints for $routeId  ... ');
+    var mList = <RoutePoint>[];
+
+    final res = listApiDog.realm.query<RoutePoint>('routeId == \$0',[routeId]);
+    mList = res.toList();
+    if (mList.isEmpty || refresh) {
+     mList = await _danceForOneRoute(routeId);
+    }
+
+    mList.sort((a,b) => a.index!.compareTo(b.index!));
+    pp('$xy routePoints for $routeId  == ${mList.length} ... ');
+
+    return res.toList();
+  }
+
+  Future<List<RoutePoint>> _danceForOneRoute(String routeId) async {
+     final mList = <RoutePoint>[];
+    final token = await appAuth.getAuthToken();
+    if (token != null) {
+      final bBag =
+      RoutePointsBag([routeId], KasieEnvironment.getUrl(), token);
+      final string =
+      await Isolate.run(() async => _heavyTaskForRoutePoints(bBag));
+      List mJson = jsonDecode(string);
+
+      for (var json in mJson) {
+        mList.add(buildRoutePoint(json));
+      }
+
+      pp('$xy back from isolate ... writing the points to realm  ${mList.length}  ... ');
+
+      listApiDog.realm.write(() {
+        listApiDog.realm.addAll<RoutePoint>(mList, update: true);
+      });
+      pp('\n\n\n$xy ..... done getting routePoints ....${E.leaf} '
+          'returning ${mList.length} ${E.leaf2} fresh and new!\n\n');
+    }
+    return mList;
+  }
 
   Future getRoute(String associationId, String routeId) async {
     pp('$xy get landmarks and routePoints for $routeId  ... ');
@@ -226,7 +267,7 @@ Future<String> _heavyTaskForRoutePoints(RoutePointsBag bag) async {
   }
 
   final jsonList = jsonEncode(points);
-  pp('$xyz Association RoutePoints for all routes: ${points.length}');
+  pp('$xyz  RoutePoints for route(s): ${points.length}');
   pp('$xyz _heavyTaskForRoutePoints returning raw string .................');
 
   return jsonList;
@@ -249,6 +290,8 @@ Future<List> _processRoute(String routeId, String url, String token) async {
     }
     points.addAll(resp);
     page++;
+    pp('$xyz .... sleeping for .5 second ...');
+    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   pp('$xyz RoutePoints for routeId: $routeId: ${points.length}\n\n');

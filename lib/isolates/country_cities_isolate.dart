@@ -14,24 +14,25 @@ import '../utils/functions.dart';
 import '../utils/kasie_exception.dart';
 
 final CountryCitiesIsolate countryCitiesIsolate = CountryCitiesIsolate();
+
 class CountryCitiesIsolate {
   final xy = '💦💦💦💦💦💦💦💦 Country Cities Isolated Functions: 🍎🍎';
 
   Future<int> getCountryCities(String countryId) async {
     pp('\n\n\n$xy .............................. getting country cities ....');
+
     final start = DateTime.now();
     final token = await appAuth.getAuthToken();
-    int count = 0;
     if (token != null) {
       final bag = CharlieBag(countryId, KasieEnvironment.getUrl(), token);
       final jsonList =
-      await Isolate.run(() async => _heavyTaskForCountryCities(bag));
+          await Isolate.run(() async => _heavyTaskForCountryCities(bag));
       final list = jsonDecode(jsonList);
       var mCities = <City>[];
       for (var value in list) {
         mCities.add(buildCity(value));
       }
-      pp('$xy before caching, cities from backend : 💙 ${mCities.length}  💙');
+      pp('$xy before caching to realm, cities from backend : 💙 ${mCities.length}  💙');
 
       listApiDog.realm.write(() {
         listApiDog.realm.addAll<City>(mCities, update: true);
@@ -45,13 +46,32 @@ class CountryCitiesIsolate {
     return 0;
   }
 }
+
 ///Isolate to get country cities
-const xyz = '💦💦💦💦💦💦💦💦 CountryCitiesIsolate: _heavyTaskForCities: 🍎🍎';
+const xyz =
+    '💦💦💦💦💦💦💦💦 CountryCitiesIsolate: _heavyTaskForCountryCities: 🍎🍎';
 
 Future<String> _heavyTaskForCountryCities(CharlieBag bag) async {
-  var mUrl = '${bag.url}getCountryCities?countryId=${bag.countryId}';
-  final List list = await _httpGet(mUrl, bag.token);
-  var s = jsonEncode(list);
+  pp('xyz ... _heavyTaskForCountryCities');
+  List allCities = [];
+  int page = 0;
+  bool stop = false;
+  while (stop == false) {
+    final mUrl =
+        '${bag.url}getCountryCities?countryId=${bag.countryId}&page=$page';
+    final List list = await _httpGet(mUrl, bag.token);
+    allCities.addAll(list);
+    if (list.isEmpty) {
+      stop = true;
+    }
+    page++;
+    pp('$xyz ... this page $page contains ${list.length} cities');
+    pp('$xyz .... sleeping for .5 second ...');
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
+  var s = jsonEncode(allCities);
+  pp('xyz ... _heavyTaskForCountryCities completed, returning big string .... ${s.length} bytes');
+
   return s;
 }
 
@@ -83,13 +103,6 @@ Future _httpGet(String mUrl, String token) async {
       var msg =
           '😡 😡 status code: ${resp.statusCode}, Request Forbidden 🥪 🥙 🌮  😡 ${resp.body}';
       pp(msg);
-      // final gex = KasieException(
-      //     message: 'Forbidden call',
-      //     url: mUrl,
-      //     translationKey: 'serverProblem',
-      //     errorType: KasieException.httpException);
-      // //errorHandler.handleError(exception: gex);
-      // throw gex;
     }
 
     if (resp.statusCode != 200) {

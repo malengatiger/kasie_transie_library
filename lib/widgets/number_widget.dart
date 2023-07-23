@@ -12,7 +12,7 @@ class NumberWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      shape: getRoundedBorder(radius: 16),
+      shape: getDefaultRoundedBorder(),
       elevation: 8,
       child: SizedBox(
         height: 120,

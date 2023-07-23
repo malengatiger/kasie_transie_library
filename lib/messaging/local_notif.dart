@@ -10,16 +10,16 @@ class LocalNotificationService {
 
   static void initialize() {
     pp('$mm Initialization setting for android ........');
-    const InitializationSettings initializationSettingsAndroid =
-        InitializationSettings(
-            android: AndroidInitializationSettings("@mipmap/ic_launcher"));
-    _notificationsPlugin.initialize(
-      initializationSettingsAndroid,
-      // to handle event when we receive notification
-      onDidReceiveNotificationResponse: (details) {
-        if (details.input != null) {}
-      },
-    );
+    // const InitializationSettings initializationSettingsAndroid =
+    //     InitializationSettings(
+    //         android: AndroidInitializationSettings("@mipmap/ic_launcher"));
+    // _notificationsPlugin.initialize(
+    //   initializationSettingsAndroid,
+    //   // to handle event when we receive notification
+    //   onDidReceiveNotificationResponse: (details) {
+    //     if (details.input != null) {}
+    //   },
+    // );
   }
 
   static Future<void> display(RemoteMessage message) async {

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
+import 'package:flutter_analog_clock/flutter_analog_clock.dart';
 
 class TimerWidget extends StatefulWidget {
   const TimerWidget({Key? key, required this.title, this.subTitle})
@@ -46,44 +47,66 @@ class TimerWidgetState extends State<TimerWidget>
 
   @override
   Widget build(BuildContext context) {
+    final date = DateTime.now();
     return SizedBox(
       width: 400,
       height: 600,
-      child: Card(
-        shape: getRoundedBorder(radius: 16),
-        elevation: 12,
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(
-                height: 64,
-              ),
-              Text(
-                widget.title,
-                style: myTextStyleMediumLargeWithColor(
-                    context, Colors.grey.shade700, 20),
-              ),
-              const SizedBox(
-                height: 24,
-              ),
-              widget.subTitle == null
-                  ? const SizedBox()
-                  : Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                    child: Text(widget.subTitle!),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Card(
+          shape: getDefaultRoundedBorder(),
+          elevation: 12,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(
+                    height: 32,
                   ),
-              const SizedBox(
-                height: 64,
+                  Text(
+                    widget.title,
+                    style: myTextStyleMediumLargeWithColor(
+                        context, Colors.grey.shade700, 16),
+                  ),
+                  const SizedBox(
+                    height: 24,
+                  ),
+                  widget.subTitle == null
+                      ? const SizedBox()
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                          child: Text(widget.subTitle!),
+                        ),
+                  const SizedBox(
+                    height: 24,
+                  ),
+                  SizedBox(width: 120, height: 120,
+                    child: AnalogClock(
+                      dateTime: date,
+                      isKeepTime: true,
+                      child: const Align(
+                        alignment: FractionalOffset(0.5, 0.75),
+                        child: Text('GMT+2'),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 48,
+                  ),
+                  Text(
+                    getFormattedTime(timeInSeconds: elapsed),
+                    style: myTextStyleMediumLargeWithColor(
+                        context, Theme.of(context).primaryColor, 48),
+                  ),
+                  const SizedBox(
+                    height: 48,
+                  ),
+                ],
               ),
-              Text(
-                getFormattedTime(timeInSeconds: elapsed),
-                style: myTextStyleMediumLargeWithColor(
-                    context, Theme.of(context).primaryColor, 48),
-              ),
-            ],
+            ),
           ),
         ),
       ),

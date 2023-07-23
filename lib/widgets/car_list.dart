@@ -6,7 +6,9 @@ import 'package:kasie_transie_library/data/schemas.dart' as lm;
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:badges/badges.dart' as bd;
+import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/widgets/car_details.dart';
+import 'package:kasie_transie_library/widgets/scanners/scan_vehicle_for_owner.dart';
 
 import '../l10n/translation_handler.dart';
 import '../utils/prefs.dart';
@@ -61,6 +63,7 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
       //
       cars.sort((a, b) => a.vehicleReg!.compareTo(b.vehicleReg!));
 
+      _carPlates.clear();
       for (var element in cars) {
         _carPlates.add(element.vehicleReg!);
         carsToDisplay.add(element);
@@ -143,6 +146,11 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
     vehicles = await translator.translate("vehicles", col.locale);
   }
 
+  void _navigateToScanner() async {
+
+    navigateWithSlide(const ScanVehicleForOwner(), context);
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -165,64 +173,11 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
               actions: [
                 IconButton(
                     onPressed: () {
-                      _getVehicles();
+                      _navigateToScanner();
                     },
-                    icon: const Icon(Icons.refresh))
+                    icon:  Icon(Icons.airport_shuttle, color: Theme.of(context).primaryColor,))
               ],
-              // bottom: PreferredSize(
-              //     preferredSize:  Size.fromHeight(height),
-              //     child: showCarDetails? const SizedBox(): Column(
-              //       children: [
-              //          SizedBox(height: height == 2? 12:24,),
-              //         height == 24? const SizedBox(): Row(
-              //           children: [
-              //             SizedBox(
-              //               width: 300,
-              //               child: Padding(
-              //                   padding: const EdgeInsets.symmetric(
-              //                       vertical: 20.0, horizontal: 12.0),
-              //                   child: TextField(
-              //                     controller: _textEditingController,
-              //                     onChanged: (text) {
-              //                       pp(' ........... changing to: $text');
-              //                       _runFilter(text);
-              //                     },
-              //                     decoration: InputDecoration(
-              //                         label: Text(
-              //                           search == null ? 'Search' : search!,
-              //                           style: myTextStyleSmall(
-              //                             context,
-              //                           ),
-              //                         ),
-              //                         icon: Icon(
-              //                           Icons.search,
-              //                           color: Theme.of(context).primaryColor,
-              //                         ),
-              //                         border: const OutlineInputBorder(),
-              //                         hintText: searchVehicles == null
-              //                             ? 'Search Vehicles'
-              //                             : searchVehicles!,
-              //                         hintStyle: myTextStyleSmallWithColor(
-              //                             context,
-              //                             Theme.of(context).primaryColor)),
-              //                   )),
-              //             ),
-              //             const SizedBox(
-              //               width: 12,
-              //             ),
-              //             bd.Badge(
-              //               position: bd.BadgePosition.topEnd(),
-              //               badgeContent: Padding(
-              //                 padding: const EdgeInsets.all(8.0),
-              //                 child: Text('${carsToDisplay.length}',
-              //                     style: myTextStyleSmallWithColor(
-              //                         context, Colors.white)),
-              //               ),
-              //             )
-              //           ],
-              //         )
-              //       ],
-              //     )),
+              bottom: const PreferredSize(preferredSize: Size.fromHeight(48), child: Column()),
             ),
             body: Stack(
               children: [
@@ -238,58 +193,84 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
                         ),
                       )
                     : Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                height: _showSearch? 100: 8,
-                              ),
-                              Expanded(
-                                child: bd.Badge(
-                                  badgeContent: Text('${cars.length}'),
-                                  badgeStyle: bd.BadgeStyle(
-                                      badgeColor: Colors.green[900]!,
-                                      padding: const EdgeInsets.all(12)),
-                                  child: ListView.builder(
-                                      itemCount: carsToDisplay.length,
-                                      itemBuilder: (ctx, index) {
-                                        final ass =
-                                            carsToDisplay.elementAt(index);
-                                        return GestureDetector(
-                                          onTap: () {
-                                            _onCarSelected(ass);
-                                          },
-                                          child: Card(
-                                            shape: getRoundedBorder(radius: 16),
-                                            elevation: 4,
-                                            child: ListTile(
-                                              title: Text(
-                                                '${ass.vehicleReg}',
-                                                style: myTextStyleMediumBold(
-                                                    context),
-                                              ),
-                                              subtitle: Text(
-                                                '${ass.make} ${ass.model} - ${ass.year}',
-                                                style:
-                                                    myTextStyleSmall(context),
-                                              ),
-                                              leading: Icon(
-                                                Icons.airport_shuttle,
-                                                color: Theme.of(context)
-                                                    .primaryColor,
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            height: _showSearch ? 100 : 8,
+                          ),
+                          cars.isEmpty
+                              ? Center(
+                                  child: SizedBox(height: 120,
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          'No cars found',
+                                          style: myTextStyleMediumLargeWithColor(
+                                              context,
+                                              Theme.of(context).primaryColorLight,
+                                              24),
+                                        ),
+                                        const SizedBox(height: 32,),
+                                        SizedBox(width: 320,
+                                          child: ElevatedButton.icon(onPressed: (){
+                                            _navigateToScanner();
+                                          }, icon: const Icon(Icons.airport_shuttle),
+                                              label: const Padding(
+                                                padding: EdgeInsets.all(16.0),
+                                                child: Text('Scan Vehicle'),
+                                              )),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              : Expanded(
+                                  child: bd.Badge(
+                                    badgeContent: Text('${cars.length}'),
+                                    badgeStyle: bd.BadgeStyle(
+                                        badgeColor: Colors.green[900]!,
+                                        padding: const EdgeInsets.all(12)),
+                                    child: ListView.builder(
+                                        itemCount: carsToDisplay.length,
+                                        itemBuilder: (ctx, index) {
+                                          final ass = carsToDisplay
+                                              .elementAt(index);
+                                          return GestureDetector(
+                                            onTap: () {
+                                              _onCarSelected(ass);
+                                            },
+                                            child: Card(
+                                              shape: getRoundedBorder(
+                                                  radius: 16),
+                                              elevation: 4,
+                                              child: ListTile(
+                                                title: Text(
+                                                  '${ass.vehicleReg}',
+                                                  style:
+                                                      myTextStyleMediumBold(
+                                                          context),
+                                                ),
+                                                subtitle: Text(
+                                                  '${ass.make} ${ass.model} - ${ass.year}',
+                                                  style: myTextStyleSmall(
+                                                      context),
+                                                ),
+                                                leading: Icon(
+                                                  Icons.airport_shuttle,
+                                                  color: Theme.of(context)
+                                                      .primaryColor,
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        );
-                                      }),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
+                                          );
+                                        }),
+                                  ),
+                                )
+                        ],
                       ),
+                    ),
                 showCarDetails
                     ? Positioned(
                         top: 0,
@@ -307,57 +288,59 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
                         ))
                     : const SizedBox(),
                 _showSearch
-                    ? Positioned(top: 0,
+                    ? Positioned(
+                        top: 0,
                         child: SizedBox(
-                        height: 100,
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              width: 300,
-                              child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 20.0, horizontal: 12.0),
-                                  child: TextField(
-                                    controller: _textEditingController,
-                                    onChanged: (text) {
-                                      pp(' ........... changing to: $text');
-                                      _runFilter(text);
-                                    },
-                                    decoration: InputDecoration(
-                                        label: Text(
-                                          search == null ? 'Search' : search!,
-                                          style: myTextStyleSmall(
-                                            context,
+                          height: 100,
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 300,
+                                child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 20.0, horizontal: 12.0),
+                                    child: TextField(
+                                      controller: _textEditingController,
+                                      onChanged: (text) {
+                                        pp(' ........... changing to: $text');
+                                        _runFilter(text);
+                                      },
+                                      decoration: InputDecoration(
+                                          label: Text(
+                                            search == null ? 'Search' : search!,
+                                            style: myTextStyleSmall(
+                                              context,
+                                            ),
                                           ),
-                                        ),
-                                        icon: Icon(
-                                          Icons.search,
-                                          color: Theme.of(context).primaryColor,
-                                        ),
-                                        border: const OutlineInputBorder(),
-                                        hintText: searchVehicles == null
-                                            ? 'Search Vehicles'
-                                            : searchVehicles!,
-                                        hintStyle: myTextStyleSmallWithColor(
-                                            context,
-                                            Theme.of(context).primaryColor)),
-                                  )),
-                            ),
-                            const SizedBox(
-                              width: 12,
-                            ),
-                            bd.Badge(
-                              position: bd.BadgePosition.topEnd(),
-                              badgeContent: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text('${carsToDisplay.length}',
-                                    style: myTextStyleSmallWithColor(
-                                        context, Colors.white)),
+                                          icon: Icon(
+                                            Icons.search,
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                          ),
+                                          border: const OutlineInputBorder(),
+                                          hintText: searchVehicles == null
+                                              ? 'Search Vehicles'
+                                              : searchVehicles!,
+                                          hintStyle: myTextStyleSmallWithColor(
+                                              context,
+                                              Theme.of(context).primaryColor)),
+                                    )),
                               ),
-                            )
-                          ],
-                        ),
-                      ))
+                              const SizedBox(
+                                width: 12,
+                              ),
+                              bd.Badge(
+                                position: bd.BadgePosition.topEnd(),
+                                badgeContent: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text('${carsToDisplay.length}',
+                                      style: myTextStyleSmallWithColor(
+                                          context, Colors.white)),
+                                ),
+                              )
+                            ],
+                          ),
+                        ))
                     : const SizedBox()
               ],
             )));
