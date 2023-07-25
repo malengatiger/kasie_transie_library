@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/data/counter_bag.dart';
 import 'package:kasie_transie_library/isolates/country_cities_isolate.dart';
-import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
 import 'package:realm/realm.dart' as rm;
@@ -51,6 +50,8 @@ final config = rm.Configuration.local(
     RouteUpdateRequest.schema,
     AmbassadorPassengerCount.schema,
     AmbassadorCheckIn.schema,
+    CommuterRequest.schema,
+    Commuter.schema,
   ],
 );
 final ListApiDog listApiDog = ListApiDog(
@@ -991,15 +992,16 @@ class ListApiDog {
 
     final cmd = '${url}findRoutesByLocation?latitude=${p.latitude}'
         '&longitude=${p.longitude}&radiusInKM=${p.radiusInKM}';
+
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
       list.add(buildRoute(value));
     }
-    // realm.write(() {
-    //   realm.addAll(list);
-    // });
-    pp('$mm findRoutesByLocation;  ${E.appleRed} routes found: ${list.length}');
+    realm.write(() {
+      realm.addAll<Route>(list, update: true);
+    });
 
+    pp('$mm findRoutesByLocation;  ${E.appleRed} routes found: ${list.length}');
     return list;
   }
 
@@ -1021,19 +1023,39 @@ class ListApiDog {
     return list;
   }
 
+  Future<List<Route>> findAssociationRouteLandmarksByLocation(
+      LocationFinderParameter p) async {
+    var list = <Route>[];
+
+    final cmd =
+        '${url}findAssociationRouteLandmarksByLocation?associationId=${p.associationId}'
+        '&latitude=${p.latitude}'
+        '&longitude=${p.longitude}&radiusInKM=${p.radiusInKM}';
+    List resp = await _sendHttpGET(cmd);
+    for (var value in resp) {
+      list.add(buildRoute(value));
+    }
+
+    pp('$mm findAssociationRouteLandmarksByLocation;  ${E.appleRed} found: ${list.length}');
+    myPrettyJsonPrint(list.first.toJson());
+    return list;
+  }
+
   Future<List<RouteLandmark>> findRouteLandmarksByLocation(
       LocationFinderParameter p) async {
     var list = <RouteLandmark>[];
 
     final cmd =
-        '${url}findRouteLandmarksByLocation?associationId=${p.associationId}'
-        '&latitude=${p.latitude}'
+        '${url}findRouteLandmarksByLocation?latitude=${p.latitude}'
         '&longitude=${p.longitude}&radiusInKM=${p.radiusInKM}';
     //
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
       list.add(buildRouteLandmark(value));
     }
+    realm.write(() {
+      realm.addAll<RouteLandmark>(list, update: true);
+    });
 
     pp('$mm findRouteLandmarksByLocation;  ${E.appleRed} routeLandmarks found: ${list.length}');
 
@@ -1045,11 +1067,14 @@ class ListApiDog {
     final user = await prefs.getUser();
     final cmd = '${url}findCitiesByLocation?latitude=${p.latitude}'
         '&longitude=${p.longitude}&radiusInKM=${p.radiusInKM}&limit=${p.limit}';
+
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
       list.add(buildCity(value));
     }
-
+    realm.write(() {
+      realm.addAll<City>(list, update: true);
+    });
     pp('$mm findCitiesByLocation;  ${E.appleRed} cities found: ${list.length}');
 
     return list;

@@ -2802,6 +2802,334 @@ class AppError extends _AppError
   }
 }
 
+class CommuterRequest extends _CommuterRequest
+    with RealmEntity, RealmObjectBase, RealmObject {
+  CommuterRequest(
+    ObjectId id, {
+    String? commuterId,
+    String? commuterRequestId,
+    String? routeId,
+    String? routeName,
+    String? dateRequested,
+    String? routeLandmarkId,
+    String? routeLandmarkName,
+    String? associationId,
+    String? dateNeeded,
+    bool? scanned,
+    Position? currentPosition,
+    int? routePointIndex,
+    int? numberOfPassengers,
+    double? distanceToRouteLandmarkInMetres,
+    double? distanceToRoutePointInMetres,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'commuterId', commuterId);
+    RealmObjectBase.set(this, 'commuterRequestId', commuterRequestId);
+    RealmObjectBase.set(this, 'routeId', routeId);
+    RealmObjectBase.set(this, 'routeName', routeName);
+    RealmObjectBase.set(this, 'dateRequested', dateRequested);
+    RealmObjectBase.set(this, 'routeLandmarkId', routeLandmarkId);
+    RealmObjectBase.set(this, 'routeLandmarkName', routeLandmarkName);
+    RealmObjectBase.set(this, 'associationId', associationId);
+    RealmObjectBase.set(this, 'dateNeeded', dateNeeded);
+    RealmObjectBase.set(this, 'scanned', scanned);
+    RealmObjectBase.set(this, 'currentPosition', currentPosition);
+    RealmObjectBase.set(this, 'routePointIndex', routePointIndex);
+    RealmObjectBase.set(this, 'numberOfPassengers', numberOfPassengers);
+    RealmObjectBase.set(this, 'distanceToRouteLandmarkInMetres',
+        distanceToRouteLandmarkInMetres);
+    RealmObjectBase.set(
+        this, 'distanceToRoutePointInMetres', distanceToRoutePointInMetres);
+  }
+
+  CommuterRequest._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get commuterId =>
+      RealmObjectBase.get<String>(this, 'commuterId') as String?;
+  @override
+  set commuterId(String? value) =>
+      RealmObjectBase.set(this, 'commuterId', value);
+
+  @override
+  String? get commuterRequestId =>
+      RealmObjectBase.get<String>(this, 'commuterRequestId') as String?;
+  @override
+  set commuterRequestId(String? value) =>
+      RealmObjectBase.set(this, 'commuterRequestId', value);
+
+  @override
+  String? get routeId =>
+      RealmObjectBase.get<String>(this, 'routeId') as String?;
+  @override
+  set routeId(String? value) => RealmObjectBase.set(this, 'routeId', value);
+
+  @override
+  String? get routeName =>
+      RealmObjectBase.get<String>(this, 'routeName') as String?;
+  @override
+  set routeName(String? value) => RealmObjectBase.set(this, 'routeName', value);
+
+  @override
+  String? get dateRequested =>
+      RealmObjectBase.get<String>(this, 'dateRequested') as String?;
+  @override
+  set dateRequested(String? value) =>
+      RealmObjectBase.set(this, 'dateRequested', value);
+
+  @override
+  String? get routeLandmarkId =>
+      RealmObjectBase.get<String>(this, 'routeLandmarkId') as String?;
+  @override
+  set routeLandmarkId(String? value) =>
+      RealmObjectBase.set(this, 'routeLandmarkId', value);
+
+  @override
+  String? get routeLandmarkName =>
+      RealmObjectBase.get<String>(this, 'routeLandmarkName') as String?;
+  @override
+  set routeLandmarkName(String? value) =>
+      RealmObjectBase.set(this, 'routeLandmarkName', value);
+
+  @override
+  String? get associationId =>
+      RealmObjectBase.get<String>(this, 'associationId') as String?;
+  @override
+  set associationId(String? value) =>
+      RealmObjectBase.set(this, 'associationId', value);
+
+  @override
+  String? get dateNeeded =>
+      RealmObjectBase.get<String>(this, 'dateNeeded') as String?;
+  @override
+  set dateNeeded(String? value) =>
+      RealmObjectBase.set(this, 'dateNeeded', value);
+
+  @override
+  bool? get scanned => RealmObjectBase.get<bool>(this, 'scanned') as bool?;
+  @override
+  set scanned(bool? value) => RealmObjectBase.set(this, 'scanned', value);
+
+  @override
+  Position? get currentPosition =>
+      RealmObjectBase.get<Position>(this, 'currentPosition') as Position?;
+  @override
+  set currentPosition(covariant Position? value) =>
+      RealmObjectBase.set(this, 'currentPosition', value);
+
+  @override
+  int? get routePointIndex =>
+      RealmObjectBase.get<int>(this, 'routePointIndex') as int?;
+  @override
+  set routePointIndex(int? value) =>
+      RealmObjectBase.set(this, 'routePointIndex', value);
+
+  @override
+  int? get numberOfPassengers =>
+      RealmObjectBase.get<int>(this, 'numberOfPassengers') as int?;
+  @override
+  set numberOfPassengers(int? value) =>
+      RealmObjectBase.set(this, 'numberOfPassengers', value);
+
+  @override
+  double? get distanceToRouteLandmarkInMetres =>
+      RealmObjectBase.get<double>(this, 'distanceToRouteLandmarkInMetres')
+          as double?;
+  @override
+  set distanceToRouteLandmarkInMetres(double? value) =>
+      RealmObjectBase.set(this, 'distanceToRouteLandmarkInMetres', value);
+
+  @override
+  double? get distanceToRoutePointInMetres =>
+      RealmObjectBase.get<double>(this, 'distanceToRoutePointInMetres')
+          as double?;
+  @override
+  set distanceToRoutePointInMetres(double? value) =>
+      RealmObjectBase.set(this, 'distanceToRoutePointInMetres', value);
+
+  @override
+  Stream<RealmObjectChanges<CommuterRequest>> get changes =>
+      RealmObjectBase.getChanges<CommuterRequest>(this);
+
+  @override
+  CommuterRequest freeze() =>
+      RealmObjectBase.freezeObject<CommuterRequest>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(CommuterRequest._);
+    return const SchemaObject(
+        ObjectType.realmObject, CommuterRequest, 'CommuterRequest', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('commuterId', RealmPropertyType.string,
+          optional: true, indexType: RealmIndexType.regular),
+      SchemaProperty('commuterRequestId', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('routeId', RealmPropertyType.string, optional: true),
+      SchemaProperty('routeName', RealmPropertyType.string, optional: true),
+      SchemaProperty('dateRequested', RealmPropertyType.string, optional: true),
+      SchemaProperty('routeLandmarkId', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('routeLandmarkName', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('associationId', RealmPropertyType.string, optional: true),
+      SchemaProperty('dateNeeded', RealmPropertyType.string, optional: true),
+      SchemaProperty('scanned', RealmPropertyType.bool, optional: true),
+      SchemaProperty('currentPosition', RealmPropertyType.object,
+          optional: true, linkTarget: 'Position'),
+      SchemaProperty('routePointIndex', RealmPropertyType.int, optional: true),
+      SchemaProperty('numberOfPassengers', RealmPropertyType.int,
+          optional: true),
+      SchemaProperty(
+          'distanceToRouteLandmarkInMetres', RealmPropertyType.double,
+          optional: true),
+      SchemaProperty('distanceToRoutePointInMetres', RealmPropertyType.double,
+          optional: true),
+    ]);
+  }
+}
+
+class Commuter extends _Commuter
+    with RealmEntity, RealmObjectBase, RealmObject {
+  Commuter(
+    ObjectId id, {
+    String? commuterId,
+    String? name,
+    String? gender,
+    String? countryId,
+    String? dateRegistered,
+    String? qrCodeUrl,
+    String? profileUrl,
+    String? password,
+    String? email,
+    String? cellphone,
+    String? profileThumbnailUrl,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'commuterId', commuterId);
+    RealmObjectBase.set(this, 'name', name);
+    RealmObjectBase.set(this, 'gender', gender);
+    RealmObjectBase.set(this, 'countryId', countryId);
+    RealmObjectBase.set(this, 'dateRegistered', dateRegistered);
+    RealmObjectBase.set(this, 'qrCodeUrl', qrCodeUrl);
+    RealmObjectBase.set(this, 'profileUrl', profileUrl);
+    RealmObjectBase.set(this, 'password', password);
+    RealmObjectBase.set(this, 'email', email);
+    RealmObjectBase.set(this, 'cellphone', cellphone);
+    RealmObjectBase.set(this, 'profileThumbnailUrl', profileThumbnailUrl);
+  }
+
+  Commuter._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get commuterId =>
+      RealmObjectBase.get<String>(this, 'commuterId') as String?;
+  @override
+  set commuterId(String? value) =>
+      RealmObjectBase.set(this, 'commuterId', value);
+
+  @override
+  String? get name => RealmObjectBase.get<String>(this, 'name') as String?;
+  @override
+  set name(String? value) => RealmObjectBase.set(this, 'name', value);
+
+  @override
+  String? get gender => RealmObjectBase.get<String>(this, 'gender') as String?;
+  @override
+  set gender(String? value) => RealmObjectBase.set(this, 'gender', value);
+
+  @override
+  String? get countryId =>
+      RealmObjectBase.get<String>(this, 'countryId') as String?;
+  @override
+  set countryId(String? value) => RealmObjectBase.set(this, 'countryId', value);
+
+  @override
+  String? get dateRegistered =>
+      RealmObjectBase.get<String>(this, 'dateRegistered') as String?;
+  @override
+  set dateRegistered(String? value) =>
+      RealmObjectBase.set(this, 'dateRegistered', value);
+
+  @override
+  String? get qrCodeUrl =>
+      RealmObjectBase.get<String>(this, 'qrCodeUrl') as String?;
+  @override
+  set qrCodeUrl(String? value) => RealmObjectBase.set(this, 'qrCodeUrl', value);
+
+  @override
+  String? get profileUrl =>
+      RealmObjectBase.get<String>(this, 'profileUrl') as String?;
+  @override
+  set profileUrl(String? value) =>
+      RealmObjectBase.set(this, 'profileUrl', value);
+
+  @override
+  String? get password =>
+      RealmObjectBase.get<String>(this, 'password') as String?;
+  @override
+  set password(String? value) => RealmObjectBase.set(this, 'password', value);
+
+  @override
+  String? get email => RealmObjectBase.get<String>(this, 'email') as String?;
+  @override
+  set email(String? value) => RealmObjectBase.set(this, 'email', value);
+
+  @override
+  String? get cellphone =>
+      RealmObjectBase.get<String>(this, 'cellphone') as String?;
+  @override
+  set cellphone(String? value) => RealmObjectBase.set(this, 'cellphone', value);
+
+  @override
+  String? get profileThumbnailUrl =>
+      RealmObjectBase.get<String>(this, 'profileThumbnailUrl') as String?;
+  @override
+  set profileThumbnailUrl(String? value) =>
+      RealmObjectBase.set(this, 'profileThumbnailUrl', value);
+
+  @override
+  Stream<RealmObjectChanges<Commuter>> get changes =>
+      RealmObjectBase.getChanges<Commuter>(this);
+
+  @override
+  Commuter freeze() => RealmObjectBase.freezeObject<Commuter>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(Commuter._);
+    return const SchemaObject(ObjectType.realmObject, Commuter, 'Commuter', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('commuterId', RealmPropertyType.string,
+          optional: true, indexType: RealmIndexType.regular),
+      SchemaProperty('name', RealmPropertyType.string, optional: true),
+      SchemaProperty('gender', RealmPropertyType.string, optional: true),
+      SchemaProperty('countryId', RealmPropertyType.string, optional: true),
+      SchemaProperty('dateRegistered', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('qrCodeUrl', RealmPropertyType.string, optional: true),
+      SchemaProperty('profileUrl', RealmPropertyType.string, optional: true),
+      SchemaProperty('password', RealmPropertyType.string, optional: true),
+      SchemaProperty('email', RealmPropertyType.string, optional: true),
+      SchemaProperty('cellphone', RealmPropertyType.string, optional: true),
+      SchemaProperty('profileThumbnailUrl', RealmPropertyType.string,
+          optional: true),
+    ]);
+  }
+}
+
 class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
   User(
     ObjectId id, {

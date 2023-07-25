@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
@@ -12,9 +10,6 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/photo_handler.dart';
-import 'package:kasie_transie_library/widgets/vehicle_photo_widget.dart';
-import 'package:kasie_transie_library/widgets/video_recorder.dart';
-import 'package:badges/badges.dart' as bd;
 import 'package:realm/realm.dart';
 
 import '../maps/route_map.dart';
@@ -58,12 +53,12 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
     passengersInText = await translator.translate('passengersIn', c.locale);
     passengersOutText = await translator.translate('passengersOut', c.locale);
     currentPassengersText =
-        await translator.translate('currentPassengers', c.locale);
+    await translator.translate('currentPassengers', c.locale);
     saveCounts = await translator.translate('saveCounts', c.locale);
     passengerCounter = await translator.translate('passengerCount', c.locale);
     lastCount = await translator.translate('lastCount', c.locale);
     passengerCountsaved =
-        await translator.translate('passengerCountsaved', c.locale);
+    await translator.translate('passengerCountsaved', c.locale);
     errorCount = await translator.translate('errorCount', c.locale);
 
     setState(() {});
@@ -105,7 +100,8 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
           refresh: refresh,
           startDate: startDate);
       passengerCounts.sort((a, b) => b.created!.compareTo(a.created!));
-      pp('$mm ... received prior VehiclePassengerCounts ...${E.appleRed} ${passengerCounts.length}');
+      pp('$mm ... received prior VehiclePassengerCounts ...${E
+          .appleRed} ${passengerCounts.length}');
     } catch (e) {
       pp(e);
     }
@@ -116,6 +112,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
   }
 
   String? lastDate;
+
   void _submitCounts() async {
     pp('$mm .. _submitCounts ...');
     setState(() {
@@ -159,7 +156,9 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
         showToast(
             duration: const Duration(seconds: 2),
             padding: 20,
-            backgroundColor: Theme.of(context).primaryColorDark,
+            backgroundColor: Theme
+                .of(context)
+                .primaryColorDark,
             message: passengerCountsaved == null
                 ? 'Passenger Counts saved, thank you!'
                 : passengerCountsaved!,
@@ -206,7 +205,9 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
     currentPassengers = startPassengers;
   }
 
-  int passengersIn = 0, passengersOut = 0, currentPassengers = 0;
+  int passengersIn = 0,
+      passengersOut = 0,
+      currentPassengers = 0;
   bool showSubmit = false;
 
   void _navigateToRouteMap() {
@@ -217,285 +218,304 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-      appBar: AppBar(
-        leading: const SizedBox(),
-        title: Text(
-            passengerCounter == null ? 'Passenger Counter' : passengerCounter!),
-        actions: [
-          IconButton(
-              onPressed: () {
-                _navigateToPhotoHandler();
-              },
-              icon: Icon(
-                Icons.camera_alt,
-                color: Theme.of(context).primaryColor,
-              )),
-          IconButton(
-              onPressed: () {
-                _navigateToRouteMap();
-              },
-              icon: Icon(Icons.map, color: Theme.of(context).primaryColor)),
-          IconButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              icon: Icon(
-                Icons.close,
-                color: Theme.of(context).primaryColor,
-              )),
-        ],
-      ),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Card(
-              shape: getDefaultRoundedBorder(),
-              elevation: 4,
-              child: Column(
-                children: [
-                  const SizedBox(
-                    height: 28,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+          appBar: AppBar(
+            leading: const SizedBox(),
+            title: Text(
+                passengerCounter == null
+                    ? 'Passenger Counter'
+                    : passengerCounter!),
+            actions: [
+              IconButton(
+                  onPressed: () {
+                    _navigateToPhotoHandler();
+                  },
+                  icon: Icon(
+                    Icons.camera_alt,
+                    color: Theme
+                        .of(context)
+                        .primaryColor,
+                  )),
+              IconButton(
+                  onPressed: () {
+                    _navigateToRouteMap();
+                  },
+                  icon: Icon(Icons.map, color: Theme
+                      .of(context)
+                      .primaryColor)),
+              IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  icon: Icon(
+                    Icons.close,
+                    color: Theme
+                        .of(context)
+                        .primaryColor,
+                  )),
+            ],
+          ),
+          body: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Card(
+                  shape: getDefaultRoundedBorder(),
+                  elevation: 4,
+                  child: Column(
                     children: [
+                      const SizedBox(
+                        height: 28,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '${widget.vehicle.vehicleReg}',
+                            style: myTextStyleMediumLargeWithColor(
+                                context, Theme
+                                .of(context)
+                                .primaryColor, 32),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 32,
+                      ),
                       Text(
-                        '${widget.vehicle.vehicleReg}',
+                        '${widget.route.name}',
                         style: myTextStyleMediumLargeWithColor(
-                            context, Theme.of(context).primaryColor, 32),
+                            context, Theme
+                            .of(context)
+                            .primaryColorLight, 14),
+                      ),
+                      const SizedBox(
+                        height: 32,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Card(
+                          shape: getDefaultRoundedBorder(),
+                          elevation: 8,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Text(
+                                  passengersInText == null
+                                      ? 'Passengers In'
+                                      : passengersInText!,
+                                  style: myTextStyleSmall(context),
+                                ),
+                                const SizedBox(
+                                  width: 24,
+                                ),
+                                NumberDropDown(
+                                    onNumberPicked: (number) {
+                                      setState(() {
+                                        passengersIn = number;
+                                        showSubmit = true;
+                                      });
+                                    },
+                                    color: Colors.green.shade800,
+                                    fontSize: 28, count: 30,),
+                                const SizedBox(
+                                  width: 24,
+                                ),
+                                Text(
+                                  '$passengersIn',
+                                  style: myTextStyleMediumLargeWithColor(
+                                      context, Colors.green.shade700, 32),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Card(
+                          shape: getDefaultRoundedBorder(),
+                          elevation: 8,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Text(
+                                  passengersOutText == null
+                                      ? 'Passengers Out'
+                                      : passengersOutText!,
+                                  style: myTextStyleSmall(context),
+                                ),
+                                const SizedBox(
+                                  width: 24,
+                                ),
+                                NumberDropDown(
+                                    onNumberPicked: (number) {
+                                      if (number > currentPassengers) {
+                                        showSnackBar(
+                                            duration: const Duration(
+                                                seconds: 10),
+                                            backgroundColor:
+                                            Theme
+                                                .of(context)
+                                                .primaryColorDark,
+                                            message: errorCount == null
+                                                ? "There can be more than the current number of people in the taxi. Please check the number and try again "
+                                                : errorCount!,
+                                            context: context);
+                                        return;
+                                      }
+                                      setState(() {
+                                        passengersOut = number;
+                                        showSubmit = true;
+                                      });
+                                    },
+                                    color: Colors.red.shade700,
+                                    fontSize: 28, count: 30,),
+                                const SizedBox(
+                                  width: 24,
+                                ),
+                                Text(
+                                  '$passengersOut',
+                                  style: myTextStyleMediumLargeWithColor(
+                                      context, Colors.red.shade700, 32),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Card(
+                          shape: getDefaultRoundedBorder(),
+                          elevation: 8,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  currentPassengersText == null
+                                      ? 'Current Passengers'
+                                      : currentPassengersText!,
+                                  style: myTextStyleSmall(context),
+                                ),
+                                const SizedBox(
+                                  width: 8,
+                                ),
+                                // NumberDropDown(
+                                //     onNumberPicked: (number) {
+                                //       setState(() {
+                                //         currentPassengers = number;
+                                //         showSubmit = true;
+                                //       });
+                                //     },
+                                //     color: Colors.blue.shade700,
+                                //     fontSize: 28),
+                                // const SizedBox(
+                                //   width: 24,
+                                // ),
+                                Text(
+                                  '$currentPassengers',
+                                  style: myTextStyleMediumLargeWithColor(
+                                      context, Colors.blue.shade700, 32),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 48,
+                      ),
+                      showSubmit
+                          ? SizedBox(
+                        width: 300,
+                        child: ElevatedButton(
+                            style: const ButtonStyle(
+                              elevation: MaterialStatePropertyAll(8.0),
+                            ),
+                            onPressed: () {
+                              _submitCounts();
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(saveCounts == null
+                                  ? 'Save Counts'
+                                  : saveCounts!),
+                            )),
+                      )
+                          : const SizedBox(),
+                      const SizedBox(
+                        height: 32,
+                      ),
+                      lastDate == null
+                          ? const SizedBox()
+                          : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(lastCount == null ? 'Last Count' : lastCount!),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          Text(
+                            '$lastDate',
+                            style: myTextStyleMediumLargeWithColor(
+                                context, Theme
+                                .of(context)
+                                .primaryColor, 24),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  const SizedBox(
-                    height: 32,
-                  ),
-                  Text(
-                    '${widget.route.name}',
-                    style: myTextStyleMediumLargeWithColor(
-                        context, Theme.of(context).primaryColorLight, 14),
-                  ),
-                  const SizedBox(
-                    height: 32,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Card(
-                      shape: getDefaultRoundedBorder(),
-                      elevation: 8,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text(
-                              passengersInText == null
-                                  ? 'Passengers In'
-                                  : passengersInText!,
-                              style: myTextStyleSmall(context),
-                            ),
-                            const SizedBox(
-                              width: 24,
-                            ),
-                            NumberDropDown(
-                                onNumberPicked: (number) {
-                                  setState(() {
-                                    passengersIn = number;
-                                    showSubmit = true;
-                                  });
-                                },
-                                color: Colors.green.shade800,
-                                fontSize: 28),
-                            const SizedBox(
-                              width: 24,
-                            ),
-                            Text(
-                              '$passengersIn',
-                              style: myTextStyleMediumLargeWithColor(
-                                  context, Colors.green.shade700, 32),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Card(
-                      shape: getDefaultRoundedBorder(),
-                      elevation: 8,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text(
-                              passengersOutText == null
-                                  ? 'Passengers Out'
-                                  : passengersOutText!,
-                              style: myTextStyleSmall(context),
-                            ),
-                            const SizedBox(
-                              width: 24,
-                            ),
-                            NumberDropDown(
-                                onNumberPicked: (number) {
-                                  if (number > currentPassengers) {
-                                    showSnackBar(
-                                        duration: const Duration(seconds: 10),
-                                        backgroundColor:
-                                            Theme.of(context).primaryColorDark,
-                                        message: errorCount == null
-                                            ? "There can be more than the current number of people in the taxi. Please check the number and try again "
-                                            : errorCount!,
-                                        context: context);
-                                    return;
-                                  }
-                                  setState(() {
-                                    passengersOut = number;
-                                    showSubmit = true;
-                                  });
-                                },
-                                color: Colors.red.shade700,
-                                fontSize: 28),
-                            const SizedBox(
-                              width: 24,
-                            ),
-                            Text(
-                              '$passengersOut',
-                              style: myTextStyleMediumLargeWithColor(
-                                  context, Colors.red.shade700, 32),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Card(
-                      shape: getDefaultRoundedBorder(),
-                      elevation: 8,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              currentPassengersText == null
-                                  ? 'Current Passengers'
-                                  : currentPassengersText!,
-                              style: myTextStyleSmall(context),
-                            ),
-                            const SizedBox(
-                              width: 8,
-                            ),
-                            // NumberDropDown(
-                            //     onNumberPicked: (number) {
-                            //       setState(() {
-                            //         currentPassengers = number;
-                            //         showSubmit = true;
-                            //       });
-                            //     },
-                            //     color: Colors.blue.shade700,
-                            //     fontSize: 28),
-                            // const SizedBox(
-                            //   width: 24,
-                            // ),
-                            Text(
-                              '$currentPassengers',
-                              style: myTextStyleMediumLargeWithColor(
-                                  context, Colors.blue.shade700, 32),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 48,
-                  ),
-                  showSubmit
-                      ? SizedBox(
-                          width: 300,
-                          child: ElevatedButton(
-                              style: const ButtonStyle(
-                                elevation: MaterialStatePropertyAll(8.0),
-                              ),
-                              onPressed: () {
-                                _submitCounts();
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Text(saveCounts == null
-                                    ? 'Save Counts'
-                                    : saveCounts!),
-                              )),
-                        )
-                      : const SizedBox(),
-                  const SizedBox(
-                    height: 32,
-                  ),
-                  lastDate == null
-                      ? const SizedBox()
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(lastCount == null ? 'Last Count' : lastCount!),
-                            const SizedBox(
-                              width: 20,
-                            ),
-                            Text(
-                              '$lastDate',
-                              style: myTextStyleMediumLargeWithColor(
-                                  context, Theme.of(context).primaryColor, 24),
-                            ),
-                          ],
-                        ),
-                ],
+                ),
               ),
-            ),
-          ),
-          busy
-              ? const Positioned(
+              busy
+                  ? const Positioned(
                   child: Center(
-                  child: SizedBox(
-                    height: 28,
-                    width: 28,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 6,
-                      backgroundColor: Colors.amber,
+                    child: SizedBox(
+                      height: 28,
+                      width: 28,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 6,
+                        backgroundColor: Colors.amber,
+                      ),
                     ),
-                  ),
-                ))
-              : const SizedBox(),
-        ],
-      ),
-    ));
+                  ))
+                  : const SizedBox(),
+            ],
+          ),
+        ));
   }
 }
 
 class NumberDropDown extends StatelessWidget {
-  const NumberDropDown(
-      {Key? key,
-      required this.onNumberPicked,
-      required this.color,
-      required this.fontSize})
+  const NumberDropDown({Key? key,
+    required this.onNumberPicked,
+    required this.color,
+    required this.count,
+    required this.fontSize})
       : super(key: key);
 
   final Function(int) onNumberPicked;
   final Color color;
   final double fontSize;
+  final int count;
+
   @override
   Widget build(BuildContext context) {
     List<DropdownMenuItem<int>> items = [];
-    for (var i = 0; i < 51; i++) {
+    for (var i = 0; i < count; i++) {
       items.add(DropdownMenuItem(
           value: i,
           child: Text(

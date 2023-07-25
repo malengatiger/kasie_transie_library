@@ -24,12 +24,22 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
   List<LangBag> languageBags = [];
   bool busy = false;
   late ColorAndLocale colorAndLocale;
-
+ var languageColor = 'languageColor';
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
+    _setTexts();
     getColors();
+  }
+
+  void _setTexts() async {
+    final c = await prefs.getColorAndLocale();
+    final loc = c.locale;
+    languageColor = await translator.translate('languageColor', loc);
+   setState(() {
+
+   });
   }
 
   @override
@@ -199,8 +209,7 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
       child: Scaffold(
         appBar: AppBar(
           leading: const SizedBox(),
-          title: Text(
-            'Language & Colour',
+          title: Text(languageColor,
             style: myTextStyleMediumLargeWithColor(
                 context, Theme.of(context).primaryColor, 24),
           ),
@@ -288,7 +297,7 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
                                      width: 8,
                                    ),
                                    SizedBox(
-                                     width: (width /2) - 60,
+                                     width: (width /2) - 48,
                                      child: LanguageList(
                                          languageBags: languageBags,
                                          onLanguageChosen: (l) {
@@ -343,9 +352,9 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
                     child: Row(
                       children: [
                         SizedBox(
-                            width: (width /2),
+                            width: (width /2) - 24,
                             child: ColorGrid(
-                              crossAxisCount: 3,
+                              crossAxisCount: 2,
                                 colors: colors,
                                 onColorChosen: (c) {
                                   onColorChosen(c);

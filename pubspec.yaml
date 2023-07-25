@@ -61,13 +61,13 @@ dependencies:
   firebase_dynamic_links: ^5.3.4
   get: ^4.6.5
   flutter_easyloading: ^3.0.5
-  firebase_ui_auth: ^1.6.0
+  firebase_ui_auth: ^1.6.1
   account_picker: ^2.1.0
   sms_autofill: ^2.3.0
   numeric_keyboard: ^1.1.0
   mobile_number: ^2.1.1
   flutter_analog_clock: ^1.0.3
-
+  custom_map_markers: ^0.0.2+1
   url_launcher:
   flutter_polyline_points:
   flutter_dotenv:

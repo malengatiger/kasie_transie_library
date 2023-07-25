@@ -72,7 +72,7 @@ class TimerWidgetState extends State<TimerWidget>
                         context, Colors.grey.shade700, 16),
                   ),
                   const SizedBox(
-                    height: 24,
+                    height: 32,
                   ),
                   widget.subTitle == null
                       ? const SizedBox()
@@ -81,7 +81,7 @@ class TimerWidgetState extends State<TimerWidget>
                           child: Text(widget.subTitle!),
                         ),
                   const SizedBox(
-                    height: 24,
+                    height: 48,
                   ),
                   SizedBox(width: 120, height: 120,
                     child: AnalogClock(

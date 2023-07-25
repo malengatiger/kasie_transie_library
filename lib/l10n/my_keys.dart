@@ -10,8 +10,9 @@ class MyKeys {
     return hashMap;
   }
 
-  static _buildMap() {
+  static void _buildMap() {
     hashMap['Cancel'] = 'Cancel';
+    hashMap['SendTaxiRequest'] = 'SendTaxiRequest';
     hashMap['addCity'] = 'addCity';
     hashMap['addNewRoute'] = 'addNewRoute';
     hashMap['af'] = 'af';
@@ -49,6 +50,7 @@ class MyKeys {
     hashMap['deleteRoutePoints'] = 'deleteRoutePoints';
     hashMap['departures'] = 'departures';
     hashMap['desc'] = 'desc';
+    hashMap['destination'] = 'destination';
     hashMap['dispatch'] = 'dispatch';
     hashMap['dispatchError'] = 'dispatchError';
     hashMap['dispatchFailed'] = 'dispatchFailed';
@@ -90,14 +92,18 @@ class MyKeys {
     hashMap['fetch'] = 'fetch';
     hashMap['fetchRouteData'] = 'fetchRouteData';
     hashMap['fileSize'] = 'fileSize';
+    hashMap['findTaxi'] = 'findTaxi';
     hashMap['firstTime'] = 'firstTime';
     hashMap['firstTime2'] = 'firstTime2';
     hashMap['fr'] = 'fr';
+    hashMap['from'] = 'from';
     hashMap['getDirections'] = 'getDirections';
     hashMap['heartbeats'] = 'heartbeats';
     hashMap['hereWeCome'] = 'hereWeCome';
     hashMap['historyCar'] = 'historyCar';
     hashMap['historyCars'] = 'historyCars';
+    hashMap['hour'] = 'hour';
+    hashMap['hours'] = 'hours';
     hashMap['ig'] = 'ig';
     hashMap['index'] = 'index';
     hashMap['initializingResources'] = 'initializingResources';
@@ -108,6 +114,8 @@ class MyKeys {
     hashMap['languageColor'] = 'languageColor';
     hashMap['lastCount'] = 'lastCount';
     hashMap['loading'] = 'loading';
+    hashMap['loadingCommuterData'] = 'loadingCommuterData';
+    hashMap['loadingInformation'] = 'loadingInformation';
     hashMap['loadingOwnerData'] = 'loadingOwnerData';
     hashMap['loadingPassengerData'] = 'loadingPassengerData';
     hashMap['loadingRoutes'] = 'loadingRoutes';
@@ -133,6 +141,7 @@ class MyKeys {
     hashMap['numberOfDays'] = 'numberOfDays';
     hashMap['ok'] = 'ok';
     hashMap['openMailApp'] = 'openMailApp';
+    hashMap['openRouteMap'] = 'openRouteMap';
     hashMap['owner'] = 'owner';
     hashMap['ownerDash'] = 'ownerDash';
     hashMap['ownerUnknown'] = 'ownerUnknown';
@@ -169,6 +178,7 @@ class MyKeys {
     hashMap['registerAssoc'] = 'registerAssoc';
     hashMap['requestLocation'] = 'requestLocation';
     hashMap['requestMedia'] = 'requestMedia';
+    hashMap['requestTaxi'] = 'requestTaxi';
     hashMap['routeColor'] = 'routeColor';
     hashMap['routeColour'] = 'routeColour';
     hashMap['routeDetails'] = 'routeDetails';
@@ -232,6 +242,7 @@ class MyKeys {
     hashMap['startOfRoute'] = 'startOfRoute';
     hashMap['startPassengerCount'] = 'startPassengerCount';
     hashMap['startPhotoVideo'] = 'startPhotoVideo';
+    hashMap['startTaxiRequest'] = 'startTaxiRequest';
     hashMap['startVideo'] = 'startVideo';
     hashMap['stopVideo'] = 'stopVideo';
     hashMap['submitText'] = 'submitText';
@@ -246,17 +257,25 @@ class MyKeys {
     hashMap['taxiMarshal'] = 'taxiMarshal';
     hashMap['taxiNotOnRoute'] = 'taxiNotOnRoute';
     hashMap['taxiOnRoute'] = 'taxiOnRoute';
+    hashMap['taxiRequest'] = 'taxiRequest';
     hashMap['taxiRouteBuilder'] = 'taxiRouteBuilder';
     hashMap['taxiRouteMapper'] = 'taxiRouteMapper';
     hashMap['taxiRouteViewer'] = 'taxiRouteViewer';
     hashMap['taxiRoutes'] = 'taxiRoutes';
+    hashMap['taxiRoutesNearby'] = 'taxiRoutesNearby';
     hashMap['thanks'] = 'thanks';
     hashMap['thanksForWaiting'] = 'thanksForWaiting';
     hashMap['thisMayTake'] = 'thisMayTake';
     hashMap['thisMayTakeMinutes'] = 'thisMayTakeMinutes';
     hashMap['thisMayTakeSeconds'] = 'thisMayTakeSeconds';
     hashMap['timeElapsed'] = 'timeElapsed';
+    hashMap['timeTaxiRequired'] = 'timeTaxiRequired';
+    hashMap['to'] = 'to';
     hashMap['totalPassenger'] = 'totalPassenger';
+    hashMap['travelFromAnotherPlace'] = 'travelFromAnotherPlace';
+    hashMap['travelFromWhereIam'] = 'travelFromWhereIam';
+    hashMap['travellingFrom'] = 'travellingFrom';
+    hashMap['travellingTo'] = 'travellingTo';
     hashMap['ts'] = 'ts';
     hashMap['unableToSignIn'] = 'unableToSignIn';
     hashMap['updateCarOner'] = 'updateCarOner';
@@ -281,6 +300,8 @@ class MyKeys {
     hashMap['wantToStartMapping'] = 'wantToStartMapping';
     hashMap['weHelp'] = 'weHelp';
     hashMap['welcome'] = 'welcome';
+    hashMap['whereWouldYou'] = 'whereWouldYou';
+    hashMap['willYouBeTravelling'] = 'willYouBeTravelling';
     hashMap['workWithRoutes'] = 'workWithRoutes';
     hashMap['working'] = 'working';
     hashMap['xh'] = 'xh';
@@ -291,4 +312,5 @@ class MyKeys {
     hashMap['zu'] = 'zu';
 
   }
+
 }

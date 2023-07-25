@@ -122,7 +122,28 @@ class Prefs {
     pp("🌽 🌽 🌽 Prefs: getAmbassador: 🧩  ${user.toJson()} retrieved");
     return user;
   }
+  //
+  Future saveCommuter(Commuter commuter) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
+    Map mJson = commuter.toJson();
+    var jx = json.encode(mJson);
+    prefs.setString('commuter', jx);
+    pp("🌽 🌽 🌽 Prefs: saveCommuter:  SAVED: 🌽 ${commuter.toJson()}");
+    return null;
+  }
+
+  Future<Commuter?> getCommuter() async {
+    var prefs = await SharedPreferences.getInstance();
+    var string = prefs.getString('commuter');
+    if (string == null) {
+      return null;
+    }
+    var jx = json.decode(string);
+    var user = buildCommuter(jx);
+    pp("🌽 🌽 🌽 Prefs: getCommuter: 🧩  ${user.toJson()} retrieved");
+    return user;
+  }
   //
   Future saveSettings(SettingsModel settings) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

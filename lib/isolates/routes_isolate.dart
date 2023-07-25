@@ -246,6 +246,11 @@ class RoutesIsolate {
 
 ///Isolate to get association routes
 const xyz = '🌀🌀🌀🌀🌀🌀🌀🌀🌀 HeavyTaskForRoutes: 🍎🍎';
+const xyz1 = '😎😎😎😎😎😎😎😎 HeavyTaskForRouteLandmarks: 🍎🍎';
+const xyz2 = '🍟🍟🍟🍟🍟🍟 HeavyTaskForRoutePoints: 🍟🍟';
+const xyz3 = '🌸🌸🌸🌸🌸🌸🌸🌸🌸 HeavyTaskForRouteCities: 🌸🌸🌸';
+
+
 @pragma('vm:entry-point')
 Future<String> _heavyTaskForRoutes(DonkeyBag bag) async {
   pp('$xyz _heavyTaskForRoutes starting ................. ${bag.url}');
@@ -259,18 +264,17 @@ Future<String> _heavyTaskForRoutes(DonkeyBag bag) async {
 
 @pragma('vm:entry-point')
 Future<String> _heavyTaskForRoutePoints(RoutePointsBag bag) async {
-  pp('$xyz _heavyTaskForRoutePoints starting ................routeIds:  ${bag.routeIds.length} .');
+  pp('$xyz2 _heavyTaskForRoutePoints starting ................routeIds:  ${bag.routeIds.length} .');
 
   final points = [];
   final token = bag.token;
   for (var id in bag.routeIds) {
     points.addAll(await _processRoute(id, bag.url, token));
-    pp('$xyz RoutePoints for routes processed so far ... ${E.appleGreen} total: ${points.length}');
+    pp('$xyz2 RoutePoints for routes processed so far ... ${E.appleGreen} total: ${points.length}');
   }
 
   final jsonList = jsonEncode(points);
-  pp('$xyz  RoutePoints for route(s): ${points.length}');
-  pp('$xyz _heavyTaskForRoutePoints returning raw string .................');
+  pp('$xyz2  RoutePoints for route(s): ${points.length}');
 
   return jsonList;
 }
@@ -302,7 +306,7 @@ Future<List> _processRoute(String routeId, String url, String token) async {
 
 @pragma('vm:entry-point')
 Future<String> _heavyTaskForRouteLandmarks(BunnyBag bag) async {
-  pp('$xyz _heavyTaskForRouteLandmarks starting .................associationId: ${bag.associationId} .');
+  pp('$xyz1 _heavyTaskForRouteLandmarks starting .................associationId: ${bag.associationId} .');
 
   final routeLandmarks = [];
   final token = bag.token;
@@ -310,13 +314,13 @@ Future<String> _heavyTaskForRouteLandmarks(BunnyBag bag) async {
   List resp = await _httpGet(bag.url, token);
   routeLandmarks.addAll(resp);
   final jsonList = jsonEncode(routeLandmarks);
-  pp('$xyz Association RouteLandmarks for all routes: ${routeLandmarks.length}');
+  pp('$xyz1 Association RouteLandmarks for all routes: ${routeLandmarks.length}');
   return jsonList;
 }
 
 @pragma('vm:entry-point')
 Future<String> _heavyTaskForRouteCities(BunnyBag bag) async {
-  pp('$xyz _heavyTaskForRouteCities starting ................. associationId; ${bag.associationId} .');
+  pp('$xyz3 _heavyTaskForRouteCities starting ................. associationId; ${bag.associationId} .');
 
   final routeCities = [];
   final token = bag.token;
@@ -324,7 +328,7 @@ Future<String> _heavyTaskForRouteCities(BunnyBag bag) async {
   List resp = await _httpGet(bag.url, token);
   routeCities.addAll(resp);
   final jsonList = jsonEncode(routeCities);
-  pp('$xyz Association RouteCities for all routes: ${routeCities.length}');
+  pp('$xyz3  RouteCities for all routes: ${routeCities.length}');
   return jsonList;
 }
 

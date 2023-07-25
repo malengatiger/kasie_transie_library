@@ -41,6 +41,9 @@ class MultiRouteChooserState extends State<MultiRouteChooser> {
     selectRoutes = await translator.translate('selectRoutes', loc);
     selectedRoutes = await translator.translate('selectedRoutes', loc);
     showRoutes = await translator.translate('show Routes', loc);
+    setState(() {
+
+    });
   }
 
   void _getRoutes() async {

@@ -59,6 +59,19 @@ class DataApiDog {
     }
   }
 
+  Future<CommuterRequest> addCommuterRequest(CommuterRequest request) async {
+    final bag = request.toJson();
+    final cmd = '${url}addCommuterRequest';
+    final res = await _callPost(cmd, bag);
+    final lr = buildCommuterRequest(res);
+
+    listApiDog.realm.write(() {
+      listApiDog.realm.add<CommuterRequest>(lr);
+    });
+    pp('$mm CommuterRequest added to database: $res');
+    return lr;
+  }
+
   Future<LocationRequest> addLocationRequest(LocationRequest request) async {
     final bag = request.toJson();
     final cmd = '${url}addLocationRequest';
@@ -189,6 +202,18 @@ class DataApiDog {
     myPrettyJsonPrint(res);
     final r = buildRoute(res);
     listApiDog.getRoutes(AssociationParameter(route.associationId!, true));
+    return r;
+  }
+
+  Future<Commuter> addCommuter(Commuter commuter) async {
+    final bag = commuter.toJson();
+    final cmd = '${url}addCommuter';
+    final res = await _callPost(cmd, bag);
+    pp('$mm Commuter added to database ...');
+    myPrettyJsonPrint(res);
+
+    final r = buildCommuter(res);
+    await prefs.saveCommuter(r);
     return r;
   }
 

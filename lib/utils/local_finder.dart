@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart';
 import 'package:kasie_transie_library/isolates/routes_isolate.dart';
+import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 
@@ -43,8 +44,8 @@ class LocalFinder {
 
   Future<RoutePoint?> findNearestRoutePoint(
       {required double latitude,
-        required double longitude,
-        required double radiusInMetres}) async {
+      required double longitude,
+      required double radiusInMetres}) async {
     final routePoints = listApiDog.realm.all<RoutePoint>();
 
     final map = HashMap<double, RoutePoint>();
@@ -146,14 +147,15 @@ class LocalFinder {
         longitude: longitude,
         radiusInMetres: radiusInMetres);
     var rList = <Route>[];
+    var map = HashMap<String,Route>();
     for (var rk in routeLandmarks) {
       final rt = await listApiDog.getRoute(rk.routeId!);
       if (rt != null) {
-        rList.add(rt);
+       map[rt.routeId!] = rt;
       }
     }
+    rList = map.values.toList();
     final end0 = DateTime.now();
-
     if (rList.isNotEmpty) {
       pp('\n\n$mm ............... found routes from landmarks, '
           '${E.redDot} returning with ${rList.length}  routes...');
@@ -163,63 +165,20 @@ class LocalFinder {
     } else {
       final user = await prefs.getUser();
       if (user != null) {
-        routesIsolate.getRoutes(user.associationId!);
+        rList = await routesIsolate.getRoutes(user.associationId!);
+      }
+      final comm = await prefs.getCommuter();
+      if (comm != null) {
+        rList = await listApiDog.findRoutesByLocation(LocationFinderParameter(
+            latitude: latitude,
+            limit: 2000,
+            longitude: longitude,
+            radiusInKM: radiusInMetres / 1000));
       }
     }
-    var routePoints = listApiDog.realm.all<RoutePoint>();
-    pp('$mm findNearestRoutes, radiusInMetres: $radiusInMetres metres');
-    pp('$mm findNearestRoutes, found all points in realm: ${routePoints.length} points');
-    final user = await prefs.getUser();
-    if (routePoints.isEmpty) {
-      final routes = await routesIsolate.getRoutes(user!.associationId!);
-      pp('$mm .. routes found ${routes.length}, will try again ...');
-      routePoints = listApiDog.realm.all<RoutePoint>();
-    }
-
-    final map = HashMap<double, RoutePoint>();
-    for (var value in routePoints) {
-      final dist = GeolocatorPlatform.instance.distanceBetween(
-          latitude,
-          longitude,
-          value.position!.coordinates[1],
-          value.position!.coordinates[0]);
-
-      map[dist] = value;
-    }
-    pp('$mm hashMap has ${map.length} distances calculated');
-
-    final routes = <Route>[];
-    List list = map.keys.toList();
-    list.sort();
-    pp('$mm hashMap has ${list.length} distances in the list ...');
-    if (list.isNotEmpty) {
-      for (var distance in list) {
-        if (distance <= radiusInMetres) {
-          var routeId = map[distance]!.routeId;
-          var route = await listApiDog.getRoute(routeId!);
-          if (route != null) {
-            // pp('$mm .... route ${route.name!} has been found nearby, '
-            //     'distance: $distance, vs radiusInMetres: $radiusInMetres ');
-            routes.add(route);
-          }
-        }
-      }
-    } else {
-      pp('$mm hashMap has ${list.length} distances. ${E.redDot} wtf?');
-    }
-    //
-    final map2 = HashMap<String, Route>();
-    for (var r in routes) {
-      map2[r.routeId!] = r;
-    }
-    final fList = map2.values.toList();
-    pp('$mm findNearestRoutes, found: ${fList.length} routes');
-    final end = DateTime.now();
-    pp('\n\n$mm findNearestRoutes, ${E.leaf2}${E.leaf2}${E.leaf2} '
-        'time elapsed: ${end.difference(start).inSeconds} seconds\n\n');
-
-    return fList;
+    return rList;
   }
+
 
   Future<List<City>> findNearestCities(
       {required double latitude,

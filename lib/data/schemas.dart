@@ -257,6 +257,7 @@ class _VehicleMediaRequest {
     return map;
   }
 }
+
 //
 @RealmModel()
 class _VehicleArrival {
@@ -297,6 +298,7 @@ class _VehicleArrival {
     return map;
   }
 }
+
 @RealmModel()
 class _VehiclePhoto {
   @PrimaryKey()
@@ -705,6 +707,113 @@ class _AppError {
     return map;
   }
 }
+/*
+ private String _partitionKey;
+    @Id
+    private String _id;
+    String commuterId;
+    String dateRequested;
+    String dateNeeded;
+
+    Position currentPosition;
+
+    String routeId;
+    String routeName;
+
+    String routeLandmarkId;
+    String routeLandmarkName;
+
+    int routePointIndex;
+    int numberOfPassengers;
+
+    double distanceToRouteLandmarkInMetres;
+    double distanceToRoutePointInMetres;
+
+    String associationId;
+    boolean scanned;
+
+    String destinationCityId;
+    String destinationCityName;
+    String originCityId;
+    String originCityName;
+
+ */
+@RealmModel()
+class _CommuterRequest {
+  @PrimaryKey()
+  late ObjectId id;
+  @Indexed()
+  String? commuterId;
+  String? commuterRequestId, routeId;
+  String? routeName;
+  String? dateRequested;
+  String? routeLandmarkId;
+  String? routeLandmarkName;
+  String? associationId;
+  String? dateNeeded;
+  bool? scanned;
+
+  _Position? currentPosition;
+  int? routePointIndex, numberOfPassengers;
+  double? distanceToRouteLandmarkInMetres, distanceToRoutePointInMetres;
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {
+      '_id': id.hexString,
+      'commuterId': commuterId,
+      'commuterRequestId': commuterRequestId,
+      'routeId': routeId,
+      'routeName': routeName,
+      'dateRequested': dateRequested,
+      'routeLandmarkId': routeLandmarkId,
+      'routeLandmarkName': routeLandmarkName,
+      'associationId': associationId,
+      'dateNeeded': dateNeeded,
+      'scanned': scanned,
+      'routePointIndex': routePointIndex,
+      'numberOfPassengers': numberOfPassengers,
+      'distanceToRouteLandmarkInMetres': distanceToRouteLandmarkInMetres,
+      'distanceToRoutePointInMetres': distanceToRoutePointInMetres,
+      'currentPosition': currentPosition!.toJson(),
+
+    };
+    return map;
+  }
+}
+//
+@RealmModel()
+class _Commuter {
+  @PrimaryKey()
+  late ObjectId id;
+  @Indexed()
+  String? commuterId;
+  String? name, gender;
+  String? countryId;
+  String? dateRegistered;
+  String? qrCodeUrl;
+  String? profileUrl;
+  String? password;
+  String? email;
+  String? cellphone, profileThumbnailUrl;
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {
+      '_id': id.hexString,
+      'dateRegistered': dateRegistered,
+      'commuterId': commuterId,
+      'password': password,
+      'qrCodeUrl': qrCodeUrl,
+      'name': name,
+      'countryId': countryId,
+      'profileUrl': profileUrl,
+      'profileThumbnailUrl': profileThumbnailUrl,
+      'email': email,
+      'cellphone': cellphone,
+      'gender': gender,
+    };
+    return map;
+  }
+}
 
 @RealmModel()
 class _User {
@@ -795,7 +904,6 @@ class _AmbassadorPassengerCount {
       'passengersOut': passengersOut,
       'currentPassengers': currentPassengers,
       'position': position == null ? null : position!.toJson(),
-
     };
     return map;
   }
@@ -823,11 +931,11 @@ class _AmbassadorCheckIn {
       'created': created,
       'associationId': associationId,
       'position': position == null ? null : position!.toJson(),
-
     };
     return map;
   }
 }
+
 @RealmModel()
 class _LocationRequest {
   @PrimaryKey()
@@ -839,7 +947,6 @@ class _LocationRequest {
   String? created;
   String? associationId;
 
-
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {
       '_id': id.hexString,
@@ -849,7 +956,6 @@ class _LocationRequest {
       'vehicleReg': vehicleReg,
       'created': created,
       'associationId': associationId,
-
     };
     return map;
   }

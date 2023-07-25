@@ -41,7 +41,27 @@ State buildState(Map map) {
   );
   return m;
 }
+Commuter buildCommuter(Map map) {
+  // pp('${E.broc}  json for User, check _id .......');
+  // myPrettyJsonPrint(map);
+  var id = rm.ObjectId.fromHexString(map['_id'] as String);
+  final m = Commuter(
+    id,
+    commuterId: map['commuterId'],
+    name: map['name'],
+    countryId: map['countryId'],
+    dateRegistered: map['dateRegistered'],
+    qrCodeUrl: map['qrCodeUrl'],
+    profileUrl: map['profileUrl'],
+    profileThumbnailUrl: map['profileThumbnailUrl'],
+    password: map['password'],
+    email: map['email'],
+    cellphone: map['cellphone'],
+    gender: map['gender'],
+  );
 
+  return m;
+}
 User buildUser(Map map) {
   // pp('${E.broc}  json for User, check _id .......');
   // myPrettyJsonPrint(map);
@@ -316,6 +336,30 @@ DispatchRecord buildDispatchRecord(Map j) {
   );
   return m;
 }
+
+CommuterRequest buildCommuterRequest(Map j) {
+  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  var m = CommuterRequest(
+    id,
+    commuterId: j['commuterId'],
+    commuterRequestId: j['commuterRequestId'],
+    associationId: j['associationId'],
+    routeId: j['routeId'],
+    routeName: j['routeName'],
+    dateRequested: j['dateRequested'],
+    routeLandmarkId: j['routeLandmarkId'],
+    routeLandmarkName: j['routeLandmarkName'],
+    dateNeeded: j['dateNeeded'],
+    scanned: j['scanned'],
+    routePointIndex: j['routePointIndex'],
+    numberOfPassengers: j['numberOfPassengers'],
+    distanceToRouteLandmarkInMetres: j['distanceToRouteLandmarkInMetres'],
+    distanceToRoutePointInMetres: j['distanceToRoutePointInMetres'],
+    currentPosition: buildPosition( j['currentPosition']),
+  );
+  return m;
+}
+
 
 VehicleArrival buildVehicleArrival(Map j) {
   var id = rm.ObjectId.fromHexString(j['_id'] as String);

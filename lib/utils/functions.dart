@@ -752,17 +752,18 @@ Future<BitmapDescriptor> getBitmapDescriptor(
   var byteData = await fi.image.toByteData(format: ui.ImageByteFormat.png);
 
   Uint8List m = byteData!.buffer.asUint8List();
+
   // img.colorOffset(
   //   doneImg!,
   //   red: rgb!.red,
   //   green: rgb.green,
   //   blue: rgb.blue,
   // );
-  // doneImg = img.copyResize(doneImg, width: width);
+  // final doneImg = img.copyResize(doneImg, width: width);
   // final Uint8List doneIconColorful =
   //     Uint8List.fromList(img.encodePng(doneImg));
-  BitmapDescriptor doneBM = BitmapDescriptor.fromBytes(m);
 
+  BitmapDescriptor doneBM = BitmapDescriptor.fromBytes(m);
   return doneBM;
 }
 
