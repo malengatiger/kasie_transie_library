@@ -315,11 +315,15 @@ String getValidLocale(String locale) {
 }
 
 String getFormattedTime({required int timeInSeconds}) {
-  int sec = timeInSeconds % 60;
-  int min = (timeInSeconds / 60).floor();
-  String minute = min.toString().length <= 1 ? "0$min" : "$min";
-  String second = sec.toString().length <= 1 ? "0$sec" : "$sec";
-  return "$minute : $second";
+  var duration = Duration(seconds: timeInSeconds);
+  return _printDuration(duration);
+}
+String _printDuration(Duration duration) {
+  String twoDigits(int n) => n.toString().padLeft(2, "0");
+  String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+  String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+
+  return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
 }
 
 Color getTextColorForBackground(Color backgroundColor) {
