@@ -398,7 +398,6 @@ class DispatchRecord extends _DispatchRecord
   DispatchRecord(
     ObjectId id, {
     String? dispatchRecordId,
-    String? landmarkId,
     String? marshalId,
     int? passengers,
     String? ownerId,
@@ -414,11 +413,11 @@ class DispatchRecord extends _DispatchRecord
     String? vehicleReg,
     String? associationId,
     String? associationName,
+    String? routeLandmarkId,
     bool? dispatched,
   }) {
     RealmObjectBase.set(this, 'id', id);
     RealmObjectBase.set(this, 'dispatchRecordId', dispatchRecordId);
-    RealmObjectBase.set(this, 'landmarkId', landmarkId);
     RealmObjectBase.set(this, 'marshalId', marshalId);
     RealmObjectBase.set(this, 'passengers', passengers);
     RealmObjectBase.set(this, 'ownerId', ownerId);
@@ -434,6 +433,7 @@ class DispatchRecord extends _DispatchRecord
     RealmObjectBase.set(this, 'vehicleReg', vehicleReg);
     RealmObjectBase.set(this, 'associationId', associationId);
     RealmObjectBase.set(this, 'associationName', associationName);
+    RealmObjectBase.set(this, 'routeLandmarkId', routeLandmarkId);
     RealmObjectBase.set(this, 'dispatched', dispatched);
   }
 
@@ -450,13 +450,6 @@ class DispatchRecord extends _DispatchRecord
   @override
   set dispatchRecordId(String? value) =>
       RealmObjectBase.set(this, 'dispatchRecordId', value);
-
-  @override
-  String? get landmarkId =>
-      RealmObjectBase.get<String>(this, 'landmarkId') as String?;
-  @override
-  set landmarkId(String? value) =>
-      RealmObjectBase.set(this, 'landmarkId', value);
 
   @override
   String? get marshalId =>
@@ -555,6 +548,13 @@ class DispatchRecord extends _DispatchRecord
       RealmObjectBase.set(this, 'associationName', value);
 
   @override
+  String? get routeLandmarkId =>
+      RealmObjectBase.get<String>(this, 'routeLandmarkId') as String?;
+  @override
+  set routeLandmarkId(String? value) =>
+      RealmObjectBase.set(this, 'routeLandmarkId', value);
+
+  @override
   bool? get dispatched =>
       RealmObjectBase.get<bool>(this, 'dispatched') as bool?;
   @override
@@ -576,7 +576,6 @@ class DispatchRecord extends _DispatchRecord
       SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
       SchemaProperty('dispatchRecordId', RealmPropertyType.string,
           optional: true),
-      SchemaProperty('landmarkId', RealmPropertyType.string, optional: true),
       SchemaProperty('marshalId', RealmPropertyType.string, optional: true),
       SchemaProperty('passengers', RealmPropertyType.int, optional: true),
       SchemaProperty('ownerId', RealmPropertyType.string, optional: true),
@@ -594,6 +593,8 @@ class DispatchRecord extends _DispatchRecord
       SchemaProperty('vehicleReg', RealmPropertyType.string, optional: true),
       SchemaProperty('associationId', RealmPropertyType.string, optional: true),
       SchemaProperty('associationName', RealmPropertyType.string,
+          optional: true),
+      SchemaProperty('routeLandmarkId', RealmPropertyType.string,
           optional: true),
       SchemaProperty('dispatched', RealmPropertyType.bool, optional: true),
     ]);

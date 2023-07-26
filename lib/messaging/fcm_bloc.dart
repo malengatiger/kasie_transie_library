@@ -39,6 +39,8 @@ class FCMBloc {
 
   lib.User? user;
   lib.Vehicle? car;
+  lib.Association? ass;
+  bool demoFlag = false;
 
   Future initialize() async {
     pp('\n$mm ... FirebaseMessaging initialize starting ... ');
@@ -99,37 +101,46 @@ class FCMBloc {
 
   String getMessageType(fb.RemoteMessage message) {
     var type = '';
-    if (message.data['routeChanges'] != null) {
+    if (message.data[Constants.routeChanges] != null) {
       pp("$mm onMessage: $red routeChanges message has arrived!  ... $red ");
-      type = 'routeChanges';
-    } else if (message.data['vehicleChanges'] != null) {
+      type = Constants.routeChanges;
+    } else if (message.data[Constants.vehicleChanges] != null) {
       pp("$mm onMessage: $red vehicleChanges message has arrived!  ... $red ");
-      type = 'vehicleChanges';
-    } else if (message.data['locationRequest'] != null) {
+      type = Constants.vehicleChanges;
+    } else if (message.data[Constants.locationRequest] != null) {
       pp("$mm onMessage: $red locationRequest message has arrived!  ... $red ");
-      type = 'locationRequest';
-    } else if (message.data['locationResponse'] != null) {
+      type = Constants.locationRequest;
+    } else if (message.data[Constants.locationResponse] != null) {
       pp("$mm onMessage: $red locationResponse message has arrived!  ... $red ");
-      type = 'locationResponse';
-    } else if (message.data['vehicleArrival'] != null) {
+      type = Constants.locationResponse;
+    } else if (message.data[Constants.vehicleArrival] != null) {
       pp("$mm onMessage: $red vehicleArrival message has arrived!  ... $red\n ");
-      type = 'vehicleArrival';
-    } else if (message.data['vehicleDeparture'] != null) {
+      type = Constants.vehicleArrival;
+    } else if (message.data[Constants.vehicleDeparture] != null) {
       pp("$mm onMessage: $red vehicleDeparture message has arrived!  ... $red ");
-      type = 'vehicleDeparture';
-    } else if (message.data['dispatchRecord'] != null) {
+      type = Constants.vehicleDeparture;
+    } else if (message.data[Constants.dispatchRecord] != null) {
       pp("$mm onMessage: $red dispatchRecord message has arrived!  ... $red ");
-      type = 'dispatchRecord';
-    } else if (message.data['userGeofenceEvent'] != null) {
+      type = Constants.dispatchRecord;
+    } else if (message.data[Constants.userGeofenceEvent] != null) {
       pp("$mm onMessage: $red userGeofenceEvent message has arrived!  ... $red ");
-      type = 'userGeofenceEvent';
-    } else if (message.data['vehicleMediaRequest'] != null) {
+      type = Constants.userGeofenceEvent;
+    } else if (message.data[Constants.vehicleMediaRequest] != null) {
       pp("$mm onMessage: $red vehicleMediaRequest message has arrived!  ... $red ");
-      type = 'vehicleMediaRequest';
-    } else if (message.data['passengerCount'] != null) {
+      type = Constants.vehicleMediaRequest;
+    } else if (message.data[Constants.passengerCount] != null) {
       pp("$mm onMessage: $red passengerCount message has arrived!  ... $red ");
-      type = 'passengerCount';
-    } else {
+      type = Constants.passengerCount;
+    } else if (message.data[Constants.heartbeat] != null) {
+      pp("$mm onMessage: $red heartbeat message has arrived!  ... $red ");
+      type = Constants.heartbeat;
+    } else if (message.data[Constants.commuterRequest] != null) {
+      pp("$mm onMessage: $red commuterRequest message has arrived!  ... $red ");
+      type = Constants.commuterRequest;
+    } else if (message.data[Constants.routeUpdateRequest] != null){
+      pp("$mm onMessage: $red routeUpdateRequest message has arrived!  ... $red ");
+      type = Constants.routeUpdateRequest;
+    } else{
       pp("$mm onMessage: $red unknown message has arrived!  ... $red ");
       return 'unknown';
     }
@@ -140,22 +151,56 @@ class FCMBloc {
 
   var newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMBloc: ';
 
+  Future<void> subscribeForDemoDriver() async {
+    String? associationId;
+    ass = await prefs.getAssociation();
+    demoFlag = await prefs.getDemoFlag();
+    if (ass != null) {
+      associationId = ass!.associationId!;
+    } else {
+      return;
+    }
+    //
+    await firebaseMessaging.subscribeToTopic('commuterRequest_$associationId');
+    pp('$newMM ..... FCM: subscribed to commuterRequest_$associationId');
+    //
+    await firebaseMessaging.subscribeToTopic('heartbeat_$associationId');
+    pp('$newMM ..... FCM: subscribed to heartbeat_$associationId');
+//
+    await firebaseMessaging.subscribeToTopic('dispatchRecord_$associationId');
+    pp('$newMM ..... FCM: subscribed to dispatchRecord_$associationId');
+    //
+    await firebaseMessaging.subscribeToTopic('passengerCount_$associationId');
+    pp('$newMM ..... FCM: subscribed to passengerCount_$associationId');
+
+    pp('$newMM ..... FCM: subscribed to all ${E.pear} 4 (four) DemoDriver FCM topics\n\n');
+  }
+
   Future<void> subscribeToTopics(String app) async {
     appName = app;
     newMM = '$newMM$app 🔷🔷';
-    var user = await prefs.getUser();
-    var car = await prefs.getCar();
+    user = await prefs.getUser();
+    car = await prefs.getCar();
+    demoFlag = await prefs.getDemoFlag();
+
     String? associationId;
     if (user != null) {
-      associationId = user.associationId!;
+      associationId = user!.associationId!;
     }
     if (car != null) {
-      associationId = car.associationId!;
+      associationId = car!.associationId!;
     }
+    if (ass != null) {
+      associationId = ass!.associationId!;
+    }
+
     if (associationId == null) {
       return;
     }
-    pp("\n\n$newMM subscribeToTopics: $red subscribe to all KasieTransie FCM topics ... ");
+
+    //todo - cut up subscriptions for each user type (or app)
+
+    pp("\n\n$newMM subscribeToTopics: $red start to subscribe to all KasieTransie FCM topics ... ");
 
     await firebaseMessaging.subscribeToTopic('vehicle_changes_$associationId');
     pp('$newMM ..... FCM: subscribed to vehicle_changes_$associationId');
@@ -190,8 +235,13 @@ class FCMBloc {
         .subscribeToTopic('vehicle_media_request_$associationId');
     pp('$newMM ..... FCM: subscribed to vehicle_media_request_$associationId');
     //
+    await firebaseMessaging.subscribeToTopic('commuterRequest_$associationId');
+    pp('$newMM ..... FCM: subscribed to commuterRequest_$associationId');
+    //
+    await firebaseMessaging.subscribeToTopic('heartbeat_$associationId');
+    pp('$newMM ..... FCM: subscribed to heartbeat_$associationId');
 
-    pp('$newMM ..... FCM: subscribed to all ${E.pear} 9 (nine) KasieTransie FCM topics\n\n');
+    pp('$newMM ..... FCM: subscribed to all ${E.pear} 12 (twelve) KasieTransie FCM topics\n\n');
     //
   }
 
@@ -201,81 +251,117 @@ class FCMBloc {
   }
 
   Future<void> processFCMMessage(fb.RemoteMessage message, String type) async {
-    pp("$newMM processFCMMessage: $red processing message received: see below ...");
+    pp("$newMM processFCMMessage: $red processing message received: see below: $type ...");
     final map = message.data;
     myPrettyJsonPrint(map);
+    pp('$newMM .... what the fuck is the type?? ${E.redDot} $type demoFlag: $demoFlag}');
+
     switch (type) {
-      case 'routeChanges':
-        _routeChangesStreamController.sink.add(map['routeChanges'] as String);
-        refreshRoute(map['routeChanges'] as String);
+      case Constants.routeChanges:
+        _routeChangesStreamController.sink.add(map[Constants.routeChanges] as String);
+        refreshRoute(map[Constants.routeChanges] as String);
         break;
-      case 'vehicleChanges':
+      case Constants.vehicleChanges:
         _vehicleChangesStreamController.sink
-            .add(map['vehicleChanges'] as String);
+            .add(map[Constants.vehicleChanges] as String);
         break;
-      case 'vehicleArrival':
-        final va = map['vehicleArrival'];
+      case Constants.vehicleArrival:
+        final va = map[Constants.vehicleArrival];
         final x = jsonDecode(va);
         _vehicleArrivalStreamController.sink.add(buildVehicleArrival(x));
         break;
-      case 'vehicleDeparture':
-        final va = map['vehicleDeparture'];
+      case Constants.vehicleDeparture:
+        final va = map[Constants.vehicleDeparture];
         final x = jsonDecode(va);
         _vehicleDepartureStreamController.sink.add(buildVehicleDeparture(x));
         break;
-      case 'dispatchRecord':
-        final va = map['dispatchRecord'];
+      case Constants.dispatchRecord:
+        pp('$newMM .... dispatchRecord in the switch?  ${E.redDot} $type');
+
+        final va = map[Constants.dispatchRecord];
         final x = jsonDecode(va);
         final kk = buildDispatchRecord(x);
-        if (user != null) {
-          if (user!.userId == kk.marshalId ||
-              user!.userId == kk.ownerId ||
-              user!.userType == 'ASSOCIATION_OFFICIAL') {
-            _dispatchStreamController.sink.add(kk);
-          }
-        }
+        _processDispatchRecord(kk);
         break;
-      case 'passengerCount':
-        final va = map['passengerCount'];
+      case Constants.passengerCount:
+        pp('$newMM .... passengerCount in the switch?  ${E.redDot} $type');
+
+        final va = map[Constants.passengerCount];
         final x = jsonDecode(va);
         final kk = buildAmbassadorPassengerCount(x);
         _processPassengerCount(kk);
         break;
-      case 'locationRequest':
-        final va = map['locationRequest'];
+      case Constants.heartbeat:
+        pp('$newMM .... heartbeat in the switch?  ${E.redDot} $type');
+
+        final va = map[Constants.heartbeat];
+        final x = jsonDecode(va);
+        final kk = buildVehicleHeartbeat(x);
+        _processHeartbeat(kk);
+        break;
+      case Constants.commuterRequest:
+        pp('$newMM .... commuterRequest in the switch?  ${E.redDot} $type');
+
+        final va = map[Constants.commuterRequest];
+        final x = jsonDecode(va);
+        final kk = buildCommuterRequest(x);
+        _processCommuterRequest(kk);
+        break;
+      case Constants.locationRequest:
+        final va = map[Constants.locationRequest];
         final x = jsonDecode(va);
         //todo - respond if it the request is for you
         final locReq = buildLocationRequest(x);
         _processLocationRequest(locReq);
         break;
-      case 'locationResponse':
-        final va = map['locationResponse'];
+      case Constants.locationResponse:
+        final va = map[Constants.locationResponse];
         final x = jsonDecode(va);
         final resp = buildLocationResponse(x);
         _processLocationResponse(resp);
         break;
-      case 'userGeofenceEvent':
-        final va = map['userGeofenceEvent'];
+      case Constants.userGeofenceEvent:
+        final va = map[Constants.userGeofenceEvent];
         final x = jsonDecode(va);
         _userGeofenceStreamController.sink.add(buildUserGeofenceEvent(x));
         break;
-      case 'vehicleMediaRequest':
-        final va = map['vehicleMediaRequest'];
+      case Constants.vehicleMediaRequest:
+        final va = map[Constants.vehicleMediaRequest];
         final x = jsonDecode(va);
         final req = buildVehicleMediaRequest(x);
         _processMediaRequest(req);
         break;
-      case 'routeUpdateRequest':
-        final va = map['routeUpdateRequest'];
+
+      case Constants.routeUpdateRequest:
+        final va = map[Constants.routeUpdateRequest];
         final x = jsonDecode(va);
         final req = buildRouteUpdateRequest(x);
         _processRouteUpdate(req);
         break;
+
+      default:
+        pp('$newMM ... SWITCH statement fell all the way through: type: $type ... ');
+        break;
+
+    }
+  }
+
+  void _processDispatchRecord(lib.DispatchRecord dispatchRecord) {
+    if (demoFlag) {
+      _dispatchStreamController.sink.add(dispatchRecord);
+      return;
+    }
+    if (user != null) {
+      if (user!.userId == dispatchRecord.marshalId ||
+          user!.userId == dispatchRecord.ownerId ||
+          user!.userType == 'ASSOCIATION_OFFICIAL') {
+        _dispatchStreamController.sink.add(dispatchRecord);
+      }
     }
   }
 
   void _processRouteUpdate(lib.RouteUpdateRequest req) async {
-    pp('$newMM ... updating local cache with refreshed route ');
+    pp('$newMM ... _processRouteUpdate ');
     await routesIsolate.getRoute(req.associationId!, req.routeId!);
     _routeUpdateRequestStreamController.sink.add(req);
   }
@@ -292,6 +378,8 @@ class FCMBloc {
   }
 
   void _processMediaRequest(lib.VehicleMediaRequest req) async {
+    pp('$newMM ... _processMediaRequest ... ');
+
     if (user != null) {
       if (user!.userId == req.userId) {
         pp('\n$newMM ... IGNORE ... this is my own request ....');
@@ -315,17 +403,53 @@ class FCMBloc {
     }
   }
 
-  void _processPassengerCount(lib.AmbassadorPassengerCount kk) {
-    pp('$mm _processPassengerCount ... ${E.redDot} check ownerId : ${kk.userId} - userId: ${user!.userId}');
-    if (user!.userId == kk.ownerId) {
-      _passengerCountStreamController.sink.add(kk);
-      pp('$mm _processPassengerCount: _passengerCountStreamController '
-          'has a new AmbassadorPassengerCount: ');
-      myPrettyJsonPrint(kk.toJson());
+  void _processPassengerCount(lib.AmbassadorPassengerCount passengerCount) {
+    pp('$newMM ... _processPassengerCount ... ');
+
+    if (demoFlag) {
+      _passengerCountStreamController.sink.add(passengerCount);
       return;
     }
-    if (user!.userType == 'ASSOCIATION_OFFICIAL') {
-      _passengerCountStreamController.sink.add(kk);
+    pp('$mm _processPassengerCount ... ${E.redDot} check ownerId : ${passengerCount.userId} - userId: ${user!.userId}');
+    if (user!.userId == passengerCount.ownerId) {
+      _passengerCountStreamController.sink.add(passengerCount);
+      pp('$mm _processPassengerCount: _passengerCountStreamController '
+          'has a new AmbassadorPassengerCount: ');
+      myPrettyJsonPrint(passengerCount.toJson());
+      return;
+    }
+    if (user!.userType == 'ASSOCIATION_OFFICIAL' || demoFlag) {
+      _passengerCountStreamController.sink.add(passengerCount);
+      return;
+    }
+  }
+
+  void _processCommuterRequest(lib.CommuterRequest commuterRequest) {
+    pp('$mm _processCommuterRequest ... ');
+
+    if (demoFlag) {
+      _commuterRequestStreamController.sink.add(commuterRequest);
+      return;
+    }
+    if (user!.userType == Constants.ASSOCIATION_OFFICIAL ||
+        user!.userType == Constants.AMBASSADOR ||
+        user!.userType == Constants.MARSHAL) {
+      _commuterRequestStreamController.sink.add(commuterRequest);
+      return;
+    }
+  }
+
+  void _processHeartbeat(lib.VehicleHeartbeat heartbeat) {
+    pp('$mm _processHeartbeat ... ');
+    if (demoFlag) {
+      _heartbeatStreamController.sink.add(heartbeat);
+      return;
+    }
+    if (user!.userType == Constants.ASSOCIATION_OFFICIAL ||
+        user!.userType == Constants.AMBASSADOR ||
+        user!.userType == Constants.MARSHAL ||
+        demoFlag) {
+      _heartbeatStreamController.sink.add(heartbeat);
       return;
     }
   }
@@ -419,6 +543,16 @@ class FCMBloc {
   final StreamController<lib.RouteUpdateRequest>
       _routeUpdateRequestStreamController = StreamController.broadcast();
 
+  final StreamController<lib.CommuterRequest> _commuterRequestStreamController =
+      StreamController.broadcast();
+  Stream<lib.CommuterRequest> get commuterRequestStreamStream =>
+      _commuterRequestStreamController.stream;
+
+  final StreamController<lib.VehicleHeartbeat> _heartbeatStreamController =
+      StreamController.broadcast();
+  Stream<lib.VehicleHeartbeat> get heartbeatStreamStream =>
+      _heartbeatStreamController.stream;
+
   Stream<lib.RouteUpdateRequest> get routeUpdateRequestStream =>
       _routeUpdateRequestStreamController.stream;
 
@@ -472,9 +606,7 @@ Future<void> kasieFirebaseMessagingBackgroundHandler(
   if (map['passengerCount'] != null) {
     handlePassengerCount(map);
   }
-
 }
-
 
 void handlePassengerCount(Map<String, dynamic> map) async {
   final user = await _getUser(map);
@@ -493,6 +625,7 @@ void handlePassengerCount(Map<String, dynamic> map) async {
     }
   }
 }
+
 void handleDispatch(Map<String, dynamic> map) async {
   final user = await _getUser(map);
 
@@ -510,11 +643,13 @@ void handleDispatch(Map<String, dynamic> map) async {
     }
   }
 }
+
 void cachePassengerCount(lib.AmbassadorPassengerCount object) {
   listApiDog.realm.write(() {
     listApiDog.realm.add<lib.AmbassadorPassengerCount>(object);
   });
 }
+
 void cacheDispatchRecord(lib.DispatchRecord object) {
   listApiDog.realm.write(() {
     listApiDog.realm.add<lib.DispatchRecord>(object);

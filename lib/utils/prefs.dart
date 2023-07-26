@@ -221,4 +221,17 @@ class Prefs {
     pp("🌽 🌽 🌽 Prefs: Email:  RETRIEVED: 🌽 $s 🌽 🌽 🌽");
     return s;
   }
+
+  Future saveDemoFlag(bool demo) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('demo', demo);
+    pp("🌽 🌽 🌽 Prefs: DemoFlag:  SAVED: 🌽 $demo 🌽 🌽 🌽");
+    return;
+  }
+  Future<bool> getDemoFlag() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final s = prefs.getBool('demo');
+    pp("🌽 🌽 🌽 Prefs: getDemoFlag:  RETRIEVED: 🌽 $s 🌽 🌽 🌽");
+    return s == null? false: true;
+  }
 }

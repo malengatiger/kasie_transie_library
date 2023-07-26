@@ -8,5 +8,21 @@ class Constants {
   static const  OWNER = "OWNER";
   static const  ROUTE_BUILDER = "ROUTE_BUILDER";
 
+  static const routeChanges = 'routeChanges';
+  static const vehicleChanges = 'vehicleChanges';
+  static const vehicleArrival = 'vehicleArrival';
+  static const vehicleDeparture = 'vehicleDeparture';
+  static const dispatchRecord = 'dispatchRecord';
+  static const passengerCount = 'passengerCount';
+  static const heartbeat = 'heartbeat';
+  static const commuterRequest = 'commuterRequest';
+  static const locationRequest = 'locationRequest';
+  static const locationResponse = 'locationResponse';
+  static const userGeofenceEvent = 'userGeofenceEvent';
+  static const vehicleMediaRequest = 'vehicleMediaRequest';
+  static const routeUpdateRequest = 'routeUpdateRequest';
+
+
+
 }
 

@@ -331,8 +331,11 @@ DispatchRecord buildDispatchRecord(Map j) {
     dispatched: j['dispatched'],
     geoHash: j['geoHash'],
     routeName: j['routeName'],
-    landmarkId: j['landmarkId'],
+    routeLandmarkId: j['routeLandmarkId'],
+    landmarkName: j['landmarkName'],
+    routeId: j['routeId'],
     position: buildPosition(j['position']),
+
   );
   return m;
 }

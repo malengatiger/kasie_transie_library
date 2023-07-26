@@ -52,6 +52,7 @@ final config = rm.Configuration.local(
     AmbassadorCheckIn.schema,
     CommuterRequest.schema,
     Commuter.schema,
+    VehicleHeartbeat.schema,
   ],
 );
 final ListApiDog listApiDog = ListApiDog(
@@ -144,6 +145,7 @@ class ListApiDog {
     myPrettyJsonPrint(resp);
     return user;
   }
+
   Future<User?> getUserByEmail(String email) async {
     final cmd = '${url}getUserByEmail?email=$email';
     try {
@@ -381,7 +383,8 @@ class ListApiDog {
 
   Future<List<RoutePoint>> getAssociationRoutePoints(
       String associationId) async {
-    final res = realm.query<RoutePoint>('associationId == \$0', [associationId]);
+    final res =
+        realm.query<RoutePoint>('associationId == \$0', [associationId]);
     var list = <RoutePoint>[];
 
     for (var value in res) {
@@ -450,23 +453,24 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<Association>> getAssociations() async {
+  Future<List<Association>> getAssociations(bool refresh) async {
     rm.RealmResults<Association> results = realm.all<Association>();
     final list = <Association>[];
     if (results.isNotEmpty) {
       for (var element in results) {
         list.add(element);
       }
-      return list;
     }
-    final cmd = '${url}getAssociations';
-    List resp = await _sendHttpGET(cmd);
-    for (var m in resp) {
-      list.add(buildAssociation(m));
+    if (list.isEmpty || refresh) {
+      final cmd = '${url}getAssociations';
+      List resp = await _sendHttpGET(cmd);
+      for (var m in resp) {
+        list.add(buildAssociation(m));
+      }
+      realm.write(() {
+        realm.addAll<Association>(list, update: true);
+      });
     }
-    realm.write(() {
-      realm.addAll(list, update: true);
-    });
     pp('$mm cached associations: ${list.length}');
     return list;
   }
@@ -485,7 +489,6 @@ class ListApiDog {
 
     return list;
   }
-
 
   final StreamController<List<Route>> _routeController =
       StreamController.broadcast();
@@ -906,7 +909,6 @@ class ListApiDog {
       return remoteList;
     }
 
-
     return localList;
   }
 
@@ -1045,8 +1047,7 @@ class ListApiDog {
       LocationFinderParameter p) async {
     var list = <RouteLandmark>[];
 
-    final cmd =
-        '${url}findRouteLandmarksByLocation?latitude=${p.latitude}'
+    final cmd = '${url}findRouteLandmarksByLocation?latitude=${p.latitude}'
         '&longitude=${p.longitude}&radiusInKM=${p.radiusInKM}';
     //
     List resp = await _sendHttpGET(cmd);

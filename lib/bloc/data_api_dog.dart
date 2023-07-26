@@ -81,7 +81,8 @@ class DataApiDog {
     return lr;
   }
 
-  Future <LocationResponse>addLocationResponse(LocationResponse response) async {
+  Future<LocationResponse> addLocationResponse(
+      LocationResponse response) async {
     final bag = response.toJson();
     final cmd = '${url}addLocationResponse';
     final res = await _callPost(cmd, bag);
@@ -95,7 +96,6 @@ class DataApiDog {
     final cmd = '${url}addVehicle';
     final res = await _callPost(cmd, bag);
     pp('$mm vehicle added to database: $res');
-
   }
 
   Future addUserGeofenceEvent(UserGeofenceEvent event) async {
@@ -300,8 +300,10 @@ class DataApiDog {
     return r;
   }
 
-  Future<List<RouteLandmark>> updateAssociationRouteLandmarks(String associationId) async {
-    final cmd = '${url}updateAssociationRouteLandmarks?associationId=$associationId';
+  Future<List<RouteLandmark>> updateAssociationRouteLandmarks(
+      String associationId) async {
+    final cmd =
+        '${url}updateAssociationRouteLandmarks?associationId=$associationId';
     List res = await _sendHttpGET(cmd);
     var list = <RouteLandmark>[];
     for (var mJson in res) {
@@ -360,14 +362,17 @@ class DataApiDog {
     return res;
   }
 
-  Future<List<RoutePoint>> deleteRoutePointsFromIndex(String routeId, int index) async {
-    final cmd = '${url}deleteRoutePointsFromIndex?routeId=$routeId&index=$index';
+  Future<List<RoutePoint>> deleteRoutePointsFromIndex(
+      String routeId, int index) async {
+    final cmd =
+        '${url}deleteRoutePointsFromIndex?routeId=$routeId&index=$index';
     List res = await _sendHttpGET(cmd);
     pp('$mm deleteRoutePointsFromIndex happened ... returned ');
     List<RoutePoint> routePoints = [];
 
     try {
-      rlm.RealmResults<RoutePoint> existing = listApiDog.realm.query('routeId == \$0',[routeId]);
+      rlm.RealmResults<RoutePoint> existing =
+          listApiDog.realm.query('routeId == \$0', [routeId]);
       for (var element in existing) {
         routePoints.add(element);
       }
@@ -385,7 +390,6 @@ class DataApiDog {
         listApiDog.realm.addAll<RoutePoint>(routePoints);
       });
       pp('$mm remaining routePoints cached: ${routePoints.length} ');
-
     } catch (e) {
       pp(e);
     }
@@ -448,7 +452,8 @@ class DataApiDog {
     return r;
   }
 
-  Future<VehicleMediaRequest> addVehicleMediaRequest(VehicleMediaRequest vehicleMediaRequest) async {
+  Future<VehicleMediaRequest> addVehicleMediaRequest(
+      VehicleMediaRequest vehicleMediaRequest) async {
     final bag = vehicleMediaRequest.toJson();
     final cmd = '${url}addVehicleMediaRequest';
 
@@ -464,7 +469,8 @@ class DataApiDog {
     return r;
   }
 
-  Future<RouteUpdateRequest> addRouteUpdateRequest (RouteUpdateRequest routeUpdateRequest) async {
+  Future<RouteUpdateRequest> addRouteUpdateRequest(
+      RouteUpdateRequest routeUpdateRequest) async {
     final bag = routeUpdateRequest.toJson();
     final cmd = '${url}addRouteUpdateRequest';
 
@@ -496,7 +502,8 @@ class DataApiDog {
     return r;
   }
 
-  Future<AmbassadorCheckIn> addAmbassadorCheckIn(AmbassadorCheckIn checkIn) async {
+  Future<AmbassadorCheckIn> addAmbassadorCheckIn(
+      AmbassadorCheckIn checkIn) async {
     final bag = checkIn.toJson();
     final cmd = '${url}addAmbassadorCheckIn';
 
@@ -512,7 +519,8 @@ class DataApiDog {
     return r;
   }
 
-  Future<AmbassadorPassengerCount> addAmbassadorPassengerCount(AmbassadorPassengerCount count) async {
+  Future<AmbassadorPassengerCount> addAmbassadorPassengerCount(
+      AmbassadorPassengerCount count) async {
     final bag = count.toJson();
     final cmd = '${url}addAmbassadorPassengerCount';
 
@@ -520,12 +528,11 @@ class DataApiDog {
       final res = await _callPost(cmd, bag);
       final r = buildAmbassadorPassengerCount(res);
       listApiDog.realm.write(() {
-            listApiDog.realm.add<AmbassadorPassengerCount>(r, update: true);
-          });
+        listApiDog.realm.add<AmbassadorPassengerCount>(r, update: true);
+      });
       pp('$mm AmbassadorPassengerCount added to database ...');
       myPrettyJsonPrint(res);
       return r;
-
     } catch (e) {
       pp(e);
       cacheManager.saveAmbassadorPassengerCount(count);
@@ -533,9 +540,68 @@ class DataApiDog {
     return count;
   }
 
-
-
-
+//
+  Future<List<DispatchRecord>> generateDispatchRecords(
+      String associationId, int numberOfCars, int intervalInSeconds) async {
+    final cmd = '${url}generateDispatchRecords?associationId=$associationId'
+        '&numberOfCars=$numberOfCars&intervalInSeconds=$intervalInSeconds';
+    List res = await _sendHttpGET(cmd);
+    var list = <DispatchRecord>[];
+    for (var mJson in res) {
+      list.add(buildDispatchRecord(mJson));
+    }
+    listApiDog.realm.write(() {
+      listApiDog.realm.addAll<DispatchRecord>(list, update: true);
+    });
+    pp('$mm DispatchRecords: ${list.length}  cached ${E.leaf}${E.leaf}');
+    return list;
+  }
+//
+  Future<List<CommuterRequest>> generateCommuterRequests(
+      String associationId, int numberOfCommuters, int intervalInSeconds) async {
+    final cmd = '${url}generateCommuterRequests?associationId=$associationId'
+        '&numberOfCommuters=$numberOfCommuters&intervalInSeconds=$intervalInSeconds';
+    List res = await _sendHttpGET(cmd);
+    var list = <CommuterRequest>[];
+    for (var mJson in res) {
+      list.add(buildCommuterRequest(mJson));
+    }
+    listApiDog.realm.write(() {
+      listApiDog.realm.addAll<CommuterRequest>(list, update: true);
+    });
+    pp('$mm CommuterRequests: ${list.length}  cached ${E.leaf}${E.leaf}');
+    return list;
+  }
+  Future<List<AmbassadorPassengerCount>> generateAmbassadorPassengerCounts(
+      String associationId, int numberOfCars, int intervalInSeconds) async {
+    final cmd = '${url}generateAmbassadorPassengerCounts?associationId=$associationId'
+        '&numberOfCars=$numberOfCars&intervalInSeconds=$intervalInSeconds';
+    List res = await _sendHttpGET(cmd);
+    var list = <AmbassadorPassengerCount>[];
+    for (var mJson in res) {
+      list.add(buildAmbassadorPassengerCount(mJson));
+    }
+    listApiDog.realm.write(() {
+      listApiDog.realm.addAll<AmbassadorPassengerCount>(list, update: true);
+    });
+    pp('$mm AmbassadorPassengerCounts: ${list.length}  cached ${E.leaf}${E.leaf}');
+    return list;
+  }
+  Future<List<VehicleHeartbeat>> generateHeartbeats(
+      String associationId, int numberOfCars, int intervalInSeconds) async {
+    final cmd = '${url}generateHeartbeats?associationId=$associationId'
+        '&numberOfCars=$numberOfCars&intervalInSeconds=$intervalInSeconds';
+    List res = await _sendHttpGET(cmd);
+    var list = <VehicleHeartbeat>[];
+    for (var mJson in res) {
+      list.add(buildVehicleHeartbeat(mJson));
+    }
+    listApiDog.realm.write(() {
+      listApiDog.realm.addAll<VehicleHeartbeat>(list, update: true);
+    });
+    pp('$mm VehicleHeartbeats: ${list.length}  cached ${E.leaf}${E.leaf}');
+    return list;
+  }
   Future _callPost(String mUrl, Map? bag) async {
     String? mBag;
     if (bag != null) {
@@ -711,5 +777,4 @@ class DataApiDog {
       throw gex;
     }
   }
-
 }

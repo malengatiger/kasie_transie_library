@@ -177,12 +177,8 @@ S
 #lib/isolates/heartbeat_isolate.dart,0/7/074153afea844e3edf30fad1db73f573a9bcd942
 O
 lib/auth/email_auth_signin.dart,2/a/2a121924df2544ed1851a2a61b5ca978703d1370
-K
-lib/messaging/fcm_bloc.dart,a/b/abc3ce0d0007de42374e4acee2f4babe2f6f7f47
 L
 lib/widgets/car_details.dart,a/1/a189b392f16310a1a2150cc33b61cdb40f1c9bef
-G
-lib/data/constants.dart,f/3/f3dc49bc1a9dd087c24293c647024038d437ece2
 I
 lib/widgets/car_list.dart,f/0/f0233c62522d48a0b42e5da2c1b51fd989f748d9
 O

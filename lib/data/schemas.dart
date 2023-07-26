@@ -102,7 +102,6 @@ class _DispatchRecord {
   @PrimaryKey()
   late ObjectId id;
   String? dispatchRecordId;
-  String? landmarkId;
   String? marshalId;
   int? passengers;
   String? ownerId;
@@ -118,13 +117,14 @@ class _DispatchRecord {
   String? vehicleReg;
   String? associationId;
   String? associationName;
+  String? routeLandmarkId;
   bool? dispatched;
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {};
     map['dispatchRecordId'] = dispatchRecordId;
     map['_id'] = id.hexString;
-    map['landmarkId'] = landmarkId;
+    map['routeLandmarkId'] = routeLandmarkId;
     map['passengers'] = passengers;
     map['vehicleId'] = vehicleId;
     map['ownerId'] = ownerId;
