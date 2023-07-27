@@ -39,7 +39,7 @@ final config = rm.Configuration.local(
     RouteStartEnd.schema,
     RouteLandmark.schema,
     RouteCity.schema,
-    State.schema,
+    StateProvince.schema,
     Vehicle.schema,
     LocationResponse.schema,
     LocationRequest.schema,
@@ -202,10 +202,10 @@ class ListApiDog {
     return bag;
   }
 
-  Future<List<State>> getCountryStates(String countryId) async {
-    var mList = <State>[];
+  Future<List<StateProvince>> getCountryStates(String countryId) async {
+    var mList = <StateProvince>[];
 
-    final res = realm.all<State>();
+    final res = realm.all<StateProvince>();
     if (res.isNotEmpty) {
       for (var value in res) {
         mList.add(value);
@@ -640,6 +640,254 @@ class ListApiDog {
     }
     return localList;
   }
+  Future<List<CommuterRequest>> getAssociationCommuterRequests(
+      {required String associationId,
+        required bool refresh,
+        required String startDate}) async {
+    var localList = <CommuterRequest>[];
+    rm.RealmResults<CommuterRequest> results =
+    realm.query<CommuterRequest>("associationId == \$0", [associationId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        //todo - filter by date
+        localList.add(element);
+      }
+    }
+    pp('$mm CommuterRequests from realm:: ${localList.length}');
+    if (localList.isNotEmpty && !refresh) {
+      return localList;
+    }
+    //
+    try {
+      final url = '${KasieEnvironment.getUrl()}getAssociationCommuterRequests?associationId=$associationId'
+          '&startDate=$startDate';
+      localList = await _getCommuterRequestsFromBackend(url: url);
+      pp('$mm CommuterRequests from backend:: ${localList.length}');
+      realm.write(() {
+        realm.addAll<CommuterRequest>(localList, update: true);
+      });
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
+  Future<List<DispatchRecord>> getAssociationDispatchRecords(
+      {required String associationId,
+        required bool refresh,
+        required String startDate}) async {
+    var localList = <DispatchRecord>[];
+    rm.RealmResults<DispatchRecord> results =
+    realm.query<DispatchRecord>("associationId == \$0", [associationId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        //todo - filter by date
+        localList.add(element);
+      }
+    }
+    pp('$mm DispatchRecords from realm:: ${localList.length}');
+    if (localList.isNotEmpty && !refresh) {
+      return localList;
+    }
+    //
+    try {
+      final url = '${KasieEnvironment.getUrl()}getAssociationDispatchRecords?associationId=$associationId'
+          '&startDate=$startDate';
+      localList = await _getDispatchRecordsFromBackend(url: url);
+      pp('$mm DispatchRecord from backend:: ${localList.length}');
+      realm.write(() {
+        realm.addAll<DispatchRecord>(localList, update: true);
+      });
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
+  Future<List<AmbassadorPassengerCount>> getAssociationAmbassadorPassengerCounts(
+      {required String associationId,
+        required bool refresh,
+        required String startDate}) async {
+    var localList = <AmbassadorPassengerCount>[];
+    rm.RealmResults<AmbassadorPassengerCount> results =
+    realm.query<AmbassadorPassengerCount>("associationId == \$0", [associationId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        //todo - filter by date
+        localList.add(element);
+      }
+    }
+    pp('$mm AmbassadorPassengerCounts from realm:: ${localList.length}');
+    if (localList.isNotEmpty && !refresh) {
+      return localList;
+    }
+    //
+    try {
+      final url = '${KasieEnvironment.getUrl()}getAssociationAmbassadorPassengerCounts?associationId=$associationId'
+          '&startDate=$startDate';
+      localList = await _getPassengerCountsFromBackend(url: url);
+      pp('$mm AmbassadorPassengerCounts from backend:: ${localList.length}');
+      realm.write(() {
+        realm.addAll<AmbassadorPassengerCount>(localList, update: true);
+      });
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
+  Future<List<AmbassadorPassengerCount>> getRoutePassengerCounts(
+      {required String routeId,
+        required bool refresh,
+        required String startDate}) async {
+    var localList = <AmbassadorPassengerCount>[];
+    rm.RealmResults<AmbassadorPassengerCount> results =
+    realm.query<AmbassadorPassengerCount>("associationId == \$0", [routeId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        //todo - filter by date
+        localList.add(element);
+      }
+    }
+    pp('$mm AmbassadorPassengerCounts from realm:: ${localList.length}');
+    if (localList.isNotEmpty && !refresh) {
+      return localList;
+    }
+    //
+    try {
+      final url = '${KasieEnvironment.getUrl()}getRoutePassengerCounts?routeId=$routeId'
+          '&startDate=$startDate';
+      localList = await _getPassengerCountsFromBackend(url: url);
+      pp('$mm AmbassadorPassengerCounts from backend:: ${localList.length}');
+      realm.write(() {
+        realm.addAll<AmbassadorPassengerCount>(localList, update: true);
+      });
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
+  Future<List<VehicleArrival>> getAssociationVehicleArrivals(
+      {required String associationId,
+        required bool refresh,
+        required String startDate}) async {
+    var localList = <VehicleArrival>[];
+    rm.RealmResults<VehicleArrival> results =
+    realm.query<VehicleArrival>("associationId == \$0", [associationId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        //todo - filter by date
+        localList.add(element);
+      }
+    }
+    pp('$mm VehicleArrivals from realm:: ${localList.length}');
+    if (localList.isNotEmpty && !refresh) {
+      return localList;
+    }
+    //
+    try {
+      final url = '${KasieEnvironment.getUrl()}getAssociationVehicleArrivals?associationId=$associationId'
+          '&startDate=$startDate';
+      localList = await _getVehicleArrivalsFromBackend(url: url);
+      pp('$mm VehicleArrivals from backend:: ${localList.length}');
+      realm.write(() {
+        realm.addAll<VehicleArrival>(localList, update: true);
+      });
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
+  Future<List<VehicleArrival>> getRouteVehicleArrivals(
+      {required String routeId,
+        required bool refresh,
+        required String startDate}) async {
+    var localList = <VehicleArrival>[];
+    rm.RealmResults<VehicleArrival> results =
+    realm.query<VehicleArrival>("routeId == \$0", [routeId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        //todo - filter by date
+        localList.add(element);
+      }
+    }
+    pp('$mm VehicleArrivals from realm:: ${localList.length}');
+    if (localList.isNotEmpty && !refresh) {
+      return localList;
+    }
+    //
+    try {
+      final url = '${KasieEnvironment.getUrl()}getRouteVehicleArrivals?routeId=$routeId'
+          '&startDate=$startDate';
+      localList = await _getVehicleArrivalsFromBackend(url: url);
+      pp('$mm VehicleArrivals from backend:: ${localList.length}');
+      realm.write(() {
+        realm.addAll<VehicleArrival>(localList, update: true);
+      });
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
+  Future<List<DispatchRecord>> getRouteDispatchRecords(
+      {required String routeId,
+        required bool refresh,
+        required String startDate}) async {
+    var localList = <DispatchRecord>[];
+    rm.RealmResults<DispatchRecord> results =
+    realm.query<DispatchRecord>("routeId == \$0", [routeId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        //todo - filter by date
+        localList.add(element);
+      }
+    }
+    pp('$mm DispatchRecords from realm:: ${localList.length}');
+    if (localList.isNotEmpty && !refresh) {
+      return localList;
+    }
+    //
+    try {
+      final url = '${KasieEnvironment.getUrl()}getRouteDispatchRecords?routeId=$routeId'
+          '&startDate=$startDate';
+      localList = await _getDispatchRecordsFromBackend(url: url);
+      pp('$mm DispatchRecord from backend:: ${localList.length}');
+      realm.write(() {
+        realm.addAll<DispatchRecord>(localList, update: true);
+      });
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
+  Future<List<CommuterRequest>> getRouteCommuterRequests(
+      {required String routeId,
+        required bool refresh,
+        required String startDate}) async {
+    var localList = <CommuterRequest>[];
+    rm.RealmResults<CommuterRequest> results =
+    realm.query<CommuterRequest>("routeId == \$0", [routeId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        //todo - filter by date
+        localList.add(element);
+      }
+    }
+    pp('$mm CommuterRequests from realm:: ${localList.length}');
+    if (localList.isNotEmpty && !refresh) {
+      return localList;
+    }
+    //
+    try {
+      final url = '${KasieEnvironment.getUrl()}getRouteCommuterRequests?routeId=$routeId'
+          '&startDate=$startDate';
+      localList = await _getCommuterRequestsFromBackend(url: url);
+      pp('$mm CommuterRequests from backend:: ${localList.length}');
+      realm.write(() {
+        realm.addAll<CommuterRequest>(localList, update: true);
+      });
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
 
   Future<List<VehicleMediaRequest>> getVehicleMediaRequests(
       String vehicleId, bool refresh) async {
@@ -724,6 +972,54 @@ class ListApiDog {
     return localList;
   }
 
+  Future<List<CommuterRequest>> _getCommuterRequestsFromBackend(
+      {required String url}) async {
+    final list = <CommuterRequest>[];
+    List resp = await _sendHttpGET(url);
+    for (var value in resp) {
+      var r = buildCommuterRequest(value);
+      list.add(r);
+    }
+
+    pp('$mm CommuterRequests found: ${list.length}');
+    return list;
+  }
+  Future<List<DispatchRecord>> _getDispatchRecordsFromBackend(
+      {required String url}) async {
+    final list = <DispatchRecord>[];
+    List resp = await _sendHttpGET(url);
+    for (var value in resp) {
+      var r = buildDispatchRecord(value);
+      list.add(r);
+    }
+
+    pp('$mm DispatchRecords found: ${list.length}');
+    return list;
+  }
+  Future<List<VehicleArrival>> _getVehicleArrivalsFromBackend(
+      {required String url}) async {
+    final list = <VehicleArrival>[];
+    List resp = await _sendHttpGET(url);
+    for (var value in resp) {
+      var r = buildVehicleArrival(value);
+      list.add(r);
+    }
+
+    pp('$mm VehicleArrivals found: ${list.length}');
+    return list;
+  }
+  Future<List<AmbassadorPassengerCount>> _getPassengerCountsFromBackend(
+      {required String url}) async {
+    final list = <AmbassadorPassengerCount>[];
+    List resp = await _sendHttpGET(url);
+    for (var value in resp) {
+      var r = buildAmbassadorPassengerCount(value);
+      list.add(r);
+    }
+
+    pp('$mm AmbassadorPassengerCount found: ${list.length}');
+    return list;
+  }
   Future<List<VehiclePhoto>> _getVehiclePhotosFromBackend(
       {required String vehicleId}) async {
     final list = <VehiclePhoto>[];

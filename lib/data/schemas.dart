@@ -1053,7 +1053,7 @@ class _RouteCity {
 }
 
 @RealmModel()
-class _State {
+class _StateProvince {
   @PrimaryKey()
   late ObjectId id;
   @Indexed()

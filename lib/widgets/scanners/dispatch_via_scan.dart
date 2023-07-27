@@ -319,7 +319,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
             longitude: loc.longitude,
           ),
           landmarkName: mark?.landmarkName,
-          landmarkId: mark?.landmarkId);
+          routeLandmarkId: mark?.landmarkId);
       //
       dispatches.insert(0, m);
       dispatchHelper.sendDispatch(m);

@@ -8,7 +8,6 @@ class Constants {
   static const  OWNER = "OWNER";
   static const  ROUTE_BUILDER = "ROUTE_BUILDER";
 
-  static const routeChanges = 'routeChanges';
   static const vehicleChanges = 'vehicleChanges';
   static const vehicleArrival = 'vehicleArrival';
   static const vehicleDeparture = 'vehicleDeparture';

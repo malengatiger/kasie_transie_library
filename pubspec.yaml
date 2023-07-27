@@ -15,7 +15,7 @@ dependencies:
 #  firebase_auth: ^4.6.3
   firebase_messaging: ^14.6.3
   firebase_core: ^2.14.0
-  firebase_auth: ^4.6.3
+  firebase_auth: ^4.7.2
   firebase_storage: ^11.2.3
   geofence_service: ^4.0.0
   geocoding: ^2.1.0
@@ -69,6 +69,7 @@ dependencies:
   mobile_number: ^2.1.1
   flutter_analog_clock: ^1.0.3
   custom_map_markers: ^0.0.2+1
+  google_maps_cluster_manager: ^3.0.0+1
   url_launcher:
   flutter_polyline_points:
   flutter_dotenv:

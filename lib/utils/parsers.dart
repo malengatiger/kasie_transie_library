@@ -29,10 +29,10 @@ Association buildAssociation(Map map) {
   return m;
 }
 
-State buildState(Map map) {
+StateProvince buildState(Map map) {
   var id = rm.ObjectId.fromHexString(map['_id'] as String);
 
-  final m = State(
+  final m = StateProvince(
     id,
     stateId: map['stateId'],
     countryId: map['countryId'],

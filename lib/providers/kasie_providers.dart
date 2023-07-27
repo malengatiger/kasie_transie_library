@@ -62,7 +62,7 @@ final usersProvider = riv.FutureProvider.family<List<User>, String>((ref,
   return res;
 });
 
-final statesProvider = riv.FutureProvider.family<List<State>, String>((ref,
+final statesProvider = riv.FutureProvider.family<List<StateProvince>, String>((ref,
     countryId) async {
   final res = await listApiDog.getCountryStates(countryId);
   pp('$bb statesProvider did the job: ${res.length} states/provinces found.');

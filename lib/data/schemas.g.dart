@@ -4033,8 +4033,9 @@ class RouteCity extends _RouteCity
   }
 }
 
-class State extends _State with RealmEntity, RealmObjectBase, RealmObject {
-  State(
+class StateProvince extends _StateProvince
+    with RealmEntity, RealmObjectBase, RealmObject {
+  StateProvince(
     ObjectId id, {
     String? stateId,
     String? name,
@@ -4048,7 +4049,7 @@ class State extends _State with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'countryName', countryName);
   }
 
-  State._();
+  StateProvince._();
 
   @override
   ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
@@ -4080,17 +4081,18 @@ class State extends _State with RealmEntity, RealmObjectBase, RealmObject {
       RealmObjectBase.set(this, 'countryName', value);
 
   @override
-  Stream<RealmObjectChanges<State>> get changes =>
-      RealmObjectBase.getChanges<State>(this);
+  Stream<RealmObjectChanges<StateProvince>> get changes =>
+      RealmObjectBase.getChanges<StateProvince>(this);
 
   @override
-  State freeze() => RealmObjectBase.freezeObject<State>(this);
+  StateProvince freeze() => RealmObjectBase.freezeObject<StateProvince>(this);
 
   static SchemaObject get schema => _schema ??= _initSchema();
   static SchemaObject? _schema;
   static SchemaObject _initSchema() {
-    RealmObjectBase.registerFactory(State._);
-    return const SchemaObject(ObjectType.realmObject, State, 'State', [
+    RealmObjectBase.registerFactory(StateProvince._);
+    return const SchemaObject(
+        ObjectType.realmObject, StateProvince, 'StateProvince', [
       SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
       SchemaProperty('stateId', RealmPropertyType.string,
           optional: true, indexType: RealmIndexType.regular),

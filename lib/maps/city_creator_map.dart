@@ -64,7 +64,7 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
   bool displayLandmark = false;
 
   var countryCities = <lib.City>[];
-  var states = <lib.State>[];
+  var states = <lib.StateProvince>[];
   TextEditingController nameEditController = TextEditingController();
   LatLng? latLng;
   String? cityName;
@@ -113,7 +113,7 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
     country = await prefs.getCountry();
     final m = ref.watch(statesProvider(country!.countryId!));
     if (m.hasValue) {
-      states = m.value!;
+      //states = m.value!;
       setState(() {});
     }
   }
@@ -172,7 +172,7 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
     setState(() {});
   }
 
-  lib.State? state;
+  lib.StateProvince? state;
   void _onMapTapped(LatLng latLng) {
     setState(() {
       this.latLng = latLng;

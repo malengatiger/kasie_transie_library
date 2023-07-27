@@ -117,8 +117,6 @@ I
 kasie_transie_library.iml,e/b/eb073ee5dbe176f7b5dea82bbd4f5e6926618803
 I
 lib/utils/user_utils.dart,5/0/501767322c1a5ee8f752c16240696106b7d6d9f9
-R
-"lib/providers/kasie_providers.dart,4/4/444f3d43023add5c821968865c0b4250a3a678a2
 N
 lib/messaging/local_notif.dart,f/0/f09c0c2140c1b24d775040751afcb61b0822b516
 U
@@ -131,8 +129,6 @@ L
 lib/widgets/city_widget.dart,2/1/21ed756d313c3b7d45c7931abd6b0644c81baeba
 N
 lib/widgets/photo_handler.dart,0/d/0d9722f04fac14afa5b744911acbcd9f1ac461d4
-[
-+lib/widgets/scanners/dispatch_via_scan.dart,c/6/c698d61e46efffadcd9f84d909b35dffe553fb80
 N
 lib/widgets/number_widget.dart,0/0/0037e7ac3953b0efde7a95a449c158df22e9ddd1
 `
@@ -195,8 +191,6 @@ G
 lib/maps/route_map.dart,2/2/22e25f57eafdd3301ea12f679d4ad89a86eac11b
 N
 lib/maps/route_map_editor.dart,b/6/b675af8a8b0c696ad344d965a0febbbf90786035
-N
-lib/maps/city_creator_map.dart,d/8/d8cfcd4adfd9e76e76169d72f2a31f8f98ed96fd
 Q
 !lib/utils/initialiazer_cover.dart,6/c/6cffa59198fcb326d2e0ec3d874f44755ad3905f
 R
