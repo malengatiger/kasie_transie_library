@@ -53,6 +53,7 @@ final config = rm.Configuration.local(
     CommuterRequest.schema,
     Commuter.schema,
     VehicleHeartbeat.schema,
+    VehicleArrival.schema,
   ],
 );
 final ListApiDog listApiDog = ListApiDog(
