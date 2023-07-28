@@ -12,11 +12,11 @@ import 'package:kasie_transie_library/utils/functions.dart';
 
 import 'cluster_covers.dart';
 
-
 class CommuterClusterMap extends StatefulWidget {
-  const CommuterClusterMap({Key? key, required this.commuterRequestCovers})
+  const CommuterClusterMap(
+      {Key? key, required this.commuterRequestCovers, required this.date})
       : super(key: key);
-
+  final String date;
   final List<CommuterRequestCover> commuterRequestCovers;
   @override
   CommuterClusterMapState createState() => CommuterClusterMapState();
@@ -128,14 +128,44 @@ class CommuterClusterMapState extends State<CommuterClusterMap>
     return SafeArea(
         child: Scaffold(
       appBar: AppBar(
-        title:  Row(
+        title: Row(
           children: [
-            Icon(Icons.people_rounded, color: Theme.of(context).primaryColor,),
-            const SizedBox(width: 8,),
-            Text('Commuter Requests Map',style: myTextStyleMediumLargeWithColor(
-                context, Theme.of(context).primaryColor, 20),),
+            Icon(
+              Icons.people_rounded,
+              color: Theme.of(context).primaryColor,
+            ),
+            const SizedBox(
+              width: 8,
+            ),
+            Text(
+              'Commuter Requests Map',
+              style: myTextStyleMediumLargeWithColor(
+                  context, Theme.of(context).primaryColor, 20),
+            ),
           ],
         ),
+        bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(32),
+            child: Column(
+              children: [
+                Row(mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Start Time: ',
+                      style: myTextStyleTiny(context),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      widget.date,
+                      style: myTextStyleSmall(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 16,
+                )
+              ],
+            )),
       ),
       body: Stack(
         children: [
@@ -158,7 +188,9 @@ class CommuterClusterMapState extends State<CommuterClusterMap>
           Positioned(
             right: 12,
             top: 0,
-            child: SizedBox(width: 48, height: 48,
+            child: SizedBox(
+              width: 48,
+              height: 48,
               child: HybridToggle(
                   onHybrid: () {
                     setState(() {
@@ -178,4 +210,3 @@ class CommuterClusterMapState extends State<CommuterClusterMap>
     ));
   }
 }
-

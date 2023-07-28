@@ -14,10 +14,11 @@ import 'cluster_covers.dart';
 
 
 class ArrivalsClusterMap extends StatefulWidget {
-  const ArrivalsClusterMap({Key? key, required this.vehicleArrivalsCovers})
+  const ArrivalsClusterMap({Key? key, required this.vehicleArrivalsCovers, required this.date})
       : super(key: key);
 
   final List<VehicleArrivalCover> vehicleArrivalsCovers;
+  final String date;
 
   @override
   CommuterClusterMapState createState() => CommuterClusterMapState();
@@ -139,6 +140,18 @@ class CommuterClusterMapState extends State<ArrivalsClusterMap>
             ),
           ],
         ),
+        bottom: PreferredSize(preferredSize: const Size.fromHeight(32), child: Column(
+          children: [
+            Row(mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Start Time: ', style: myTextStyleTiny(context),),
+                const SizedBox(width: 12),
+                Text(widget.date, style: myTextStyleSmall(context),),
+              ],
+            ),
+            const SizedBox(height: 16,)
+          ],
+        )),
       ),
       body: Stack(
         children: [

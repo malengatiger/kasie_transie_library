@@ -14,10 +14,12 @@ import 'cluster_covers.dart';
 
 
 class DispatchClusterMap extends StatefulWidget {
-  const DispatchClusterMap({Key? key, required this.dispatchRecordCovers})
+  const DispatchClusterMap({Key? key, required this.dispatchRecordCovers, required this.date})
       : super(key: key);
 
   final List<DispatchRecordCover> dispatchRecordCovers;
+  final String date;
+
   @override
   DispatchClusterMapState createState() => DispatchClusterMapState();
 }
@@ -136,6 +138,18 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
                 context, Theme.of(context).primaryColor, 20),),
           ],
         ),
+        bottom: PreferredSize(preferredSize: const Size.fromHeight(32), child: Column(
+          children: [
+            Row(mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Start Time: ', style: myTextStyleTiny(context),),
+                const SizedBox(width: 12),
+                Text(widget.date, style: myTextStyleSmall(context),),
+              ],
+            ),
+            const SizedBox(height: 16,)
+          ],
+        )),
       ),
       body: Stack(
         children: [

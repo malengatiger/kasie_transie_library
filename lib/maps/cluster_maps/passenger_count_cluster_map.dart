@@ -13,9 +13,10 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'cluster_covers.dart';
 
 class PassengerCountClusterMap extends StatefulWidget {
-  const PassengerCountClusterMap({Key? key, required this.passengerCountCovers}) : super(key: key);
+  const PassengerCountClusterMap({Key? key, required this.passengerCountCovers, required this.date}) : super(key: key);
 
   final List<PassengerCountCover> passengerCountCovers;
+  final String date;
   @override
   PassengerCountClusterMapState createState() => PassengerCountClusterMapState();
 }
@@ -128,8 +129,28 @@ class PassengerCountClusterMapState extends State<PassengerCountClusterMap>
   Widget build(BuildContext context) {
     return SafeArea(child: Scaffold(
       appBar: AppBar(
-        title:  Text('Passenger Counts',style: myTextStyleMediumLargeWithColor(
-            context, Theme.of(context).primaryColor, 20),),
+        title:  SizedBox(height: 100,
+          child: Row(
+            children: [
+              Icon(Icons.people_rounded, color: Theme.of(context).primaryColor,),
+              const SizedBox(width: 8,),
+              Text('Passenger Counts',style: myTextStyleMediumLargeWithColor(
+                  context, Theme.of(context).primaryColor, 20),),
+            ],
+          ),
+        ),
+        bottom: PreferredSize(preferredSize: const Size.fromHeight(32), child: Column(
+          children: [
+            Row(mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Start Time: ', style: myTextStyleTiny(context),),
+                const SizedBox(width: 12),
+                Text(widget.date, style: myTextStyleSmall(context),),
+              ],
+            ),
+            const SizedBox(height: 16,)
+          ],
+        )),
       ),
       body: Stack(
         children: [
