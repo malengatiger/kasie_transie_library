@@ -69,7 +69,6 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   }
 
   void _control() async {
-    _buildLandmarkIcons();
     _getCurrentLocation();
     _getUser();
   }
@@ -86,7 +85,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
             latitude: widget.latitude!,
             longitude: widget.longitude!,
             radiusInMetres:
-            widget.radiusInMetres == null ? 2000 : widget.radiusInMetres!);
+                widget.radiusInMetres == null ? 2000 : widget.radiusInMetres!);
       } else {
         pp('\n\n$mm .......... get all Association Routes ...');
         routes = await listApiDog
@@ -104,28 +103,27 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
       busy = false;
     });
     // _showMultiRouteDialog();
-
   }
 
   var routesPicked = <lib.Route>[];
 
   void _showMultiRouteDialog() async {
-    showDialog(context: context, builder: (ctx) {
-      return AlertDialog(
-        title: Text(
-            'Select Routes', style: myTextStyleMediumLargeWithColor(context,
-            Theme
-                .of(context)
-                .primaryColorLight, 24)),
-        content: MultiRouteChooser(onRoutesPicked: (routesPicked) {
-          setState(() {
-            this.routesPicked = routesPicked;
-          });
-          Navigator.of(context).pop();
-          _buildHashMap();
-        }),
-      );
-    });
+    showDialog(
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            title: Text('Select Routes',
+                style: myTextStyleMediumLargeWithColor(
+                    context, Theme.of(context).primaryColorLight, 24)),
+            content: MultiRouteChooser(onRoutesPicked: (routesPicked) {
+              setState(() {
+                this.routesPicked = routesPicked;
+              });
+              Navigator.of(context).pop();
+              _buildHashMap();
+            }),
+          );
+        });
   }
 
   @override
@@ -138,21 +136,14 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
 
   Future _getUser() async {
     _user = await prefs.getUser();
-    _makeDotMarker();
   }
 
-  Future _makeDotMarker() async {
-    var intList = await getBytesFromAsset("assets/markers/dot2.png", 40);
-    _dotMarker = BitmapDescriptor.fromBytes(intList);
-    pp('$mm custom marker 💜 assets/markers/dot2.png created');
-  }
 
   Future _getCurrentLocation() async {
     pp('$mm .......... get current location ....');
     _currentPosition = await locationBloc.getLocation();
 
-    pp('$mm .......... get current location ....  🍎 found: ${_currentPosition!
-        .toJson()}');
+    pp('$mm .......... get current location ....  🍎 found: ${_currentPosition!.toJson()}');
     _myCurrentCameraPosition = CameraPosition(
       target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
       zoom: defaultZoom,
@@ -175,17 +166,10 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   int index = 0;
   final numberMarkers = <BitmapDescriptor>[];
 
-  Future _buildLandmarkIcons() async {
-    for (var i = 0; i < 100; i++) {
-      var intList =
-      await getBytesFromAsset("assets/numbers/number_${i + 1}.png", 84);
-      numberMarkers.add(BitmapDescriptor.fromBytes(intList));
-    }
-    pp('$mm have built ${numberMarkers.length} markers for landmarks');
-  }
-
-  void _addLandmarks(List<lib.RouteLandmark> routeLandmarks,
-      List<BitmapDescriptor> icons) {
+  Future<void> _addLandmarks(
+      {required List<lib.RouteLandmark> routeLandmarks,
+      required List<BitmapDescriptor> icons,
+      required String color}) async {
     pp('$mm .......... _addLandmarks ....... .');
 
     int landmarkIndex = 0;
@@ -193,8 +177,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
       _markers.add(Marker(
           markerId: MarkerId(routeLandmark.landmarkId!),
           icon: icons.elementAt(landmarkIndex),
-          position:
-          LatLng(routeLandmark.position!.coordinates[1],
+          position: LatLng(routeLandmark.position!.coordinates[1],
               routeLandmark.position!.coordinates[0]),
           infoWindow: InfoWindow(
               title: routeLandmark.landmarkName,
@@ -203,9 +186,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     }
   }
 
-  Random random = Random(DateTime
-      .now()
-      .millisecondsSinceEpoch);
+  Random random = Random(DateTime.now().millisecondsSinceEpoch);
   var widthIndex = 0;
 
   void _addPolyLine(List<lib.RoutePoint> points, Color color) {
@@ -241,9 +222,12 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
       final marks = await listApiDog.getRouteLandmarks(route.routeId!, false);
       final icons = <BitmapDescriptor>[];
       for (var i = 0; i < marks.length; i++) {
-        final icon = await getBitmapDescriptor(
-            path: "assets/numbers/number_${i + 1}.png",
-            width: 84, color: route.color!);
+        final icon = await getMarkerBitmap(72,
+            text: '${i + 1}',
+            color: route.color!,
+            borderColor: Colors.black,
+            fontSize: 28,
+            fontWeight: FontWeight.w900);
         icons.add(icon);
       }
       final bag = MapBag(route, points, marks, icons);
@@ -254,15 +238,16 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     _markers.clear();
     _polyLines.clear();
 
-    for (var bag in hashMap.values.toList()) {
+    final list = hashMap.values.toList();
+    for (var bag in list) {
       _addPolyLine(bag.routePoints, getColor(bag.route.color!));
-      _addLandmarks(bag.routeLandmarks, bag.landmarkIcons);
+      _addLandmarks(
+          routeLandmarks: bag.routeLandmarks,
+          icons: bag.landmarkIcons,
+          color: bag.route.color!);
     }
     if (hashMap.isNotEmpty) {
-      _zoomToBeginningOfRoute(hashMap.values
-          .toList()
-          .first
-          .route);
+      _zoomToBeginningOfRoute(hashMap.values.toList().first.route);
     }
   }
 
@@ -282,64 +267,64 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
         key: _key,
         body: _myCurrentCameraPosition == null
             ? Center(
-          child: Text(
-            'Waiting for GPS location ...',
-            style: myTextStyleMediumBold(context),
-          ),
-        )
+                child: Text(
+                  'Waiting for GPS location ...',
+                  style: myTextStyleMediumBold(context),
+                ),
+              )
             : Stack(children: [
-          GoogleMap(
-            mapType: isHybrid ? MapType.hybrid : MapType.normal,
-            myLocationEnabled: true,
-            markers: _markers,
-            circles: _circles,
-            polylines: _polyLines,
-            initialCameraPosition: _myCurrentCameraPosition!,
-            onTap: (latLng) {
-              pp('$mm .......... on map tapped : $latLng .');
-            },
-            onMapCreated: (GoogleMapController controller) {
-              pp('$mm .......... on onMapCreated .....');
-              _mapController.complete(controller);
-              _getRoutes();
-            },
-          ),
-          Positioned(
-              right: 12,
-              top: 120,
-              child: Container(
-                color: Colors.black45,
-                child: Padding(
-                  padding: const EdgeInsets.all(0.0),
-                  child: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          isHybrid = !isHybrid;
-                        });
-                      },
-                      icon: Icon(
-                        Icons.album_outlined,
-                        color: isHybrid ? Colors.yellow : Colors.white,
-                      )),
+                GoogleMap(
+                  mapType: isHybrid ? MapType.hybrid : MapType.normal,
+                  myLocationEnabled: true,
+                  markers: _markers,
+                  circles: _circles,
+                  polylines: _polyLines,
+                  initialCameraPosition: _myCurrentCameraPosition!,
+                  onTap: (latLng) {
+                    pp('$mm .......... on map tapped : $latLng .');
+                  },
+                  onMapCreated: (GoogleMapController controller) {
+                    pp('$mm .......... on onMapCreated .....');
+                    _mapController.complete(controller);
+                    _getRoutes();
+                  },
                 ),
-              )),
-          busy
-              ? const Positioned(
-            top: 160,
-            left: 48,
-            child: Center(
-              child: SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 12,
-                  backgroundColor: Colors.pink,
-                ),
-              ),
-            ),
-          )
-              : const SizedBox(),
-        ]));
+                Positioned(
+                    right: 12,
+                    top: 120,
+                    child: Container(
+                      color: Colors.black45,
+                      child: Padding(
+                        padding: const EdgeInsets.all(0.0),
+                        child: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                isHybrid = !isHybrid;
+                              });
+                            },
+                            icon: Icon(
+                              Icons.album_outlined,
+                              color: isHybrid ? Colors.yellow : Colors.white,
+                            )),
+                      ),
+                    )),
+                busy
+                    ? const Positioned(
+                        top: 160,
+                        left: 48,
+                        child: Center(
+                          child: SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 12,
+                              backgroundColor: Colors.pink,
+                            ),
+                          ),
+                        ),
+                      )
+                    : const SizedBox(),
+              ]));
   }
 }
 

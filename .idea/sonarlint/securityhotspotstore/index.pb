@@ -195,8 +195,6 @@ X
 (lib/isolates/country_cities_isolate.dart,6/c/6c5f4ef676527601b6dee97fc7714324a6e132a5
 \
 ,lib/widgets/calculated_distances_widget.dart,7/a/7a26a39812311740324befc62720e14a2dc6529a
-N
-lib/maps/route_map_viewer.dart,2/d/2d66cd26f69125332295544233b149a97cfba76b
 X
 (lib/utils/route_distance_calculator.dart,5/7/576c3b43ca21597acf1e8e79e6d18b2f58d5b432
 R
@@ -213,8 +211,6 @@ E
 lib/l10n/my_keys.dart,1/b/1bc97497c84bf2179a04983aaa15a5f75ea3a892
 M
 lib/widgets/timer_widget.dart,a/d/ad0a5f4fcc22c914e010ea84a29f99dbb725be1a
-b
-2lib/widgets/route_widgets/multi_route_chooser.dart,8/c/8c0eb440e29ac2f9bb66009e2f49f72b511baeac
 J
 lib/utils/environment.dart,2/9/29aa30c893fdd0dcb85853c0a069b2d7d001deae
 D
@@ -237,3 +233,25 @@ J
 lib/bloc/list_api_dog.dart,f/e/feb3e180b952f4bd12ef54e4199c88bdb1a8fe07
 Q
 !lib/utils/initialiazer_cover.dart,6/c/6cffa59198fcb326d2e0ec3d874f44755ad3905f
+R
+"lib/providers/kasie_providers.dart,4/4/444f3d43023add5c821968865c0b4250a3a678a2
+F
+lib/utils/parsers.dart,f/d/fdd3bbae621bfbda008d330ec565412416ae2e53
+O
+lib/widgets/city_selection.dart,b/a/bae87fc0f3dabeb2d125869428ea939f930b31ea
+N
+lib/maps/city_creator_map.dart,d/8/d8cfcd4adfd9e76e76169d72f2a31f8f98ed96fd
+[
++lib/widgets/language_and_color_chooser.dart,e/0/e084d864c6026e18c64f9423376c69244ac839b1
+Y
+)lib/maps/cluster_maps/cluster_covers.dart,5/8/58fcfb088faf084ad592a68f64994743fd1241f6
+G
+lib/data/constants.dart,f/3/f3dc49bc1a9dd087c24293c647024038d437ece2
+a
+1lib/maps/cluster_maps/cluster_map_controller.dart,6/2/62ca8e2e5704a13efb1cba37e4c43ccaba4bf16b
+_
+/lib/maps/cluster_maps/arrivals_cluster_map.dart,1/e/1e901847437eebdede18a5620753fd968b777cb5
+Z
+*lib/widgets/route_widgets/live_widget.dart,2/4/24fd582fb4ddb4b9a9e9a5bc36180abf05acf3e0
+K
+lib/messaging/fcm_bloc.dart,a/b/abc3ce0d0007de42374e4acee2f4babe2f6f7f47

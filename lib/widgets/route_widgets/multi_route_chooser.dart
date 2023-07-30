@@ -98,7 +98,7 @@ class MultiRouteChooserState extends State<MultiRouteChooser> {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              Row(
+              Row(mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text('$selectedRoutes : ', style: myTextStyleMediumLargeWithColor(context,
                       Theme.of(context).primaryColorLight, 16),),
@@ -113,20 +113,23 @@ class MultiRouteChooserState extends State<MultiRouteChooser> {
                   const SizedBox(
                     width: 24,
                   ),
-                  list.isEmpty
-                      ? const SizedBox()
-                      : ElevatedButton(
-                          onPressed: () {
-                            widget.onRoutesPicked(list);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Text(showRoutes),
-                          )),
                 ],
               ),
               const SizedBox(
-                height: 16,
+                height: 8,
+              ),
+              list.isEmpty
+                  ? const SizedBox()
+                  : ElevatedButton(
+                  onPressed: () {
+                    widget.onRoutesPicked(list);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(6.0),
+                    child: Text(showRoutes),
+                  )),
+              const SizedBox(
+                height: 8,
               ),
               Expanded(
                 child: bd.Badge(

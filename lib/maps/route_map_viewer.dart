@@ -35,7 +35,7 @@ class RouteMapViewer extends StatefulWidget {
 class RouteMapViewerState extends State<RouteMapViewer> {
   static const defaultZoom = 14.0;
   final Completer<GoogleMapController> _mapController = Completer();
-
+  late GoogleMapController googleMapController;
   CameraPosition? _myCurrentCameraPosition;
   static const mm = '😡😡😡😡😡😡😡 RouteMapViewer: 💪 ';
   final _key = GlobalKey<ScaffoldState>();
@@ -54,6 +54,9 @@ class RouteMapViewerState extends State<RouteMapViewer> {
   var routeLandmarks = <lib.RouteLandmark>[];
   int landmarkIndex = 0;
   lib.Route? route;
+  Color newColor = Colors.black;
+  String? stringColor;
+  String routeMapViewer = 'Viewer', changeColor = '';
 
   @override
   void initState() {
@@ -70,6 +73,7 @@ class RouteMapViewerState extends State<RouteMapViewer> {
 
     setState(() {});
   }
+
   Future _getRoute() async {
     setState(() {
       busy = true;
@@ -93,10 +97,6 @@ class RouteMapViewerState extends State<RouteMapViewer> {
   void dispose() {
     super.dispose();
   }
-
-  Color newColor = Colors.black;
-  String? stringColor;
-  String routeMapViewer = 'Viewer', changeColor = '';
 
   void changeRouteColorOnBackend() async {
     pp('$mm ... updateRouteColor ...color: $stringColor');
@@ -177,9 +177,11 @@ class RouteMapViewerState extends State<RouteMapViewer> {
     for (var landmark in routeLandmarks) {
       final latLng = LatLng(landmark.position!.coordinates.last,
           landmark.position!.coordinates.first);
+      final icon = await getMarkerBitmap(72, text: '${landmarkIndex+1}',
+          color: route!.color!, borderColor: Colors.black, fontSize: 28, fontWeight: FontWeight.w900);
       _markers.add(Marker(
           markerId: MarkerId('${landmark.landmarkId}'),
-          icon: numberMarkers.elementAt(landmarkIndex),
+          icon: icon,
           onTap: () {
             pp('$mm .............. marker tapped, index: $index, $latLng - '
                 'landmarkId: ${landmark.landmarkId} - routeId: ${landmark.routeId}');

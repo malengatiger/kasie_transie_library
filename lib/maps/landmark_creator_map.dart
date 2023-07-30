@@ -153,9 +153,12 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     for (var routeLandmark in routeLandmarks) {
       final latLng = LatLng(routeLandmark.position!.coordinates.last,
           routeLandmark.position!.coordinates.first);
+      final icon = await getMarkerBitmap(72, text: '${landmarkIndex+1}',
+          color: widget.route.color!, borderColor: Colors.black, fontSize: 28, fontWeight: FontWeight.w900);
+
       _markers.add(Marker(
           markerId: MarkerId('${routeLandmark.landmarkId}'),
-          icon: numberMarkers.elementAt(landmarkIndex),
+          icon: icon,
           onTap: () {
             pp('$mm .............. routeLandmark marker tapped, index: $index $latLng');
             //_deleteRoutePoint(routePoint);
