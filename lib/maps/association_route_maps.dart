@@ -128,58 +128,6 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     });
   }
 
-  // void _showRouteDialog() async {
-  //   final type = getThisDeviceType();
-  //   showDialog(
-  //       context: context,
-  //       builder: (ctx) {
-  //         return AlertDialog(
-  //           content: SizedBox(width: 300, height: type == 'phone'? 300: 500,
-  //             child: Card(
-  //               shape: getDefaultRoundedBorder(),
-  //               elevation: 8,
-  //               child: Padding(
-  //                 padding: const EdgeInsets.all(16.0),
-  //                 child: ListView.builder(
-  //                     itemCount: routes.length,
-  //                     itemBuilder: (ctx, index) {
-  //                       final route = routes.elementAt(index);
-  //                       return GestureDetector(
-  //                         onTap: () {
-  //                           setState(() {
-  //                             routeSelected = route;
-  //                           });
-  //                           Navigator.of(context).pop();
-  //                           _getRouteMap(route);
-  //                         },
-  //                         child: Card(
-  //                           shape: getRoundedBorder(radius: 12),
-  //                           elevation: 12,
-  //                           child: Padding(
-  //                             padding: const EdgeInsets.all(8.0),
-  //                             child: Text(
-  //                               '${route.name}',
-  //                               style: myTextStyleSmall(context),
-  //                             ),
-  //                           ),
-  //                         ),
-  //                       );
-  //                     }),
-  //               ),
-  //             ),
-  //           ),
-  //         );
-  //       });
-  // }
-
-  // void _getRouteMap(lib.Route route) async {
-  //   color = getColor(route.color!);
-  //   await _getRoutePoints(route, false);
-  //   await _getRouteLandmarks(route, false);
-  //   await _buildMap();
-  //   _zoomToBeginningOfRoute(route);
-  // }
-
   @override
   void dispose() {
     super.dispose();
@@ -187,121 +135,6 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
 
   Color newColor = Colors.black;
   String? stringColor;
-
-  Future _getRouteLandmarks(lib.Route route, bool refresh) async {
-    routeLandmarks =
-    await listApiDog.getRouteLandmarks(route.routeId!, refresh);
-    pp('$mm _getRouteLandmarks ...  route: ${route
-        .name}; found: ${routeLandmarks.length} ');
-
-    landmarkIndex = 0;
-    for (var landmark in routeLandmarks) {
-      final latLng = LatLng(landmark.position!.coordinates.last,
-          landmark.position!.coordinates.first);
-      _markers.add(Marker(
-          markerId: MarkerId('${landmark.landmarkId}'),
-          icon: numberMarkers.elementAt(landmarkIndex),
-          onTap: () {
-            pp('$mm .............. marker tapped: $index');
-          },
-          infoWindow: InfoWindow(
-              snippet:
-              '\nThis landmark is part of the route:\n ${route.name}\n\n',
-              title: '🍎 ${landmark.landmarkName}',
-              onTap: () {
-                pp('$mm ............. infoWindow tapped, point index: $index');
-                //_deleteLandmark(landmark);
-              }),
-          position: latLng));
-      landmarkIndex++;
-    }
-    setState(() {});
-  }
-
-  void _showNoPointsDialog() {
-    showDialog(
-        context: context,
-        builder: (ctx) {
-          return AlertDialog(
-            elevation: 12,
-            title: Text(
-              'Route Mapping',
-              style: myTextStyleLarge(context),
-            ),
-            content: Card(
-              shape: getDefaultRoundedBorder(),
-              child: const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text('This route has not been completely defined yet.'),
-              ),
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    _popOut();
-                  },
-                  child: const Text('Close')),
-            ],
-          );
-        });
-  }
-
-  void _popOut() {
-    Navigator.of(context).pop();
-    Navigator.of(context).pop();
-  }
-
-  Future _getRoutePoints(lib.Route route, bool refresh) async {
-    setState(() {
-      busy = true;
-    });
-    try {
-      _user = await prefs.getUser();
-      pp('$mm getting existing RoutePoints .......');
-      existingRoutePoints =
-      await routesIsolate.getRoutePoints(routeSelected!.routeId!, refresh);
-    } catch (e) {
-      pp(e);
-    }
-    setState(() {
-      busy = false;
-    });
-  }
-
-  // Future<void> _buildMap() async {
-  //   pp('$mm .......... existingRoutePoints ....  🍎 found: '
-  //       '${existingRoutePoints.length} points');
-  //   if (existingRoutePoints.isEmpty) {
-  //     setState(() {
-  //       busy = false;
-  //     });
-  //     _showNoPointsDialog();
-  //     //return;
-  //   }
-  //   _addPolyLine();
-  //   landmarkIndex = 0;
-  //   for (var rl in routeLandmarks) {
-  //     _markers.add(Marker(
-  //         markerId: MarkerId(rl.landmarkId!),
-  //         icon: numberMarkers.elementAt(landmarkIndex),
-  //         position:
-  //             LatLng(rl.position!.coordinates[1], rl.position!.coordinates[0]),
-  //         infoWindow: InfoWindow(
-  //             title: rl.landmarkName, snippet: '🍎Part of ${rl.routeName}')));
-  //     landmarkIndex++;
-  //   }
-  //   setState(() {});
-  //   var point = existingRoutePoints.first;
-  //   var latLng = LatLng(
-  //       point.position!.coordinates.last, point.position!.coordinates.first);
-  //   _myCurrentCameraPosition = CameraPosition(
-  //     target: latLng,
-  //     zoom: defaultZoom,
-  //   );
-  //   final GoogleMapController controller = await _mapController.future;
-  //   controller.animateCamera(
-  //       CameraUpdate.newCameraPosition(_myCurrentCameraPosition!));
-  // }
 
   Future _getUser() async {
     _user = await prefs.getUser();
@@ -349,11 +182,6 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
       numberMarkers.add(BitmapDescriptor.fromBytes(intList));
     }
     pp('$mm have built ${numberMarkers.length} markers for landmarks');
-  }
-
-  _clearMap() {
-    _polyLines.clear();
-    _markers.clear();
   }
 
   void _addLandmarks(List<lib.RouteLandmark> routeLandmarks,
@@ -495,30 +323,6 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
                       )),
                 ),
               )),
-          // Positioned(
-          //     right: 12,
-          //     top: 40,
-          //     child: Card(
-          //       elevation: 8,
-          //       shape: getRoundedBorder(radius: 12),
-          //       child: Row(
-          //         children: [
-          //           IconButton(
-          //               onPressed: () {
-          //                 if (routeSelected != null) {
-          //                   _refreshRoute(routeSelected!);
-          //                 }
-          //               },
-          //               icon: Icon(
-          //                 Icons.toggle_on,
-          //                 color: Theme.of(context).primaryColor,
-          //               )),
-          //           const SizedBox(
-          //             width: 28,
-          //           ),
-          //         ],
-          //       ),
-          //     )),
           busy
               ? const Positioned(
             top: 160,

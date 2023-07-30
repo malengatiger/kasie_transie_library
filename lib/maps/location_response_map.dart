@@ -30,8 +30,9 @@ class LocationResponseMapState extends State<LocationResponseMap> {
   bool busy = false;
   bool hybrid = true;
   final initialCameraPosition =
-      const CameraPosition(target: LatLng(-25.7, 27.6));
+      const CameraPosition(target: LatLng(-25.7, 27.6), zoom: 14.6);
   final Completer<GoogleMapController> _mapController = Completer();
+  late GoogleMapController googleMapController;
 
   final _markers = <Marker>{};
   final _polyLines = <Polyline>{};
@@ -40,15 +41,14 @@ class LocationResponseMapState extends State<LocationResponseMap> {
   var routeLandmarks = [<lib.RouteLandmark>[]];
 
   String? locationResponseText, dateText, taxiCurrentLocation, loadingRoutes;
-  final _markerIcons = <List<BitmapDescriptor>>[];
   lib.User? user;
   var bags = <RouteDataBag>[];
+
   @override
   void initState() {
     super.initState();
     pp('$mm at least I get to initState ... ${E.heartRed} ${widget.locationResponse.vehicleReg}');
     _setTexts();
-    _findRoutesNearby();
   }
 
   Future _findRoutesNearby() async {
@@ -69,19 +69,23 @@ class LocationResponseMapState extends State<LocationResponseMap> {
     user = await prefs.getUser();
     try {
       final loc = await locationBloc.getLocation();
-      routes = await localFinder.findNearestRoutes(latitude: loc.latitude,
-          longitude: loc.longitude, radiusInMetres: 5000);
-      var marks = await localFinder.findNearestRouteLandmarks(latitude: loc.latitude,
-          longitude: loc.longitude, radiusInMetres: 5000);
+      routes = await localFinder.findNearestRoutes(
+          latitude: loc.latitude,
+          longitude: loc.longitude,
+          radiusInMetres: 5000);
+      var marks = await localFinder.findNearestRouteLandmarks(
+          latitude: loc.latitude,
+          longitude: loc.longitude,
+          radiusInMetres: 5000);
       pp('$mm ... marks: ${marks.length}');
       pp('$mm ... routes: ${routes.length}');
       if (routes.isNotEmpty) {
         pp('$mm  check for null: ${routes.first.name} color: ${routes.first.color}');
       }
-
       for (var value in routes) {
         final lrs = await listApiDog.getRouteLandmarks(value.routeId!, false);
-        final points =await routesIsolate.getRoutePoints(value.routeId!, false);
+        final points =
+            await routesIsolate.getRoutePoints(value.routeId!, false);
         final bag = RouteDataBag(
             route: value, routeLandmarks: lrs, routePoints: points);
         bags.add(bag);
@@ -94,7 +98,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
 
       _buildPolyLines();
       await _buildLandmarks();
-      putResponseOnMap();
+      //putResponseOnMap();
     } catch (e) {
       pp(e);
       if (mounted) {
@@ -124,7 +128,6 @@ class LocationResponseMapState extends State<LocationResponseMap> {
         width: 12,
         onTap: () {
           pp('$mm ... polyline tapped ... point below ...');
-
         },
         consumeTapEvents: true,
         color: getColor(route.color!),
@@ -135,10 +138,18 @@ class LocationResponseMapState extends State<LocationResponseMap> {
     }
   }
 
-  Future<BitmapDescriptor> buildIcon(int index) async {
-    var intList =
-        await getBytesFromAsset("assets/numbers/number_${index + 1}.png", 84);
-    final icon = BitmapDescriptor.fromBytes(intList);
+  Future<BitmapDescriptor> buildIcon(
+      {required int index,
+      required String color,
+      required Color borderColor,
+      required Color textColor,
+      required TextStyle style}) async {
+    final icon = getMarkerBitmap(72,
+        text: '${index + 1}',
+        color: color,
+        borderColor: borderColor,
+        fontSize: 32,
+        fontWeight: FontWeight.w900);
     return icon;
   }
 
@@ -146,14 +157,18 @@ class LocationResponseMapState extends State<LocationResponseMap> {
     pp('$mm _buildLandmarks on map ...');
     var routeIndex = 0;
     for (var route in routes) {
-      pp('$mm route: ${route.name} - ${route.routeId}');
+      pp('$mm route: ${route.name} - ${route.routeId} ${E.blueDot} color: ${route.color}');
       final bag = bags[routeIndex];
       var index = 0;
 
       for (var mark in bag.routeLandmarks) {
         final latLng = LatLng(
             mark.position!.coordinates[1], mark.position!.coordinates[0]);
-        final icon = await buildIcon(index);
+
+        final icon = await getMarkerBitmap(72,
+            text: '${index + 1}',
+            color: route.color!, borderColor: Colors.black, fontSize: 28, fontWeight: FontWeight.normal);
+
         _markers.add(Marker(
             markerId: MarkerId(mark.landmarkId!),
             icon: icon,
@@ -176,33 +191,44 @@ class LocationResponseMapState extends State<LocationResponseMap> {
   }
 
   Future<void> putResponseOnMap() async {
-    pp('$mm _putResponseOnMap ...');
+    pp('$mm _putResponseOnMap .......................'
+        '${widget.locationResponse.vehicleReg}');
 
     final latLng = LatLng(widget.locationResponse.position!.coordinates[1],
         widget.locationResponse.position!.coordinates[0]);
 
-    var intList = await getBytesFromAsset("assets/markers/footprint.png", 108);
-    final icon = BitmapDescriptor.fromBytes(intList);
+    // var intList = await getBytesFromAsset("assets/markers/footprint.png", 108);
+    // final icon = BitmapDescriptor.fromBytes(intList);
+    final ic = await getMarkerBitmap(
+      128,
+      text: widget.locationResponse.vehicleReg!,
+      color: 'black',
+      borderColor: Colors.white,
+      fontSize: 16,
+      fontWeight: FontWeight.w900,
+    );
     _markers.add(Marker(
         markerId: MarkerId(widget.locationResponse.vehicleId!),
-        icon: icon,
+        icon: ic,
         zIndex: 2,
         position: latLng,
+        onTap: () {
+          pp('$mm ... car tapped. find routes ...');
+          _findRoutesNearby();
+        },
         infoWindow: InfoWindow(
           title: widget.locationResponse.vehicleReg,
         )));
 
-    _zoomTo();
+    setState(() {});
+    _zoomTo(latLng);
   }
 
-  Future<void> _zoomTo() async {
-    final latLng = LatLng(widget.locationResponse.position!.coordinates[1],
-        widget.locationResponse.position!.coordinates[0]);
-
+  Future<void> _zoomTo(LatLng latLng) async {
+    pp('$mm ....... zoom to $latLng');
     var cameraPos = CameraPosition(target: latLng, zoom: 14.0);
-    final GoogleMapController controller = await _mapController.future;
-    controller.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
-    setState(() {});
+    googleMapController.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
+
   }
 
   void _setTexts() async {
@@ -214,9 +240,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
     loadingRoutes = await translator.translate('loadingRoutes', locale);
     taxiCurrentLocation =
         await translator.translate('taxiCurrentLocation', locale);
-    setState(() {
-
-    });
+    setState(() {});
   }
 
   @override
@@ -250,7 +274,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
           // ],
         ),
         body: busy
-            ?  Center(
+            ? Center(
                 child: Card(
                   elevation: 8,
                   shape: getDefaultRoundedBorder(),
@@ -266,7 +290,9 @@ class LocationResponseMapState extends State<LocationResponseMap> {
                         const SizedBox(
                           height: 24,
                         ),
-                        Text(loadingRoutes == null? 'Loading route data ...': loadingRoutes!),
+                        Text(loadingRoutes == null
+                            ? 'Loading route data ...'
+                            : loadingRoutes!),
                       ],
                     ),
                   ),
@@ -282,9 +308,15 @@ class LocationResponseMapState extends State<LocationResponseMap> {
                     mapToolbarEnabled: true,
                     polylines: _polyLines,
                     markers: _markers,
-                    onMapCreated: (googleMapController) {
+                    onMapCreated: (cont) {
                       pp('\n$mm .......... on onMapCreated .....');
-                      _mapController.complete(googleMapController);
+                      googleMapController = cont;
+                      try {
+                        _mapController.complete(cont);
+                      } catch (e) {
+                        pp('$mm error ignored: $e');
+                      }
+                      putResponseOnMap();
                     },
                   ),
                   Positioned(
@@ -308,7 +340,10 @@ class LocationResponseMapState extends State<LocationResponseMap> {
                               Text(
                                 '${widget.locationResponse.vehicleReg}',
                                 style: myTextStyleMediumLargeWithColor(
-                                    context, Colors.white30, 20),
+                                    context, Colors.white, 20),
+                              ),
+                              const SizedBox(
+                                height: 4,
                               ),
                               Text(
                                 date,

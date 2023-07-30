@@ -23,7 +23,7 @@ class ClusterMapController extends StatefulWidget {
 }
 
 class ClusterMapControllerState extends State<ClusterMapController> {
-  final mm = '🍐🍐🍐🍐RouteList 🍐🍐';
+  final mm = '🍐🍐🍐🍐ClusterMapController 🍐🍐';
 
   var routes = <lib.Route>[];
   var dispatches = <lib.DispatchRecord>[];
@@ -316,6 +316,13 @@ class ClusterMapControllerState extends State<ClusterMapController> {
 
   @override
   Widget build(BuildContext context) {
+    var padding = 64.0;
+    final type = getThisDeviceType();
+
+    if (type == 'phone') {
+      padding = 20.0;
+    }
+
     return SafeArea(
         child: Scaffold(
       appBar: AppBar(
@@ -348,15 +355,15 @@ class ClusterMapControllerState extends State<ClusterMapController> {
             child: Card(
               shape: getRoundedBorder(radius: 16),
               elevation: 8,
-              child: Column(
+              child: Column(mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(
-                    height: 12,
+                   SizedBox(
+                    height: type == 'phone'? 12:48,
                   ),
                   busy
                       ? const SizedBox()
                       : SizedBox(
-                          width: 320,
+                          width:  type == 'phone'?280:320,
                           child: ElevatedButton.icon(
                               style: const ButtonStyle(
                                 elevation: MaterialStatePropertyAll(12.0),
@@ -373,161 +380,172 @@ class ClusterMapControllerState extends State<ClusterMapController> {
                                 ),
                               )),
                         ),
-                  ListTile(
-                    title: Row(
-                      children: [
-                        Text(
-                          'Dispatch Records',
-                          style: myTextStyleSmall(context),
-                        ),
-                        const SizedBox(
-                          width: 28,
-                        ),
-                        bd.Badge(
-                          badgeStyle: const bd.BadgeStyle(
-                              elevation: 12,
-                              badgeColor: Colors.deepOrange,
-                              padding: EdgeInsets.all(12)),
-                          badgeContent: Text(
-                            '${dispatches.length}',
-                            style: myTextStyleTiny(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                    leading: Radio(
-                        value: 1,
-                        groupValue: groupValue,
-                        onChanged: (int? v) {
-                          pp('$mm ... dispatch record radio changed : $v');
-                          if (v != null) {
-                            groupValue = 1;
-                          }
-                          setState(() {
-                            _showDispatches = true;
-                            _showArrivals = false;
-                            _showPassengerCounts = false;
-                            _showCommuterRequests = false;
-                          });
-                        }),
+                   SizedBox(
+                    height: type == 'phone'? 4:48,
                   ),
-                  ListTile(
-                    title: Row(
-                      children: [
-                        Text(
-                          'Vehicle Arrivals',
-                          style: myTextStyleSmall(context),
-                        ),
-                        const SizedBox(
-                          width: 28,
-                        ),
-                        bd.Badge(
-                          badgeStyle: bd.BadgeStyle(
-                              elevation: 12,
-                              badgeColor: Colors.green[800]!,
-                              padding: const EdgeInsets.all(12)),
-                          badgeContent: Text(
-                            '${arrivals.length}',
-                            style: myTextStyleTiny(context),
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SizedBox(height:  type == 'phone'?240: 260, width:  type == 'phone'?320: 400, child: Column(
+                        children: [
+                          ListTile(
+                            title: Row(
+                              children: [
+                                Text(
+                                  'Dispatch Records',
+                                  style: myTextStyleSmall(context),
+                                ),
+                                const SizedBox(
+                                  width: 28,
+                                ),
+                                bd.Badge(
+                                  badgeStyle: const bd.BadgeStyle(
+                                      elevation: 12,
+                                      badgeColor: Colors.deepOrange,
+                                      padding: EdgeInsets.all(12)),
+                                  badgeContent: Text(
+                                    '${dispatches.length}',
+                                    style: myTextStyleTiny(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            leading: Radio(
+                                value: 1,
+                                groupValue: groupValue,
+                                onChanged: (int? v) {
+                                  pp('$mm ... dispatch record radio changed : $v');
+                                  if (v != null) {
+                                    groupValue = 1;
+                                  }
+                                  setState(() {
+                                    _showDispatches = true;
+                                    _showArrivals = false;
+                                    _showPassengerCounts = false;
+                                    _showCommuterRequests = false;
+                                  });
+                                }),
                           ),
-                        ),
-                      ],
-                    ),
-                    leading: Radio(
-                        value: 2,
-                        groupValue: groupValue,
-                        onChanged: (int? v) {
-                          pp('$mm ...  arrivals radio changed : $v');
-                          if (v != null) {
-                            groupValue = 2;
-                          }
-                          setState(() {
-                            _showDispatches = false;
-                            _showArrivals = true;
-                            _showPassengerCounts = false;
-                            _showCommuterRequests = false;
-                          });
-                        }),
-                  ),
-                  ListTile(
-                    title: Row(
-                      children: [
-                        Text(
-                          'Passenger Counts',
-                          style: myTextStyleSmall(context),
-                        ),
-                        const SizedBox(
-                          width: 28,
-                        ),
-                        bd.Badge(
-                          badgeStyle: bd.BadgeStyle(
-                            elevation: 12,
-                            padding: const EdgeInsets.all(12),
-                            badgeColor: Colors.pink.shade700,
+                          ListTile(
+                            title: Row(
+                              children: [
+                                Text(
+                                  'Vehicle Arrivals',
+                                  style: myTextStyleSmall(context),
+                                ),
+                                const SizedBox(
+                                  width: 28,
+                                ),
+                                bd.Badge(
+                                  badgeStyle: bd.BadgeStyle(
+                                      elevation: 12,
+                                      badgeColor: Colors.green[800]!,
+                                      padding: const EdgeInsets.all(12)),
+                                  badgeContent: Text(
+                                    '${arrivals.length}',
+                                    style: myTextStyleTiny(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            leading: Radio(
+                                value: 2,
+                                groupValue: groupValue,
+                                onChanged: (int? v) {
+                                  pp('$mm ...  arrivals radio changed : $v');
+                                  if (v != null) {
+                                    groupValue = 2;
+                                  }
+                                  setState(() {
+                                    _showDispatches = false;
+                                    _showArrivals = true;
+                                    _showPassengerCounts = false;
+                                    _showCommuterRequests = false;
+                                  });
+                                }),
                           ),
-                          badgeContent: Text(
-                            '${passengerCounts.length}',
-                            style: myTextStyleTiny(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                    leading: Radio(
-                        value: 3,
-                        groupValue: groupValue,
-                        onChanged: (int? v) {
-                          pp('$mm ... passenger  radio changed : $v');
+                          ListTile(
+                            title: Row(
+                              children: [
+                                Text(
+                                  'Passenger Counts',
+                                  style: myTextStyleSmall(context),
+                                ),
+                                const SizedBox(
+                                  width: 28,
+                                ),
+                                bd.Badge(
+                                  badgeStyle: bd.BadgeStyle(
+                                    elevation: 12,
+                                    padding: const EdgeInsets.all(12),
+                                    badgeColor: Colors.pink.shade700,
+                                  ),
+                                  badgeContent: Text(
+                                    '${passengerCounts.length}',
+                                    style: myTextStyleTiny(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            leading: Radio(
+                                value: 3,
+                                groupValue: groupValue,
+                                onChanged: (int? v) {
+                                  pp('$mm ... passenger  radio changed : $v');
 
-                          if (v != null) {
-                            groupValue = 3;
-                          }
-                          setState(() {
-                            _showDispatches = false;
-                            _showArrivals = false;
-                            _showPassengerCounts = true;
-                            _showCommuterRequests = false;
-                          });
-                        }),
-                  ),
-                  ListTile(
-                    title: Row(
-                      children: [
-                        Text(
-                          'Commuter Requests',
-                          style: myTextStyleSmall(context),
-                        ),
-                        const SizedBox(
-                          width: 28,
-                        ),
-                        bd.Badge(
-                          badgeStyle: bd.BadgeStyle(
-                            elevation: 12,
-                            padding: const EdgeInsets.all(12),
-                            badgeColor: Colors.blue[800]!,
+                                  if (v != null) {
+                                    groupValue = 3;
+                                  }
+                                  setState(() {
+                                    _showDispatches = false;
+                                    _showArrivals = false;
+                                    _showPassengerCounts = true;
+                                    _showCommuterRequests = false;
+                                  });
+                                }),
                           ),
-                          badgeContent: Text(
-                            '${requests.length}',
-                            style: myTextStyleTiny(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                    leading: Radio(
-                        value: 4,
-                        groupValue: groupValue,
-                        onChanged: (int? v) {
-                          pp('$mm ... commuter requests radio changed : $v');
+                          ListTile(
+                            title: Row(
+                              children: [
+                                Text(
+                                  'Commuter Requests',
+                                  style: myTextStyleSmall(context),
+                                ),
+                                const SizedBox(
+                                  width: 28,
+                                ),
+                                bd.Badge(
+                                  badgeStyle: bd.BadgeStyle(
+                                    elevation: 12,
+                                    padding: const EdgeInsets.all(12),
+                                    badgeColor: Colors.blue[800]!,
+                                  ),
+                                  badgeContent: Text(
+                                    '${requests.length}',
+                                    style: myTextStyleTiny(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            leading: Radio(
+                                value: 4,
+                                groupValue: groupValue,
+                                onChanged: (int? v) {
+                                  pp('$mm ... commuter requests radio changed : $v');
 
-                          if (v != null) {
-                            groupValue = 4;
-                          }
-                          setState(() {
-                            _showDispatches = false;
-                            _showArrivals = false;
-                            _showPassengerCounts = false;
-                            _showCommuterRequests = true;
-                          });
-                        }),
+                                  if (v != null) {
+                                    groupValue = 4;
+                                  }
+                                  setState(() {
+                                    _showDispatches = false;
+                                    _showArrivals = false;
+                                    _showPassengerCounts = false;
+                                    _showCommuterRequests = true;
+                                  });
+                                }),
+                          ),
+                        ],
+                      )),
+                    ],
                   ),
                   const SizedBox(
                     height: 12,
@@ -576,11 +594,11 @@ class ClusterMapControllerState extends State<ClusterMapController> {
                     ],
                   ),
                   const SizedBox(
-                    height: 28,
+                    height: 2,
                   ),
                   Expanded(
                       child: Padding(
-                    padding: const EdgeInsets.all(20.0),
+                    padding:  EdgeInsets.all(padding),
                     child: ListView.builder(
                         itemCount: routes.length,
                         itemBuilder: (_, index) {

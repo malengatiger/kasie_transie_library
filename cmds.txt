@@ -26,35 +26,17 @@ $ pod setup
 
 https://stackoverflow.com/questions/65921257/flutter-display-log-in-release-mode-in-ios
 
+//wireless debug
+ adb pair 192.168.86.29:42541
+ adb pair 192.168.86.250:45235
+
+
+
 Android phones
 +27 72 212 6971 - Redmi
 +27 71 441 4396 - Samsung
 
 
-//... from plist
-<key>CFBundleLocalizations</key>
-	<array>
-		<string>en</string>
-		<string>fr</string>
-		<string>es</string>
-		<string>pt</string>
-		<string>sw</string>
-		<string>sn</string>
-		<string>st</string>
-		<string>ts</string>
-		<string>ig</string>
-		<string>xh</string>
-		<string>zu</string>
-		<string>yo</string>
-		<string>af</string>
-		<string>zh_CN</string>
-	</array>
-
-	<key>NSAppTransportSecurity</key>
-    	<dict>
-    		<key>NSAllowsArbitraryLoads</key>
-    		<true/>
-    	</dict>
 
 https://bohatmx-dev-ed.develop.my.salesforce.com user: aubrey.og@geo.com
 khayaAndI#333_geo
@@ -86,24 +68,4 @@ dart run custom_lint
 // import the package
 import 'package:responsive_builder/responsive_builder.dart';
 
-// Use the widget
-ResponsiveBuilder(
-    builder: (context, sizingInformation) {
-      // Check the sizing information here and return your UI
-          if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
-          return Container(color:Colors.blue);
-        }
-
-        if (sizingInformation.deviceScreenType == DeviceScreenType.tablet) {
-          return Container(color:Colors.red);
-        }
-
-        if (sizingInformation.deviceScreenType == DeviceScreenType.watch) {
-          return Container(color:Colors.yellow);
-        }
-
-        return Container(color:Colors.purple);
-      },
-    },
-  );
 }

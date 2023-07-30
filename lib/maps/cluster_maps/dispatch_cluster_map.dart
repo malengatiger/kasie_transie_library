@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -6,15 +7,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
+import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/maps/cluster_maps/toggle.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
+import 'package:kasie_transie_library/data/schemas.dart' as lib;
 
 import 'cluster_covers.dart';
 
-
 class DispatchClusterMap extends StatefulWidget {
-  const DispatchClusterMap({Key? key, required this.dispatchRecordCovers, required this.date})
+  const DispatchClusterMap(
+      {Key? key, required this.dispatchRecordCovers, required this.date})
       : super(key: key);
 
   final List<DispatchRecordCover> dispatchRecordCovers;
@@ -30,6 +33,7 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
   final Completer<GoogleMapController> _googleMapController = Completer();
   final mm = '🍐🍐🍐🍐DispatchClusterMap 🍐🍐';
 
+  var routes = <lib.Route>[];
   Set<Marker> markers = {};
   late ClusterManager clusterManager;
   final CameraPosition _parisCameraPosition =
@@ -40,6 +44,20 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
     _controller = AnimationController(vsync: this);
     clusterManager = _initClusterManager();
     super.initState();
+    _getRoutes();
+  }
+
+  Future _getRoutes() async {
+    final m = HashMap<String, String>();
+    for (var value in widget.dispatchRecordCovers) {
+      m[value.dispatchRecord.routeId!] = value.dispatchRecord.routeName!;
+    }
+    for (var value1 in m.keys.toList()) {
+      final route = await listApiDog.getRoute(value1);
+      routes.add(route!);
+    }
+    pp('${routes.length} routes filtered');
+    setState(() {});
   }
 
   ClusterManager<ClusterItem> _initClusterManager() {
@@ -60,55 +78,35 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
 
   Future<Marker> Function(Cluster<DispatchRecordCover>) get _markerBuilder =>
       (cluster) async {
+        var size = cluster.isMultiple ? 125.0 : 75.0;
+        var text = cluster.isMultiple ? cluster.count.toString() : "1";
+        final ic = await getMarkerBitmap(
+          size.toInt(),
+          text: text,
+          color: 'teal',
+          borderColor: Colors.white,
+          fontWeight: FontWeight.normal,
+          fontSize: size / 3,
+        );
         return Marker(
           markerId: MarkerId(cluster.getId()),
           position: cluster.location,
           onTap: () {
             pp('$mm ---- cluster? ${E.redDot} $cluster');
+            final list = <lib.DispatchRecord>[];
             for (var p in cluster.items) {
+              list.add(p.dispatchRecord);
+            }
+            list.sort((a, b) => a.vehicleReg!.compareTo(b.vehicleReg!));
+            for (var p in list) {
               pp('$mm ... DispatchRecordCover - cluster item: ${E.appleRed} '
-                  '${p.dispatchRecord.vehicleReg} ${p.dispatchRecord.landmarkName}'
-                  '\n${E.leaf} route: ${p.dispatchRecord.routeName} ');
+                  '${p.vehicleReg} ${p.landmarkName}'
+                  '${E.leaf} route: ${p.routeName} date: ${getFormattedDateLong(p.created!)}');
             }
           },
-          icon: await _getMarkerBitmap(cluster.isMultiple ? 125 : 75,
-              text: cluster.isMultiple ? cluster.count.toString() : null),
+          icon: ic,
         );
       };
-
-  Future<BitmapDescriptor> _getMarkerBitmap(int size, {String? text}) async {
-    if (kIsWeb) size = (size / 2).floor();
-
-    final PictureRecorder pictureRecorder = PictureRecorder();
-    final Canvas canvas = Canvas(pictureRecorder);
-    final Paint paint1 = Paint()..color = Colors.teal[600]!;
-    final Paint paint2 = Paint()..color = Colors.white;
-
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.0, paint1);
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.2, paint2);
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.8, paint1);
-
-    if (text != null) {
-      TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
-      painter.text = TextSpan(
-        text: text,
-        style: TextStyle(
-            fontSize: size / 3,
-            color: Colors.white,
-            fontWeight: FontWeight.normal),
-      );
-      painter.layout();
-      painter.paint(
-        canvas,
-        Offset(size / 2 - painter.width / 2, size / 2 - painter.height / 2),
-      );
-    }
-
-    final img = await pictureRecorder.endRecording().toImage(size, size);
-    final data = await img.toByteData(format: ImageByteFormat.png) as ByteData;
-
-    return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
-  }
 
   bool hybrid = true;
   @override
@@ -130,26 +128,45 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
     return SafeArea(
         child: Scaffold(
       appBar: AppBar(
-        title:  Row(
+        title: Row(
           children: [
-            Icon(Icons.airport_shuttle, color: Theme.of(context).primaryColor,),
-            const SizedBox(width: 16,),
-            Text('Dispatch Records Map',style: myTextStyleMediumLargeWithColor(
-                context, Theme.of(context).primaryColor, 20),),
+            Icon(
+              Icons.airport_shuttle,
+              color: Theme.of(context).primaryColor,
+            ),
+            const SizedBox(
+              width: 16,
+            ),
+            Text(
+              'Dispatch Records Map',
+              style: myTextStyleMediumLargeWithColor(
+                  context, Theme.of(context).primaryColor, 20),
+            ),
           ],
         ),
-        bottom: PreferredSize(preferredSize: const Size.fromHeight(32), child: Column(
-          children: [
-            Row(mainAxisAlignment: MainAxisAlignment.center,
+        bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(32),
+            child: Column(
               children: [
-                Text('Start Time: ', style: myTextStyleTiny(context),),
-                const SizedBox(width: 12),
-                Text(widget.date, style: myTextStyleSmall(context),),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Start Time: ',
+                      style: myTextStyleTiny(context),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      widget.date,
+                      style: myTextStyleSmall(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 16,
+                )
               ],
-            ),
-            const SizedBox(height: 16,)
-          ],
-        )),
+            )),
       ),
       body: Stack(
         children: [
@@ -172,7 +189,9 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
           Positioned(
             right: 12,
             top: 0,
-            child: SizedBox(width: 48, height: 48,
+            child: SizedBox(
+              width: 48,
+              height: 48,
               child: HybridToggle(
                   onHybrid: () {
                     setState(() {
@@ -192,4 +211,3 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
     ));
   }
 }
-

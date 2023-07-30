@@ -45,7 +45,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   final Set<Circle> _circles = HashSet();
   final Set<Polyline> _polyLines = {};
   BitmapDescriptor? _dotMarker;
-
+  late GoogleMapController googleMapController;
   final numberMarkers = <BitmapDescriptor>[];
 
   // List<BitmapDescriptor> _numberMarkers = [];
@@ -272,8 +272,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
 
   Future<void> _animateCamera(LatLng latLng, double zoom) async {
     var cameraPos = CameraPosition(target: latLng, zoom: zoom);
-    final GoogleMapController controller = await _mapController.future;
-    controller.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
+    googleMapController.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
   }
 
   bool _showLandmark = false;
@@ -492,6 +491,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
                   },
                   onMapCreated: (GoogleMapController controller) async {
                     _mapController.complete(controller);
+                    googleMapController = controller;
                     _zoomToStartCity();
                     _controlReads();
                   },

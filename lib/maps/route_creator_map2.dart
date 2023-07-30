@@ -42,6 +42,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
       const CameraPosition(target: LatLng(-26.5, 27.6), zoom: 14.6);
   static const mm = '💟💟💟💟💟💟💟💟💟💟 RouteCreatorMap2: 💪 ';
   final _key = GlobalKey<ScaffoldState>();
+  late GoogleMapController googleMapController;
   bool busy = false;
   bool isHybrid = false;
   lib.User? _user;
@@ -500,6 +501,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
             onLongPress: _confirmDelete,
             onMapCreated: (GoogleMapController controller) {
               _mapController.complete(controller);
+              googleMapController = controller;
               _zoomToStartCity();
               _controlReads(false);
             },

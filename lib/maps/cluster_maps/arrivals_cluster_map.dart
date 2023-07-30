@@ -12,9 +12,9 @@ import 'package:kasie_transie_library/utils/functions.dart';
 
 import 'cluster_covers.dart';
 
-
 class ArrivalsClusterMap extends StatefulWidget {
-  const ArrivalsClusterMap({Key? key, required this.vehicleArrivalsCovers, required this.date})
+  const ArrivalsClusterMap(
+      {Key? key, required this.vehicleArrivalsCovers, required this.date})
       : super(key: key);
 
   final List<VehicleArrivalCover> vehicleArrivalsCovers;
@@ -60,6 +60,16 @@ class CommuterClusterMapState extends State<ArrivalsClusterMap>
 
   Future<Marker> Function(Cluster<VehicleArrivalCover>) get _markerBuilder =>
       (cluster) async {
+        var size = cluster.isMultiple ? 125.0 : 75.0;
+        var text = cluster.isMultiple ? cluster.count.toString() : "1";
+        final ic = await getMarkerBitmap(
+          size.toInt(),
+          text: text,
+          color: 'indigo',
+          borderColor: Colors.white,
+          fontWeight: FontWeight.normal,
+          fontSize: size / 3,
+        );
         return Marker(
           markerId: MarkerId(cluster.getId()),
           position: cluster.location,
@@ -70,44 +80,9 @@ class CommuterClusterMapState extends State<ArrivalsClusterMap>
                   '${p.arrival.vehicleReg} - ${p.arrival.landmarkName} - ${p.arrival.created}');
             }
           },
-          icon: await _getMarkerBitmap(cluster.isMultiple ? 125 : 75,
-              text: cluster.isMultiple ? cluster.count.toString() : null),
+          icon: ic,
         );
       };
-
-  Future<BitmapDescriptor> _getMarkerBitmap(int size, {String? text}) async {
-    if (kIsWeb) size = (size / 2).floor();
-
-    final PictureRecorder pictureRecorder = PictureRecorder();
-    final Canvas canvas = Canvas(pictureRecorder);
-    final Paint paint1 = Paint()..color = Colors.brown[700]!;
-    final Paint paint2 = Paint()..color = Colors.white;
-
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.0, paint1);
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.2, paint2);
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.8, paint1);
-
-    if (text != null) {
-      TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
-      painter.text = TextSpan(
-        text: text,
-        style: TextStyle(
-            fontSize: size / 3,
-            color: Colors.white,
-            fontWeight: FontWeight.normal),
-      );
-      painter.layout();
-      painter.paint(
-        canvas,
-        Offset(size / 2 - painter.width / 2, size / 2 - painter.height / 2),
-      );
-    }
-
-    final img = await pictureRecorder.endRecording().toImage(size, size);
-    final data = await img.toByteData(format: ImageByteFormat.png) as ByteData;
-
-    return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
-  }
 
   bool hybrid = true;
   @override
@@ -131,8 +106,13 @@ class CommuterClusterMapState extends State<ArrivalsClusterMap>
       appBar: AppBar(
         title: Row(
           children: [
-            Icon(Icons.airport_shuttle, color: Theme.of(context).primaryColor,),
-            const SizedBox(width: 16,),
+            Icon(
+              Icons.airport_shuttle,
+              color: Theme.of(context).primaryColor,
+            ),
+            const SizedBox(
+              width: 16,
+            ),
             Text(
               'Vehicle Arrivals Map',
               style: myTextStyleMediumLargeWithColor(
@@ -140,18 +120,29 @@ class CommuterClusterMapState extends State<ArrivalsClusterMap>
             ),
           ],
         ),
-        bottom: PreferredSize(preferredSize: const Size.fromHeight(32), child: Column(
-          children: [
-            Row(mainAxisAlignment: MainAxisAlignment.center,
+        bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(32),
+            child: Column(
               children: [
-                Text('Start Time: ', style: myTextStyleTiny(context),),
-                const SizedBox(width: 12),
-                Text(widget.date, style: myTextStyleSmall(context),),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Start Time: ',
+                      style: myTextStyleTiny(context),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      widget.date,
+                      style: myTextStyleSmall(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 16,
+                )
               ],
-            ),
-            const SizedBox(height: 16,)
-          ],
-        )),
+            )),
       ),
       body: Stack(
         children: [
@@ -174,7 +165,9 @@ class CommuterClusterMapState extends State<ArrivalsClusterMap>
           Positioned(
             right: 12,
             top: 0,
-            child: SizedBox(width: 48, height: 48,
+            child: SizedBox(
+              width: 48,
+              height: 48,
               child: HybridToggle(
                   onHybrid: () {
                     setState(() {

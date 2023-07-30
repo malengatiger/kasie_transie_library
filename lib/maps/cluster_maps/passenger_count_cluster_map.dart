@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -9,16 +10,21 @@ import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:kasie_transie_library/maps/cluster_maps/toggle.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
+import 'package:kasie_transie_library/data/schemas.dart' as lib;
 
+import '../../bloc/list_api_dog.dart';
 import 'cluster_covers.dart';
 
 class PassengerCountClusterMap extends StatefulWidget {
-  const PassengerCountClusterMap({Key? key, required this.passengerCountCovers, required this.date}) : super(key: key);
+  const PassengerCountClusterMap(
+      {Key? key, required this.passengerCountCovers, required this.date})
+      : super(key: key);
 
   final List<PassengerCountCover> passengerCountCovers;
   final String date;
   @override
-  PassengerCountClusterMapState createState() => PassengerCountClusterMapState();
+  PassengerCountClusterMapState createState() =>
+      PassengerCountClusterMapState();
 }
 
 class PassengerCountClusterMapState extends State<PassengerCountClusterMap>
@@ -27,22 +33,37 @@ class PassengerCountClusterMapState extends State<PassengerCountClusterMap>
   final Completer<GoogleMapController> _googleMapController = Completer();
   final mm = '🍐🍐🍐🍐PassengerCountClusterMap 🍐🍐';
 
+  var routes = <lib.Route>[];
   Set<Marker> markers = {};
   late ClusterManager clusterManager;
   final CameraPosition _parisCameraPosition =
-  const CameraPosition(target: LatLng(48.856613, 2.352222), zoom: 12.0);
-
+      const CameraPosition(target: LatLng(48.856613, 2.352222), zoom: 12.0);
 
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
     clusterManager = _initClusterManager();
     super.initState();
+    _getRoutes();
+  }
+
+  Future _getRoutes() async {
+    final m = HashMap<String, String>();
+    for (var value in widget.passengerCountCovers) {
+      m[value.passengerCount.routeId!] = value.passengerCount.routeName!;
+    }
+    for (var value1 in m.keys.toList()) {
+      final route = await listApiDog.getRoute(value1);
+      routes.add(route!);
+    }
+    pp('${routes.length} routes filtered');
+    setState(() {});
   }
 
   ClusterManager<ClusterItem> _initClusterManager() {
     pp('$mm ......... _initClusterManager, ${E.appleRed} items: ${widget.passengerCountCovers.length}');
-    clusterManager = ClusterManager<PassengerCountCover>(widget.passengerCountCovers, _updateMarkers,
+    clusterManager = ClusterManager<PassengerCountCover>(
+        widget.passengerCountCovers, _updateMarkers,
         markerBuilder: _markerBuilder);
 
     return clusterManager;
@@ -56,7 +77,18 @@ class PassengerCountClusterMapState extends State<PassengerCountClusterMap>
   }
 
   Future<Marker> Function(Cluster<PassengerCountCover>) get _markerBuilder =>
-          (cluster) async {
+      (cluster) async {
+        var size = cluster.isMultiple ? 125.0 : 75.0;
+        var text = cluster.isMultiple ? cluster.count.toString() : "1";
+        final ic = await getMarkerBitmap(
+          size.toInt(),
+          text: text,
+          color: 'red',
+          borderColor: Colors.white,
+          fontWeight: FontWeight.normal,
+          fontSize: size / 3,
+        );
+
         return Marker(
           markerId: MarkerId(cluster.getId()),
           position: cluster.location,
@@ -69,44 +101,10 @@ class PassengerCountClusterMapState extends State<PassengerCountClusterMap>
                   '\n${E.leaf} currentPassengers: ${p.passengerCount.currentPassengers}');
             }
           },
-          icon: await _getMarkerBitmap(cluster.isMultiple ? 125 : 75,
-              text: cluster.isMultiple ? cluster.count.toString() : null),
+          icon: ic,
         );
       };
 
-  Future<BitmapDescriptor> _getMarkerBitmap(int size, {String? text}) async {
-    if (kIsWeb) size = (size / 2).floor();
-
-    final PictureRecorder pictureRecorder = PictureRecorder();
-    final Canvas canvas = Canvas(pictureRecorder);
-    final Paint paint1 = Paint()..color = Colors.indigo;
-    final Paint paint2 = Paint()..color = Colors.white;
-
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.0, paint1);
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.2, paint2);
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.8, paint1);
-
-    if (text != null) {
-      TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
-      painter.text = TextSpan(
-        text: text,
-        style: TextStyle(
-            fontSize: size / 3,
-            color: Colors.white,
-            fontWeight: FontWeight.normal),
-      );
-      painter.layout();
-      painter.paint(
-        canvas,
-        Offset(size / 2 - painter.width / 2, size / 2 - painter.height / 2),
-      );
-    }
-
-    final img = await pictureRecorder.endRecording().toImage(size, size);
-    final data = await img.toByteData(format: ImageByteFormat.png) as ByteData;
-
-    return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
-  }
   bool hybrid = true;
   @override
   void dispose() {
@@ -127,52 +125,76 @@ class PassengerCountClusterMapState extends State<PassengerCountClusterMap>
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(child: Scaffold(
+    return SafeArea(
+        child: Scaffold(
       appBar: AppBar(
-        title:  SizedBox(height: 100,
+        title: SizedBox(
+          height: 100,
           child: Row(
             children: [
-              Icon(Icons.people_rounded, color: Theme.of(context).primaryColor,),
-              const SizedBox(width: 8,),
-              Text('Passenger Counts',style: myTextStyleMediumLargeWithColor(
-                  context, Theme.of(context).primaryColor, 20),),
+              Icon(
+                Icons.people_rounded,
+                color: Theme.of(context).primaryColor,
+              ),
+              const SizedBox(
+                width: 8,
+              ),
+              Text(
+                'Passenger Counts',
+                style: myTextStyleMediumLargeWithColor(
+                    context, Theme.of(context).primaryColor, 20),
+              ),
             ],
           ),
         ),
-        bottom: PreferredSize(preferredSize: const Size.fromHeight(32), child: Column(
-          children: [
-            Row(mainAxisAlignment: MainAxisAlignment.center,
+        bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(32),
+            child: Column(
               children: [
-                Text('Start Time: ', style: myTextStyleTiny(context),),
-                const SizedBox(width: 12),
-                Text(widget.date, style: myTextStyleSmall(context),),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Start Time: ',
+                      style: myTextStyleTiny(context),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      widget.date,
+                      style: myTextStyleSmall(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 16,
+                )
               ],
-            ),
-            const SizedBox(height: 16,)
-          ],
-        )),
+            )),
       ),
       body: Stack(
         children: [
-          GoogleMap(initialCameraPosition: _parisCameraPosition,
-          buildingsEnabled: true,
-          mapType: hybrid? MapType.hybrid: MapType.normal,
-          markers: markers,
-          onCameraMove: clusterManager.onCameraMove,
-          onCameraIdle: clusterManager.updateMap,
-          onMapCreated: (GoogleMapController cont){
-            pp('$mm .......... onMapCreated ...........');
-            _googleMapController.complete(cont);
-            clusterManager.setMapId(cont.mapId);
-            clusterManager.setItems(widget.passengerCountCovers);
-            //_updateMarkers(widget.passengerCountCovers);
-            _zoomToStart();
-
-          },),
+          GoogleMap(
+            initialCameraPosition: _parisCameraPosition,
+            buildingsEnabled: true,
+            mapType: hybrid ? MapType.hybrid : MapType.normal,
+            markers: markers,
+            onCameraMove: clusterManager.onCameraMove,
+            onCameraIdle: clusterManager.updateMap,
+            onMapCreated: (GoogleMapController cont) {
+              pp('$mm .......... onMapCreated ...........');
+              _googleMapController.complete(cont);
+              clusterManager.setMapId(cont.mapId);
+              clusterManager.setItems(widget.passengerCountCovers);
+              //_updateMarkers(widget.passengerCountCovers);
+              _zoomToStart();
+            },
+          ),
           Positioned(
             right: 12,
             top: 0,
-            child: SizedBox(width: 48, height: 48,
+            child: SizedBox(
+              width: 48,
+              height: 48,
               child: HybridToggle(
                   onHybrid: () {
                     setState(() {
@@ -191,6 +213,4 @@ class PassengerCountClusterMapState extends State<PassengerCountClusterMap>
       ),
     ));
   }
-
 }
-

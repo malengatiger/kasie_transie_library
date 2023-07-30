@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -9,7 +10,9 @@ import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:kasie_transie_library/maps/cluster_maps/toggle.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
+import 'package:kasie_transie_library/data/schemas.dart' as lib;
 
+import '../../bloc/list_api_dog.dart';
 import 'cluster_covers.dart';
 
 class CommuterClusterMap extends StatefulWidget {
@@ -28,6 +31,7 @@ class CommuterClusterMapState extends State<CommuterClusterMap>
   final Completer<GoogleMapController> _googleMapController = Completer();
   final mm = '🍐🍐🍐🍐CommuterClusterMap 🍐🍐';
 
+  var routes = <lib.Route>[];
   Set<Marker> markers = {};
   late ClusterManager clusterManager;
   final CameraPosition _parisCameraPosition =
@@ -38,6 +42,20 @@ class CommuterClusterMapState extends State<CommuterClusterMap>
     _controller = AnimationController(vsync: this);
     clusterManager = _initClusterManager();
     super.initState();
+    _getRoutes();
+  }
+
+  Future _getRoutes() async {
+    final m = HashMap<String, String>();
+    for (var value in widget.commuterRequestCovers) {
+      m[value.request.routeId!] = value.request.routeName!;
+    }
+    for (var value1 in m.keys.toList()) {
+      final route = await listApiDog.getRoute(value1);
+      routes.add(route!);
+    }
+    pp('${routes.length} routes filtered');
+    setState(() {});
   }
 
   ClusterManager<ClusterItem> _initClusterManager() {
@@ -58,6 +76,16 @@ class CommuterClusterMapState extends State<CommuterClusterMap>
 
   Future<Marker> Function(Cluster<CommuterRequestCover>) get _markerBuilder =>
       (cluster) async {
+        var size = cluster.isMultiple ? 125.0 : 75.0;
+        var text = cluster.isMultiple ? cluster.count.toString() : "1";
+        final ic = await getMarkerBitmap(
+          size.toInt(),
+          text: text,
+          color: 'pink',
+          borderColor: Colors.white,
+          fontWeight: FontWeight.normal,
+          fontSize: size / 3,
+        );
         return Marker(
           markerId: MarkerId(cluster.getId()),
           position: cluster.location,
@@ -69,44 +97,9 @@ class CommuterClusterMapState extends State<CommuterClusterMap>
                   '\n${E.leaf} route: ${p.request.routeName} ');
             }
           },
-          icon: await _getMarkerBitmap(cluster.isMultiple ? 125 : 75,
-              text: cluster.isMultiple ? cluster.count.toString() : null),
+          icon: ic,
         );
       };
-
-  Future<BitmapDescriptor> _getMarkerBitmap(int size, {String? text}) async {
-    if (kIsWeb) size = (size / 2).floor();
-
-    final PictureRecorder pictureRecorder = PictureRecorder();
-    final Canvas canvas = Canvas(pictureRecorder);
-    final Paint paint1 = Paint()..color = Colors.pink[700]!;
-    final Paint paint2 = Paint()..color = Colors.white;
-
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.0, paint1);
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.2, paint2);
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.8, paint1);
-
-    if (text != null) {
-      TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
-      painter.text = TextSpan(
-        text: text,
-        style: TextStyle(
-            fontSize: size / 3,
-            color: Colors.white,
-            fontWeight: FontWeight.normal),
-      );
-      painter.layout();
-      painter.paint(
-        canvas,
-        Offset(size / 2 - painter.width / 2, size / 2 - painter.height / 2),
-      );
-    }
-
-    final img = await pictureRecorder.endRecording().toImage(size, size);
-    final data = await img.toByteData(format: ImageByteFormat.png) as ByteData;
-
-    return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
-  }
 
   bool hybrid = true;
   @override
@@ -148,7 +141,8 @@ class CommuterClusterMapState extends State<CommuterClusterMap>
             preferredSize: const Size.fromHeight(32),
             child: Column(
               children: [
-                Row(mainAxisAlignment: MainAxisAlignment.center,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       'Start Time: ',

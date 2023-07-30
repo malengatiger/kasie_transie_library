@@ -10,7 +10,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/date_symbol_data_file.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:path_provider/path_provider.dart';
 import 'package:pretty_json/pretty_json.dart';
 import 'dart:ui' as ui;
@@ -39,8 +39,8 @@ Future<String> getFmtDate(String date, String locale) async {
   Future.delayed(const Duration(milliseconds: 10));
 
   DateTime now = DateTime.parse(date).toLocal();
-  final format = DateFormat("EEEE dd MMMM yyyy  HH:mm:ss", mLocale);
-  final formatUS = DateFormat("EEEE MMMM dd yyyy  HH:mm:ss", mLocale);
+  final format = intl.DateFormat("EEEE dd MMMM yyyy  HH:mm:ss", mLocale);
+  final formatUS = intl.DateFormat("EEEE MMMM dd yyyy  HH:mm:ss", mLocale);
   if (mLocale.contains('en_US')) {
     final String result = formatUS.format(now);
     return result;
@@ -53,7 +53,7 @@ Future<String> getFmtDate(String date, String locale) async {
 String getFormattedDate(String date) {
   try {
     DateTime d = DateTime.parse(date);
-    var format = DateFormat.yMMMd();
+    var format = intl.DateFormat.yMMMd();
     return format.format(d);
   } catch (e) {
     return date;
@@ -63,7 +63,7 @@ String getFormattedDate(String date) {
 String getFormattedDateLong(String date) {
   try {
     DateTime d = DateTime.parse(date);
-    var format = DateFormat("EEEE, dd MMMM yyyy HH:mm");
+    var format = intl.DateFormat("EEEE, dd MMMM yyyy HH:mm");
     return format.format(d);
   } catch (e) {
     return date;
@@ -270,11 +270,11 @@ double getFileSizeInMB({required int bytes, int decimals = 0}) {
 String getFormattedDateHour(String date) {
   try {
     DateTime d = DateTime.parse(date);
-    var format = DateFormat.Hms();
+    var format = intl.DateFormat.Hms();
     return format.format(d.toUtc());
   } catch (e) {
     DateTime d = DateTime.now();
-    var format = DateFormat.Hm();
+    var format = intl.DateFormat.Hm();
     return format.format(d);
   }
 }
@@ -318,6 +318,7 @@ String getFormattedTime({required int timeInSeconds}) {
   var duration = Duration(seconds: timeInSeconds);
   return _printDuration(duration);
 }
+
 String _printDuration(Duration duration) {
   String twoDigits(int n) => n.toString().padLeft(2, "0");
   String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
@@ -735,6 +736,65 @@ showSnackBar(
       ),
     ),
   ));
+}
+
+Future<BitmapDescriptor> getMarkerBitmap(int size,
+    {String? text,
+    required String color,
+    required Color borderColor,
+    required double fontSize,
+    required FontWeight fontWeight}) async {
+
+  pp('color coming in: $color ');
+  if (kIsWeb) size = (size / 2).floor();
+  var textColor = Colors.white;
+  switch (color) {
+    case 'white':
+      textColor = Colors.black;
+      break;
+    case 'yellow':
+      textColor = Colors.black;
+      break;
+    case 'amber':
+      textColor = Colors.black;
+      break;
+
+  }
+  pp('color object calculated: ${textColor.toString()} ');
+
+  final style = TextStyle(
+    fontSize: fontSize,
+    fontWeight: fontWeight,
+    color: textColor,
+  );
+  final mainColor = getColor(color);
+
+  final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
+  final Canvas canvas = Canvas(pictureRecorder);
+  final Paint paint1 = Paint()..color = mainColor;
+  final Paint paint2 = Paint()..color = borderColor;
+
+  canvas.drawCircle(Offset(size / 2, size / 2), size / 2.0, paint1);
+  canvas.drawCircle(Offset(size / 2, size / 2), size / 2.2, paint2);
+  canvas.drawCircle(Offset(size / 2, size / 2), size / 2.8, paint1);
+
+  if (text != null) {
+    TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
+    painter.text = TextSpan(
+      text: text,
+      style: style,
+    );
+    painter.layout();
+    painter.paint(
+      canvas,
+      Offset(size / 2 - painter.width / 2, size / 2 - painter.height / 2),
+    );
+  }
+
+  final img = await pictureRecorder.endRecording().toImage(size, size);
+  final data = await img.toByteData(format: ui.ImageByteFormat.png) as ByteData;
+
+  return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
 }
 
 Future<Uint8List> getBytesFromAsset(String path, int width) async {

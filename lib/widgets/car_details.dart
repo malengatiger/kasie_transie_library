@@ -7,9 +7,7 @@ import 'package:kasie_transie_library/data/schemas.dart' as lib;
 import 'package:kasie_transie_library/maps/location_response_map.dart';
 import 'package:kasie_transie_library/messaging/fcm_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/widgets/counts_widget.dart';
-import 'package:kasie_transie_library/widgets/number_widget.dart';
 import 'package:realm/realm.dart';
 
 import '../bloc/data_api_dog.dart';
@@ -54,9 +52,13 @@ class CarDetailsState extends State<CarDetails>
       heartbeats = 0,
       dispatches = 0,
       totalPassengers = 0;
+
   late StreamSubscription<lib.LocationResponse> respSub;
   late StreamSubscription<lib.DispatchRecord> dispatchStreamSub;
   late StreamSubscription<lib.AmbassadorPassengerCount> passengerStreamSub;
+  late StreamSubscription<lib.VehicleArrival> arrivalStreamSub;
+  late StreamSubscription<lib.VehicleDeparture> departureStreamSub;
+
   @override
   void dispose() {
     dispatchStreamSub.cancel();
@@ -77,6 +79,25 @@ class CarDetailsState extends State<CarDetails>
   lib.LocationResponse? locationResponse;
   String? routeName;
   void _listen() async {
+    arrivalStreamSub = fcmBloc.vehicleArrivalStream.listen((event) {
+      pp('\n\n\n$mm vehicleArrivalStream delivered: ${E.leaf2} ${event.vehicleReg} at ${DateTime.now().toIso8601String()}');
+      if (event.vehicleId == widget.vehicle.vehicleId) {
+      arrivals++;
+      if (mounted) {
+        setState(() {});
+      }
+      }
+    });
+    departureStreamSub = fcmBloc.vehicleDepartureStream.listen((event) {
+      pp('\n\n\n$mm vehicleDepartureStream delivered: ${E.leaf2} ${event.vehicleReg} at ${DateTime.now().toIso8601String()}');
+      if (event.vehicleId == widget.vehicle.vehicleId) {
+
+        departures++;
+      if (mounted) {
+        setState(() {});
+      }
+      }
+    });
     respSub = fcmBloc.locationResponseStream.listen((event) {
       pp('\n\n\n$mm locationResponseStream delivered: ${E.leaf2} ${event.vehicleReg} at ${DateTime.now().toIso8601String()}');
       locationResponse = event;
@@ -273,8 +294,11 @@ class CarDetailsState extends State<CarDetails>
   @override
   Widget build(BuildContext context) {
     final bWidth = MediaQuery.of(context).size.width;
+    final bHeight = MediaQuery.of(context).size.height;
+    final type = getThisDeviceType();
     return SizedBox(
       width: widget.width == null ? bWidth : widget.width!,
+      height: bHeight,
       child: Stack(
         children: [
           GestureDetector(
@@ -312,8 +336,8 @@ class CarDetailsState extends State<CarDetails>
                             style: myTextStyleMediumLargeWithColor(context,
                                 Theme.of(context).primaryColorLight, 16),
                           ),
-                    const SizedBox(
-                      height: 24,
+                     SizedBox(
+                      height: type == 'phone'?12:24,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -348,7 +372,7 @@ class CarDetailsState extends State<CarDetails>
                     ),
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.all(20.0),
+                        padding:  EdgeInsets.all(type == 'phone'?12:20.0),
                         child: counts.isEmpty
                             ? const SizedBox()
                             : CountsGridWidget(
@@ -365,7 +389,7 @@ class CarDetailsState extends State<CarDetails>
                               ),
                       ),
                     ),
-                    ElevatedButton(
+                    TextButton(
                         onPressed: () {
                           _sendLocationRequest();
                         },
@@ -375,10 +399,10 @@ class CarDetailsState extends State<CarDetails>
                               ? 'Request Current Location'
                               : requestLocation!),
                         )),
-                    const SizedBox(
-                      height: 32,
+                     SizedBox(
+                      height: type == 'phone'? 24:32,
                     ),
-                    ElevatedButton(
+                    TextButton(
                         onPressed: () {
                           _sendMediaRequest();
                         },
