@@ -738,6 +738,66 @@ showSnackBar(
   ));
 }
 
+
+Future<BitmapDescriptor> getVehicleMarkerBitmap(int size,
+    {String? text,
+      required String color,
+      required Color borderColor,
+      required double fontSize,
+      required FontWeight fontWeight}) async {
+
+  if (kIsWeb) size = (size / 2).floor();
+  var textColor = Colors.white;
+  switch (color) {
+    case 'white':
+      textColor = Colors.black;
+      break;
+    case 'yellow':
+      textColor = Colors.black;
+      break;
+    case 'amber':
+      textColor = Colors.black;
+      break;
+
+  }
+
+  final style = TextStyle(
+    fontSize: fontSize,
+    fontWeight: fontWeight,
+    color: textColor,
+  );
+  final mainColor = getColor(color);
+
+  final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
+  final Canvas canvas = Canvas(pictureRecorder);
+  final Paint paint1 = Paint()..color = mainColor;
+  final Paint paint2 = Paint()..color = borderColor;
+
+  canvas.drawCircle(Offset(size / 2, size / 2), size / 2.0, paint1);
+  canvas.drawCircle(Offset(size / 2, size / 2), size / 2.2, paint2);
+  canvas.drawCircle(Offset(size / 2, size / 2), size / 2.8, paint1);
+
+
+  if (text != null) {
+    TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
+    painter.text = TextSpan(
+      text: text,
+      style: style,
+    );
+    painter.layout();
+    painter.paint(
+      canvas,
+      Offset(size / 2 - painter.width / 2, size / 2 - painter.height / 2),
+    );
+  }
+
+  final img = await pictureRecorder.endRecording().toImage(size, size);
+  final data = await img.toByteData(format: ui.ImageByteFormat.png) as ByteData;
+
+  return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
+}
+
+
 Future<BitmapDescriptor> getMarkerBitmap(int size,
     {String? text,
     required String color,
@@ -794,6 +854,50 @@ Future<BitmapDescriptor> getMarkerBitmap(int size,
 
   return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
 }
+
+Future<BitmapDescriptor> getRectangularMarkerIcon( {String? text,
+  required String color,
+  required Color borderColor,
+  required Color textColor,
+  required double width,
+  required double height,
+  required double fontSize,
+  required FontWeight fontWeight}) async {
+   Size size = Size(width, height);
+
+  final recorder = ui.PictureRecorder();
+  final canvas = Canvas(recorder);
+
+  final Paint borderPaint = Paint()
+    ..color = borderColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 4;
+
+  final Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
+  final RRect roundedRect = RRect.fromRectAndRadius(rect, const Radius.circular(10));
+  canvas.drawRRect(roundedRect, borderPaint);
+
+  final Paint fillPaint = Paint()..color = Colors.black;
+  canvas.drawRRect(roundedRect.deflate(4), fillPaint);
+
+  final TextPainter textPainter = TextPainter(
+    text: TextSpan(
+      text: text,
+      style: TextStyle(color: textColor, fontSize: fontSize, fontWeight: fontWeight),
+    ),
+    textDirection: TextDirection.ltr,
+  );
+
+  textPainter.layout();
+  textPainter.paint(canvas, Offset((size.width - textPainter.width) / 2, (size.height - textPainter.height) / 2));
+
+  final picture = recorder.endRecording();
+  final image = await picture.toImage(size.width.toInt(), size.height.toInt());
+  final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+
+  return BitmapDescriptor.fromBytes(Uint8List.view(bytes!.buffer));
+}
+
 
 Future<Uint8List> getBytesFromAsset(String path, int width) async {
   ByteData data = await rootBundle.load(path);

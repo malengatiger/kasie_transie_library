@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:badges/badges.dart' as bd;
+import 'package:flutter/material.dart';
 import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/utils/functions.dart';
 
 import '../../messaging/fcm_bloc.dart';
 import '../../utils/emojis.dart';
@@ -13,9 +13,12 @@ class LiveOperations extends StatefulWidget {
       {super.key,
       required this.width,
       required this.height,
-      required this.elevation});
+      required this.elevation,
+      required this.restart});
 
   final double width, height, elevation;
+  final bool restart;
+
   @override
   State<LiveOperations> createState() => _LiveOperationsState();
 }
@@ -39,6 +42,17 @@ class _LiveOperationsState extends State<LiveOperations> {
   void initState() {
     super.initState();
     _listen();
+    _restart();
+  }
+
+  void _restart() {
+    if (widget.restart) {
+      dispatches.clear();
+      requests.clear();
+      heartbeats.clear();
+      arrivals.clear();
+      passengerCounts.clear();
+    }
   }
 
   void _listen() async {
@@ -121,7 +135,9 @@ class _LiveOperationsState extends State<LiveOperations> {
                 height: 80,
                 child: Row(
                   children: [
-                    const SizedBox(width: 20,),
+                    const SizedBox(
+                      width: 20,
+                    ),
                     bd.Badge(
                       badgeContent: Text('${dispatches.length}'),
                       badgeStyle: const bd.BadgeStyle(
@@ -130,7 +146,9 @@ class _LiveOperationsState extends State<LiveOperations> {
                         padding: EdgeInsets.all(16.0),
                       ),
                     ),
-                    const SizedBox(width: 28,),
+                    const SizedBox(
+                      width: 28,
+                    ),
                     Text(
                       'Dispatch Records',
                       style: myTextStyleSmall(context),
@@ -146,8 +164,9 @@ class _LiveOperationsState extends State<LiveOperations> {
                 height: 80,
                 child: Row(
                   children: [
-                    const SizedBox(width: 20,),
-
+                    const SizedBox(
+                      width: 20,
+                    ),
                     bd.Badge(
                       badgeContent: Text('${heartbeats.length}'),
                       badgeStyle: bd.BadgeStyle(
@@ -156,7 +175,9 @@ class _LiveOperationsState extends State<LiveOperations> {
                         padding: const EdgeInsets.all(16.0),
                       ),
                     ),
-                    const SizedBox(width: 28,),
+                    const SizedBox(
+                      width: 28,
+                    ),
                     Text(
                       'Vehicle Heartbeat',
                       style: myTextStyleSmall(context),
@@ -172,8 +193,9 @@ class _LiveOperationsState extends State<LiveOperations> {
                 height: 80,
                 child: Row(
                   children: [
-                    const SizedBox(width: 20,),
-
+                    const SizedBox(
+                      width: 20,
+                    ),
                     bd.Badge(
                       badgeContent: Text('${passengerCounts.length}'),
                       badgeStyle: bd.BadgeStyle(
@@ -182,7 +204,9 @@ class _LiveOperationsState extends State<LiveOperations> {
                         padding: const EdgeInsets.all(16.0),
                       ),
                     ),
-                    const SizedBox(width: 28,),
+                    const SizedBox(
+                      width: 28,
+                    ),
                     Text(
                       'Passenger Count Events',
                       style: myTextStyleSmall(context),
@@ -198,8 +222,9 @@ class _LiveOperationsState extends State<LiveOperations> {
                 height: 80,
                 child: Row(
                   children: [
-                    const SizedBox(width: 20,),
-
+                    const SizedBox(
+                      width: 20,
+                    ),
                     bd.Badge(
                       badgeContent: Text('${requests.length}'),
                       badgeStyle: bd.BadgeStyle(
@@ -208,7 +233,9 @@ class _LiveOperationsState extends State<LiveOperations> {
                         padding: const EdgeInsets.all(16.0),
                       ),
                     ),
-                    const SizedBox(width: 28,),
+                    const SizedBox(
+                      width: 28,
+                    ),
                     Text(
                       'Commuter Requests',
                       style: myTextStyleSmall(context),
@@ -224,8 +251,9 @@ class _LiveOperationsState extends State<LiveOperations> {
                 height: 80,
                 child: Row(
                   children: [
-                    const SizedBox(width: 20,),
-
+                    const SizedBox(
+                      width: 20,
+                    ),
                     bd.Badge(
                       badgeContent: Text('${arrivals.length}'),
                       badgeStyle: bd.BadgeStyle(
@@ -234,8 +262,9 @@ class _LiveOperationsState extends State<LiveOperations> {
                         padding: const EdgeInsets.all(16.0),
                       ),
                     ),
-                    const SizedBox(width: 28,),
-
+                    const SizedBox(
+                      width: 28,
+                    ),
                     Text(
                       'Vehicle Arrivals',
                       style: myTextStyleSmall(context),
