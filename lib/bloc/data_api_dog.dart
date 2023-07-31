@@ -42,7 +42,7 @@ class DataApiDog {
   };
 
   late String url;
-  static const timeOutInSeconds = 120;
+  static const timeOutInSeconds = 360;
 
   final http.Client client;
   final AppAuth appAuth;
@@ -557,6 +557,22 @@ class DataApiDog {
     return list;
   }
 //
+  Future<List<DispatchRecord>> generateRouteDispatchRecords(
+      String routeId, int numberOfCars, int intervalInSeconds) async {
+    final cmd = '${url}generateRouteDispatchRecords?routeId=$routeId'
+        '&numberOfCars=$numberOfCars&intervalInSeconds=$intervalInSeconds';
+    List res = await _sendHttpGET(cmd);
+    var list = <DispatchRecord>[];
+    for (var mJson in res) {
+      list.add(buildDispatchRecord(mJson));
+    }
+    listApiDog.realm.write(() {
+      listApiDog.realm.addAll<DispatchRecord>(list, update: true);
+    });
+    pp('$mm DispatchRecords: ${list.length}  cached ${E.leaf}${E.leaf}');
+    return list;
+  }
+//
   Future<List<CommuterRequest>> generateCommuterRequests(
       String associationId, int numberOfCommuters, int intervalInSeconds) async {
     final cmd = '${url}generateCommuterRequests?associationId=$associationId'
@@ -572,6 +588,24 @@ class DataApiDog {
     pp('$mm CommuterRequests: ${list.length}  cached ${E.leaf}${E.leaf}');
     return list;
   }
+
+  Future<List<CommuterRequest>> generateRouteCommuterRequests(
+      String routeId, int numberOfCommuters, int intervalInSeconds) async {
+    final cmd = '${url}generateRouteCommuterRequests?routeId=$routeId'
+        '&numberOfCommuters=$numberOfCommuters&intervalInSeconds=$intervalInSeconds';
+    List res = await _sendHttpGET(cmd);
+    var list = <CommuterRequest>[];
+    for (var mJson in res) {
+      list.add(buildCommuterRequest(mJson));
+    }
+    listApiDog.realm.write(() {
+      listApiDog.realm.addAll<CommuterRequest>(list, update: true);
+    });
+    pp('$mm CommuterRequests: ${list.length}  cached ${E.leaf}${E.leaf}');
+    return list;
+  }
+
+
   Future<List<AmbassadorPassengerCount>> generateAmbassadorPassengerCounts(
       String associationId, int numberOfCars, int intervalInSeconds) async {
     final cmd = '${url}generateAmbassadorPassengerCounts?associationId=$associationId'
@@ -587,6 +621,24 @@ class DataApiDog {
     pp('$mm AmbassadorPassengerCounts: ${list.length}  cached ${E.leaf}${E.leaf}');
     return list;
   }
+
+  Future<List<AmbassadorPassengerCount>> generateRoutePassengerCounts(
+      String routeId, int numberOfCars, int intervalInSeconds) async {
+    final cmd = '${url}generateRoutePassengerCounts?routeId=$routeId'
+        '&numberOfCars=$numberOfCars&intervalInSeconds=$intervalInSeconds';
+    List res = await _sendHttpGET(cmd);
+    var list = <AmbassadorPassengerCount>[];
+    for (var mJson in res) {
+      list.add(buildAmbassadorPassengerCount(mJson));
+    }
+    listApiDog.realm.write(() {
+      listApiDog.realm.addAll<AmbassadorPassengerCount>(list, update: true);
+    });
+    pp('$mm AmbassadorPassengerCounts: ${list.length}  cached ${E.leaf}${E.leaf}');
+    return list;
+  }
+
+
   Future<List<VehicleHeartbeat>> generateHeartbeats(
       String associationId, int numberOfCars, int intervalInSeconds) async {
     final cmd = '${url}generateHeartbeats?associationId=$associationId'
@@ -602,6 +654,23 @@ class DataApiDog {
     pp('$mm VehicleHeartbeats: ${list.length}  cached ${E.leaf}${E.leaf}');
     return list;
   }
+
+  Future<List<VehicleHeartbeat>> generateRouteHeartbeats(
+      String routeId, int numberOfCars, int intervalInSeconds) async {
+    final cmd = '${url}generateRouteHeartbeats?routeId=$routeId'
+        '&numberOfCars=$numberOfCars&intervalInSeconds=$intervalInSeconds';
+    List res = await _sendHttpGET(cmd);
+    var list = <VehicleHeartbeat>[];
+    for (var mJson in res) {
+      list.add(buildVehicleHeartbeat(mJson));
+    }
+    listApiDog.realm.write(() {
+      listApiDog.realm.addAll<VehicleHeartbeat>(list, update: true);
+    });
+    pp('$mm VehicleHeartbeats: ${list.length}  cached ${E.leaf}${E.leaf}');
+    return list;
+  }
+
   Future _callPost(String mUrl, Map? bag) async {
     String? mBag;
     if (bag != null) {
@@ -694,7 +763,7 @@ class DataApiDog {
           translationKey: 'networkProblem',
           errorType: KasieException.timeoutException);
       errorHandler.handleError(exception: gex);
-      //throw gex;
+      throw gex;
     }
     headers['Authorization'] = 'Bearer $token';
     try {
@@ -746,7 +815,11 @@ class DataApiDog {
           url: mUrl,
           translationKey: 'serverProblem',
           errorType: KasieException.socketException);
-      errorHandler.handleError(exception: gex);
+      try {
+        errorHandler.handleError(exception: gex);
+      } catch (e) {
+        //ignore
+      }
       throw gex;
     } on HttpException {
       pp("$mm HttpException occurred 😱");
@@ -755,7 +828,11 @@ class DataApiDog {
           url: mUrl,
           translationKey: 'serverProblem',
           errorType: KasieException.httpException);
-      errorHandler.handleError(exception: gex);
+      try {
+        errorHandler.handleError(exception: gex);
+      } catch (e) {
+        //ignore
+      }
       throw gex;
     } on FormatException {
       pp("$mm Bad response format 👎");
@@ -764,7 +841,11 @@ class DataApiDog {
           url: mUrl,
           translationKey: 'serverProblem',
           errorType: KasieException.formatException);
-      errorHandler.handleError(exception: gex);
+      try {
+        errorHandler.handleError(exception: gex);
+      } catch (e) {
+        //ignore
+      }
       throw gex;
     } on TimeoutException {
       pp("$mm No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
@@ -773,7 +854,11 @@ class DataApiDog {
           url: mUrl,
           translationKey: 'networkProblem',
           errorType: KasieException.timeoutException);
-      errorHandler.handleError(exception: gex);
+      try {
+        errorHandler.handleError(exception: gex);
+      } catch (e) {
+        //ignore
+      }
       throw gex;
     }
   }

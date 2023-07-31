@@ -45,12 +45,9 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
   late GoogleMapController googleMapController;
   bool busy = false;
   bool isHybrid = false;
-  lib.User? _user;
-  geo.Position? _currentPosition;
   final Set<Marker> _markers = HashSet();
   final Set<Circle> _circles = HashSet();
   final Set<Polyline> _polyLines = {};
-  BitmapDescriptor? _dotMarker;
 
   // List<BitmapDescriptor> _numberMarkers = [];
   final List<lib.RoutePoint> rpList = [];
@@ -71,8 +68,6 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
   @override
   void initState() {
     super.initState();
-    _makeDotMarker();
-    _getUser();
   }
 
   Future _setTexts() async {
@@ -93,9 +88,8 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
     });
     try {
       await _setTexts();
-      await _buildLandmarkIcons();
       await getRoutePoints(refresh);
-      await getRouteLandmarks();
+      await getRouteLandmarks(refresh);
     } catch (e) {
       pp(e);
     }
@@ -104,18 +98,21 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
     });
   }
 
-  Future getRouteLandmarks() async {
+  Future getRouteLandmarks(bool refresh) async {
     routeLandmarks =
-        await listApiDog.getRouteLandmarks(widget.route.routeId!, false);
+        await listApiDog.getRouteLandmarks(widget.route.routeId!, refresh);
     pp('\n\n$mm _getRouteLandmarks ...  ${E.appleRed} route: ${widget.route.name}; found: ${routeLandmarks.length} ');
     routeLandmarks.sort((a, b) => a.created!.compareTo(b.created!));
     landmarkIndex = 0;
     for (var landmark in routeLandmarks) {
       final latLng = LatLng(landmark.position!.coordinates.last,
           landmark.position!.coordinates.first);
+      final icon = await getMarkerBitmap(72,
+          text: '${landmarkIndex+1}',
+          color: widget.route.color!, borderColor: Colors.black, fontSize: 28, fontWeight: FontWeight.w900);
       _markers.add(Marker(
           markerId: MarkerId('${landmark.landmarkId}'),
-          icon: numberMarkers.elementAt(landmarkIndex),
+          icon: icon,
           onTap: () {
             pp('$mm .............. marker tapped: $routePointIndex');
             //_deleteRoutePoint(routePoint);
@@ -147,22 +144,12 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
     controller.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
   }
 
-  Future _buildLandmarkIcons() async {
-    for (var i = 0; i < 60; i++) {
-      var intList =
-          await getBytesFromAsset("assets/numbers/number_${i + 1}.png", 84);
-      numberMarkers.add(BitmapDescriptor.fromBytes(intList));
-    }
-    pp('$mm have built ${numberMarkers.length} markers for landmarks');
-  }
-
   Future getRoutePoints(bool refresh) async {
     pp('$mm getRoutePoints ... refresh $refresh');
     setState(() {
       busy = true;
     });
     try {
-      _user = await prefs.getUser();
       color = getColor(widget.route.color!);
       pp('$mm getting existing RoutePoints ....... refresh: $refresh');
       setState(() {
@@ -218,16 +205,6 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
     super.dispose();
   }
 
-  Future _getUser() async {
-    _user = await prefs.getUser();
-    _makeDotMarker();
-  }
-
-  Future _makeDotMarker() async {
-    var intList = await getBytesFromAsset("assets/markers/dot2.png", 64);
-    _dotMarker = BitmapDescriptor.fromBytes(intList);
-    pp('$mm custom marker 💜 assets/markers/dot2.png created');
-  }
 
   Future<void> _zoomToStartCity() async {
     if (widget.route.routeStartEnd != null) {
@@ -503,7 +480,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
               _mapController.complete(controller);
               googleMapController = controller;
               _zoomToStartCity();
-              _controlReads(false);
+              _controlReads(true);
             },
           ),
           Positioned(
@@ -631,14 +608,14 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
               )),
           busy
               ? const Positioned(
-                  left: 100,
-                  top: 160,
-                  child: SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 4,
-                      backgroundColor: Colors.purple,
+                  child: Center(
+                    child: SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 4,
+                        backgroundColor: Colors.purple,
+                      ),
                     ),
                   ))
               : const SizedBox(),

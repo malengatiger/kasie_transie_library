@@ -2623,6 +2623,8 @@ class AppError extends _AppError
     String? iosSystemName,
     String? userUrl,
     String? uploadedDate,
+    String? vehicleId,
+    String? vehicleReg,
   }) {
     RealmObjectBase.set(this, 'id', id);
     RealmObjectBase.set(this, 'appErrorId', appErrorId);
@@ -2643,6 +2645,8 @@ class AppError extends _AppError
     RealmObjectBase.set(this, 'iosSystemName', iosSystemName);
     RealmObjectBase.set(this, 'userUrl', userUrl);
     RealmObjectBase.set(this, 'uploadedDate', uploadedDate);
+    RealmObjectBase.set(this, 'vehicleId', vehicleId);
+    RealmObjectBase.set(this, 'vehicleReg', vehicleReg);
   }
 
   AppError._();
@@ -2766,6 +2770,19 @@ class AppError extends _AppError
       RealmObjectBase.set(this, 'uploadedDate', value);
 
   @override
+  String? get vehicleId =>
+      RealmObjectBase.get<String>(this, 'vehicleId') as String?;
+  @override
+  set vehicleId(String? value) => RealmObjectBase.set(this, 'vehicleId', value);
+
+  @override
+  String? get vehicleReg =>
+      RealmObjectBase.get<String>(this, 'vehicleReg') as String?;
+  @override
+  set vehicleReg(String? value) =>
+      RealmObjectBase.set(this, 'vehicleReg', value);
+
+  @override
   Stream<RealmObjectChanges<AppError>> get changes =>
       RealmObjectBase.getChanges<AppError>(this);
 
@@ -2799,6 +2816,8 @@ class AppError extends _AppError
       SchemaProperty('iosSystemName', RealmPropertyType.string, optional: true),
       SchemaProperty('userUrl', RealmPropertyType.string, optional: true),
       SchemaProperty('uploadedDate', RealmPropertyType.string, optional: true),
+      SchemaProperty('vehicleId', RealmPropertyType.string, optional: true),
+      SchemaProperty('vehicleReg', RealmPropertyType.string, optional: true),
     ]);
   }
 }

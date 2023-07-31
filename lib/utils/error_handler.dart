@@ -20,13 +20,12 @@ class ErrorHandler {
   final DeviceLocationBloc locationBloc;
   final Prefs prefs;
 
-  ErrorHandler(
-    this.locationBloc,
-    this.prefs,
-  );
+  ErrorHandler(this.locationBloc,
+      this.prefs,);
 
   Future handleError({required KasieException exception}) async {
-    pp('$mm handleError, will save the error in cache until it can be downloaded: ... $exception');
+    pp(
+        '$mm handleError, will save the error in cache until it can be downloaded: ... $exception');
 
     var deviceData = <String, dynamic>{};
     final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
@@ -35,11 +34,16 @@ class ErrorHandler {
     Position? errorPosition;
     try {
       final loc = await locationBloc.getLocation();
+      pp('$mm ... location ok? $loc');
       errorPosition = Position(
           coordinates: [loc.longitude, loc.latitude!],
           type: 'Point',
           latitude: loc.latitude,
           longitude: loc.latitude);
+    } catch (e) {
+      pp(e);
+    }
+    try {
       if (kIsWeb) {
         deviceData = _readWebBrowserInfo(await deviceInfoPlugin.webBrowserInfo);
       } else {
@@ -56,31 +60,34 @@ class ErrorHandler {
           deviceData = _readMacOsDeviceInfo(await deviceInfoPlugin.macOsInfo);
         }
       }
-      pp('$mm setting up AppError: ${exception.toString()}}');
+      pp('$mm ...... setting up AppError: ${exception.toString()}}');
       final user = await prefs.getUser();
-      if (user != null) {
-        final ae = AppError(ObjectId(),
-          appErrorId: Uuid.v4().toString(),
-          errorMessage: exception.toString(),
-          model: deviceData['model'],
-          created: DateTime.now().toUtc().toIso8601String(),
-          userId: user!.userId,
-          userName: user.name,
-          errorPosition: errorPosition,
-          versionCodeName: deviceData['versionCodeName'],
-          manufacturer: deviceData['manufacturer'],
-          brand: deviceData['brand'],
-          associationId: user.associationId,
-          uploadedDate: null,
-          baseOS: deviceData['baseOS'],
-          deviceType: deviceType,
-          userUrl: user.thumbnailUrl,
-          iosSystemName: deviceData['systemName'],
-          iosName: deviceData['iosName'],
-        );
+      final car = await prefs.getCar();
+      final ae = AppError(ObjectId(),
+        appErrorId: Uuid.v4().toString(),
+        errorMessage: exception.toString(),
+        model: deviceData['model'],
+        created: DateTime.now().toUtc().toIso8601String(),
+        userId: user == null ? null : user!.userId,
+        userName: user?.name,
+        errorPosition: errorPosition,
+        versionCodeName: deviceData['versionCodeName'],
+        manufacturer: deviceData['manufacturer'],
+        brand: deviceData['brand'],
+        associationId: user?.associationId,
+        uploadedDate: null,
+        baseOS: deviceData['baseOS'],
+        deviceType: deviceType,
+        userUrl: user?.thumbnailUrl,
+        vehicleId: car?.vehicleId,
+        vehicleReg: car?.vehicleReg,
+        iosSystemName: deviceData['systemName'],
+        iosName: deviceData['iosName'],
+      );
 
-        await cacheManager.saveAppError(ae);
-      }
+      await cacheManager.saveAppError(ae);
+      final m = await cacheManager.getAppErrors();
+      pp('$mm AppError saved in cache; cache has ${m.length} app errors');
     } on PlatformException {
       deviceData = <String, dynamic>{
         'Error:': 'Failed to get platform version.'
@@ -168,7 +175,7 @@ class ErrorHandler {
       'isPhysicalDevice': build.isPhysicalDevice,
       'systemFeatures': build.systemFeatures,
       'displaySizeInches':
-          ((build.displayMetrics.sizeInches * 10).roundToDouble() / 10),
+      ((build.displayMetrics.sizeInches * 10).roundToDouble() / 10),
       'displayWidthPixels': build.displayMetrics.widthPx,
       'displayWidthInches': build.displayMetrics.widthInches,
       'displayHeightPixels': build.displayMetrics.heightPx,

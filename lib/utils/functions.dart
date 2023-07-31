@@ -745,7 +745,6 @@ Future<BitmapDescriptor> getMarkerBitmap(int size,
     required double fontSize,
     required FontWeight fontWeight}) async {
 
-  pp('color coming in: $color ');
   if (kIsWeb) size = (size / 2).floor();
   var textColor = Colors.white;
   switch (color) {
@@ -760,7 +759,6 @@ Future<BitmapDescriptor> getMarkerBitmap(int size,
       break;
 
   }
-  pp('color object calculated: ${textColor.toString()} ');
 
   final style = TextStyle(
     fontSize: fontSize,

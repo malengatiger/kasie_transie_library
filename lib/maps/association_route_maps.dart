@@ -81,15 +81,19 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
       _user = await prefs.getUser();
       if (widget.latitude != null && widget.longitude != null) {
         pp('\n\n$mm .......... find Association Routes by location ...');
-        routes = await localFinder.findNearestRoutes(
+        final mRoutes = await localFinder.findNearestRoutes(
             latitude: widget.latitude!,
             longitude: widget.longitude!,
             radiusInMetres:
                 widget.radiusInMetres == null ? 2000 : widget.radiusInMetres!);
+        await _filter(mRoutes);
+
       } else {
         pp('\n\n$mm .......... get all Association Routes ...');
-        routes = await listApiDog
+        final mRoutes = await listApiDog
             .getRoutes(AssociationParameter(_user!.associationId!, false));
+        await _filter(mRoutes);
+
       }
     } catch (e) {
       pp(e);
@@ -105,9 +109,19 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     // _showMultiRouteDialog();
   }
 
+  Future<void> _filter(List<lib.Route> mRoutes) async {
+    for (var route in mRoutes) {
+      final marks = await listApiDog.getRouteLandmarks(route.routeId!, false);
+      if (marks.isNotEmpty) {
+        routes.add(route);
+      }
+    }
+  }
+
   var routesPicked = <lib.Route>[];
 
   void _showMultiRouteDialog() async {
+    final type = getThisDeviceType();
     showDialog(
         context: context,
         builder: (ctx) {
@@ -121,7 +135,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
               });
               Navigator.of(context).pop();
               _buildHashMap();
-            }),
+            }, routes: routes,),
           );
         });
   }

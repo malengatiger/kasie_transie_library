@@ -10,9 +10,10 @@ import 'package:badges/badges.dart' as bd;
 import '../../l10n/translation_handler.dart';
 
 class MultiRouteChooser extends StatefulWidget {
-  const MultiRouteChooser({Key? key, required this.onRoutesPicked})
+  const MultiRouteChooser({Key? key, required this.onRoutesPicked, required this.routes})
       : super(key: key);
 
+  final List<lib.Route> routes;
   final Function(List<lib.Route>) onRoutesPicked;
 
   @override
@@ -22,20 +23,28 @@ class MultiRouteChooser extends StatefulWidget {
 class MultiRouteChooserState extends State<MultiRouteChooser> {
   static const mm = '🔷🔷🔷 MultiRouteChooser';
 
-  List<lib.Route> routes = [];
   var list = <lib.Route>[];
   String selectRoutes = 'Select Routes';
-
-  bool busy = false;
 
   @override
   void initState() {
     super.initState();
     _setTexts();
-    _getRoutes();
+    _setCheckList();
   }
+  void _control() async {
+    await _setTexts();
+    _setCheckList();
+    setState(() {
 
-  void _setTexts() async {
+    });
+  }
+  void _setCheckList() {
+    widget.routes.forEach((element) {
+      checkList.add(false);
+    });
+  }
+  Future _setTexts() async {
     final c = await prefs.getColorAndLocale();
     final loc = c.locale;
     selectRoutes = await translator.translate('selectRoutes', loc);
@@ -43,25 +52,6 @@ class MultiRouteChooserState extends State<MultiRouteChooser> {
     showRoutes = await translator.translate('show Routes', loc);
     setState(() {
 
-    });
-  }
-
-  void _getRoutes() async {
-    final user = await prefs.getUser();
-    setState(() {
-      busy = true;
-    });
-    try {
-      routes = await listApiDog
-          .getRoutes(AssociationParameter(user!.associationId!, false));
-      for (var r in routes) {
-        checkList.add(false);
-      }
-    } catch (e) {
-      pp(e);
-    }
-    setState(() {
-      busy = false;
     });
   }
 
@@ -95,7 +85,7 @@ class MultiRouteChooserState extends State<MultiRouteChooser> {
         shape: getRoundedBorder(radius: 16),
         elevation: 8,
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding:  EdgeInsets.all(type == 'phone'? 8.0:28),
           child: Column(
             children: [
               Row(mainAxisAlignment: MainAxisAlignment.center,
@@ -133,46 +123,49 @@ class MultiRouteChooserState extends State<MultiRouteChooser> {
               ),
               Expanded(
                 child: bd.Badge(
-                  badgeContent: Text('${routes.length}'),
+                  badgeContent: Text('${widget.routes.length}'),
                   position: bd.BadgePosition.topEnd(top: 8, end: -8),
-                  child: ListView.builder(
-                      itemCount: routes.length,
-                      itemBuilder: (ctx, index) {
-                        final route = routes.elementAt(index);
-                        final picked = checkList.elementAt(index);
-                        return Card(
-                          shape: getRoundedBorder(radius: 16),
-                          elevation: 8,
-                          child: Row(
-                            children: [
-                              Checkbox(
-                                  value: picked,
-                                  onChanged: (checked) {
-                                    pp('$mm ... Checkbox: checked: $checked ...');
-                                    if (checked != null) {
-                                      checkList[index] = checked;
-                                      if (checked) {
-                                        _addRoute(route);
-                                      } else {
-                                        _removeRoute(route);
+                  child: Padding(
+                    padding: EdgeInsets.all(type == 'phone'? 8.0:48),
+                    child: ListView.builder(
+                        itemCount: widget.routes.length,
+                        itemBuilder: (ctx, index) {
+                          final route = widget.routes.elementAt(index);
+                          final picked = checkList.elementAt(index);
+                          return Card(
+                            shape: getRoundedBorder(radius: 16),
+                            elevation: 8,
+                            child: Row(
+                              children: [
+                                Checkbox(
+                                    value: picked,
+                                    onChanged: (checked) {
+                                      pp('$mm ... Checkbox: checked: $checked ...');
+                                      if (checked != null) {
+                                        checkList[index] = checked;
+                                        if (checked) {
+                                          _addRoute(route);
+                                        } else {
+                                          _removeRoute(route);
+                                        }
                                       }
-                                    }
-                                    setState(() {});
+                                      setState(() {});
 
-                                  }),
-                              const SizedBox(
-                                width: 2,
-                              ),
-                              Flexible(
-                                child: Text(
-                                  '${route.name}',
-                                  style: myTextStyleSmall(context),
+                                    }),
+                                const SizedBox(
+                                  width: 2,
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
+                                Flexible(
+                                  child: Text(
+                                    '${route.name}',
+                                    style: myTextStyleSmall(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                  ),
                 ),
               ),
             ],

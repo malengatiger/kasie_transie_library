@@ -161,7 +161,7 @@ class RouteMapState extends State<RouteMap> {
       _user = await prefs.getUser();
       pp('$mm getting existing RoutePoints .......');
       existingRoutePoints =
-      await routesIsolate.getRoutePoints(route.routeId!, refresh);
+          await routesIsolate.getRoutePoints(route.routeId!, refresh);
     } catch (e) {
       pp(e);
     }
@@ -235,15 +235,11 @@ class RouteMapState extends State<RouteMap> {
   }
 
   Future<void> _zoomToCurrentLocation(double latitude, double longitude) async {
-
-      final latLng = LatLng(
-          latitude,
-          longitude);
-      var cameraPos = CameraPosition(target: latLng, zoom: defaultZoom);
-      final GoogleMapController controller = await _mapController.future;
-      controller.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
-      setState(() {});
-
+    final latLng = LatLng(latitude, longitude);
+    var cameraPos = CameraPosition(target: latLng, zoom: defaultZoom);
+    final GoogleMapController controller = await _mapController.future;
+    controller.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
+    setState(() {});
   }
 
   int index = 0;
@@ -395,12 +391,16 @@ class RouteDropDown extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = <DropdownMenuItem<lib.Route>>[];
     for (var r in routes) {
-      items.add(DropdownMenuItem<lib.Route>(
+      items.add(
+        DropdownMenuItem<lib.Route>(
           value: r,
           child: Text(
-            r.name!,
+            r.name!, overflow: TextOverflow.clip,
+            softWrap: false,
             style: myTextStyleSmall(context),
-          )));
+          ),
+        ),
+      );
     }
     return DropdownButton(
         hint: Text(

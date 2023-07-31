@@ -125,37 +125,39 @@ class RouteMapViewerState extends State<RouteMapViewer> {
             child: Column(
               children: [
                 const SizedBox(
-                  height: 28,
+                  height: 16,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(changeColor,
-                      style: myTextStyleLarge(context),
+                      style: myTextStyleMediumLargeWithColor(context, Theme.of(context).primaryColorLight, 24),
                     ),
                     const SizedBox(
                       width: 28,
                     ),
                     Container(
-                      height: 48,
-                      width: 48,
+                      height: 32,
+                      width: 32,
                       color: newColor,
                     ),
                   ],
                 ),
                 const SizedBox(
-                  height: 16,
+                  height: 8,
                 ),
-                ColorPad(
-                  onColorPicked: (mColor, string) {
-                    pp('$mm ....... 🍎🍎🍎🍎🍎🍎 onColorPicked picked ... $stringColor');
-                    setState(() {
-                      newColor = mColor;
-                      stringColor = string;
-                    });
-                    Navigator.pop(context);
-                    _updateRouteColor();
-                  },
+                SizedBox(height: 220,
+                  child: ColorPad(
+                    onColorPicked: (mColor, string) {
+                      pp('$mm ....... 🍎🍎🍎🍎🍎🍎 onColorPicked picked ... $stringColor');
+                      setState(() {
+                        newColor = mColor;
+                        stringColor = string;
+                      });
+                      Navigator.pop(context);
+                      _updateRouteColor();
+                    },
+                  ),
                 ),
               ],
             ),
@@ -173,12 +175,13 @@ class RouteMapViewerState extends State<RouteMapViewer> {
     pp('$mm _getRouteLandmarks ...  route: ${widget.routeId}; found: ${routeLandmarks.length} ');
 
     landmarkIndex = 0;
-    await _buildLandmarkIcons(routeLandmarks.length);
     for (var landmark in routeLandmarks) {
       final latLng = LatLng(landmark.position!.coordinates.last,
           landmark.position!.coordinates.first);
+
       final icon = await getMarkerBitmap(72, text: '${landmarkIndex+1}',
           color: route!.color!, borderColor: Colors.black, fontSize: 28, fontWeight: FontWeight.w900);
+
       _markers.add(Marker(
           markerId: MarkerId('${landmark.landmarkId}'),
           icon: icon,
@@ -281,12 +284,6 @@ class RouteMapViewerState extends State<RouteMapViewer> {
 
   Future _getUser() async {
     _user = await prefs.getUser();
-    _makeDotMarker();
-  }
-
-  Future _makeDotMarker() async {
-    var intList = await getBytesFromAsset("assets/markers/dot2.png", 40);
-    pp('$mm custom marker 💜 assets/markers/dot2.png created');
   }
 
   Future _getCurrentLocation() async {
@@ -317,15 +314,6 @@ class RouteMapViewerState extends State<RouteMapViewer> {
   }
 
   int index = 0;
-  final numberMarkers = <BitmapDescriptor>[];
-  Future _buildLandmarkIcons(int cnt) async {
-    for (var i = 0; i < cnt; i++) {
-      var intList =
-          await getBytesFromAsset("assets/numbers/number_${i + 1}.png", 84);
-      numberMarkers.add(BitmapDescriptor.fromBytes(intList));
-    }
-    pp('$mm have built ${numberMarkers.length} markers for landmarks');
-  }
 
   _clearMap() {
     _polyLines.clear();

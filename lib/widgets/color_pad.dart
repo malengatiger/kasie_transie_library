@@ -27,15 +27,15 @@ class ColorPad extends StatelessWidget {
           shape: getDefaultRoundedBorder(),
           elevation: 6,
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(12.0),
             child: SizedBox(
-              height: 320,
+              height: 360,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 48.0),
+                padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 24.0),
                 child: GridView.builder(
                     shrinkWrap: true,
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisSpacing: 1.8, crossAxisCount: 6, mainAxisSpacing: 1.8),
+                        crossAxisSpacing: 1, crossAxisCount: 12, mainAxisSpacing: 1),
                     itemCount: colors.length,
                     itemBuilder: (context, index) {
                       var color = colors.elementAt(index);

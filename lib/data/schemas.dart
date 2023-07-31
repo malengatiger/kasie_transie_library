@@ -683,6 +683,8 @@ class _AppError {
   String? iosSystemName;
   String? userUrl;
   String? uploadedDate;
+  String? vehicleId;
+  String? vehicleReg;
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {
@@ -695,6 +697,9 @@ class _AppError {
       'deviceType': deviceType,
       'baseOS': baseOS,
       'userId': userId,
+      'vehicleId': vehicleId,
+      'vehicleReg': vehicleReg,
+
       'associationId': associationId,
       'brand': brand,
       'uploadedDate': uploadedDate,

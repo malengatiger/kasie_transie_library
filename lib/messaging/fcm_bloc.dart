@@ -408,7 +408,6 @@ class FCMBloc {
     pp("$newMM processFCMMessage: $red processing message received in "
         "foreground: ${E.leaf}${E.leaf} type: $type ...");
     final map = message.data;
-    myPrettyJsonPrint(map);
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     myName = packageInfo.appName;
     if (!newMM.contains(myName!)) {
@@ -604,7 +603,7 @@ class FCMBloc {
       _passengerCountStreamController.sink.add(passengerCount);
       pp('$mm _processPassengerCount: _passengerCountStreamController '
           'has a new AmbassadorPassengerCount: ');
-      myPrettyJsonPrint(passengerCount.toJson());
+      // myPrettyJsonPrint(passengerCount.toJson());
       return;
     }
     if (user!.userType == 'ASSOCIATION_OFFICIAL' || demoFlag) {
@@ -677,7 +676,7 @@ class FCMBloc {
         pp('$newMM sending location response! ${E.blueDot}');
         final result = await dataApiDog.addLocationResponse(resp);
         pp('$newMM location response successfully sent! ${E.leaf} ');
-        myPrettyJsonPrint(result.toJson());
+        // myPrettyJsonPrint(result.toJson());
       } catch (e) {
         pp(e);
       }

@@ -10,8 +10,12 @@ import '../../utils/emojis.dart';
 
 class LiveOperations extends StatefulWidget {
   const LiveOperations(
-      {super.key});
+      {super.key,
+      required this.width,
+      required this.height,
+      required this.elevation});
 
+  final double width, height, elevation;
   @override
   State<LiveOperations> createState() => _LiveOperationsState();
 }
@@ -31,13 +35,12 @@ class _LiveOperationsState extends State<LiveOperations> {
   late StreamSubscription<lib.VehicleHeartbeat> heartbeatSub;
   late StreamSubscription<lib.VehicleArrival> arrivalsSub;
 
-
   @override
   void initState() {
     super.initState();
     _listen();
-
   }
+
   void _listen() async {
     pp('\n\n$mm ... listening to FCM topics .......................... ');
 
@@ -100,129 +103,148 @@ class _LiveOperationsState extends State<LiveOperations> {
     heartbeatSub.cancel();
     arrivalsSub.cancel();
     super.dispose();
-
-
   }
+
   @override
   Widget build(BuildContext context) {
-    var width = 600.0, height = 800.0;
-    final type = getThisDeviceType();
-    if (type == 'phone') {
-      width = 400;
-      height = 600;
-    }
     return SizedBox(
-      height: height,
-      width: width,
-      child: Card(
-        shape: getRoundedBorder(radius: 16),
-        elevation: 8,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ListView(
-            children: [
-              Card(
-                shape: getRoundedBorder(radius: 12),
-                elevation: 12,
-                child: SizedBox(
-                  height: 60,
-                  child: Column(
-                    children: [
-                      bd.Badge(
-                        badgeContent: Text('${dispatches.length}'),
-                        badgeStyle: const bd.BadgeStyle(
-                          badgeColor: Colors.deepOrange,
-                          elevation: 12,
-                          padding: EdgeInsets.all(12.0),
-                        ),
+      height: widget.height,
+      width: widget.width,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ListView(
+          children: [
+            Card(
+              shape: getRoundedBorder(radius: 12),
+              elevation: 12,
+              child: SizedBox(
+                height: 80,
+                child: Row(
+                  children: [
+                    const SizedBox(width: 20,),
+                    bd.Badge(
+                      badgeContent: Text('${dispatches.length}'),
+                      badgeStyle: const bd.BadgeStyle(
+                        badgeColor: Colors.deepOrange,
+                        elevation: 12,
+                        padding: EdgeInsets.all(16.0),
                       ),
-                      const Text('Dispatch Records'),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 28,),
+                    Text(
+                      'Dispatch Records',
+                      style: myTextStyleSmall(context),
+                    ),
+                  ],
                 ),
               ),
-              Card(
-                shape: getRoundedBorder(radius: 12),
-                elevation: 12,
-                child: SizedBox(
-                  height: 60,
-                  child: Column(
-                    children: [
-                      bd.Badge(
-                        badgeContent: Text('${heartbeats.length}'),
-                        badgeStyle:  bd.BadgeStyle(
-                          badgeColor: Colors.teal.shade700,
-                          elevation: 12,
-                          padding: const EdgeInsets.all(12.0),
-                        ),
+            ),
+            Card(
+              shape: getRoundedBorder(radius: 12),
+              elevation: 12,
+              child: SizedBox(
+                height: 80,
+                child: Row(
+                  children: [
+                    const SizedBox(width: 20,),
+
+                    bd.Badge(
+                      badgeContent: Text('${heartbeats.length}'),
+                      badgeStyle: bd.BadgeStyle(
+                        badgeColor: Colors.teal.shade700,
+                        elevation: 12,
+                        padding: const EdgeInsets.all(16.0),
                       ),
-                      const Text('Vehicle Heartbeat'),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 28,),
+                    Text(
+                      'Vehicle Heartbeat',
+                      style: myTextStyleSmall(context),
+                    ),
+                  ],
                 ),
               ),
-              Card(
-                shape: getRoundedBorder(radius: 12),
-                elevation: 12,
-                child: SizedBox(
-                  height: 60,
-                  child: Column(
-                    children: [
-                      bd.Badge(
-                        badgeContent: Text('${passengerCounts.length}'),
-                        badgeStyle:  bd.BadgeStyle(
-                          badgeColor: Colors.pink.shade700,
-                          elevation: 12,
-                          padding: const EdgeInsets.all(12.0),
-                        ),
+            ),
+            Card(
+              shape: getRoundedBorder(radius: 12),
+              elevation: 12,
+              child: SizedBox(
+                height: 80,
+                child: Row(
+                  children: [
+                    const SizedBox(width: 20,),
+
+                    bd.Badge(
+                      badgeContent: Text('${passengerCounts.length}'),
+                      badgeStyle: bd.BadgeStyle(
+                        badgeColor: Colors.pink.shade700,
+                        elevation: 12,
+                        padding: const EdgeInsets.all(16.0),
                       ),
-                      const Text('Passenger Count Events'),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 28,),
+                    Text(
+                      'Passenger Count Events',
+                      style: myTextStyleSmall(context),
+                    ),
+                  ],
                 ),
               ),
-              Card(
-                shape: getRoundedBorder(radius: 12),
-                elevation: 12,
-                child: SizedBox(
-                  height: 60,
-                  child: Column(
-                    children: [
-                      bd.Badge(
-                        badgeContent: Text('${requests.length}'),
-                        badgeStyle:  bd.BadgeStyle(
-                          badgeColor: Colors.blue.shade700,
-                          elevation: 12,
-                          padding: const EdgeInsets.all(12.0),
-                        ),
+            ),
+            Card(
+              shape: getRoundedBorder(radius: 12),
+              elevation: 12,
+              child: SizedBox(
+                height: 80,
+                child: Row(
+                  children: [
+                    const SizedBox(width: 20,),
+
+                    bd.Badge(
+                      badgeContent: Text('${requests.length}'),
+                      badgeStyle: bd.BadgeStyle(
+                        badgeColor: Colors.blue.shade700,
+                        elevation: 12,
+                        padding: const EdgeInsets.all(16.0),
                       ),
-                      const Text('Commuter Requests'),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 28,),
+                    Text(
+                      'Commuter Requests',
+                      style: myTextStyleSmall(context),
+                    ),
+                  ],
                 ),
               ),
-              Card(
-                shape: getRoundedBorder(radius: 12),
-                elevation: 12,
-                child: SizedBox(
-                  height: 60,
-                  child: Column(
-                    children: [
-                      bd.Badge(
-                        badgeContent: Text('${arrivals.length}'),
-                        badgeStyle:  bd.BadgeStyle(
-                          badgeColor: Colors.amber.shade900,
-                          elevation: 12,
-                          padding: const EdgeInsets.all(12.0),
-                        ),
+            ),
+            Card(
+              shape: getRoundedBorder(radius: 12),
+              elevation: 12,
+              child: SizedBox(
+                height: 80,
+                child: Row(
+                  children: [
+                    const SizedBox(width: 20,),
+
+                    bd.Badge(
+                      badgeContent: Text('${arrivals.length}'),
+                      badgeStyle: bd.BadgeStyle(
+                        badgeColor: Colors.amber.shade900,
+                        elevation: 12,
+                        padding: const EdgeInsets.all(16.0),
                       ),
-                      const Text('Vehicle Arrivals'),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 28,),
+
+                    Text(
+                      'Vehicle Arrivals',
+                      style: myTextStyleSmall(context),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
