@@ -102,7 +102,9 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
         .size
         .height;
 
-    return Card(
+    return route == null? Center(
+      child: Text('Waiting for Godot', style: myTextStyleMediumBoldGrey(context),),
+    ): Card(
       shape: getDefaultRoundedBorder(),
       elevation: 8,
       child: Padding(
@@ -147,27 +149,23 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
                     children: [
                       route == null
                           ? const SizedBox()
-                          : Card(
-                        shape: getDefaultRoundedBorder(),
-                        elevation: 4,
-                        child: DetailsWidget(
-                          route: route!,
-                          fontSize: 16,
-                          numberOfLandmarks: numberOfLandmarks,
-                          numberOfPoints: numberOfPoints,
-                          onClose: () {
-                            widget.onClose();
-                          },
-                          onNavigateToMapViewer: () {
-                            widget.onNavigateToMapViewer();
-                          },
-                          routeColor: routeColor,
-                          routeLandmarks: routeLandmarks,
-                          routePointsMapped: routePointsMapped,
-                          routeDetails: routeDetails,
-                        ),
-                      ),
-                      Expanded(
+                          : DetailsWidget(
+                            route: route!,
+                            fontSize: 16,
+                            numberOfLandmarks: numberOfLandmarks,
+                            numberOfPoints: numberOfPoints,
+                            onClose: () {
+                              widget.onClose();
+                            },
+                            onNavigateToMapViewer: () {
+                              widget.onNavigateToMapViewer();
+                            },
+                            routeColor: routeColor,
+                            routeLandmarks: routeLandmarks,
+                            routePointsMapped: routePointsMapped,
+                            routeDetails: routeDetails,
+                          ),
+                      widget.routeId == null? const SizedBox() : Expanded(
                         child: Card(
                           shape: getDefaultRoundedBorder(),
                           elevation: 12,
@@ -181,18 +179,13 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
                 landscape: (ctx) {
                   return SizedBox(
                     height: height,
-                    child: Row(
+                    child: Column(
                       children: [
                         route == null
                             ? const SizedBox()
-                            : SizedBox(
-                          width: (width / 2) - 120,
-                          child: Card(
-                            shape: getDefaultRoundedBorder(),
-                            elevation: 8,
-                            child: DetailsWidget(
+                            : DetailsWidget(
                               route: route!,
-                              fontSize: 18,
+                              fontSize: 16,
                               numberOfLandmarks: numberOfLandmarks,
                               numberOfPoints: numberOfPoints,
                               onClose: () {
@@ -202,14 +195,11 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
                                 widget.onNavigateToMapViewer();
                               },
                               routeColor: routeColor,
-                              routePointsMapped: routePointsMapped,
                               routeLandmarks: routeLandmarks,
+                              routePointsMapped: routePointsMapped,
                               routeDetails: routeDetails,
                             ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: (width / 2),
+                        widget.routeId == null? const SizedBox() : Expanded(
                           child: Card(
                             shape: getDefaultRoundedBorder(),
                             elevation: 12,
@@ -250,7 +240,7 @@ class Header extends StatelessWidget {
     return Column(
       children: [
          SizedBox(
-          height: type == 'phone'? 12: 24,
+          height: type == 'phone'? 4: 8,
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -287,7 +277,7 @@ class Header extends StatelessWidget {
           ],
         ),
         const SizedBox(
-          height: 48,
+          height: 12,
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -342,13 +332,7 @@ class DetailsWidget extends StatelessWidget {
             onNavigateToMapViewer();
           },
         ),
-        Text(
-          '${route.associationName}',
-          style: myTextStyleMediumPrimaryColor(context),
-        ),
-        const SizedBox(
-          height: 12,
-        ),
+
         Text(getFormattedDateLong(route!.created!)),
         const SizedBox(
           height: 8,

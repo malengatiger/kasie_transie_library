@@ -170,7 +170,6 @@ class _CitySearchState extends State<CitySearch> {
   void _close(lib.City city) {
     pp('$mm city selected: ${city.name}, widget.onCitySelected ...');
     widget.onCitySelected(city);
-    Navigator.of(context).pop();
   }
 
   @override

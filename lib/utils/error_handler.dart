@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:realm/realm.dart';
@@ -10,6 +13,7 @@ import 'package:realm/realm.dart';
 import '../bloc/cache_manager.dart';
 import '../data/schemas.dart';
 import 'device_location_bloc.dart';
+import 'emojis.dart';
 import 'functions.dart';
 
 final ErrorHandler errorHandler = ErrorHandler(locationBloc, prefs);
@@ -20,12 +24,27 @@ class ErrorHandler {
   final DeviceLocationBloc locationBloc;
   final Prefs prefs;
 
-  ErrorHandler(this.locationBloc,
-      this.prefs,);
+  ErrorHandler(
+    this.locationBloc,
+    this.prefs,
+  );
+
+  Future sendErrors() async {
+    final m = await cacheManager.getAppErrors();
+    pp('${E.leaf2}${E.leaf2}${E.leaf2}${E.leaf2} '
+        'ErrorHandler: sendErrors: AppErrors in cache; ${m.length} errors, sending ...');
+    if (m.isNotEmpty) {
+      final errors = AppErrors(m);
+      await dataApiDog.addAppErrors(errors);
+      await cacheManager.deleteAppErrors();
+      final x = await cacheManager.getAppErrors();
+      pp('${E.leaf2}${E.leaf2}${E.leaf2}${E.leaf2} '
+          'ErrorHandler: sendErrors: AppError sent to backend; cache has ${x.length} app errors');
+    }
+  }
 
   Future handleError({required KasieException exception}) async {
-    pp(
-        '$mm handleError, will save the error in cache until it can be downloaded: ... $exception');
+    pp('$mm handleError, will save the error in cache until it can be downloaded: ... $exception');
 
     var deviceData = <String, dynamic>{};
     final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
@@ -33,6 +52,12 @@ class ErrorHandler {
     String? deviceType;
     Position? errorPosition;
     try {
+      final err = jsonEncode(exception);
+      final dd = jsonDecode(err);
+
+      FirebaseCrashlytics.instance
+          .recordError(dd, null, reason: exception.getErrorType());
+
       final loc = await locationBloc.getLocation();
       pp('$mm ... location ok? $loc');
       errorPosition = Position(
@@ -63,7 +88,8 @@ class ErrorHandler {
       pp('$mm ...... setting up AppError: ${exception.toString()}}');
       final user = await prefs.getUser();
       final car = await prefs.getCar();
-      final ae = AppError(ObjectId(),
+      final ae = AppError(
+        ObjectId(),
         appErrorId: Uuid.v4().toString(),
         errorMessage: exception.toString(),
         model: deviceData['model'],
@@ -175,7 +201,7 @@ class ErrorHandler {
       'isPhysicalDevice': build.isPhysicalDevice,
       'systemFeatures': build.systemFeatures,
       'displaySizeInches':
-      ((build.displayMetrics.sizeInches * 10).roundToDouble() / 10),
+          ((build.displayMetrics.sizeInches * 10).roundToDouble() / 10),
       'displayWidthPixels': build.displayMetrics.widthPx,
       'displayWidthInches': build.displayMetrics.widthInches,
       'displayHeightPixels': build.displayMetrics.heightPx,
@@ -201,5 +227,21 @@ class ErrorHandler {
       'utsname.version:': data.utsname.version,
       'utsname.machine:': data.utsname.machine,
     };
+  }
+}
+
+class AppErrors {
+  List<AppError> appErrorList = [];
+  AppErrors(this.appErrorList);
+
+  Map<String, dynamic> toJson() {
+    final list = [];
+    for (var err in appErrorList) {
+      list.add(err.toJson());
+    }
+    Map<String, dynamic> map = {
+      'appErrorList': list,
+    };
+    return map;
   }
 }

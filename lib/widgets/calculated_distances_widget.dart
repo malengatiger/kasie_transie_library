@@ -27,7 +27,7 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late StreamSubscription<String> sub;
-  final mm = '😎😎😎😎😎😎😎😎 RouteInfoWidget: 🍎🍎🍎';
+  final mm = '😎😎😎😎😎😎😎😎 CalculatedDistancesWidget: 🍎🍎🍎';
 
   var calculatedDistances = <lib.CalculatedDistance>[];
   bool busy = false;
@@ -106,9 +106,10 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
     route = await tinyBloc.getRoute(widget.routeId);
     calculatedDistances = await routeDistanceCalculator.calculateRouteDistances(
         widget.routeId, route!.associationId!);
-    total = await routeDistanceCalculator.calculateRouteLengthInKM(
+    total = await routeDistanceCalculator.calculateTotalRouteDistanceInMetres(
         widget.routeId);
 
+    pp('$mm total length: $total metres, calculated distances: ${calculatedDistances.length}');
     setState(() {
       busy = false;
     });
@@ -148,7 +149,7 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
                         width: 8,
                       ),
                       Text(
-                        '$total',
+                        fmt.format(total/1000),
                         style: myTextStyleMediumLargeWithColor(
                             context, Theme.of(context).primaryColor, type == 'phone'? 16:20),
                       ),

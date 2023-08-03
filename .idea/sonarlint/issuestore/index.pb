@@ -105,8 +105,6 @@ R
 "lib/isolates/dispatch_isolate.dart,a/7/a71f0e60cb52599660eb8c7812f089ed5a71ae67
 E
 lib/utils/beeper.dart,b/2/b28d3a52a3c4043540c53d1d5d1075f13244da9f
-E
-lib/data/big_bag.dart,1/7/178212d9172943ef10dde785d5c4cec618b33f34
 N
 lib/widgets/counts_widget.dart,1/f/1f6d04625b8abdac21c95e6101f9d61b63be4651
 N
@@ -157,8 +155,6 @@ S
 #lib/widgets/route_list_minimum.dart,c/a/ca6048750b8f977dbaecf7727536068c66eae2db
 N
 lib/maps/route_map_editor.dart,b/6/b675af8a8b0c696ad344d965a0febbbf90786035
-M
-lib/widgets/route_widget.dart,b/7/b711d115f86b66d65ede6f01f9a3e8d6dc1e5def
 a
 1lib/widgets/scanners/scan_vehicle_for_counts.dart,5/7/57dbac398d04cb06bd0f3fc9fb9ebeb152ae1b68
 `
@@ -187,14 +183,6 @@ F
 lib/bloc/app_auth.dart,2/e/2e8ace8db1fde91611d0c739cd6d716a3f5ac924
 M
 lib/widgets/color_picker.dart,0/8/086e8ab888e0a3fc09f217585a45b74cbb207475
-\
-,lib/widgets/calculated_distances_widget.dart,7/a/7a26a39812311740324befc62720e14a2dc6529a
-X
-(lib/utils/route_distance_calculator.dart,5/7/576c3b43ca21597acf1e8e79e6d18b2f58d5b432
-R
-"lib/widgets/route_info_widget.dart,6/a/6ababd2d803c35ece23aa936200df6a71919ddc5
-P
- lib/isolates/routes_isolate.dart,7/8/78980e2a94aef9580fd5b37776a3b16effe93c3c
 V
 &lib/widgets/auth/cell_auth_signin.dart,f/8/f865f6036340f26489dd0ede60b705c8269dce5f
 K
@@ -203,26 +191,16 @@ E
 lib/l10n/my_keys.dart,1/b/1bc97497c84bf2179a04983aaa15a5f75ea3a892
 M
 lib/widgets/timer_widget.dart,a/d/ad0a5f4fcc22c914e010ea84a29f99dbb725be1a
-X
-(lib/widgets/vehicle_passenger_count.dart,1/e/1e150cc923625b6c01d58a86b17e2b2011a2a6f9
 D
 lib/utils/prefs.dart,0/6/062ed39b477cbfc674db4a3f8539e7725e506c8c
-S
-#.idea/libraries/Flutter_Plugins.xml,e/8/e8bbc0fdfcefee9aa7b463c83a8a480b92333860
 [
 +lib/widgets/scanners/dispatch_via_scan.dart,c/6/c698d61e46efffadcd9f84d909b35dffe553fb80
-<
-pubspec.yaml,e/8/e8e045469170189f1d6ef12576bd01af132b1018
 Q
 !lib/maps/cluster_maps/toggle.dart,e/e/ee9513099c6ce4f0ee2b021ec64b2ec069a34b5a
-J
-lib/bloc/list_api_dog.dart,f/e/feb3e180b952f4bd12ef54e4199c88bdb1a8fe07
 Q
 !lib/utils/initialiazer_cover.dart,6/c/6cffa59198fcb326d2e0ec3d874f44755ad3905f
 R
 "lib/providers/kasie_providers.dart,4/4/444f3d43023add5c821968865c0b4250a3a678a2
-O
-lib/widgets/city_selection.dart,b/a/bae87fc0f3dabeb2d125869428ea939f930b31ea
 N
 lib/maps/city_creator_map.dart,d/8/d8cfcd4adfd9e76e76169d72f2a31f8f98ed96fd
 [
@@ -233,8 +211,6 @@ G
 lib/data/constants.dart,f/3/f3dc49bc1a9dd087c24293c647024038d437ece2
 _
 /lib/maps/cluster_maps/arrivals_cluster_map.dart,1/e/1e901847437eebdede18a5620753fd968b777cb5
-a
-1lib/maps/cluster_maps/cluster_map_controller.dart,6/2/62ca8e2e5704a13efb1cba37e4c43ccaba4bf16b
 _
 /lib/maps/cluster_maps/commuter_cluster_map.dart,9/e/9e056ef085ffe5fbbd8dc21b10ca032cb4ccf407
 f
@@ -243,27 +219,11 @@ S
 #lib/maps/location_response_map.dart,6/5/655cc572da548cc96be1776f121da9a500982f67
 L
 lib/widgets/car_details.dart,a/1/a189b392f16310a1a2150cc33b61cdb40f1c9bef
-R
-"lib/maps/landmark_creator_map.dart,8/b/8b341e83239509d0dba7fbf817afc73f8b262243
-J
-lib/utils/environment.dart,2/9/29aa30c893fdd0dcb85853c0a069b2d7d001deae
 F
 lib/utils/parsers.dart,f/d/fdd3bbae621bfbda008d330ec565412416ae2e53
 8
 cmds.txt,9/6/96aabe83f58456692f5d448a6988674171d63b89
-N
-lib/maps/route_map_viewer.dart,2/d/2d66cd26f69125332295544233b149a97cfba76b
-J
-lib/bloc/data_api_dog.dart,0/f/0f27426890d5956a726f9c74637bb8749dbd74bb
-J
-lib/widgets/color_pad.dart,e/6/e63096aea4abf56d8d908e312322904122aec7a8
-L
-lib/utils/error_handler.dart,1/0/10a99e756989f9692ff3b288cdfdb0dc6a40787b
 G
 lib/maps/route_map.dart,2/2/22e25f57eafdd3301ea12f679d4ad89a86eac11b
-E
-lib/data/schemas.dart,5/8/58d969c07e26acfd1069cc807eb292b050451ec3
 G
 lib/data/schemas.g.dart,a/e/ae9d36def259da82b2fd0cef34dd7fbd434adbfb
-_
-/lib/maps/cluster_maps/dispatch_cluster_map.dart,1/4/143f2daedb640c441c8b9800ea139c63467257b7

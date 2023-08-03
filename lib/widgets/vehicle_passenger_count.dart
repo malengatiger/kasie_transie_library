@@ -14,6 +14,7 @@ import 'package:realm/realm.dart';
 
 import '../maps/route_map.dart';
 import '../utils/parsers.dart';
+import 'drop_down_widgets.dart';
 
 class VehiclePassengerCount extends StatefulWidget {
   const VehiclePassengerCount(
@@ -496,39 +497,5 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
             ],
           ),
         ));
-  }
-}
-
-class NumberDropDown extends StatelessWidget {
-  const NumberDropDown({Key? key,
-    required this.onNumberPicked,
-    required this.color,
-    required this.count,
-    required this.fontSize})
-      : super(key: key);
-
-  final Function(int) onNumberPicked;
-  final Color color;
-  final double fontSize;
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    List<DropdownMenuItem<int>> items = [];
-    for (var i = 0; i < count; i++) {
-      items.add(DropdownMenuItem(
-          value: i,
-          child: Text(
-            '$i',
-            style: myTextStyleMediumLargeWithColor(context, color, fontSize),
-          )));
-    }
-    return DropdownButton<int>(
-        items: items,
-        onChanged: (number) {
-          if (number != null) {
-            onNumberPicked(number);
-          }
-        });
   }
 }

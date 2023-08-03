@@ -738,14 +738,47 @@ showSnackBar(
   ));
 }
 
+Future<BitmapDescriptor> getTaxiMapIcon(
+    {required double iconSize,
+    required String text,
+    required TextStyle style,
+    required String path}) async {
+  final ByteData byteData = await rootBundle.load(path);
+  final imageData = byteData.buffer.asUint8List();
+
+  final ui.Codec codec = await ui.instantiateImageCodec(imageData);
+  final ui.Image image = (await codec.getNextFrame()).image;
+
+  final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
+  final Canvas canvas = Canvas(pictureRecorder);
+
+  canvas.drawImage(image, const Offset(0, 0), Paint());
+
+  final TextPainter textPainter = TextPainter(
+    text: TextSpan(
+      text: text,
+      style: style,
+    ),
+    textDirection: TextDirection.ltr,
+  )..layout();
+
+  final double textX = (iconSize - textPainter.width) / 2.0;
+  final double textY = (iconSize - textPainter.height) / 2.0;
+  textPainter.paint(canvas, Offset(textX, textY));
+
+  final img =
+      await pictureRecorder.endRecording().toImage(iconSize.toInt(), iconSize.toInt());
+  final data = await img.toByteData(format: ui.ImageByteFormat.png) as ByteData;
+
+  return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
+}
 
 Future<BitmapDescriptor> getVehicleMarkerBitmap(int size,
     {String? text,
-      required String color,
-      required Color borderColor,
-      required double fontSize,
-      required FontWeight fontWeight}) async {
-
+    required String color,
+    required Color borderColor,
+    required double fontSize,
+    required FontWeight fontWeight}) async {
   if (kIsWeb) size = (size / 2).floor();
   var textColor = Colors.white;
   switch (color) {
@@ -758,7 +791,6 @@ Future<BitmapDescriptor> getVehicleMarkerBitmap(int size,
     case 'amber':
       textColor = Colors.black;
       break;
-
   }
 
   final style = TextStyle(
@@ -776,7 +808,6 @@ Future<BitmapDescriptor> getVehicleMarkerBitmap(int size,
   canvas.drawCircle(Offset(size / 2, size / 2), size / 2.0, paint1);
   canvas.drawCircle(Offset(size / 2, size / 2), size / 2.2, paint2);
   canvas.drawCircle(Offset(size / 2, size / 2), size / 2.8, paint1);
-
 
   if (text != null) {
     TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
@@ -796,7 +827,6 @@ Future<BitmapDescriptor> getVehicleMarkerBitmap(int size,
 
   return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
 }
-
 
 Future<BitmapDescriptor> getMarkerBitmap(int size,
     {String? text,
@@ -804,7 +834,6 @@ Future<BitmapDescriptor> getMarkerBitmap(int size,
     required Color borderColor,
     required double fontSize,
     required FontWeight fontWeight}) async {
-
   if (kIsWeb) size = (size / 2).floor();
   var textColor = Colors.white;
   switch (color) {
@@ -817,7 +846,6 @@ Future<BitmapDescriptor> getMarkerBitmap(int size,
     case 'amber':
       textColor = Colors.black;
       break;
-
   }
 
   final style = TextStyle(
@@ -855,15 +883,16 @@ Future<BitmapDescriptor> getMarkerBitmap(int size,
   return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
 }
 
-Future<BitmapDescriptor> getRectangularMarkerIcon( {String? text,
-  required String color,
-  required Color borderColor,
-  required Color textColor,
-  required double width,
-  required double height,
-  required double fontSize,
-  required FontWeight fontWeight}) async {
-   Size size = Size(width, height);
+Future<BitmapDescriptor> getRectangularMarkerIcon(
+    {String? text,
+    required String color,
+    required Color borderColor,
+    required Color textColor,
+    required double width,
+    required double height,
+    required double fontSize,
+    required FontWeight fontWeight}) async {
+  Size size = Size(width, height);
 
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder);
@@ -874,7 +903,8 @@ Future<BitmapDescriptor> getRectangularMarkerIcon( {String? text,
     ..strokeWidth = 4;
 
   final Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
-  final RRect roundedRect = RRect.fromRectAndRadius(rect, const Radius.circular(10));
+  final RRect roundedRect =
+      RRect.fromRectAndRadius(rect, const Radius.circular(10));
   canvas.drawRRect(roundedRect, borderPaint);
 
   final Paint fillPaint = Paint()..color = Colors.black;
@@ -883,13 +913,17 @@ Future<BitmapDescriptor> getRectangularMarkerIcon( {String? text,
   final TextPainter textPainter = TextPainter(
     text: TextSpan(
       text: text,
-      style: TextStyle(color: textColor, fontSize: fontSize, fontWeight: fontWeight),
+      style: TextStyle(
+          color: textColor, fontSize: fontSize, fontWeight: fontWeight),
     ),
     textDirection: TextDirection.ltr,
   );
 
   textPainter.layout();
-  textPainter.paint(canvas, Offset((size.width - textPainter.width) / 2, (size.height - textPainter.height) / 2));
+  textPainter.paint(
+      canvas,
+      Offset((size.width - textPainter.width) / 2,
+          (size.height - textPainter.height) / 2));
 
   final picture = recorder.endRecording();
   final image = await picture.toImage(size.width.toInt(), size.height.toInt());
@@ -897,7 +931,6 @@ Future<BitmapDescriptor> getRectangularMarkerIcon( {String? text,
 
   return BitmapDescriptor.fromBytes(Uint8List.view(bytes!.buffer));
 }
-
 
 Future<Uint8List> getBytesFromAsset(String path, int width) async {
   ByteData data = await rootBundle.load(path);
@@ -948,6 +981,17 @@ void _buildColorHashMap() {
   colorHashMap['purple'] = MyRGB(red: 128, green: 0, blue: 128);
   colorHashMap['yellow'] = MyRGB(red: 255, green: 255, blue: 0);
 }
+
+const gapW4 = SizedBox(width: 4.0);
+const gapW8 = SizedBox(width: 8.0);
+const gapW12 = SizedBox(width: 12.0);
+const gapW16 = SizedBox(width: 16.0);
+
+const gapH4 = SizedBox(height: 4.0);
+const gapH8 = SizedBox(height: 8.0);
+const gapH12 = SizedBox(height: 12.0);
+const gapH16 = SizedBox(height: 16.0);
+
 
 showToast(
     {required String message,

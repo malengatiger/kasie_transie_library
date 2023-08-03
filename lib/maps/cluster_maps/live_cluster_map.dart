@@ -82,14 +82,12 @@ class LiveClusterMapState extends State<LiveClusterMap>
         latLng: LatLng(event.currentPosition!.coordinates[1],
             event.currentPosition!.coordinates[0]),
       ));
-      // _getRoutes();
-      // requestsClusterManager.setItems(commuterRequestCovers);
 
-      // if (mounted) {
-      //   setState(() {});
-      //   _animate(LatLng(event.currentPosition!.coordinates[1],
-      //       event.currentPosition!.coordinates[0]));
-      // }
+      if (mounted) {
+        setState(() {});
+        // _animate(LatLng(event.currentPosition!.coordinates[1],
+        //     event.currentPosition!.coordinates[0]));
+      }
     });
   }
 
@@ -159,14 +157,17 @@ class LiveClusterMapState extends State<LiveClusterMap>
             var size = cluster.isMultiple ? 125.0 : 75.0;
             var text = cluster.isMultiple ? cluster.count.toString() : "1";
 
-            final ic = await getMarkerBitmap(
-              size.toInt(),
-              text: text,
-              color: 'teal',
-              borderColor: Colors.white,
-              fontWeight: FontWeight.normal,
-              fontSize: size / 3,
-            );
+            // final ic = await getMarkerBitmap(
+            //   size.toInt(),
+            //   text: text,
+            //   color: 'teal',
+            //   borderColor: Colors.white,
+            //   fontWeight: FontWeight.normal,
+            //   fontSize: size / 3,
+            // );
+            final ic2 = await getTaxiMapIcon(iconSize: 240, text: text, style: const TextStyle(
+              fontSize: 48, color: Colors.white, fontWeight: FontWeight.w900,
+            ), path: 'assets/car1.png');
 
             return Marker(
               markerId: MarkerId(cluster.getId()),
@@ -184,7 +185,7 @@ class LiveClusterMapState extends State<LiveClusterMap>
                       '${E.leaf} route: ${p.routeName} date: ${getFormattedDateLong(p.created!)}');
                 }
               },
-              icon: ic,
+              icon: ic2,
             );
           };
 
@@ -201,6 +202,7 @@ class LiveClusterMapState extends State<LiveClusterMap>
               fontWeight: FontWeight.normal,
               fontSize: size / 3,
             );
+
             return Marker(
               markerId: MarkerId(cluster.getId()),
               position: cluster.location,
@@ -229,9 +231,9 @@ class LiveClusterMapState extends State<LiveClusterMap>
   }
 
   Future<void> _animate(LatLng latLng) async {
-    // var cameraPos = CameraPosition(target: latLng, zoom: 12.0);
-    // final GoogleMapController controller = await _googleMapController.future;
-    // controller.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
+    var cameraPos = CameraPosition(target: latLng, zoom: 12.0);
+    final GoogleMapController controller = await _googleMapController.future;
+    controller.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
   }
 
   @override

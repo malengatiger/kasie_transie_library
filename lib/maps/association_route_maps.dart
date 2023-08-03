@@ -14,8 +14,11 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/local_finder.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/route_widgets/multi_route_chooser.dart';
+import 'package:kasie_transie_library/widgets/vehicle_passenger_count.dart';
 
 import '../isolates/routes_isolate.dart';
+import '../utils/emojis.dart';
+import '../widgets/drop_down_widgets.dart';
 
 class AssociationRouteMaps extends StatefulWidget {
   const AssociationRouteMaps({
@@ -48,13 +51,9 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   final Set<Marker> _markers = HashSet();
   final Set<Circle> _circles = HashSet();
   final Set<Polyline> _polyLines = {};
-  BitmapDescriptor? _dotMarker;
 
-  // List<BitmapDescriptor> _numberMarkers = [];
   final List<lib.RoutePoint> rpList = [];
   List<lib.RoutePoint> existingRoutePoints = [];
-
-  // List<lib.Landmark> _landmarks = [];
 
   List<poly.PointLatLng>? polylinePoints;
   Color color = Colors.black;
@@ -73,7 +72,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     _getUser();
   }
 
-  Future _getRoutes() async {
+  Future _getRoutes(bool refresh) async {
     setState(() {
       busy = true;
     });
@@ -85,15 +84,14 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
             latitude: widget.latitude!,
             longitude: widget.longitude!,
             radiusInMetres:
-                widget.radiusInMetres == null ? 2000 : widget.radiusInMetres!);
+                widget.radiusInMetres == null ? distanceInKM * 1000 : widget.radiusInMetres!);
         await _filter(mRoutes);
-
       } else {
-        pp('\n\n$mm .......... get all Association Routes ...');
+        pp('\n\n$mm .......... get all Association Routes ... refresh: $refresh');
         final mRoutes = await listApiDog
-            .getRoutes(AssociationParameter(_user!.associationId!, false));
+            .getRoutes(AssociationParameter(_user!.associationId!, refresh));
+        _printy();
         await _filter(mRoutes);
-
       }
     } catch (e) {
       pp(e);
@@ -106,38 +104,47 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     setState(() {
       busy = false;
     });
-    // _showMultiRouteDialog();
   }
 
+  void _printy() {
+    int cnt = 1;
+    for (var r in routes) {
+      pp('$mm route #:$cnt ${E.appleRed} ${r.name}');
+      cnt++;
+    }
+  }
   Future<void> _filter(List<lib.Route> mRoutes) async {
+    routes.clear();
     for (var route in mRoutes) {
-      final marks = await listApiDog.getRouteLandmarks(route.routeId!, false);
-      if (marks.isNotEmpty) {
+      final marks = await routesIsolate.countRoutePoints(route.routeId!);
+      if (marks > 0) {
         routes.add(route);
       }
     }
+    pp('routes have been filtered .. where is SpruitView?');
+   _printy();
+    pp('$mm ... routes filtered: ${routes.length}');
   }
 
   var routesPicked = <lib.Route>[];
 
-  void _showMultiRouteDialog() async {
+  void _showBottomSheet() async {
     final type = getThisDeviceType();
-    showDialog(
-        context: context,
-        builder: (ctx) {
-          return AlertDialog(
-            title: Text('Select Routes',
-                style: myTextStyleMediumLargeWithColor(
-                    context, Theme.of(context).primaryColorLight, 24)),
-            content: MultiRouteChooser(onRoutesPicked: (routesPicked) {
-              setState(() {
-                this.routesPicked = routesPicked;
-              });
-              Navigator.of(context).pop();
-              _buildHashMap();
-            }, routes: routes,),
-          );
-        });
+    showModalBottomSheet(context: context, builder: (ctx){
+      return Padding(
+        padding:  EdgeInsets.symmetric(horizontal: type == 'phone'?12.0:48),
+        child: MultiRouteChooser(
+          onRoutesPicked: (routesPicked) {
+            setState(() {
+              this.routesPicked = routesPicked;
+            });
+            Navigator.of(context).pop();
+            _buildHashMap();
+          },
+          routes: routes,
+        ),
+      );
+    });
   }
 
   @override
@@ -151,7 +158,6 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   Future _getUser() async {
     _user = await prefs.getUser();
   }
-
 
   Future _getCurrentLocation() async {
     pp('$mm .......... get current location ....');
@@ -265,18 +271,46 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     }
   }
 
+  int distanceInKM = 100;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: ElevatedButton(
-              style: const ButtonStyle(
-                elevation: MaterialStatePropertyAll(8.0),
+          title: const Text('Route Map Finder'),
+          bottom: PreferredSize(preferredSize: const Size.fromHeight(64), child: Column(
+            children: [
+              Row(mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                      style: const ButtonStyle(
+                        elevation: MaterialStatePropertyAll(8.0),
+                      ),
+                      onPressed: () {
+                        _showBottomSheet();
+                      },
+                      child: SizedBox(width: 200,
+                        child:
+                        Text('${routes.length} Routes'),
+                      )),
+                  gapW16,
+                  DistanceDropDown(
+                    onDistancePicked: (dist) {
+                      setState(() {
+                        distanceInKM = dist;
+                      });
+                      _getRoutes(true);
+                    },
+                    color: Theme.of(context).primaryColor,
+                    count: 12,
+                    fontSize: 16,
+                    multiplier: 50,
+                  ),
+                ],
               ),
-              onPressed: () {
-                _showMultiRouteDialog();
-              },
-              child: Text('${routes.length} Routes')),
+              gapH16,
+            ],
+          )),
         ),
         key: _key,
         body: _myCurrentCameraPosition == null
@@ -300,7 +334,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
                   onMapCreated: (GoogleMapController controller) {
                     pp('$mm .......... on onMapCreated .....');
                     _mapController.complete(controller);
-                    _getRoutes();
+                    _getRoutes(false);
                   },
                 ),
                 Positioned(

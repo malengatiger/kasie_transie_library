@@ -78,7 +78,6 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
 
   void _setup() async {
     await _getSettings();
-    await _makeDotMarker();
     await _getCurrentLocation();
     _getUser();
   }
@@ -148,17 +147,26 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     if (routeLandmarks.isEmpty) {
       return;
     }
-    await _buildLandmarkIcons(routeLandmarks.length, 84);
+    // await _buildLandmarkIcons(routeLandmarks.length, 84);
 
     for (var routeLandmark in routeLandmarks) {
+      final ic2 = await getMarkerBitmap(72, color: widget.route.color!,
+          text: '${landmarkIndex + 1}',
+          borderColor: Colors.black, fontSize: 32, fontWeight: FontWeight.w900);
+
+
       final latLng = LatLng(routeLandmark.position!.coordinates.last,
           routeLandmark.position!.coordinates.first);
-      final icon = await getMarkerBitmap(72, text: '${landmarkIndex+1}',
-          color: widget.route.color!, borderColor: Colors.black, fontSize: 28, fontWeight: FontWeight.w900);
+      // final icon = await getMarkerBitmap(72,
+      //     text: '${landmarkIndex + 1}',
+      //     color: widget.route.color!,
+      //     borderColor: Colors.black,
+      //     fontSize: 28,
+      //     fontWeight: FontWeight.w900);
 
       _markers.add(Marker(
           markerId: MarkerId('${routeLandmark.landmarkId}'),
-          icon: icon,
+          icon: ic2,
           onTap: () {
             pp('$mm .............. routeLandmark marker tapped, index: $index $latLng');
             //_deleteRoutePoint(routePoint);
@@ -188,7 +196,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
       _user = await prefs.getUser();
       pp('$mm ...... getting existing RoutePoints .......');
       existingRoutePoints =
-      await routesIsolate.getRoutePoints(widget.route.routeId!, refresh);
+          await routesIsolate.getRoutePoints(widget.route.routeId!, refresh);
 
       pp('$mm .......... existingRoutePoints ....  🍎 found: '
           '${existingRoutePoints.length} points');
@@ -212,8 +220,9 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
       mPoints.add(LatLng(
           rp.position!.coordinates.last, rp.position!.coordinates.first));
     }
+    final color = getColor(widget.route.color!);
     var polyLine = Polyline(
-      color: Colors.grey[600]!,
+      color: color,
       width: 8,
       points: mPoints,
       polylineId: PolylineId(DateTime.now().toIso8601String()),
@@ -242,9 +251,16 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
       pp('$mm route points empty. WTF?');
       return;
     }
-    if (_dotMarker == null) {
-      await _makeDotMarker();
-    }
+
+    // final ic = await getTaxiMapIcon(
+    //     iconSize: 160,
+    //     text: '${landmarkIndex + 1}',
+    //     style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
+    //     path: 'assets/landmark.png');
+
+    final ic2 = await getMarkerBitmap(84,
+        color: widget.route.color!, borderColor: Colors.black, fontSize: 32, fontWeight: FontWeight.w900);
+
     totalPoints = existingRoutePoints.length;
     // _clearMap();
     for (var routePoint in existingRoutePoints) {
@@ -252,7 +268,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
           routePoint.position!.coordinates.first);
       _markers.add(Marker(
           markerId: MarkerId('${routePoint.routePointId}'),
-          icon: _dotMarker!,
+          icon: ic2,
           onTap: () {
             pp('$mm .............. ${E.pear}${E.pear}${E.pear} '
                 'marker tapped: routePoint: ${routePoint.toJson()}');
@@ -275,7 +291,8 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
 
   Future<void> _animateCamera(LatLng latLng, double zoom) async {
     var cameraPos = CameraPosition(target: latLng, zoom: zoom);
-    googleMapController.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
+    googleMapController
+        .animateCamera(CameraUpdate.newCameraPosition(cameraPos));
   }
 
   bool _showLandmark = false;
@@ -296,11 +313,6 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     _user = await prefs.getUser();
   }
 
-  Future _makeDotMarker() async {
-    var intList = await getBytesFromAsset("assets/markers/dot2.png", 32);
-    _dotMarker = BitmapDescriptor.fromBytes(intList);
-    pp('$mm custom marker 💜 assets/markers/dot2.png created');
-  }
 
   Future _getCurrentLocation() async {
     pp('$mm .......... get current location ....');
@@ -355,13 +367,18 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
       return;
     }
     pendingCount++;
-    await _buildLandmarkIcons(routeLandmarks.length + 1, 84);
+
     landmarkIndex = (routeLandmarks.length - 1) + pendingCount;
+
+    final ic2 = await getMarkerBitmap(72, color: widget.route.color!,
+        text: '${landmarkIndex + 1}',
+        borderColor: Colors.black, fontSize: 32, fontWeight: FontWeight.w900);
+
     pp('....... _addNewLandmark: landmarkIndex: $landmarkIndex');
 
     _markers.add(Marker(
         markerId: MarkerId('${routePointForLandmark!.routePointId}'),
-        icon: numberMarkers.elementAt(landmarkIndex),
+        icon: ic2,
         onTap: () {
           pp('$mm .............. marker tapped: $index');
           //_deleteRoutePoint(routePoint);
@@ -544,8 +561,8 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
                                       children: [
                                         Text(
                                           'Route Landmarks',
-                                          style:
-                                              myTextStyleMediumLarge(context, 20),
+                                          style: myTextStyleMediumLarge(
+                                              context, 20),
                                         )
                                       ],
                                     ),

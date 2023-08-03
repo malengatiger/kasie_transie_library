@@ -7,6 +7,8 @@ class ColorPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final type = getThisDeviceType();
+
     final colors = <Color>[
       Colors.red,
       Colors.black,
@@ -34,8 +36,8 @@ class ColorPad extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 24.0),
                 child: GridView.builder(
                     shrinkWrap: true,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisSpacing: 1, crossAxisCount: 12, mainAxisSpacing: 1),
+                    gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisSpacing: 1, crossAxisCount: type == 'phone'? 4: 6, mainAxisSpacing: 1),
                     itemCount: colors.length,
                     itemBuilder: (context, index) {
                       var color = colors.elementAt(index);

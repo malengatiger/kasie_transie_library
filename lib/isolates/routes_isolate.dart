@@ -21,6 +21,10 @@ final RoutesIsolate routesIsolate = RoutesIsolate();
 class RoutesIsolate {
   final xy = '☕️☕️☕️☕️☕️ Routes Isolate Functions: 🍎🍎';
 
+  Future<int> countRoutePoints(String routeId) async {
+    final res = listApiDog.realm.query<RoutePoint>('routeId == \$0',[routeId]);
+    return res.length;
+  }
   Future<List<RoutePoint>> getRoutePoints(String routeId, bool refresh) async {
     pp('$xy get routePoints for $routeId  ... refresh: $refresh');
     var mList = <RoutePoint>[];

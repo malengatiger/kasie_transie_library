@@ -205,6 +205,25 @@ class DataApiDog {
     return r;
   }
 
+  Future addAppError(AppError error) async {
+    final bag = error.toJson();
+    final cmd = '${url}addAppError';
+    final res = await _callPost(cmd, bag);
+    pp('$mm AppError added to database ...');
+    myPrettyJsonPrint(res);
+
+    return 0;
+  }
+
+  Future addAppErrors(AppErrors errors) async {
+    final bag = errors.toJson();
+    final cmd = '${url}addAppErrors';
+    List res = await _callPost(cmd, bag);
+    pp('$mm AppErrors added to database ... ${res.length} errors');
+
+    return 0;
+  }
+
   Future<Commuter> addCommuter(Commuter commuter) async {
     final bag = commuter.toJson();
     final cmd = '${url}addCommuter';

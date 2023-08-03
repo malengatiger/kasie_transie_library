@@ -53,7 +53,7 @@ class RouteDistanceCalculator {
       return [];
     }
 
-    routeLandmarks.sort((a,b) => a.index!.compareTo(b.index!));
+    routeLandmarks.sort((a, b) => a.index!.compareTo(b.index!));
     final routePoints = await routesIsolate.getRoutePoints(routeId, false);
     if (routePoints.isEmpty) {
       pp('$mm ... 2. stopping calculateRouteDistances for $routeId, routePoints');
@@ -116,6 +116,38 @@ class RouteDistanceCalculator {
     return distances;
   }
 
+  Future<double> calculateTotalRouteDistanceInMetres(
+      String routeId) async {
+    pp('$mm ... starting calculateTotalRouteDistance for $routeId');
+
+    final routePoints = await routesIsolate.getRoutePoints(routeId, false);
+    if (routePoints.isEmpty) {
+      pp('$mm ... 2. stopping calculateRouteDistances for $routeId, routePoints');
+      return 0.0;
+    }
+
+    //
+    routePoints.sort((a, b) => a.index!.compareTo(b.index!));
+
+    int index = 0;
+    double mDistance = 0;
+    lib.RoutePoint? previousRoutePoint;
+    for (var rp in routePoints) {
+      if (index > 0) {
+        var dist = geo.Geolocator.distanceBetween(
+            previousRoutePoint!.position!.coordinates[1],
+            previousRoutePoint.position!.coordinates[0],
+            rp.position!.coordinates[1],
+            rp.position!.coordinates[0]);
+        mDistance += dist;
+      }
+      previousRoutePoint = rp;
+      index++;
+      //
+    }
+    return mDistance;
+  }
+
   Future<double> _calculateDistanceBetween(
       {required lib.RouteLandmark fromLandmark,
       required lib.RouteLandmark toLandmark,
@@ -160,7 +192,8 @@ class RouteDistanceCalculator {
       required double longitude,
       required lib.Route route}) async {
     pp('🥬🥬🥬🥬🥬🥬🥬 calculateFromLocation starting: 💛 ${DateTime.now().toIso8601String()}');
-    final routePoints = await routesIsolate.getRoutePoints(route.routeId!, false);
+    final routePoints =
+        await routesIsolate.getRoutePoints(route.routeId!, false);
 
     pp('🥬🥬🥬🥬🥬🥬🥬  ${route.name} points: ${routePoints.length}');
     List<RoutePointDistance> rpdList = [];
@@ -252,8 +285,8 @@ class RouteDistanceCalculator {
         index++;
       } else {
         final dist = geo.GeolocatorPlatform.instance.distanceBetween(
-            prevRoutePoint!.position!.coordinates[1],
-            prevRoutePoint.position!.coordinates[0],
+          prevRoutePoint!.position!.coordinates[1],
+          prevRoutePoint.position!.coordinates[0],
           routePoint.position!.coordinates[1],
           routePoint.position!.coordinates[0],
         );
@@ -263,13 +296,12 @@ class RouteDistanceCalculator {
       }
     }
     pp('$mm ... calculateRouteLengthInKM: length: $totalDistance metres');
-    pp('$mm ... calculateRouteLengthInKM length: ${(totalDistance/1000).toStringAsFixed(2)} km');
+    pp('$mm ... calculateRouteLengthInKM length: ${(totalDistance / 1000).toStringAsFixed(2)} km');
 
-    var b = totalDistance /1000;
+    var b = totalDistance / 1000;
     b = double.parse(b.toStringAsFixed(2));
     return b;
   }
-
 }
 
 class RoutePointDistance {
@@ -280,4 +312,3 @@ class RoutePointDistance {
   RoutePointDistance(
       {required this.index, required this.routePoint, required this.distance});
 }
-

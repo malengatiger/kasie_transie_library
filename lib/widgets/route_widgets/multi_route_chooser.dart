@@ -1,9 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart' as lib;
-import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:badges/badges.dart' as bd;
@@ -29,8 +27,7 @@ class MultiRouteChooserState extends State<MultiRouteChooser> {
   @override
   void initState() {
     super.initState();
-    _setTexts();
-    _setCheckList();
+    _control();
   }
   void _control() async {
     await _setTexts();
@@ -80,98 +77,90 @@ class MultiRouteChooserState extends State<MultiRouteChooser> {
   @override
   Widget build(BuildContext context) {
     final type = getThisDeviceType();
-    return SizedBox(height: type == 'phone'?480:640, width: type == 'phone'?400: 600,
-      child: Card(
-        shape: getRoundedBorder(radius: 16),
-        elevation: 8,
-        child: Padding(
-          padding:  EdgeInsets.all(type == 'phone'? 8.0:28),
-          child: Column(
-            children: [
-              Row(mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('$selectedRoutes : ', style: myTextStyleMediumLargeWithColor(context,
-                      Theme.of(context).primaryColorLight, 16),),
-                   SizedBox(
-                    width: type == 'phone'?24:64,
-                  ),
-                  Text(
-                    '${list.length}',
-                    style: myTextStyleMediumLargeWithColor(
-                        context, Theme.of(context).primaryColorDark, 20),
-                  ),
-                  const SizedBox(
-                    width: 24,
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 8,
-              ),
-              list.isEmpty
-                  ? const SizedBox()
-                  : ElevatedButton(
-                  onPressed: () {
-                    widget.onRoutesPicked(list);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(6.0),
-                    child: Text(showRoutes),
-                  )),
-              const SizedBox(
-                height: 8,
-              ),
-              Expanded(
-                child: bd.Badge(
-                  badgeContent: Text('${widget.routes.length}'),
-                  position: bd.BadgePosition.topEnd(top: 8, end: -8),
-                  child: Padding(
-                    padding: EdgeInsets.all(type == 'phone'? 8.0:48),
-                    child: ListView.builder(
-                        itemCount: widget.routes.length,
-                        itemBuilder: (ctx, index) {
-                          final route = widget.routes.elementAt(index);
-                          final picked = checkList.elementAt(index);
-                          return Card(
-                            shape: getRoundedBorder(radius: 16),
-                            elevation: 8,
-                            child: Row(
-                              children: [
-                                Checkbox(
-                                    value: picked,
-                                    onChanged: (checked) {
-                                      pp('$mm ... Checkbox: checked: $checked ...');
-                                      if (checked != null) {
-                                        checkList[index] = checked;
-                                        if (checked) {
-                                          _addRoute(route);
-                                        } else {
-                                          _removeRoute(route);
-                                        }
-                                      }
-                                      setState(() {});
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
 
-                                    }),
-                                const SizedBox(
-                                  width: 2,
-                                ),
-                                Flexible(
-                                  child: Text(
-                                    '${route.name}',
-                                    style: myTextStyleSmall(context),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                  ),
-                ),
-              ),
-            ],
+    return Column(
+      children: [
+        gapH16,
+        Row(mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('$selectedRoutes : ', style: myTextStyleMediumLargeWithColor(context,
+                Theme.of(context).primaryColorLight, 14),),
+             SizedBox(
+              width: type == 'phone'?12:64,
+            ),
+            Text(
+              '${list.length}',
+              style: myTextStyleMediumLargeWithColor(
+                  context, Theme.of(context).primaryColorLight, 20),
+            ),
+            const SizedBox(
+              width: 24,
+            ),
+          ],
+        ),
+        const SizedBox(
+          height: 4,
+        ),
+        list.isEmpty
+            ? const SizedBox()
+            : ElevatedButton(
+            onPressed: () {
+              widget.onRoutesPicked(list);
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Text(showRoutes),
+            )),
+        const SizedBox(
+          height: 8,
+        ),
+        Expanded(
+          child: bd.Badge(
+            badgeContent: Text('${widget.routes.length}'),
+            position: bd.BadgePosition.topEnd(top: 8, end: -8),
+            child: ListView.builder(
+                itemCount: widget.routes.length,
+                itemBuilder: (ctx, index) {
+                  final route = widget.routes.elementAt(index);
+                  final picked = checkList.elementAt(index);
+                  return Card(
+                    shape: getRoundedBorder(radius: 8),
+                    elevation: 12,
+                    child: Row(
+                      children: [
+                        Checkbox(
+                            value: picked,
+                            onChanged: (checked) {
+                              pp('$mm ... Checkbox: checked: $checked ...');
+                              if (checked != null) {
+                                checkList[index] = checked;
+                                if (checked) {
+                                  _addRoute(route);
+                                } else {
+                                  _removeRoute(route);
+                                }
+                              }
+                              setState(() {});
+
+                            }),
+                        const SizedBox(
+                          width: 2,
+                        ),
+                        Flexible(
+                          child: Text(
+                            '${route.name}',
+                            style: myTextStyleSmall(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
           ),
         ),
-      ),
+      ],
     );
   }
 }

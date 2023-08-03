@@ -38,7 +38,7 @@ dependencies:
   responsive_builder: ^0.7.0
   animations: ^2.0.7
   flex_color_scheme: ^7.1.2
-  firebase_crashlytics: ^3.3.3
+  firebase_crashlytics: ^3.3.4
   pin_code_fields: ^7.4.0
   geolocator: ^9.0.2
   maps_toolkit: ^2.0.1
@@ -70,6 +70,8 @@ dependencies:
   flutter_analog_clock: ^1.0.3
   custom_map_markers: ^0.0.2+1
   google_maps_cluster_manager: ^3.0.0+1
+  firebase_analytics: ^10.4.4
+
   url_launcher:
   flutter_polyline_points:
   flutter_dotenv:

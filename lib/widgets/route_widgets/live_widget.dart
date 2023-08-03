@@ -139,11 +139,11 @@ class _LiveOperationsState extends State<LiveOperations> {
                       width: 20,
                     ),
                     bd.Badge(
-                      badgeContent: Text('${dispatches.length}'),
+                      badgeContent: Text('${dispatches.length}', style: myTextStyleSmall(context),),
                       badgeStyle: const bd.BadgeStyle(
                         badgeColor: Colors.deepOrange,
                         elevation: 12,
-                        padding: EdgeInsets.all(16.0),
+                        padding: EdgeInsets.all(12.0),
                       ),
                     ),
                     const SizedBox(
@@ -168,11 +168,11 @@ class _LiveOperationsState extends State<LiveOperations> {
                       width: 20,
                     ),
                     bd.Badge(
-                      badgeContent: Text('${heartbeats.length}'),
+                      badgeContent: Text('${heartbeats.length}', style: myTextStyleSmall(context),),
                       badgeStyle: bd.BadgeStyle(
                         badgeColor: Colors.teal.shade700,
                         elevation: 12,
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(12.0),
                       ),
                     ),
                     const SizedBox(
@@ -197,11 +197,11 @@ class _LiveOperationsState extends State<LiveOperations> {
                       width: 20,
                     ),
                     bd.Badge(
-                      badgeContent: Text('${passengerCounts.length}'),
+                      badgeContent: Text('${passengerCounts.length}', style: myTextStyleSmall(context),),
                       badgeStyle: bd.BadgeStyle(
                         badgeColor: Colors.pink.shade700,
                         elevation: 12,
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(12.0),
                       ),
                     ),
                     const SizedBox(
@@ -226,11 +226,11 @@ class _LiveOperationsState extends State<LiveOperations> {
                       width: 20,
                     ),
                     bd.Badge(
-                      badgeContent: Text('${requests.length}'),
+                      badgeContent: Text('${requests.length}', style: myTextStyleSmall(context),),
                       badgeStyle: bd.BadgeStyle(
                         badgeColor: Colors.blue.shade700,
                         elevation: 12,
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(12.0),
                       ),
                     ),
                     const SizedBox(
@@ -255,11 +255,11 @@ class _LiveOperationsState extends State<LiveOperations> {
                       width: 20,
                     ),
                     bd.Badge(
-                      badgeContent: Text('${arrivals.length}'),
+                      badgeContent: Text('${arrivals.length}', style: myTextStyleSmall(context),),
                       badgeStyle: bd.BadgeStyle(
                         badgeColor: Colors.amber.shade900,
                         elevation: 12,
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(12.0),
                       ),
                     ),
                     const SizedBox(
