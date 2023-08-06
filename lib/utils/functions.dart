@@ -754,17 +754,20 @@ Future<BitmapDescriptor> getTaxiMapIcon(
 
   canvas.drawImage(image, const Offset(0, 0), Paint());
 
-  final TextPainter textPainter = TextPainter(
-    text: TextSpan(
+    TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
+    painter.text = TextSpan(
       text: text,
       style: style,
-    ),
-    textDirection: TextDirection.ltr,
-  )..layout();
+    );
+    painter.layout();
+    painter.paint(
+      canvas,
+      Offset(iconSize / 2 - painter.width / 2, iconSize / 2 - painter.height / 2),
+    );
 
-  final double textX = (iconSize - textPainter.width) / 2.0;
-  final double textY = (iconSize - textPainter.height) / 2.0;
-  textPainter.paint(canvas, Offset(textX, textY));
+  // final double textX = (iconSize - textPainter.width) / 2.0;
+  // final double textY = (iconSize - textPainter.height) / 2.0;
+  // textPainter.paint(canvas, Offset(textX, textY));
 
   final img =
       await pictureRecorder.endRecording().toImage(iconSize.toInt(), iconSize.toInt());

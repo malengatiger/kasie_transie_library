@@ -1,31 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../utils/functions.dart';
 
 class NumberWidget extends StatelessWidget {
-  const NumberWidget({Key? key, required this.title, required this.number})
+  const NumberWidget({Key? key, required this.title, required this.number, required this.height, required this.width, required this.elevation, required this.fontSize})
       : super(key: key);
 
   final String title;
   final int number;
+  final double height, width, elevation, fontSize;
 
   @override
   Widget build(BuildContext context) {
+    final fmt = NumberFormat.decimalPattern();
+    final count = fmt.format(number);
     return Card(
       shape: getDefaultRoundedBorder(),
-      elevation: 8,
+      elevation: elevation,
       child: SizedBox(
-        height: 120,
-        width: 120,
-        child: Column(
+        height: height,
+        width: width,
+        child: Column(mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(
-              height: 40,
-            ),
             Text(
-              '$number',
+              count,
               style: myNumberStyleLargerWithColor(
-                  Theme.of(context).primaryColor, 32, context),
+                  Theme.of(context).primaryColor, fontSize, context),
             ),
             Text(
               title,

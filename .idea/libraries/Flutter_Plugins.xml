@@ -1,13 +1,13 @@
 <component name="libraryTable">
   <library name="Flutter Plugins" type="FlutterPluginsLibraryType">
     <CLASSES>
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/firebase_auth-4.7.2" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/image_picker_for_web-2.1.12" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/beep_player-0.0.1" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/geofence_service-4.0.0" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/qr_code_scanner-1.0.1" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/firebase_messaging_web-3.5.3" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/device_info_plus-9.0.2" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/google_maps_flutter-2.3.0" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/play_integrity_flutter-0.0.1" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/file_selector_windows-0.9.2" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/geolocator-9.0.2" />
@@ -15,7 +15,6 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/shared_preferences_web-2.1.0" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/mobile_number-2.1.1" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/image_picker_macos-0.2.0" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/location-4.4.0" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_foreground_task-4.2.0" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/path_provider_foundation-2.2.3" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/firebase_storage-11.2.3" />
@@ -33,7 +32,7 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/shared_preferences-2.1.2" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/fluttertoast-8.2.2" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/audioplayers_web-3.1.0" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/google_maps_flutter_web-0.5.0+1" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/firebase_analytics-10.4.4" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/geolocator_apple-2.2.7" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/shared_preferences_linux-2.2.0" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/url_launcher_linux-3.0.5" />
@@ -42,10 +41,12 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/geocoding_ios-2.1.0" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/geolocator_web-2.1.6" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/fl_location_web-2.0.0" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/firebase_analytics_web-0.5.4+4" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/url_launcher_ios-6.1.4" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/geolocator_android-4.1.9" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.2.2" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/camera_avfoundation-0.9.13+2" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/firebase_auth_web-5.6.2" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/file_selector_linux-0.9.1+3" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/firebase_core-2.15.0" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/path_provider_android-2.0.27" />
@@ -69,7 +70,6 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/sqflite-2.2.8+4" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/shared_preferences_android-2.1.4" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/permission_handler-10.3.0" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/location_web-3.1.1" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/camera_web-0.3.1+4" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/google_maps_flutter_ios-2.2.3" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/url_launcher-6.1.12" />
@@ -77,11 +77,11 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/firebase_core_web-2.6.0" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/image_picker_linux-0.2.0" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/url_launcher_windows-3.0.7" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/firebase_auth-4.7.2" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/firebase_auth_web-5.6.2" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/firebase_crashlytics-3.3.4" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/firebase_analytics-10.4.4" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/firebase_analytics_web-0.5.4+4" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/location-4.4.0" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/location_web-3.1.1" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/background_location-0.11.8" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/google_maps_flutter_web-0.5.3" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/google_maps_flutter-2.4.0" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

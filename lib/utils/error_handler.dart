@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
@@ -55,8 +54,8 @@ class ErrorHandler {
       final err = jsonEncode(exception);
       final dd = jsonDecode(err);
 
-      FirebaseCrashlytics.instance
-          .recordError(dd, null, reason: exception.getErrorType());
+      // FirebaseCrashlytics.instance
+      //     .recordError(dd, null, reason: exception.getErrorType());
 
       final loc = await locationBloc.getLocation();
       pp('$mm ... location ok? $loc');

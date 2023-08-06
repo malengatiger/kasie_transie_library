@@ -70,6 +70,10 @@ class DeviceBackgroundLocation {
         myPrettyJsonPrint(hb.toJson());
       }
     });
+    // var settings = Platform.isIOS ? iosSettings : androidSettings;
+    // Geolocator.getPositionStream(locationSettings: settings).listen((position) {
+    //   double speedMps = position.speed;
+    // });
   }
 
   Future<(double?, double?)> getLocation() async {

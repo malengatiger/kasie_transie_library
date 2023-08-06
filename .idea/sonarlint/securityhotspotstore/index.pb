@@ -81,8 +81,6 @@ I
 lib/data/counter_bag.dart,4/8/481833efe8214297e08c077fe7f4fa2c4fa7cb38
 O
 lib/widgets/days_drop_down.dart,2/4/24257c964b8f8500da5a8d61bf1c600e439dceeb
-Y
-)lib/utils/device_background_location.dart,1/e/1efc5ba4b8bb851e5c438dac3827db57b42c5c29
 P
  lib/bloc/cloud_storage_bloc.dart,1/5/15f54e39142302bb67931b7a6b950533be41cf15
 N
@@ -98,15 +96,11 @@ M
 R
 "lib/isolates/landmark_isolate.dart,f/c/fc6db5720b1b00c776a396d6ea90e8b204ce1e2f
 K
-lib/bloc/cache_manager.dart,f/6/f6af9dc2c14cc2d983ed952cbc52421867d334ab
-K
 lib/widgets/qr_scanner.dart,d/c/dcd6abbd4e9bba1d0f8e378698cdb2845aa4e1fc
 R
 "lib/isolates/dispatch_isolate.dart,a/7/a71f0e60cb52599660eb8c7812f089ed5a71ae67
 E
 lib/utils/beeper.dart,b/2/b28d3a52a3c4043540c53d1d5d1075f13244da9f
-N
-lib/widgets/counts_widget.dart,1/f/1f6d04625b8abdac21c95e6101f9d61b63be4651
 N
 lib/utils/kasie_exception.dart,b/b/bb23b0771d428b91650b02ea2b4bd0866a3ea69d
 I
@@ -125,8 +119,6 @@ L
 lib/widgets/city_widget.dart,2/1/21ed756d313c3b7d45c7931abd6b0644c81baeba
 N
 lib/widgets/photo_handler.dart,0/d/0d9722f04fac14afa5b744911acbcd9f1ac461d4
-N
-lib/widgets/number_widget.dart,0/0/0037e7ac3953b0efde7a95a449c158df22e9ddd1
 `
 0lib/widgets/scanners/scan_vehicle_for_owner.dart,d/d/ddb6669beae3d0ba69bff1a78aa145bcdf24814b
 L
@@ -165,8 +157,6 @@ S
 #lib/isolates/heartbeat_isolate.dart,0/7/074153afea844e3edf30fad1db73f573a9bcd942
 O
 lib/auth/email_auth_signin.dart,2/a/2a121924df2544ed1851a2a61b5ca978703d1370
-I
-lib/widgets/car_list.dart,f/0/f0233c62522d48a0b42e5da2c1b51fd989f748d9
 O
 lib/auth/phone_auth_signin.dart,e/d/ed017848211d6cf1bb53695f5d95a2b3310634cf
 G
@@ -217,8 +207,6 @@ f
 6lib/maps/cluster_maps/passenger_count_cluster_map.dart,f/1/f193f0f3fb1efadc06c0f34e4d45a54e5742f943
 S
 #lib/maps/location_response_map.dart,6/5/655cc572da548cc96be1776f121da9a500982f67
-L
-lib/widgets/car_details.dart,a/1/a189b392f16310a1a2150cc33b61cdb40f1c9bef
 F
 lib/utils/parsers.dart,f/d/fdd3bbae621bfbda008d330ec565412416ae2e53
 8
@@ -227,3 +215,35 @@ G
 lib/maps/route_map.dart,2/2/22e25f57eafdd3301ea12f679d4ad89a86eac11b
 G
 lib/data/schemas.g.dart,a/e/ae9d36def259da82b2fd0cef34dd7fbd434adbfb
+K
+lib/messaging/fcm_bloc.dart,a/b/abc3ce0d0007de42374e4acee2f4babe2f6f7f47
+P
+ lib/maps/route_creator_map2.dart,6/e/6ee34b1ed40eae0e6df3ab154c453436b9d94a2b
+E
+lib/data/schemas.dart,5/8/58d969c07e26acfd1069cc807eb292b050451ec3
+E
+lib/data/big_bag.dart,1/7/178212d9172943ef10dde785d5c4cec618b33f34
+_
+/lib/maps/cluster_maps/dispatch_cluster_map.dart,1/4/143f2daedb640c441c8b9800ea139c63467257b7
+M
+lib/widgets/route_widget.dart,b/7/b711d115f86b66d65ede6f01f9a3e8d6dc1e5def
+O
+lib/widgets/city_selection.dart,b/a/bae87fc0f3dabeb2d125869428ea939f930b31ea
+\
+,lib/widgets/route_widgets/route_monitor.dart,f/f/ff7b834a9cbf88ed0517066aa34f5a80cd35a887
+Z
+*lib/widgets/route_widgets/live_widget.dart,2/4/24fd582fb4ddb4b9a9e9a5bc36180abf05acf3e0
+]
+-lib/widgets/route_widgets/route_activity.dart,5/d/5d4535b706840a9376a2c24daabcb092456d3779
+R
+"lib/maps/landmark_creator_map.dart,8/b/8b341e83239509d0dba7fbf817afc73f8b262243
+R
+"lib/widgets/drop_down_widgets.dart,1/6/16bbeac24cbb7c4ccf626488b531b640057980c7
+[
++lib/maps/cluster_maps/live_cluster_map.dart,6/e/6ecaaad392143ebf59bd85e0af384f5db6c9a83f
+a
+1lib/maps/cluster_maps/cluster_map_controller.dart,6/2/62ca8e2e5704a13efb1cba37e4c43ccaba4bf16b
+X
+(lib/widgets/vehicle_passenger_count.dart,1/e/1e150cc923625b6c01d58a86b17e2b2011a2a6f9
+J
+lib/widgets/color_pad.dart,e/6/e63096aea4abf56d8d908e312322904122aec7a8

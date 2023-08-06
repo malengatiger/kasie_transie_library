@@ -43,4 +43,14 @@ class VehicleBag {
       passengerCounts.add(buildAmbassadorPassengerCount(value));
     }
   }
+  bool isEmpty() {
+    if(dispatchRecords.isEmpty
+        && passengerCounts.isEmpty
+        && heartbeats.isEmpty
+        && departures.isEmpty
+        && arrivals.isEmpty) {
+      return true;
+    }
+    return false;
+  }
 }

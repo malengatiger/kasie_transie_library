@@ -7,11 +7,11 @@ import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:badges/badges.dart' as bd;
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
-import 'package:kasie_transie_library/widgets/car_details.dart';
+import 'package:kasie_transie_library/widgets/vehicle_widgets/car_details.dart';
 import 'package:kasie_transie_library/widgets/scanners/scan_vehicle_for_owner.dart';
 
-import '../l10n/translation_handler.dart';
-import '../utils/prefs.dart';
+import '../../l10n/translation_handler.dart';
+import '../../utils/prefs.dart';
 
 class CarList extends StatefulWidget {
   const CarList({Key? key, this.associationId, this.ownerId}) : super(key: key);
@@ -84,8 +84,13 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
   Future _onCarSelected(lm.Vehicle car) async {
     pp('$mm .... car selected ... will show details ...');
     myPrettyJsonPrint(car.toJson());
+
     this.car = car;
     myPrettyJsonPrint(car.toJson());
+    if (getThisDeviceType() == 'phone') {
+      _navigateToCarDetails();
+      return;
+    }
     setState(() {
       showCarDetails = true;
       _showSearch = false;
@@ -162,7 +167,9 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     var height = 100.0;
-    if (cars.length < 11) {}
+    if (cars.length > 20) {
+      _showSearch = true;
+    }
     return SafeArea(
         child: Scaffold(
             appBar: AppBar(
@@ -273,7 +280,7 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
                     ),
                 showCarDetails
                     ? Positioned(
-                        top: 0,
+                        top: -48,
                         bottom: 0,
                         child: CarDetails(
                           vehicle: car!,
@@ -344,5 +351,21 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
                     : const SizedBox()
               ],
             )));
+  }
+  void _navigateToCarDetails() {
+    if (car == null) {
+      return;
+    }
+    navigateWithScale(CarDetails(
+      vehicle: car!,
+      onClose: () {
+        setState(() {
+          showCarDetails = false;
+          if (cars.length > 19) {
+            _showSearch = true;
+          }
+        });
+      },
+    ), context);
   }
 }

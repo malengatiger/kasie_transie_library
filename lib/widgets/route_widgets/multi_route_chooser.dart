@@ -124,7 +124,7 @@ class MultiRouteChooserState extends State<MultiRouteChooser> {
                 itemCount: widget.routes.length,
                 itemBuilder: (ctx, index) {
                   final route = widget.routes.elementAt(index);
-                  final picked = checkList.elementAt(index);
+                  final picked = checkList.isEmpty? false: checkList.elementAt(index);
                   return Card(
                     shape: getRoundedBorder(radius: 8),
                     elevation: 12,
