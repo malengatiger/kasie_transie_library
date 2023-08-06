@@ -406,7 +406,7 @@ class FCMBloc {
 
   Future<void> processFCMMessage(fb.RemoteMessage message, String type) async {
     pp("$newMM processFCMMessage: $red processing message received in "
-        "foreground: ${E.leaf}${E.leaf} type: $type ...");
+        "foreground: ${E.leaf}${E.leaf} type: $type ... messageId: ${message.messageId}");
     final map = message.data;
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     myName = packageInfo.appName;

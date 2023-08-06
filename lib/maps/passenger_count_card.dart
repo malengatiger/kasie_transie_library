@@ -12,14 +12,15 @@ class PassengerCountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final date = getFormattedDateLong(passengerCount.created!);
     return Card(
       shape: getDefaultRoundedBorder(),
-      elevation: 8,
+      elevation: 12,
       color: backgroundColor,
       child: SizedBox(
-        height: 128,
+        height: 100,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(4.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -28,24 +29,26 @@ class PassengerCountCard extends StatelessWidget {
                 children: [
                   Counter(title: 'In',
                       color: Colors.green,
-                      fontSize: 20,
+                      fontSize: 18,
                       width: 60,
                       number: passengerCount.passengersIn!),
                   gapW12,
                   Counter(
                       color: Colors.red,
-                      fontSize: 20,
+                      fontSize: 18,
                       width: 60,
                       title: 'Out', number: passengerCount.passengersOut!),
                   gapW12,
                   Counter(
                       title: 'Current',
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: 18,
                       width: 80,
                       number: passengerCount.currentPassengers!),
                 ],
-              )
+              ),
+              Text(date, style: myTextStyleSmall(context),),
+              gapH8,
             ],
           ),
         ),
@@ -73,25 +76,20 @@ class Counter extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: width,
-      child: Card(
-        shape: getRoundedBorder(radius: 8),
-        color: Colors.black26,
-        elevation: 8,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SizedBox(
-            height: 60,
-            child: Column(
-              children: [
-                Text(title, style: myTextStyleSmall(context),),
-                gapH8,
-                Text(
-                  '$number',
-                  style:
-                      myTextStyleMediumLargeWithColor(context, color, fontSize),
-                ),
-              ],
-            ),
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: SizedBox(
+          height: 60,
+          child: Column(
+            children: [
+              Text(title, style: myTextStyleSmall(context),),
+              gapH8,
+              Text(
+                '$number',
+                style:
+                    myTextStyleMediumLargeWithColor(context, color, fontSize),
+              ),
+            ],
           ),
         ),
       ),

@@ -63,7 +63,24 @@ class CacheManager {
 
     pp("$mm saveDispatchRecord: SAVED: 🌽 ${list.length} DispatchRecords in cache $mm");
   }
+  Future saveRoute(Route route) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final list = await getRoutes();
+    //replace route if already exists ...
+    final fl = <Route>[];
+    for (var r in list) {
+      if (r.routeId != route.routeId) {
+        fl.add(r);
+      }
+    }
+    fl.add(route);
+    final m = RouteList(fl);
+    final mJson = m.toJson();
+    final saveMe = jsonEncode(mJson);
+    await prefs.setString('routes', saveMe);
 
+    pp("$mm saveRoute: SAVED: 🌽 ${list.length} Routes in cache $mm");
+  }
   Future saveAmbassadorPassengerCount(AmbassadorPassengerCount count) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final list = await getAmbassadorCounts();
@@ -92,6 +109,18 @@ class CacheManager {
     var list = DispatchRecordList.fromJson(jx);
     pp("$mm  ${list.dispatchRecords.length} DispatchRecords retrieved");
     return list.dispatchRecords;
+  }
+
+  Future<List<Route>> getRoutes() async {
+    var prefs = await SharedPreferences.getInstance();
+    var string = prefs.getString('routes');
+    if (string == null) {
+      return [];
+    }
+    var jx = json.decode(string);
+    var list = RouteList.fromJson(jx);
+    pp("$mm  ${list.routes.length} Routes retrieved");
+    return list.routes;
   }
 
   Future deleteAmbassadorCounts() async {
@@ -195,6 +224,29 @@ class AmbassadorPassengerCountList {
     }
     Map<String, dynamic> map = {
       'counts': list,
+    };
+    return map;
+  }
+}
+class RouteList {
+  List<Route> routes = [];
+
+  RouteList(this.routes);
+
+  RouteList.fromJson(Map data) {
+    List list = data['routes'];
+    for (var value in list) {
+      final m = buildRoute(value);
+      routes.add(m);
+    }
+  }
+  Map<String, dynamic> toJson() {
+    final list = [];
+    for (var r in routes) {
+      list.add(r.toJson());
+    }
+    Map<String, dynamic> map = {
+      'routes': list,
     };
     return map;
   }

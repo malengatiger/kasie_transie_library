@@ -4,6 +4,7 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:kasie_transie_library/bloc/cache_manager.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart' as lib;
 import 'package:kasie_transie_library/data/vehicle_bag.dart';
@@ -33,7 +34,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
   final Completer<GoogleMapController> _googleMapCompleter = Completer();
   late GoogleMapController googleMapController;
   CameraPosition initialCameraPosition =
-      const CameraPosition(target: LatLng(-27.6, 27.4), zoom: 14);
+  const CameraPosition(target: LatLng(-27.6, 27.4), zoom: 14);
 
   var dispatches = <lib.DispatchRecord>[];
   var heartbeats = <lib.VehicleHeartbeat>[];
@@ -46,7 +47,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
   bool busy = false;
   String title = "Maps";
 
-  late StreamSubscription<lib.LocationResponse> respSub;
+  // late StreamSubscription<lib.LocationResponse> respSub;
   late StreamSubscription<lib.DispatchRecord> dispatchStreamSub;
   late StreamSubscription<lib.AmbassadorPassengerCount> passengerStreamSub;
   late StreamSubscription<lib.VehicleArrival> arrivalStreamSub;
@@ -64,7 +65,8 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
 
   void _listen() async {
     arrivalStreamSub = fcmBloc.vehicleArrivalStream.listen((event) async {
-      pp('$mm ... vehicleArrivalStream delivered: ${E.leaf2} ${event.vehicleReg} at ${DateTime.now().toIso8601String()}');
+      pp('$mm ... vehicleArrivalStream delivered: ${E.leaf2} ${event
+          .vehicleReg} at ${event.created}');
       if (event.vehicleId == widget.vehicle.vehicleId) {
         arrivals.add(event);
         // if (mounted) {
@@ -73,7 +75,8 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
       }
     });
     departureStreamSub = fcmBloc.vehicleDepartureStream.listen((event) {
-      pp('$mm ... vehicleDepartureStream delivered: ${E.leaf2} ${event.vehicleReg} at ${DateTime.now().toIso8601String()}');
+      pp('$mm ... vehicleDepartureStream delivered: ${E.leaf2} ${event
+          .vehicleReg} at ${event.created}');
       if (event.vehicleId == widget.vehicle.vehicleId) {
         departures.add(event);
         // if (mounted) {
@@ -84,33 +87,40 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
 
     dispatchStreamSub =
         fcmBloc.dispatchStream.listen((lib.DispatchRecord dRec) async {
-      pp('$mm ... dispatchStream delivered dispatch for: ${dRec.vehicleReg} at ${dRec.landmarkName}');
-      if (dRec.vehicleId == widget.vehicle.vehicleId) {
-        dispatches.add(dRec);
-        totalPassengers += dRec.passengers!;
-        await routeExists(dRec.routeId!);
-        // if (mounted) {
-        //   setState(() {});
-        // }
-      }
-    });
+          pp('$mm ... dispatchStream delivered dispatch for: ${dRec
+              .vehicleReg} at ${dRec.landmarkName} at ${dRec.created}');
+          if (dRec.vehicleId == widget.vehicle.vehicleId) {
+            dispatches.add(dRec);
+            totalPassengers += dRec.passengers!;
+            await routeExists(dRec.routeId!);
+            // if (mounted) {
+            //   setState(() {});
+            // }
+          }
+        });
     passengerStreamSub = fcmBloc.passengerCountStream
         .listen((lib.AmbassadorPassengerCount cunt) {
-      pp('$mm ... passengerCountStream delivered count for: ${cunt.vehicleReg}');
+      pp('$mm ... passengerCountStream delivered count for: ${cunt
+          .vehicleReg} at ${cunt.created}');
       if (cunt.vehicleId == widget.vehicle.vehicleId) {
         totalPassengers += cunt.passengersIn!;
         passengerCounts.add(cunt);
         //
         if (mounted) {
-          setState(() {
-            showPassengerCount = true;
-          });
+          try {
+            setState(() {
+              showPassengerCount = true;
+            });
+          } catch (e) {
+            pp('$mm ERROR SETTING STATE: $e');
+          }
         }
       }
     });
     heartbeatStreamSub = fcmBloc.heartbeatStreamStream
         .listen((lib.VehicleHeartbeat heartbeat) async {
-      pp('$mm ... heartbeatStreamStream delivered heartbeat for: ${heartbeat.vehicleReg}');
+      pp('$mm ... heartbeatStreamStream delivered heartbeat for: ${heartbeat
+          .vehicleReg} at ${heartbeat.created}');
       if (heartbeat.vehicleId == widget.vehicle.vehicleId) {
         await _putHeartbeatOnMap(heartbeat);
       }
@@ -118,9 +128,11 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
   }
 
   bool showPassengerCount = false;
+  bool retryDone = false;
 
   Future _getVehicleBag() async {
-    pp('$mm ... getVehicleBag ');
+    pp('$mm ... getVehicleBag that shows the last ${E
+        .blueDot} $hours hours .... ');
     setState(() {
       busy = true;
     });
@@ -131,10 +143,26 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     try {
       bag = await listApiDog.getVehicleBag(widget.vehicle.vehicleId!, date);
       if (bag!.isEmpty()) {
-        if (mounted) {
+        routes = await cacheManager.getRoutes();
+        if (routes.isEmpty) {
+          if (!retryDone) {
+            setState(() {
+              hours += 2;
+              retryDone = true;
+            });
+            _getVehicleBag();
+          } else {
+            _putRoutesOnMap(true);
+          }
+        }
+      } else {
+        await _filterRoutes();
+      }
+      if (mounted) {
+        if (bag!.isEmpty()) {
           showSnackBar(
               message:
-                  'There is no data within $hours hours. Please try again with higher hours',
+              'There is no data within $hours hours. Please try again with higher hours or wait for data from the vehicle',
               context: context);
           setState(() {
             busy = false;
@@ -142,7 +170,6 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
           return;
         }
       }
-      await _filterRoutes();
     } catch (e) {
       pp(e);
       if (mounted) {
@@ -168,13 +195,18 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     final list = hash.keys.toList();
     pp('$mm ... _filterRoutes found ${list.length} route ids');
 
-    for (var value1 in list) {
-      final route = await listApiDog.getRoute(value1);
+    for (var routeId in list) {
+      final route = await listApiDog.getRoute(routeId);
       if (route != null) {
         routes.add(route);
       }
     }
-    _putRoutesOnMap(true);
+    for (var r in routes) {
+      await cacheManager.saveRoute(r);
+    }
+    if (routes.isNotEmpty) {
+      _putRoutesOnMap(true);
+    }
   }
 
   var routes = <lib.Route>[];
@@ -208,7 +240,6 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
   final Set<Marker> _routeMarkers = HashSet();
   final Set<Marker> _heartbeatMarkers = HashSet();
   final Set<Marker> _lastHeartbeatMarkers = HashSet();
-
 
   final Set<Circle> _circles = HashSet();
   final Set<Polyline> _polyLines = {};
@@ -256,33 +287,32 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
             infoWindow: InfoWindow(
                 title: routeLandmark.landmarkName,
                 snippet:
-                    '🍎Landmark on route:\n\n ${routeLandmark.routeName}')));
+                '🍎Landmark on route:\n\n ${routeLandmark.routeName}')));
         index++;
       }
     }
     getAllMarkers();
     if (zoomTo) {
-      setState(() {
-        showDot = true;
-      });
-      _zoomToBeginningOfRoute(hash.values.first.first);
+      if (hash.isNotEmpty) {
+        final m = hash.values.first.first;
+        final latLng =
+        LatLng(m.position!.coordinates.last, m.position!.coordinates.first);
+        _zoomToPosition(latLng);
+      }
     }
-    pp('$mm ... _putRoutesOnMap: _markers: ${_routeMarkers.length}');
   }
 
   Set<Marker> allMarkers = {};
+
   // Method to get all markers from all sets
- void getAllMarkers() {
-    pp('$mm ... getAllMarkers : route markers: ${_routeMarkers.length} heartbeats markers: ${_heartbeatMarkers.length}');
+  void getAllMarkers() {
     allMarkers.clear();
     allMarkers.addAll(_routeMarkers);
     allMarkers.addAll(_heartbeatMarkers);
     allMarkers.addAll(_lastHeartbeatMarkers);
-
- }
+  }
 
   Future _putHeartbeatOnMap(lib.VehicleHeartbeat heartbeat) async {
-    pp('$mm ... _putHeartbeatsOnMap : ${heartbeats.length} beats, markers: ${_heartbeatMarkers.length}');
     heartbeats.sort((a, b) => a.created!.compareTo(b.created!));
     _heartbeatMarkers.clear();
     if (mounted) {
@@ -327,7 +357,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
                 _handleTap();
               },
               snippet:
-                  '${E.blueDot} ${getFormattedDateLong(value.created!)}')));
+              '${E.blueDot} ${getFormattedDateLong(value.created!)}')));
     }
     //
     pp('\n\n$mm put latest heartbeat on map ...');
@@ -351,13 +381,12 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
         infoWindow: InfoWindow(
             title: heartbeat.vehicleReg,
             onTap: () async {
-              pp('$mm ... on infoWindow tapped...${getFormattedDate(heartbeat.created!)}');
+              pp('$mm ... on infoWindow tapped...${getFormattedDate(
+                  heartbeat.created!)}');
               _handleTap();
             },
             snippet:
-                '${E.blueDot} ${getFormattedDateLong(heartbeat.created!)}')));
-
-    pp('$mm ... _putHeartbeatsOnMap : markers after rebuild: ${_heartbeatMarkers.length}');
+            '${E.blueDot} ${getFormattedDateLong(heartbeat.created!)}')));
 
     heartbeats.add(heartbeat);
 
@@ -365,20 +394,18 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     if (mounted) {
       setState(() {});
     }
-    var cameraPos = CameraPosition(
-        target: LatLng(heartbeat.position!.coordinates.last,
-            heartbeat.position!.coordinates.first),
-        zoom: 14.6);
+
     try {
-      await googleMapController
-          .moveCamera(CameraUpdate.newCameraPosition(cameraPos));
+      await _zoomToPosition(LatLng(heartbeat.position!.coordinates.last,
+          heartbeat.position!.coordinates.first));
       if (mounted) {
         setState(() {
-                showDot = false;
-              });
+          showDot = false;
+        });
       }
     } catch (e) {
-      pp('$mm some error with zooming? ${E.redDot}${E.redDot}${E.redDot}${E.redDot}'
+      pp('$mm some error with zooming? ${E.redDot}${E.redDot}${E.redDot}${E
+          .redDot}'
           ' $e');
     }
   }
@@ -406,9 +433,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
 
   bool showDetails = false;
 
-  Future<void> _zoomToBeginningOfRoute(lib.RoutePoint routePoint) async {
-    final latLng = LatLng(routePoint.position!.coordinates.last,
-        routePoint.position!.coordinates.first);
+  Future<void> _zoomToPosition(LatLng latLng) async {
     var cameraPos = CameraPosition(target: latLng, zoom: 13.4);
     try {
       await googleMapController
@@ -440,105 +465,124 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
   @override
   void dispose() {
     _controller.dispose();
+    dispatchStreamSub.cancel();
+    arrivalStreamSub.cancel();
+    departureStreamSub.cancel();
+    heartbeatStreamSub.cancel();
+    passengerStreamSub.cancel();
     super.dispose();
   }
 
   bool showDot = false;
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-      appBar: AppBar(
-        title: Text(
-          '${widget.vehicle.vehicleReg}',
-          style: myTextStyleMediumLargeWithColor(
-              context, Theme.of(context).primaryColor, 24),
-        ),
-        bottom: PreferredSize(preferredSize: const Size.fromHeight(48), child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Hours',
-                  style: myTextStyleSmall(context),
-                ),
-                const SizedBox(
-                  width: 16,
-                ),
-                Text(
-                  '$hours',
-                  style: myTextStyleMediumLargeWithColor(
-                      context, Theme.of(context).primaryColor, 20),
-                ),
-                const SizedBox(
-                  width: 48,
-                ),
-                NumberDropDown(
-                    onNumberPicked: (number) {
-                      setState(() {
-                        hours = number;
-                      });
-                      _getVehicleBag();
-                    },
-                    color: Theme.of(context).primaryColor,
-                    count: 49,
-                    fontSize: 14),
-                const SizedBox(
-                  width: 48,
-                ),
-                showDot? Text(E.redDot): gapH12,
-              ],
+          appBar: AppBar(
+            title: Text(
+              '${widget.vehicle.vehicleReg}',
+              style: myTextStyleMediumLargeWithColor(
+                  context, Theme
+                  .of(context)
+                  .primaryColor, 24),
             ),
-            gapH12,
-          ],
-        )),
-      ),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-
-              Expanded(
-                  child: GoogleMap(
-                initialCameraPosition: initialCameraPosition,
-                mapType: hybrid ? MapType.hybrid : MapType.normal,
-                markers: allMarkers,
-                polylines: _polyLines,
-                onMapCreated: (cont) {
-                  pp('$mm .......... onMapCreated set up cluster managers ...........');
-                  _googleMapCompleter.complete(cont);
-                  googleMapController = cont;
-                },
-              )),
-            ],
+            bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(48),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Hours',
+                          style: myTextStyleSmall(context),
+                        ),
+                        const SizedBox(
+                          width: 16,
+                        ),
+                        Text(
+                          '$hours',
+                          style: myTextStyleMediumLargeWithColor(
+                              context, Theme
+                              .of(context)
+                              .primaryColor, 20),
+                        ),
+                        const SizedBox(
+                          width: 48,
+                        ),
+                        NumberDropDown(
+                            onNumberPicked: (number) {
+                              setState(() {
+                                hours = number;
+                              });
+                              _getVehicleBag();
+                            },
+                            color: Theme
+                                .of(context)
+                                .primaryColor,
+                            count: 49,
+                            fontSize: 14),
+                        const SizedBox(
+                          width: 48,
+                        ),
+                        showDot ? Text(E.redDot) : gapH12,
+                      ],
+                    ),
+                    gapH12,
+                  ],
+                )),
           ),
-          showPassengerCount? Positioned(
-              bottom: 20, left: 20,
-              child: PassengerCountCard(
-                  backgroundColor: Colors.black38,
-                  passengerCount: passengerCounts.last)): gapW12,
-          showDetails
-              ? Positioned(
+          body: Stack(
+            children: [
+              Column(
+                children: [
+                  Expanded(
+                      child: GoogleMap(
+                        initialCameraPosition: initialCameraPosition,
+                        mapType: hybrid ? MapType.hybrid : MapType.normal,
+                        markers: allMarkers,
+                        polylines: _polyLines,
+                        onMapCreated: (cont) {
+                          pp(
+                              '$mm .......... onMapCreated set up cluster managers ...........');
+                          _googleMapCompleter.complete(cont);
+                          googleMapController = cont;
+                        },
+                      )),
+                ],
+              ),
+              showPassengerCount
+                  ? Positioned(
+                  bottom: 20,
+                  left: 8,
+                  child: PassengerCountCard(
+                      backgroundColor: Colors.black38,
+                      passengerCount: passengerCounts.last))
+                  : gapW12,
+              showDetails
+                  ? Positioned(
                   child: Center(
                       child: VehicleDispatches(
-                          dispatchRecords: bag!.dispatchRecords, onClose: (){
-                            setState(() {
-                              showDetails = false;
-                            });
-                      },)))
-              : gapH8,
-          busy
-              ? const Positioned(
+                        dispatchRecords: bag!.dispatchRecords,
+                        onClose: () {
+                          setState(() {
+                            showDetails = false;
+                          });
+                        },
+                      )))
+                  : gapH8,
+              busy
+                  ? const Positioned(
                   child: Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 4,
-                    backgroundColor: Colors.teal,
-                  ),
-                ))
-              : gapW8,
-        ],
-      ),
-    ));
+                    child: CircularProgressIndicator(
+                      strokeWidth: 4,
+                      backgroundColor: Colors.teal,
+                    ),
+                  ))
+                  : gapW8,
+            ],
+          ),
+        ));
   }
 }

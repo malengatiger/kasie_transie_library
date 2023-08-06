@@ -27,14 +27,16 @@ class VehicleDispatches extends StatelessWidget {
         child: Column(
           children: [
             gapH16,
-            Text('Dispatches', style: myTextStyleMediumLargeWithColor(context, Theme.of(context).primaryColorLight,
+            Text('Dispatches', style: myTextStyleMediumLargeWithColor(context,
+                Theme.of(context).primaryColor,
                 28),),
             gapH8,
             Row(mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text('Total Passengers: ', style: myTextStyleSmall(context),),
                 gapW8,
-                Text(tot, style: myTextStyleMediumLargeWithColor(context, Theme.of(context).primaryColorLight,
+                Text(tot, style: myTextStyleMediumLargeWithColor(context,
+                    Theme.of(context).primaryColor,
                     20),),
               ],
             ),
@@ -78,7 +80,7 @@ class DispatchWidget extends StatelessWidget {
             Text(
               date,
               style: myTextStyleMediumLargeWithColor(
-                  context, Theme.of(context).primaryColor, 24),
+                  context, Theme.of(context).primaryColorLight, 24),
             ),
             gapH16,
             Text(
