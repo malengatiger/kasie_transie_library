@@ -104,7 +104,10 @@ class LiveClusterMapState extends State<LiveClusterMap>
       routes.add(route!);
     }
     pp('$mm ${routes.length} distinct routes from dispatches and requests ');
-    setState(() {});
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   ClusterManager<ClusterItem> _initDispatchClusterManager() {

@@ -2284,6 +2284,116 @@ class Route extends _Route with RealmEntity, RealmObjectBase, RealmObject {
   }
 }
 
+class RouteAssignment extends _RouteAssignment
+    with RealmEntity, RealmObjectBase, RealmObject {
+  RouteAssignment(
+    ObjectId id, {
+    String? vehicleId,
+    String? routeId,
+    String? routeName,
+    String? created,
+    String? vehicleReg,
+    int? active,
+    String? associationId,
+    String? associationName,
+  }) {
+    RealmObjectBase.set(this, 'id', id);
+    RealmObjectBase.set(this, 'vehicleId', vehicleId);
+    RealmObjectBase.set(this, 'routeId', routeId);
+    RealmObjectBase.set(this, 'routeName', routeName);
+    RealmObjectBase.set(this, 'created', created);
+    RealmObjectBase.set(this, 'vehicleReg', vehicleReg);
+    RealmObjectBase.set(this, 'active', active);
+    RealmObjectBase.set(this, 'associationId', associationId);
+    RealmObjectBase.set(this, 'associationName', associationName);
+  }
+
+  RouteAssignment._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, 'id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, 'id', value);
+
+  @override
+  String? get vehicleId =>
+      RealmObjectBase.get<String>(this, 'vehicleId') as String?;
+  @override
+  set vehicleId(String? value) => RealmObjectBase.set(this, 'vehicleId', value);
+
+  @override
+  String? get routeId =>
+      RealmObjectBase.get<String>(this, 'routeId') as String?;
+  @override
+  set routeId(String? value) => RealmObjectBase.set(this, 'routeId', value);
+
+  @override
+  String? get routeName =>
+      RealmObjectBase.get<String>(this, 'routeName') as String?;
+  @override
+  set routeName(String? value) => RealmObjectBase.set(this, 'routeName', value);
+
+  @override
+  String? get created =>
+      RealmObjectBase.get<String>(this, 'created') as String?;
+  @override
+  set created(String? value) => RealmObjectBase.set(this, 'created', value);
+
+  @override
+  String? get vehicleReg =>
+      RealmObjectBase.get<String>(this, 'vehicleReg') as String?;
+  @override
+  set vehicleReg(String? value) =>
+      RealmObjectBase.set(this, 'vehicleReg', value);
+
+  @override
+  int? get active => RealmObjectBase.get<int>(this, 'active') as int?;
+  @override
+  set active(int? value) => RealmObjectBase.set(this, 'active', value);
+
+  @override
+  String? get associationId =>
+      RealmObjectBase.get<String>(this, 'associationId') as String?;
+  @override
+  set associationId(String? value) =>
+      RealmObjectBase.set(this, 'associationId', value);
+
+  @override
+  String? get associationName =>
+      RealmObjectBase.get<String>(this, 'associationName') as String?;
+  @override
+  set associationName(String? value) =>
+      RealmObjectBase.set(this, 'associationName', value);
+
+  @override
+  Stream<RealmObjectChanges<RouteAssignment>> get changes =>
+      RealmObjectBase.getChanges<RouteAssignment>(this);
+
+  @override
+  RouteAssignment freeze() =>
+      RealmObjectBase.freezeObject<RouteAssignment>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(RouteAssignment._);
+    return const SchemaObject(
+        ObjectType.realmObject, RouteAssignment, 'RouteAssignment', [
+      SchemaProperty('id', RealmPropertyType.objectid, primaryKey: true),
+      SchemaProperty('vehicleId', RealmPropertyType.string,
+          optional: true, indexType: RealmIndexType.regular),
+      SchemaProperty('routeId', RealmPropertyType.string, optional: true),
+      SchemaProperty('routeName', RealmPropertyType.string, optional: true),
+      SchemaProperty('created', RealmPropertyType.string, optional: true),
+      SchemaProperty('vehicleReg', RealmPropertyType.string, optional: true),
+      SchemaProperty('active', RealmPropertyType.int, optional: true),
+      SchemaProperty('associationId', RealmPropertyType.string, optional: true),
+      SchemaProperty('associationName', RealmPropertyType.string,
+          optional: true),
+    ]);
+  }
+}
+
 class Vehicle extends _Vehicle with RealmEntity, RealmObjectBase, RealmObject {
   Vehicle(
     ObjectId id, {

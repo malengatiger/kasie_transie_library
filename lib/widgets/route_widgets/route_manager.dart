@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'package:kasie_transie_library/maps/route_map.dart';
 import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
-import 'package:kasie_transie_library/utils/prefs.dart';
+import 'package:kasie_transie_library/widgets/drop_down_widgets.dart';
 import 'package:kasie_transie_library/widgets/route_widgets/live_widget.dart';
 import 'package:kasie_transie_library/maps/cluster_maps/live_cluster_map.dart';
 import 'package:kasie_transie_library/widgets/route_widgets/route_activity.dart';
@@ -77,22 +78,23 @@ class _RouteManagerState extends State<RouteManager> {
 
   Future<void> _filter(List<lib.Route> mRoutes) async {
     for (var route in mRoutes) {
-      final marks = await listApiDog.getRouteLandmarks(route.routeId!, false);
-      if (marks.isNotEmpty) {
+      final marks = await routesIsolate.countRouteLandmarks(route.routeId!);
+      if (marks > 1) {
         routes.add(route);
       }
     }
-    pp('$mm ... routes found: ${routes.length}');
+    pp('$mm ........................ ${E.heartOrange} routes found: ${routes.length}');
   }
 
   void _generateDispatchRecords() async {
     pp('$mm ... _generateDispatchRecords');
     setState(() {
-      busy = false;
+      busy = true;
     });
     try {
-      await dataApiDog.generateRouteDispatchRecords(route!.routeId!, 10, 5);
-      _showSuccess('Dispatch record generation requests completed');
+      await dataApiDog.generateRouteDispatchRecords(routeId: route!.routeId!,
+          numberOfCars:numberOfCars, intervalInSeconds: 4);
+      _showSuccess('Dispatch record generation requests sent. Watch for action ...');
     } catch (e) {
       pp(e);
       _showError(e);
@@ -105,11 +107,11 @@ class _RouteManagerState extends State<RouteManager> {
   void _generateCommuterRequests() async {
     pp('$mm ... _generateCommuterRequests ');
     setState(() {
-      busy = false;
+      busy = true;
     });
     try {
-      await dataApiDog.generateRouteCommuterRequests(route!.routeId!, 400, 5);
-      _showSuccess('Commuter requests completed!');
+      await dataApiDog.generateRouteCommuterRequests(route!.routeId!, 400, 10);
+      _showSuccess('Commuter request generation has been sent!');
     } catch (e) {
       pp(e);
       _showError(e);
@@ -118,6 +120,8 @@ class _RouteManagerState extends State<RouteManager> {
       busy = false;
     });
   }
+
+  int numberOfCars = 3;
 
   void _navigateToMap() {
     navigateWithScale(const LiveClusterMap(), context);
@@ -133,9 +137,9 @@ class _RouteManagerState extends State<RouteManager> {
     return SafeArea(
         child: Scaffold(
       appBar: AppBar(
-        title: const Text('Route Monitor'),
+        title: const Text('Route Manager'),
         bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(60),
+            preferredSize: const Size.fromHeight(128),
             child: Column(
               children: [
                 RouteDropDown(
@@ -146,6 +150,21 @@ class _RouteManagerState extends State<RouteManager> {
                       });
                       _handleRoute();
                     }),
+                gapH8,
+                Row(mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Number of Vehicles'),
+                    gapW16,
+                    Text('$numberOfCars', style: myTextStyleMediumBold(context),),
+                    gapW32,
+                    NumberDropDown(onNumberPicked: (number){
+                      setState(() {
+                        numberOfCars = number;
+                      });
+                      _startGeneration();
+                    }, color: Theme.of(context).primaryColor, count: 11, fontSize: 16),
+                  ],
+                ),
               ],
             )),
         actions: [
@@ -180,11 +199,13 @@ class _RouteManagerState extends State<RouteManager> {
                 Expanded(
                     child: ScreenTypeLayout.builder(
                   mobile: (ctx) {
-                    return LiveOperations(
-                      height: height,
-                      width: width,
-                      restart: restart,
-                      elevation: 8.0,
+                    return SingleChildScrollView(
+                      child: LiveOperations(
+                        height: height,
+                        width: width,
+                        restart: restart,
+                        elevation: 8.0,
+                      ),
                     );
                   },
                   tablet: (ctx) {

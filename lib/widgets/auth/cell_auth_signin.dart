@@ -111,11 +111,13 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification>
   Future<void> onCodeSent(String verificationId,
       [int? forceResendToken]) async {
     this.verificationId = verificationId;
-    pp('\n\n$mm ...................... ${E.redDot} onCodeSent; verificationId: $verificationId');
+    pp('\n\n$mm ...................... ${E.redDot} '
+        'onCodeSent; verificationId: $verificationId ${E.blueDot} ... will start _initializeData ...');
     _initializeData();
   }
 
   bool initializing = false;
+
   Future _initializeData() async {
     pp('$mm ...................... ${E.redDot} _initializeData; '
         '\n ${E.blueDot} verificationId: $verificationId ${E.blueDot} smsCode: $smsCode');
@@ -190,6 +192,7 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification>
   }
 
   String? cellphoneNumber, smsCode;
+
   @override
   void onSMSCodeRequested(String phoneNumber) {
     pp('$mm ... onSMSCodeRequested, phoneNumber: $phoneNumber');
@@ -197,12 +200,14 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification>
     setState(() {
       child = MySmsCodeInput(
         onSMSCode: (smsCode) async {
-          pp('$mm ...onSMSCodeRequested:  SMSCodeInput ${E.blueDot} onSubmit: $smsCode provider: ${provider.providerId}'
+          pp('$mm ...MySmsCodeInput:  onSMSCode ${E.blueDot} smsCode: $smsCode '
+              'provider: ${provider.providerId}'
               ' ${E.redDot} verificationId: $verificationId');
           this.smsCode = smsCode;
           if (verificationId != null) {
             pp('$mm ...onSMSCodeRequested:  verificationId: $verificationId');
-            await _initializeData();
+              await _initializeData();
+
           }
         },
       );
@@ -334,7 +339,11 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification>
     try {
       // tries default recovery strategy
       //defaultOnAuthError(provider, error);
+      showSnackBar(
+          duration: const Duration(seconds: 10),
+          message: 'SMS Code Invalid: ${error.toString()}', context: context);
     } catch (err) {
+      pp(error);
       setState(() {
         //defaultOnAuthError(provider, error);
       });
@@ -349,7 +358,7 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification>
 
   @override
   void onCredentialReceived(fb.AuthCredential credential) {
-    pp('$mm onCredentialReceived ');
+    pp('$mm onCredentialReceived : $credential');
   }
 
   @override

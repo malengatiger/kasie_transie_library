@@ -41,6 +41,7 @@ StateProvince buildState(Map map) {
   );
   return m;
 }
+
 Commuter buildCommuter(Map map) {
   // pp('${E.broc}  json for User, check _id .......');
   // myPrettyJsonPrint(map);
@@ -62,6 +63,7 @@ Commuter buildCommuter(Map map) {
 
   return m;
 }
+
 User buildUser(Map map) {
   // pp('${E.broc}  json for User, check _id .......');
   // myPrettyJsonPrint(map);
@@ -307,8 +309,23 @@ Vehicle buildVehicle(Map vehicleJson) {
     dateInstalled: vehicleJson['dateInstalled'],
     ownerId: vehicleJson['ownerId'],
     passengerCapacity: vehicleJson['passengerCapacity'],
-
     ownerName: vehicleJson['ownerName'],
+  );
+  return m;
+}
+
+RouteAssignment buildRouteAssignment(Map map) {
+  var id = rm.ObjectId.fromHexString(map['_id'] as String);
+  var m = RouteAssignment(
+    id,
+    vehicleId: map['vehicleId'],
+    vehicleReg: map['vehicleReg'],
+    associationId: map['associationId'],
+    associationName: map['associationName'],
+    created: map['created'],
+    routeId: map['routeId'],
+    routeName: map['routeName'],
+    active: map['active'],
   );
   return m;
 }
@@ -335,7 +352,6 @@ DispatchRecord buildDispatchRecord(Map j) {
     landmarkName: j['landmarkName'],
     routeId: j['routeId'],
     position: buildPosition(j['position']),
-
   );
   return m;
 }
@@ -358,11 +374,10 @@ CommuterRequest buildCommuterRequest(Map j) {
     numberOfPassengers: j['numberOfPassengers'],
     distanceToRouteLandmarkInMetres: j['distanceToRouteLandmarkInMetres'],
     distanceToRoutePointInMetres: j['distanceToRoutePointInMetres'],
-    currentPosition: buildPosition( j['currentPosition']),
+    currentPosition: buildPosition(j['currentPosition']),
   );
   return m;
 }
-
 
 VehicleArrival buildVehicleArrival(Map j) {
   var id = rm.ObjectId.fromHexString(j['_id'] as String);
@@ -481,11 +496,10 @@ LocationRequest buildLocationRequest(Map j) {
     vehicleReg: j['vehicleReg'],
     userName: j['userName'],
     created: j['created'],
-
-
   );
   return m;
 }
+
 AmbassadorCheckIn buildAmbassadorCheckIn(Map j) {
   var id = rm.ObjectId.fromHexString(j['_id'] as String);
   var m = AmbassadorCheckIn(
@@ -497,10 +511,10 @@ AmbassadorCheckIn buildAmbassadorCheckIn(Map j) {
     userName: j['userName'],
     created: j['created'],
     position: buildPosition(j['position']),
-
   );
   return m;
 }
+
 AmbassadorPassengerCount buildAmbassadorPassengerCount(Map j) {
   var id = rm.ObjectId.fromHexString(j['_id'] as String);
   var m = AmbassadorPassengerCount(

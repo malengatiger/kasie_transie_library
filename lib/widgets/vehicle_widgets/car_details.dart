@@ -84,8 +84,9 @@ class CarDetailsState extends State<CarDetails>
   String? routeName;
 
   void _listen() async {
+    pp('$mm ............... listen to FCM .............................');
     arrivalStreamSub = fcmBloc.vehicleArrivalStream.listen((event) {
-      pp('\n\n\n$mm vehicleArrivalStream delivered: ${E.leaf2} ${event.vehicleReg} at ${DateTime.now().toIso8601String()}');
+      pp('$mm vehicleArrivalStream delivered: ${E.leaf2} ${event.vehicleReg} at ${DateTime.now().toIso8601String()}');
       if (event.vehicleId == widget.vehicle.vehicleId) {
         arrivals++;
         if (mounted) {
@@ -94,7 +95,7 @@ class CarDetailsState extends State<CarDetails>
       }
     });
     departureStreamSub = fcmBloc.vehicleDepartureStream.listen((event) {
-      pp('\n\n\n$mm vehicleDepartureStream delivered: ${E.leaf2} ${event.vehicleReg} at ${DateTime.now().toIso8601String()}');
+      pp('$mm vehicleDepartureStream delivered: ${E.leaf2} ${event.vehicleReg} at ${DateTime.now().toIso8601String()}');
       if (event.vehicleId == widget.vehicle.vehicleId) {
         departures++;
         if (mounted) {
@@ -103,7 +104,7 @@ class CarDetailsState extends State<CarDetails>
       }
     });
     respSub = fcmBloc.locationResponseStream.listen((event) {
-      pp('\n\n\n$mm locationResponseStream delivered: ${E.leaf2} ${event.vehicleReg} at ${DateTime.now().toIso8601String()}');
+      pp('$mm locationResponseStream delivered: ${E.leaf2} ${event.vehicleReg} at ${DateTime.now().toIso8601String()}');
       locationResponse = event;
       if (mounted) {
         _navigateToMap();
@@ -111,7 +112,7 @@ class CarDetailsState extends State<CarDetails>
     });
     dispatchStreamSub =
         fcmBloc.dispatchStream.listen((lib.DispatchRecord dRec) {
-      pp('$mm\n\n\n ... fcmBloc.dispatchStream delivered dispatch for: ${dRec.vehicleReg}');
+      pp('$mm ... fcmBloc.dispatchStream delivered dispatch for: ${dRec.vehicleReg}');
       if (dRec.vehicleId == widget.vehicle.vehicleId) {
         dispatches++;
         routeName = dRec.routeName;
@@ -191,6 +192,7 @@ class CarDetailsState extends State<CarDetails>
   }
 
   var paCounts = <lib.AmbassadorPassengerCount>[];
+
   void _getData() async {
     pp('$mm ... getData ...');
     setState(() {
@@ -406,10 +408,8 @@ class CarDetailsState extends State<CarDetails>
                                       ? 'Request Photo/Video'
                                       : requestMedia!),
                                 )),
-                            Expanded(
-                              child: counts.isEmpty
-                                  ? const SizedBox()
-                                  : Padding(
+                            arrivalsText == null? gapW16: Expanded(
+                              child: Padding(
                                 padding: const EdgeInsets.all(16.0),
                                 child: CountsGridWidget(
                                   arrivalsText: arrivalsText!,

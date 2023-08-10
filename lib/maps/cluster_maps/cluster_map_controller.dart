@@ -15,6 +15,7 @@ import 'package:kasie_transie_library/widgets/vehicle_passenger_count.dart';
 
 import 'package:badges/badges.dart' as bd;
 
+import '../../isolates/routes_isolate.dart';
 import '../../widgets/drop_down_widgets.dart';
 
 class ClusterMapController extends StatefulWidget {
@@ -54,6 +55,15 @@ class ClusterMapControllerState extends State<ClusterMapController> {
     super.initState();
     _getAssociationRouteData(true);
   }
+  Future<void> _filter(List<lib.Route> mRoutes) async {
+    for (var route in mRoutes) {
+      final marks = await routesIsolate.countRouteLandmarks(route.routeId!);
+      if (marks > 1) {
+        routes.add(route);
+      }
+    }
+    pp('$mm ... routes found: ${routes.length}');
+  }
 
   void _getAssociationRouteData(bool refresh) async {
     pp('$mm ... _getAssociationRouteData; refresh: $refresh');
@@ -67,8 +77,9 @@ class ClusterMapControllerState extends State<ClusterMapController> {
       busy = true;
     });
     try {
-      routes = await listApiDog.getRoutes(
+      final mRoutes = await listApiDog.getRoutes(
           AssociationParameter(association!.associationId!, refresh));
+      _filter(mRoutes);
       dispatches = await listApiDog.getAssociationDispatchRecords(
           associationId: association!.associationId!,
           refresh: refresh,
@@ -147,16 +158,7 @@ class ClusterMapControllerState extends State<ClusterMapController> {
     String mDate = getFormattedDateLong(date!);
     if (_showPassengerCounts) {
       final passengerCountCovers = <PassengerCountCover>[];
-      for (var pc in passengerCounts) {
-        if (pc.routeId == route!.routeId) {
-          final cover = PassengerCountCover(
-            passengerCount: pc,
-            latLng: LatLng(
-                pc.position!.coordinates[1], pc.position!.coordinates[0]),
-          );
-          passengerCountCovers.add(cover);
-        }
-      }
+      _buildPassengerCovers(passengerCountCovers);
       if (mounted) {
         if (passengerCountCovers.isEmpty) {
           showSnackBar(message: "No data found for map", context: context);
@@ -173,23 +175,18 @@ class ClusterMapControllerState extends State<ClusterMapController> {
     if (_showDispatches) {
       final dispatchCovers = <DispatchRecordCover>[];
       for (var pc in dispatches) {
-        if (pc.routeId == route!.routeId) {
-          final cover = DispatchRecordCover(
-            dispatchRecord: pc,
-            latLng: LatLng(
-                pc.position!.coordinates[1], pc.position!.coordinates[0]),
-          );
-          dispatchCovers.add(cover);
-        }
+        _buildDispatchCovers(pc, dispatchCovers);
       }
       if (mounted) {
         if (dispatchCovers.isEmpty) {
           showSnackBar(message: "No data found for map", context: context);
         } else {
+          final covers = _buildRequestCovers();
           navigateWithScale(
               DispatchClusterMap(
                 date: mDate,
                 dispatchRecordCovers: dispatchCovers,
+                commuterRequestCovers: covers,
               ),
               context);
         }
@@ -219,6 +216,30 @@ class ClusterMapControllerState extends State<ClusterMapController> {
               context);
         }
       }
+    }
+  }
+
+  void _buildPassengerCovers(List<PassengerCountCover> passengerCountCovers) {
+    for (var pc in passengerCounts) {
+      if (pc.routeId == route!.routeId) {
+        final cover = PassengerCountCover(
+          passengerCount: pc,
+          latLng: LatLng(
+              pc.position!.coordinates[1], pc.position!.coordinates[0]),
+        );
+        passengerCountCovers.add(cover);
+      }
+    }
+  }
+
+  void _buildDispatchCovers(lib.DispatchRecord pc, List<DispatchRecordCover> dispatchCovers) {
+    if (pc.routeId == route!.routeId) {
+      final cover = DispatchRecordCover(
+        dispatchRecord: pc,
+        latLng: LatLng(
+            pc.position!.coordinates[1], pc.position!.coordinates[0]),
+      );
+      dispatchCovers.add(cover);
     }
   }
 
@@ -284,10 +305,12 @@ class ClusterMapControllerState extends State<ClusterMapController> {
             );
             dispatchCovers.add(cover);
           }
+          List<CommuterRequestCover> requestCovers = _buildRequestCovers();
           navigateWithScale(
               DispatchClusterMap(
                 date: mDate,
                 dispatchRecordCovers: dispatchCovers,
+                commuterRequestCovers: requestCovers,
               ),
               context);
         }
@@ -314,6 +337,19 @@ class ClusterMapControllerState extends State<ClusterMapController> {
         }
       }
     }
+  }
+
+  List<CommuterRequestCover> _buildRequestCovers() {
+     final requestCovers = <CommuterRequestCover>[];
+    for (var pc in requests) {
+      final cover = CommuterRequestCover(
+        request: pc,
+        latLng: LatLng(
+            pc.currentPosition!.coordinates[1], pc.currentPosition!.coordinates[0]),
+      );
+      requestCovers.add(cover);
+    }
+    return requestCovers;
   }
 
   @override
@@ -375,7 +411,7 @@ class ClusterMapControllerState extends State<ClusterMapController> {
                               },
                               icon: const Icon(Icons.map),
                               label: Padding(
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(12.0),
                                 child: Text(
                                   'Map Across Association',
                                   style: myTextStyleSmallBlack(context),

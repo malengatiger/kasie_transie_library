@@ -9,12 +9,14 @@ import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart' as lib;
 import 'package:kasie_transie_library/data/vehicle_bag.dart';
 import 'package:kasie_transie_library/maps/passenger_count_card.dart';
+import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/vehicle_dispatches.dart';
 
 import '../isolates/routes_isolate.dart';
 import '../messaging/fcm_bloc.dart';
 import '../utils/emojis.dart';
+import '../widgets/counts_widget.dart';
 import '../widgets/drop_down_widgets.dart';
 
 class VehicleMonitorMap extends StatefulWidget {
@@ -34,7 +36,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
   final Completer<GoogleMapController> _googleMapCompleter = Completer();
   late GoogleMapController googleMapController;
   CameraPosition initialCameraPosition =
-  const CameraPosition(target: LatLng(-27.6, 27.4), zoom: 14);
+      const CameraPosition(target: LatLng(-27.6, 27.4), zoom: 14);
 
   var dispatches = <lib.DispatchRecord>[];
   var heartbeats = <lib.VehicleHeartbeat>[];
@@ -65,8 +67,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
 
   void _listen() async {
     arrivalStreamSub = fcmBloc.vehicleArrivalStream.listen((event) async {
-      pp('$mm ... vehicleArrivalStream delivered: ${E.leaf2} ${event
-          .vehicleReg} at ${event.created}');
+      pp('$mm ... vehicleArrivalStream delivered: ${E.leaf2} ${event.vehicleReg} at ${event.created}');
       if (event.vehicleId == widget.vehicle.vehicleId) {
         arrivals.add(event);
         // if (mounted) {
@@ -75,8 +76,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
       }
     });
     departureStreamSub = fcmBloc.vehicleDepartureStream.listen((event) {
-      pp('$mm ... vehicleDepartureStream delivered: ${E.leaf2} ${event
-          .vehicleReg} at ${event.created}');
+      pp('$mm ... vehicleDepartureStream delivered: ${E.leaf2} ${event.vehicleReg} at ${event.created}');
       if (event.vehicleId == widget.vehicle.vehicleId) {
         departures.add(event);
         // if (mounted) {
@@ -87,21 +87,18 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
 
     dispatchStreamSub =
         fcmBloc.dispatchStream.listen((lib.DispatchRecord dRec) async {
-          pp('$mm ... dispatchStream delivered dispatch for: ${dRec
-              .vehicleReg} at ${dRec.landmarkName} at ${dRec.created}');
-          if (dRec.vehicleId == widget.vehicle.vehicleId) {
-            dispatches.add(dRec);
-            totalPassengers += dRec.passengers!;
-            await routeExists(dRec.routeId!);
-            // if (mounted) {
-            //   setState(() {});
-            // }
-          }
-        });
+      pp('$mm ... dispatchStream delivered dispatch for: ${dRec.vehicleReg} at ${dRec.landmarkName} at ${dRec.created}');
+      if (dRec.vehicleId == widget.vehicle.vehicleId) {
+        dispatches.add(dRec);
+        totalPassengers += dRec.passengers!;
+        // if (mounted) {
+        //   setState(() {});
+        // }
+      }
+    });
     passengerStreamSub = fcmBloc.passengerCountStream
         .listen((lib.AmbassadorPassengerCount cunt) {
-      pp('$mm ... passengerCountStream delivered count for: ${cunt
-          .vehicleReg} at ${cunt.created}');
+      pp('$mm ... passengerCountStream delivered count for: ${cunt.vehicleReg} at ${cunt.created}');
       if (cunt.vehicleId == widget.vehicle.vehicleId) {
         totalPassengers += cunt.passengersIn!;
         passengerCounts.add(cunt);
@@ -119,9 +116,9 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     });
     heartbeatStreamSub = fcmBloc.heartbeatStreamStream
         .listen((lib.VehicleHeartbeat heartbeat) async {
-      pp('$mm ... heartbeatStreamStream delivered heartbeat for: ${heartbeat
-          .vehicleReg} at ${heartbeat.created}');
+      pp('$mm ... heartbeatStreamStream delivered heartbeat for: ${heartbeat.vehicleReg} at ${heartbeat.created}');
       if (heartbeat.vehicleId == widget.vehicle.vehicleId) {
+        //
         await _putHeartbeatOnMap(heartbeat);
       }
     });
@@ -131,8 +128,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
   bool retryDone = false;
 
   Future _getVehicleBag() async {
-    pp('$mm ... getVehicleBag that shows the last ${E
-        .blueDot} $hours hours .... ');
+    pp('$mm ... getVehicleBag that shows the last ${E.blueDot} $hours hours .... ');
     setState(() {
       busy = true;
     });
@@ -143,26 +139,14 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     try {
       bag = await listApiDog.getVehicleBag(widget.vehicle.vehicleId!, date);
       if (bag!.isEmpty()) {
-        routes = await cacheManager.getRoutes();
-        if (routes.isEmpty) {
-          if (!retryDone) {
-            setState(() {
-              hours += 2;
-              retryDone = true;
-            });
-            _getVehicleBag();
-          } else {
-            _putRoutesOnMap(true);
-          }
-        }
       } else {
-        await _filterRoutes();
+        await _getRoutes();
       }
       if (mounted) {
         if (bag!.isEmpty()) {
           showSnackBar(
               message:
-              'There is no data within $hours hours. Please try again with higher hours or wait for data from the vehicle',
+                  'There is no data within $hours hours. Please try again with higher hours or wait for data from the vehicle',
               context: context);
           setState(() {
             busy = false;
@@ -183,27 +167,28 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     });
   }
 
-  Future<void> _filterRoutes() async {
+  Future<void> _getRoutes() async {
+    final ass = await listApiDog.getVehicleRouteAssignments(
+        widget.vehicle.vehicleId!, false);
     var hash = HashMap<String, String>();
-    for (var dispatch in bag!.dispatchRecords) {
-      hash[dispatch.routeId!] = dispatch.routeId!;
-    }
-    for (var count in bag!.passengerCounts) {
-      hash[count.routeId!] = count.routeId!;
-    }
 
-    final list = hash.keys.toList();
-    pp('$mm ... _filterRoutes found ${list.length} route ids');
-
-    for (var routeId in list) {
-      final route = await listApiDog.getRoute(routeId);
-      if (route != null) {
-        routes.add(route);
+    if (ass.isNotEmpty) {
+      for (var a in ass) {
+        hash[a.routeId!] = a.routeId!;
       }
+      final list = hash.keys.toList();
+      pp('$mm ... _filterRoutes found ${list.length} route ids from route assignments');
+
+      for (var routeId in list) {
+        final route = await listApiDog.getRoute(routeId);
+        if (route != null) {
+          routes.add(route);
+        }
+      }
+    } else {
+      routes = await listApiDog.getRoutes(AssociationParameter(widget.vehicle.associationId!, false));
     }
-    for (var r in routes) {
-      await cacheManager.saveRoute(r);
-    }
+
     if (routes.isNotEmpty) {
       _putRoutesOnMap(true);
     }
@@ -211,7 +196,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
 
   var routes = <lib.Route>[];
 
-  Future routeExists(String routeId) async {
+  Future _routeExists(String routeId) async {
     if (routes.isEmpty) {
       await _handleRoute(routeId);
     } else {
@@ -265,16 +250,24 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
           color: getColor(route.color!),
           width: 12,
           points: latLngs,
+          zIndex: 0,
+          onTap: () {
+            pp('$mm ... polyLine tapped; route: ${points.first.routeName}');
+            if (mounted) {
+              showToast(message: '${points.first.routeName}', context: context);
+            }
+          },
+          consumeTapEvents: true,
           polylineId: PolylineId(route.routeId!));
 
       _polyLines.add(polyLine);
 
       int index = 0;
+
       for (var routeLandmark in marks) {
-        final icon = await getMarkerBitmap(100,
+        final icon = await getMarkerBitmap(64,
             text: '${index + 1}',
             color: route.color!,
-            borderColor: Colors.black,
             fontSize: 28,
             fontWeight: FontWeight.w900);
 
@@ -287,7 +280,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
             infoWindow: InfoWindow(
                 title: routeLandmark.landmarkName,
                 snippet:
-                '🍎Landmark on route:\n\n ${routeLandmark.routeName}')));
+                    '🍎Landmark on route:\n\n ${routeLandmark.routeName}')));
         index++;
       }
     }
@@ -296,7 +289,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
       if (hash.isNotEmpty) {
         final m = hash.values.first.first;
         final latLng =
-        LatLng(m.position!.coordinates.last, m.position!.coordinates.first);
+            LatLng(m.position!.coordinates.last, m.position!.coordinates.first);
         _zoomToPosition(latLng);
       }
     }
@@ -357,7 +350,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
                 _handleTap();
               },
               snippet:
-              '${E.blueDot} ${getFormattedDateLong(value.created!)}')));
+                  '${E.blueDot} ${getFormattedDateLong(value.created!)}')));
     }
     //
     pp('\n\n$mm put latest heartbeat on map ...');
@@ -369,6 +362,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
         path: 'assets/car2.png');
 
     _lastHeartbeatMarkers.clear();
+
     _lastHeartbeatMarkers.add(Marker(
         markerId: MarkerId('hb_$key'),
         icon: iconLast,
@@ -381,12 +375,11 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
         infoWindow: InfoWindow(
             title: heartbeat.vehicleReg,
             onTap: () async {
-              pp('$mm ... on infoWindow tapped...${getFormattedDate(
-                  heartbeat.created!)}');
+              pp('$mm ... on infoWindow tapped...${getFormattedDate(heartbeat.created!)}');
               _handleTap();
             },
             snippet:
-            '${E.blueDot} ${getFormattedDateLong(heartbeat.created!)}')));
+                '${E.blueDot} ${getFormattedDateLong(heartbeat.created!)}')));
 
     heartbeats.add(heartbeat);
 
@@ -404,8 +397,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
         });
       }
     } catch (e) {
-      pp('$mm some error with zooming? ${E.redDot}${E.redDot}${E.redDot}${E
-          .redDot}'
+      pp('$mm some error with zooming? ${E.redDot}${E.redDot}${E.redDot}${E.redDot}'
           ' $e');
     }
   }
@@ -475,114 +467,125 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
 
   bool showDot = false;
 
+  void _showCounts() {
+    showModalBottomSheet(context: context, builder: (ctx){
+      return CountsGridWidget(
+        arrivals: arrivals.length,
+        departures: departures.length,
+        dispatches: dispatches.length,
+        passengerCounts: passengerCounts.length,  //todo calculate passengers
+        heartbeats: heartbeats.length,
+        arrivalsText: 'Arrivals',
+        departuresText: 'Departures',
+        dispatchesText: 'Dispatches',
+        heartbeatText: 'Heartbeats',
+        passengerCountsText: 'Passengers',
+
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-          appBar: AppBar(
-            title: Text(
-              '${widget.vehicle.vehicleReg}',
-              style: myTextStyleMediumLargeWithColor(
-                  context, Theme
-                  .of(context)
-                  .primaryColor, 24),
-            ),
-            bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(48),
-                child: Column(
+      appBar: AppBar(
+        title: Text(
+          '${widget.vehicle.vehicleReg}',
+          style: myTextStyleMediumLargeWithColor(
+              context, Theme.of(context).primaryColor, 24),
+        ),
+        bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(48),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Hours',
-                          style: myTextStyleSmall(context),
-                        ),
-                        const SizedBox(
-                          width: 16,
-                        ),
-                        Text(
-                          '$hours',
-                          style: myTextStyleMediumLargeWithColor(
-                              context, Theme
-                              .of(context)
-                              .primaryColor, 20),
-                        ),
-                        const SizedBox(
-                          width: 48,
-                        ),
-                        NumberDropDown(
-                            onNumberPicked: (number) {
-                              setState(() {
-                                hours = number;
-                              });
-                              _getVehicleBag();
-                            },
-                            color: Theme
-                                .of(context)
-                                .primaryColor,
-                            count: 49,
-                            fontSize: 14),
-                        const SizedBox(
-                          width: 48,
-                        ),
-                        showDot ? Text(E.redDot) : gapH12,
-                      ],
+                    Text(
+                      'Hours',
+                      style: myTextStyleSmall(context),
                     ),
-                    gapH12,
-                  ],
-                )),
-          ),
-          body: Stack(
-            children: [
-              Column(
-                children: [
-                  Expanded(
-                      child: GoogleMap(
-                        initialCameraPosition: initialCameraPosition,
-                        mapType: hybrid ? MapType.hybrid : MapType.normal,
-                        markers: allMarkers,
-                        polylines: _polyLines,
-                        onMapCreated: (cont) {
-                          pp(
-                              '$mm .......... onMapCreated set up cluster managers ...........');
-                          _googleMapCompleter.complete(cont);
-                          googleMapController = cont;
+                    const SizedBox(
+                      width: 16,
+                    ),
+                    Text(
+                      '$hours',
+                      style: myTextStyleMediumLargeWithColor(
+                          context, Theme.of(context).primaryColor, 20),
+                    ),
+                    const SizedBox(
+                      width: 100,
+                    ),
+                    NumberDropDown(
+                        onNumberPicked: (number) {
+                          setState(() {
+                            hours = number;
+                          });
+                          _getVehicleBag();
                         },
-                      )),
-                ],
-              ),
-              showPassengerCount
-                  ? Positioned(
+                        color: Theme.of(context).primaryColor,
+                        count: 49,
+                        fontSize: 14),
+                    const SizedBox(
+                      width: 48,
+                    ),
+                    showDot ? Text(E.redDot) : gapH12,
+                  ],
+                ),
+                gapH12,
+              ],
+            )),
+      ),
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              Expanded(
+                  child: GoogleMap(
+                initialCameraPosition: initialCameraPosition,
+                mapType: hybrid ? MapType.hybrid : MapType.normal,
+                markers: allMarkers,
+                polylines: _polyLines,
+                onMapCreated: (cont) {
+                  pp('$mm .......... onMapCreated set up cluster managers ...........');
+                  _googleMapCompleter.complete(cont);
+                  googleMapController = cont;
+                },
+              )),
+            ],
+          ),
+          showPassengerCount
+              ? Positioned(
                   bottom: 20,
                   left: 8,
                   child: PassengerCountCard(
                       backgroundColor: Colors.black38,
                       passengerCount: passengerCounts.last))
-                  : gapW12,
-              showDetails
-                  ? Positioned(
+              : gapW12,
+          showDetails
+              ? Positioned(
                   child: Center(
                       child: VehicleDispatches(
-                        dispatchRecords: bag!.dispatchRecords,
-                        onClose: () {
-                          setState(() {
-                            showDetails = false;
-                          });
-                        },
-                      )))
-                  : gapH8,
-              busy
-                  ? const Positioned(
+                  dispatchRecords: bag!.dispatchRecords,
+                  onClose: () {
+                    setState(() {
+                      showDetails = false;
+                    });
+                  },
+                )))
+              : gapH8,
+          busy
+              ? const Positioned(
                   child: Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 4,
-                      backgroundColor: Colors.teal,
-                    ),
-                  ))
-                  : gapW8,
-            ],
-          ),
-        ));
+                  child: CircularProgressIndicator(
+                    strokeWidth: 4,
+                    backgroundColor: Colors.teal,
+                  ),
+                ))
+              : gapW8,
+        ],
+      ),
+    ));
   }
 }

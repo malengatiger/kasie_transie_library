@@ -399,7 +399,8 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
                                           controller: codeController,
                                           onCompleted: (v) {
                                             pp(
-                                                "$mm PinCodeTextField: Completed: $v - should call submit ...");
+                                                "$mm PinCodeTextField: Completed: $v - should call _processSignIn ...");
+                                            //_processSignIn();
                                           },
                                           onChanged: (value) {
                                             pp(value);

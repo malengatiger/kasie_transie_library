@@ -147,7 +147,6 @@ class LocationResponseMapState extends State<LocationResponseMap> {
     final icon = getMarkerBitmap(72,
         text: '${index + 1}',
         color: color,
-        borderColor: borderColor,
         fontSize: 32,
         fontWeight: FontWeight.w900);
     return icon;
@@ -167,7 +166,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
 
         final icon = await getMarkerBitmap(72,
             text: '${index + 1}',
-            color: route.color!, borderColor: Colors.black, fontSize: 28, fontWeight: FontWeight.normal);
+            color: route.color!,  fontSize: 28, fontWeight: FontWeight.normal);
 
         _markers.add(Marker(
             markerId: MarkerId(mark.landmarkId!),
@@ -197,19 +196,15 @@ class LocationResponseMapState extends State<LocationResponseMap> {
     final latLng = LatLng(widget.locationResponse.position!.coordinates[1],
         widget.locationResponse.position!.coordinates[0]);
 
-    // var intList = await getBytesFromAsset("assets/markers/footprint.png", 108);
-    // final icon = BitmapDescriptor.fromBytes(intList);
-    final ic = await getMarkerBitmap(
-      128,
-      text: widget.locationResponse.vehicleReg!,
-      color: 'black',
-      borderColor: Colors.white,
-      fontSize: 16,
-      fontWeight: FontWeight.w900,
-    );
+    final icon = await getTaxiMapIcon(iconSize: 160,
+        text: widget.locationResponse.vehicleReg!, style: const TextStyle(
+          color: Colors.yellow,
+          fontWeight: FontWeight.w900,
+          fontSize: 20,
+        ), path: 'assets/car2.png');
     _markers.add(Marker(
         markerId: MarkerId(widget.locationResponse.vehicleId!),
-        icon: ic,
+        icon: icon,
         zIndex: 2,
         position: latLng,
         onTap: () {

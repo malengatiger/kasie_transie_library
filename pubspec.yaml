@@ -52,7 +52,7 @@ dependencies:
   qr_code_scanner: ^1.0.1
   audioplayers: ^4.1.0
   geojson: ^1.0.0
-  location: ^4.4.0
+#  location: ^4.4.0
   native_device_orientation: ^1.1.4
   image: ^4.0.17
   video_thumbnail: ^0.5.3
@@ -71,13 +71,9 @@ dependencies:
   google_maps_cluster_manager: ^3.0.0+1
   firebase_analytics: ^10.4.4
   background_location: ^0.11.8
-
   url_launcher:
   flutter_polyline_points:
   flutter_dotenv:
-
-
-
   dots_indicator:
   google_fonts:
   shared_preferences:

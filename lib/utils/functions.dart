@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,15 +10,14 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image/image.dart' as img;
 import 'package:intl/date_symbol_data_file.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:path_provider/path_provider.dart';
 import 'package:pretty_json/pretty_json.dart';
-import 'dart:ui' as ui;
-import 'package:image/image.dart' as img;
-import 'emojis.dart';
 import 'package:video_thumbnail/video_thumbnail.dart' as vt;
-import 'package:image/image.dart' as img;
+
+import 'emojis.dart';
 
 pp(dynamic msg) {
   var time = getFormattedDateHour(DateTime.now().toIso8601String());
@@ -754,23 +754,24 @@ Future<BitmapDescriptor> getTaxiMapIcon(
 
   canvas.drawImage(image, const Offset(0, 0), Paint());
 
-    TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
-    painter.text = TextSpan(
-      text: text,
-      style: style,
-    );
-    painter.layout();
-    painter.paint(
-      canvas,
-      Offset(iconSize / 2 - painter.width / 2, iconSize / 2 - painter.height / 2),
-    );
+  TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
+  painter.text = TextSpan(
+    text: text,
+    style: style,
+  );
+  painter.layout();
+  painter.paint(
+    canvas,
+    const Offset(0.0, 56.0),
+  );
 
   // final double textX = (iconSize - textPainter.width) / 2.0;
   // final double textY = (iconSize - textPainter.height) / 2.0;
   // textPainter.paint(canvas, Offset(textX, textY));
 
-  final img =
-      await pictureRecorder.endRecording().toImage(iconSize.toInt(), iconSize.toInt());
+  final img = await pictureRecorder
+      .endRecording()
+      .toImage(iconSize.toInt(), iconSize.toInt());
   final data = await img.toByteData(format: ui.ImageByteFormat.png) as ByteData;
 
   return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
@@ -834,10 +835,19 @@ Future<BitmapDescriptor> getVehicleMarkerBitmap(int size,
 Future<BitmapDescriptor> getMarkerBitmap(int size,
     {String? text,
     required String color,
-    required Color borderColor,
+    Color? borderColor,
     required double fontSize,
     required FontWeight fontWeight}) async {
   if (kIsWeb) size = (size / 2).floor();
+  if (borderColor == null) {
+    borderColor = Colors.black;
+    if (color == 'black') {
+      borderColor = Colors.white;
+    }
+    if (color == 'white') {
+      borderColor = Colors.black;
+    }
+  }
   var textColor = Colors.white;
   switch (color) {
     case 'white':
@@ -970,6 +980,7 @@ Future<BitmapDescriptor> getBitmapDescriptor(
 }
 
 final colorHashMap = HashMap<String, MyRGB>();
+
 void _buildColorHashMap() {
   colorHashMap.clear();
   colorHashMap['red'] = MyRGB(red: 255, green: 0, blue: 0);
@@ -989,12 +1000,13 @@ const gapW4 = SizedBox(width: 4.0);
 const gapW8 = SizedBox(width: 8.0);
 const gapW12 = SizedBox(width: 12.0);
 const gapW16 = SizedBox(width: 16.0);
+const gapW32 = SizedBox(width: 32.0);
 
 const gapH4 = SizedBox(height: 4.0);
 const gapH8 = SizedBox(height: 8.0);
 const gapH12 = SizedBox(height: 12.0);
 const gapH16 = SizedBox(height: 16.0);
-
+const gapH32 = SizedBox(height: 32.0);
 
 showToast(
     {required String message,
@@ -1014,10 +1026,10 @@ showToast(
   Widget toastContainer = Container(
     width: 320,
     padding: EdgeInsets.symmetric(
-        horizontal: padding ?? 8.0, vertical: padding ?? 8.0),
+        horizontal: padding ?? 20.0, vertical: padding ?? 20.0),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(8.0),
-      color: backgroundColor ?? Colors.white,
+      color: backgroundColor ?? Colors.black,
     ),
     child: Row(
       mainAxisSize: MainAxisSize.max,

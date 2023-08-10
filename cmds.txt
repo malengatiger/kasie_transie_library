@@ -28,7 +28,7 @@ https://stackoverflow.com/questions/65921257/flutter-display-log-in-release-mode
 
 //wireless debug
  adb pair 192.168.86.29:42541
- adb pair 192.168.86.250:45235
+ adb pair 192.168.86.249:43671
 
 
 

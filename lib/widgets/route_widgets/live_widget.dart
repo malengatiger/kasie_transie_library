@@ -30,13 +30,15 @@ class _LiveOperationsState extends State<LiveOperations> {
   var requests = <lib.CommuterRequest>[];
   var heartbeats = <lib.VehicleHeartbeat>[];
   var arrivals = <lib.VehicleArrival>[];
-
+  var departures = <lib.VehicleDeparture>[];
   var passengerCounts = <lib.AmbassadorPassengerCount>[];
   late StreamSubscription<lib.AmbassadorPassengerCount> passengerSub;
   late StreamSubscription<lib.DispatchRecord> dispatchSub;
   late StreamSubscription<lib.CommuterRequest> requestSub;
   late StreamSubscription<lib.VehicleHeartbeat> heartbeatSub;
   late StreamSubscription<lib.VehicleArrival> arrivalsSub;
+  late StreamSubscription<lib.VehicleDeparture> departureSub;
+
 
   @override
   void initState() {
@@ -52,6 +54,7 @@ class _LiveOperationsState extends State<LiveOperations> {
       heartbeats.clear();
       arrivals.clear();
       passengerCounts.clear();
+      departures.clear();
     }
   }
 
@@ -61,16 +64,26 @@ class _LiveOperationsState extends State<LiveOperations> {
     arrivalsSub = fcmBloc.vehicleArrivalStream.listen((event) {
       pp('$mm ... vehicleArrivalStream delivered an arrival \t${E.appleRed} '
           '${event.vehicleReg} at ${event.landmarkName} ${E.blueDot} date: ${event.created}');
-      // myPrettyJsonPrint(event.toJson());
+      
       arrivals.add(event);
       if (mounted) {
         setState(() {});
       }
     });
+    departureSub = fcmBloc.vehicleDepartureStream.listen((event) {
+      pp('$mm ... vehicleDepartureStream delivered an arrival \t${E.appleRed} '
+          '${event.vehicleReg} at ${event.landmarkName} ${E.blueDot} date: ${event.created}');
+
+      departures.add(event);
+      if (mounted) {
+        setState(() {});
+      }
+    });
+
     passengerSub = fcmBloc.passengerCountStream.listen((event) {
       pp('$mm ... passengerCountStream delivered a count \t ${E.pear} ${event.vehicleReg} '
           '${E.blueDot} date:  ${event.created}');
-      // myPrettyJsonPrint(event.toJson());
+      
       pp('$mm ... PassengerCountCover - cluster item: ${E.appleRed} ${event.vehicleReg}'
           '\n${E.leaf} passengersIn: ${event.passengersIn} '
           '\n${E.leaf} passengersOut: ${event.passengersOut} '
@@ -83,7 +96,7 @@ class _LiveOperationsState extends State<LiveOperations> {
     dispatchSub = fcmBloc.dispatchStream.listen((event) {
       pp('$mm ... dispatchStream delivered a dispatch record \t '
           '${E.appleGreen} ${event.vehicleReg} ${event.landmarkName} ${E.blueDot} date:  ${event.created}');
-      // myPrettyJsonPrint(event.toJson());
+      
       dispatches.add(event);
       if (mounted) {
         setState(() {});
@@ -92,7 +105,7 @@ class _LiveOperationsState extends State<LiveOperations> {
     requestSub = fcmBloc.commuterRequestStreamStream.listen((event) {
       pp('$mm ... commuterRequestStreamStream delivered a request \t ${E.appleRed} '
           '${event.routeLandmarkName} ${E.blueDot} date:  ${event.dateRequested}');
-      // myPrettyJsonPrint(event.toJson());
+      
       requests.add(event);
       if (mounted) {
         setState(() {});
@@ -101,7 +114,7 @@ class _LiveOperationsState extends State<LiveOperations> {
     heartbeatSub = fcmBloc.heartbeatStreamStream.listen((event) {
       pp('$mm ... heartbeatStreamStream delivered a heartbeat \t '
           '${E.appleRed} ${event.vehicleReg} ${E.blueDot} date:  ${event.created}');
-      // myPrettyJsonPrint(event.toJson());
+      
       heartbeats.add(event);
       if (mounted) {
         setState(() {});
@@ -116,6 +129,7 @@ class _LiveOperationsState extends State<LiveOperations> {
     requestSub.cancel();
     heartbeatSub.cancel();
     arrivalsSub.cancel();
+    departureSub.cancel();
     super.dispose();
   }
 
@@ -132,7 +146,7 @@ class _LiveOperationsState extends State<LiveOperations> {
               shape: getRoundedBorder(radius: 12),
               elevation: 12,
               child: SizedBox(
-                height: 80,
+                height: 64,
                 child: Row(
                   children: [
                     const SizedBox(
@@ -161,7 +175,7 @@ class _LiveOperationsState extends State<LiveOperations> {
               shape: getRoundedBorder(radius: 12),
               elevation: 12,
               child: SizedBox(
-                height: 80,
+                height: 64,
                 child: Row(
                   children: [
                     const SizedBox(
@@ -190,7 +204,7 @@ class _LiveOperationsState extends State<LiveOperations> {
               shape: getRoundedBorder(radius: 12),
               elevation: 12,
               child: SizedBox(
-                height: 80,
+                height: 64,
                 child: Row(
                   children: [
                     const SizedBox(
@@ -219,7 +233,7 @@ class _LiveOperationsState extends State<LiveOperations> {
               shape: getRoundedBorder(radius: 12),
               elevation: 12,
               child: SizedBox(
-                height: 80,
+                height: 64,
                 child: Row(
                   children: [
                     const SizedBox(
@@ -248,7 +262,7 @@ class _LiveOperationsState extends State<LiveOperations> {
               shape: getRoundedBorder(radius: 12),
               elevation: 12,
               child: SizedBox(
-                height: 80,
+                height: 64,
                 child: Row(
                   children: [
                     const SizedBox(
@@ -267,6 +281,35 @@ class _LiveOperationsState extends State<LiveOperations> {
                     ),
                     Text(
                       'Vehicle Arrivals',
+                      style: myTextStyleSmall(context),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Card(
+              shape: getRoundedBorder(radius: 12),
+              elevation: 12,
+              child: SizedBox(
+                height: 64,
+                child: Row(
+                  children: [
+                    const SizedBox(
+                      width: 20,
+                    ),
+                    bd.Badge(
+                      badgeContent: Text('${departures.length}', style: myTextStyleSmall(context),),
+                      badgeStyle: bd.BadgeStyle(
+                        badgeColor: Colors.indigo.shade900,
+                        elevation: 12,
+                        padding: const EdgeInsets.all(12.0),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 28,
+                    ),
+                    Text(
+                      'Vehicle Departures',
                       style: myTextStyleSmall(context),
                     ),
                   ],

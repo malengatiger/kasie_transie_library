@@ -590,7 +590,47 @@ class _Route {
     return map;
   }
 }
+/*
+ private String _partitionKey;
+    @Id
+    private String _id;
+    String associationId;
+    String routeId;
+    String vehicleId;
+    int active;
+    String created;
+    String routeName;
+    String associationName;
+    String vehicleReg;
+ */
+//
+@RealmModel()
+class _RouteAssignment {
+  @PrimaryKey()
+  late ObjectId id;
+  @Indexed()
+  String? vehicleId;
+  String? routeId, routeName;
+  String? created;
+  String? vehicleReg;
+  int? active;
+  String? associationId, associationName;
 
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {
+      '_id': id.hexString,
+      'vehicleId': vehicleId,
+      'routeId': routeId,
+      'routeName': routeName,
+      'vehicleReg': vehicleReg,
+      'active': active,
+      'created': created,
+      'associationId': associationId,
+      'associationName': associationName,
+    };
+    return map;
+  }
+}
 //
 @RealmModel()
 class _Vehicle {

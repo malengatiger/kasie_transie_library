@@ -24,6 +24,7 @@ class CountsGridWidget extends StatelessWidget {
       dispatchesText,
       heartbeatText,
       passengerCountsText;
+
   final int arrivals, departures, heartbeats, dispatches, passengerCounts;
 
   @override

@@ -86,8 +86,7 @@ class FCMBloc {
       processFCMMessage(message, getMessageType(message));
     });
 
-    fb.FirebaseMessaging.onBackgroundMessage(
-        kasieFirebaseMessagingBackgroundHandler);
+    fb.FirebaseMessaging.onBackgroundMessage(kasieFirebaseMessagingBackgroundHandler);
 
     fb.FirebaseMessaging.onMessageOpenedApp.listen((fb.RemoteMessage message) {
       pp('$mm onMessageOpenedApp:  $red A new onMessageOpenedApp event was published! ${message.data}');
@@ -100,56 +99,10 @@ class FCMBloc {
         " apps will subscribe to topics in a bit! ...........................");
   }
 
-  String getMessageType(fb.RemoteMessage message) {
-    var type = '';
-    if (message.data[Constants.routeUpdateRequest] != null) {
-      //pp("$mm onMessage: $red routeChanges message has arrived!  ... $red ");
-      type = Constants.routeUpdateRequest;
-    } else if (message.data[Constants.vehicleChanges] != null) {
-      //pp("$mm onMessage: $red vehicleChanges message has arrived!  ... $red ");
-      type = Constants.vehicleChanges;
-    } else if (message.data[Constants.locationRequest] != null) {
-      //pp("$mm onMessage: $red locationRequest message has arrived!  ... $red ");
-      type = Constants.locationRequest;
-    } else if (message.data[Constants.locationResponse] != null) {
-      //pp("$mm onMessage: $red locationResponse message has arrived!  ... $red ");
-      type = Constants.locationResponse;
-    } else if (message.data[Constants.vehicleArrival] != null) {
-      //pp("$mm onMessage: $red vehicleArrival message has arrived!  ... $red\n ");
-      type = Constants.vehicleArrival;
-    } else if (message.data[Constants.vehicleDeparture] != null) {
-      //pp("$mm onMessage: $red vehicleDeparture message has arrived!  ... $red ");
-      type = Constants.vehicleDeparture;
-    } else if (message.data[Constants.dispatchRecord] != null) {
-      //pp("$mm onMessage: $red dispatchRecord message has arrived!  ... $red ");
-      type = Constants.dispatchRecord;
-    } else if (message.data[Constants.userGeofenceEvent] != null) {
-      //pp("$mm onMessage: $red userGeofenceEvent message has arrived!  ... $red ");
-      type = Constants.userGeofenceEvent;
-    } else if (message.data[Constants.vehicleMediaRequest] != null) {
-      //pp("$mm onMessage: $red vehicleMediaRequest message has arrived!  ... $red ");
-      type = Constants.vehicleMediaRequest;
-    } else if (message.data[Constants.passengerCount] != null) {
-      //pp("$mm onMessage: $red passengerCount message has arrived!  ... $red ");
-      type = Constants.passengerCount;
-    } else if (message.data[Constants.heartbeat] != null) {
-      //pp("$mm onMessage: $red heartbeat message has arrived!  ... $red ");
-      type = Constants.heartbeat;
-    } else if (message.data[Constants.commuterRequest] != null) {
-      //pp("$mm onMessage: $red commuterRequest message has arrived!  ... $red ");
-      type = Constants.commuterRequest;
-    } else if (message.data[Constants.routeUpdateRequest] != null) {
-      //pp("$mm onMessage: $red routeUpdateRequest message has arrived!  ... $red ");
-      type = Constants.routeUpdateRequest;
-    } else {
-      pp("$mm onMessage: $red unknown message has arrived!  ... $red ");
-      return 'unknown';
-    }
-    return type;
-  }
-
   static const red = '🍎🍎';
   var newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMBloc: 🌀🌀🌀🌀';
+
+
 
   Future<void> subscribeForDemoDriver(String app) async {
     String? associationId;
@@ -515,7 +468,13 @@ class FCMBloc {
         _vehicleDepartureStreamController.sink.add(departure);
       }
     }
+    if (car != null) {
+      if (car!.vehicleId == departure.vehicleId ) {
+        _vehicleDepartureStreamController.sink.add(departure);
+      }
+    }
   }
+
   void _processVehicleArrival(lib.VehicleArrival arrival) {
     pp('$newMM _processVehicleArrival ... ${arrival.vehicleReg}');
 
@@ -530,7 +489,13 @@ class FCMBloc {
         _vehicleArrivalStreamController.sink.add(arrival);
       }
     }
+    if (car != null) {
+      if (car!.vehicleId == arrival.vehicleId ) {
+        _vehicleArrivalStreamController.sink.add(arrival);
+      }
+    }
   }
+
   void _processDispatchRecord(lib.DispatchRecord dispatchRecord) {
     pp('$newMM _processDispatchRecord ... ${dispatchRecord.vehicleReg}');
 
@@ -545,7 +510,13 @@ class FCMBloc {
         _dispatchStreamController.sink.add(dispatchRecord);
       }
     }
+    if (car != null) {
+      if (car!.vehicleId == dispatchRecord.vehicleId ) {
+        _dispatchStreamController.sink.add(dispatchRecord);
+      }
+    }
   }
+
   void _processRouteUpdate(lib.RouteUpdateRequest req) async {
     pp('$newMM _processRouteUpdate ... ${req.routeName}');
 
@@ -598,15 +569,20 @@ class FCMBloc {
       _passengerCountStreamController.sink.add(passengerCount);
       return;
     }
+    if (car != null) {
+      if (car!.vehicleId == passengerCount.vehicleId ) {
+        _passengerCountStreamController.sink.add(passengerCount);
+      }
+    }
     pp('$mm _processPassengerCount ... ${E.redDot} check ownerId : ${passengerCount.userId} - userId: ${user!.userId}');
     if (user!.userId == passengerCount.ownerId) {
       _passengerCountStreamController.sink.add(passengerCount);
       pp('$mm _processPassengerCount: _passengerCountStreamController '
           'has a new AmbassadorPassengerCount: ');
       // myPrettyJsonPrint(passengerCount.toJson());
-      return;
+
     }
-    if (user!.userType == 'ASSOCIATION_OFFICIAL' || demoFlag) {
+    if (user!.userType == 'ASSOCIATION_OFFICIAL') {
       _passengerCountStreamController.sink.add(passengerCount);
       return;
     }
@@ -775,56 +751,76 @@ class FCMBloc {
 String? myName;
 var mxx = '💙💙💙💙💙💙 Background Processing:  💙💙💙💙💙💙';
 
+@pragma('vm:entry-point')
 Future<void> kasieFirebaseMessagingBackgroundHandler(
     fb.RemoteMessage message) async {
+  pp("\n\n\n$mxx kasieFirebaseMessagingBackgroundHandler: "
+      "\n🍎🍎🍎🍎 will handle message in the background! 🍎🍎🍎🍎\n${message.data}");
+
+  await Firebase.initializeApp();
+
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
   myName = packageInfo.appName;
   if (!mxx.contains(myName!)) {
     mxx = '$mxx $myName :';
   }
 
-  final messageType = fcmBloc.getMessageType(message);
-
-  pp("\n\n\n$mxx kasieFirebaseMessagingBackgroundHandler: "
-      "\n🍎🍎🍎🍎 will handle $messageType message in the background! 🍎🍎🍎🍎");
-  myPrettyJsonPrint(message.data);
-
   final map = message.data;
 
   if (map[Constants.locationRequest] != null) {
-    handleLocationRequest(map);
+    final va = map[Constants.locationRequest];
+    final x = jsonDecode(va);
+    final locReq = buildLocationRequest(x);
+    handleLocationRequest(locReq);
   }
 
   if (map[Constants.dispatchRecord] != null) {
-    handleDispatch(map);
+    final va = map[Constants.dispatchRecord];
+    final x = jsonDecode(va);
+    final dispatch = buildDispatchRecord(x);
+    handleDispatch(dispatch);
   }
 
   if (map[Constants.passengerCount] != null) {
-    handlePassengerCount(map);
+    final va = map[Constants.passengerCount];
+    final x = jsonDecode(va);
+    final count = buildAmbassadorPassengerCount(x);
+    handlePassengerCount(count);
   }
 
   if (map[Constants.heartbeat] != null) {
-    handleHeartbeat(map);
+    final va = map[Constants.heartbeat];
+    final x = jsonDecode(va);
+    final h = buildVehicleHeartbeat(x);
+    handleHeartbeat(h);
   }
   if (map[Constants.vehicleArrival] != null) {
-    handleVehicleArrival(map);
+    final va = map[Constants.vehicleArrival];
+    final x = jsonDecode(va);
+    final a = buildVehicleArrival(x);
+    handleVehicleArrival(a);
   }
 
   if (map[Constants.vehicleDeparture] != null) {
-    handleVehicleDeparture(map);
+    final va = map[Constants.vehicleDeparture];
+    final x = jsonDecode(va);
+    final d = buildVehicleDeparture(x);
+    handleVehicleDeparture(d);
   }
   if (map[Constants.locationResponse] != null) {
-    handleHeartbeat(map);
+    final va = map[Constants.locationResponse];
+    final x = jsonDecode(va);
+    final r = buildLocationResponse(x);
+    handleLocationResponse(r);
   }
 }
 
 ///message handlers
-void handleLocationResponse(Map<String, dynamic> map) async {
+void handleLocationResponse(lib.LocationResponse response) async {
   pp('$mxx ... handleLocationResponse in background ...');
-  final user = await _getUser(map);
+  final user = await _getUser();
 
   if (user != null) {
-    final response = buildLocationResponse(map);
 
     if (user.userType == Constants.OWNER) {
       if (user.userId == response.userId) {
@@ -838,13 +834,12 @@ void handleLocationResponse(Map<String, dynamic> map) async {
   }
 }
 
-void handleHeartbeat(Map<String, dynamic> map) async {
+void handleHeartbeat(lib.VehicleHeartbeat heartbeat) async {
   pp('$mxx ... handleHeartbeat in background ...');
 
-  final user = await _getUser(map);
+  final user = await _getUser();
 
   if (user != null) {
-    final heartbeat = buildVehicleHeartbeat(map);
 
     if (user.userType == Constants.OWNER) {
       if (user.userId == heartbeat.ownerId) {
@@ -858,14 +853,12 @@ void handleHeartbeat(Map<String, dynamic> map) async {
   }
 }
 
-void handlePassengerCount(Map<String, dynamic> map) async {
+void handlePassengerCount(lib.AmbassadorPassengerCount passengerCount) async {
   pp('$mxx ... handlePassengerCount in background ...');
 
-  final user = await _getUser(map);
+  final user = await _getUser();
 
   if (user != null) {
-    final passengerCount = buildAmbassadorPassengerCount(map);
-
     if (user.userType == Constants.OWNER) {
       if (user.userId == passengerCount.ownerId) {
         cachePassengerCount(passengerCount);
@@ -878,13 +871,12 @@ void handlePassengerCount(Map<String, dynamic> map) async {
   }
 }
 
-void handleDispatch(Map<String, dynamic> map) async {
+void handleDispatch(lib.DispatchRecord dispatchRecord) async {
   pp('$mxx ... handleDispatch in background ...');
 
-  final user = await _getUser(map);
+  final user = await _getUser();
 
   if (user != null) {
-    final dispatchRecord = buildDispatchRecord(map);
 
     if (user.userType == Constants.OWNER) {
       if (user.userId == dispatchRecord.ownerId) {
@@ -898,13 +890,12 @@ void handleDispatch(Map<String, dynamic> map) async {
   }
 }
 
-void handleVehicleDeparture(Map<String, dynamic> map) async {
+void handleVehicleDeparture(lib.VehicleDeparture departure) async {
   pp('$mxx ... handleVehicleDeparture in background ...');
 
-  final user = await _getUser(map);
+  final user = await _getUser();
 
   if (user != null) {
-    final departure = buildVehicleDeparture(map);
 
     if (user.userType == Constants.OWNER) {
       if (user.userId == departure.ownerId) {
@@ -918,13 +909,12 @@ void handleVehicleDeparture(Map<String, dynamic> map) async {
   }
 }
 
-void handleVehicleArrival(Map<String, dynamic> map) async {
+void handleVehicleArrival(lib.VehicleArrival arrival) async {
   pp('$mxx ... handleVehicleArrival in background ...');
 
-  final user = await _getUser(map);
+  final user = await _getUser();
 
   if (user != null) {
-    final arrival = buildVehicleArrival(map);
 
     if (user.userType == Constants.OWNER) {
       if (user.userId == arrival.ownerId) {
@@ -974,7 +964,7 @@ void cacheDispatchRecord(lib.DispatchRecord object) {
   });
 }
 
-Future<lib.User?> _getUser(Map map) async {
+Future<lib.User?> _getUser() async {
   lib.User? user;
   final prefs1 = await SharedPreferences.getInstance();
   prefs1.reload(); // The magic line
@@ -990,30 +980,33 @@ Future<lib.User?> _getUser(Map map) async {
 
   return user;
 }
-
-void handleLocationRequest(Map map) async {
-  pp('$mxx ... handleLocationRequest in background ...');
-
+Future<lib.Vehicle?> _getCar() async {
   lib.Vehicle? car;
   final prefs1 = await SharedPreferences.getInstance();
   prefs1.reload(); // The magic line
   var string = prefs1.getString('car');
   if (string == null) {
     pp('\n\n$mxx ... ${E.redDot}${E.redDot}${E.redDot} car is null in background ... \n\n');
-    return;
+    return null;
   }
   var jx = json.decode(string);
   car = buildVehicle(jx);
-
-  pp('$mxx ... ${car.vehicleReg} - this car is responding while in background');
+  pp('$mxx ... this car is responding while in background');
   myPrettyJsonPrint(car.toJson());
 
-  final va = map['locationRequest'];
-  final x = jsonDecode(va);
-  final locReq = buildLocationRequest(x);
-  if (car.vehicleId == locReq.vehicleId) {
+  return car;
+}
+void handleLocationRequest(lib.LocationRequest request) async {
+  pp('$mxx ... handleLocationRequest in background ...');
+
+  lib.Vehicle? car = await _getCar();
+  if (car == null) {
+    return;
+  }
+
+  if (car.vehicleId == request.vehicleId) {
     pp('\n\n$mxx ... this request is for me .... ${E.blueDot} gotta respond!');
-    respondToLocationRequest(request: locReq, token: 'myToken', car: car);
+    respondToLocationRequest(request: request, token: 'myToken', car: car);
   }
 }
 
@@ -1128,4 +1121,53 @@ Future _sendLocationResponse(lib.LocationResponse resp, String fcmToken) async {
     errorHandler.handleError(exception: gex);
     throw gex;
   }
+}
+//
+String getMessageType(fb.RemoteMessage message) {
+  var type = '';
+  if (message.data[Constants.routeUpdateRequest] != null) {
+    //pp("$mm onMessage: $red routeChanges message has arrived!  ... $red ");
+    type = Constants.routeUpdateRequest;
+  } else if (message.data[Constants.vehicleChanges] != null) {
+    //pp("$mm onMessage: $red vehicleChanges message has arrived!  ... $red ");
+    type = Constants.vehicleChanges;
+  } else if (message.data[Constants.locationRequest] != null) {
+    //pp("$mm onMessage: $red locationRequest message has arrived!  ... $red ");
+    type = Constants.locationRequest;
+  } else if (message.data[Constants.locationResponse] != null) {
+    //pp("$mm onMessage: $red locationResponse message has arrived!  ... $red ");
+    type = Constants.locationResponse;
+  } else if (message.data[Constants.vehicleArrival] != null) {
+    //pp("$mm onMessage: $red vehicleArrival message has arrived!  ... $red\n ");
+    type = Constants.vehicleArrival;
+  } else if (message.data[Constants.vehicleDeparture] != null) {
+    //pp("$mm onMessage: $red vehicleDeparture message has arrived!  ... $red ");
+    type = Constants.vehicleDeparture;
+  } else if (message.data[Constants.dispatchRecord] != null) {
+    //pp("$mm onMessage: $red dispatchRecord message has arrived!  ... $red ");
+    type = Constants.dispatchRecord;
+  } else if (message.data[Constants.userGeofenceEvent] != null) {
+    //pp("$mm onMessage: $red userGeofenceEvent message has arrived!  ... $red ");
+    type = Constants.userGeofenceEvent;
+  } else if (message.data[Constants.vehicleMediaRequest] != null) {
+    //pp("$mm onMessage: $red vehicleMediaRequest message has arrived!  ... $red ");
+    type = Constants.vehicleMediaRequest;
+  } else if (message.data[Constants.passengerCount] != null) {
+    //pp("$mm onMessage: $red passengerCount message has arrived!  ... $red ");
+    type = Constants.passengerCount;
+  } else if (message.data[Constants.heartbeat] != null) {
+    //pp("$mm onMessage: $red heartbeat message has arrived!  ... $red ");
+    type = Constants.heartbeat;
+  } else if (message.data[Constants.commuterRequest] != null) {
+    //pp("$mm onMessage: $red commuterRequest message has arrived!  ... $red ");
+    type = Constants.commuterRequest;
+  } else if (message.data[Constants.routeUpdateRequest] != null) {
+    //pp("$mm onMessage: $red routeUpdateRequest message has arrived!  ... $red ");
+    type = Constants.routeUpdateRequest;
+  } else {
+    pp("$mxx onMessage: unknown message has arrived!  ...");
+    myPrettyJsonPrint(message.data);
+    return 'unknown';
+  }
+  return type;
 }

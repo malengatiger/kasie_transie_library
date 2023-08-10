@@ -25,6 +25,11 @@ class RoutesIsolate {
     final res = listApiDog.realm.query<RoutePoint>('routeId == \$0',[routeId]);
     return res.length;
   }
+  Future<int> countRouteLandmarks(String routeId) async {
+    final res = listApiDog.realm.query<RouteLandmark>('routeId == \$0',[routeId]);
+    return res.length;
+  }
+
   Future<List<RoutePoint>> getRoutePoints(String routeId, bool refresh) async {
     pp('$xy get routePoints for $routeId  ... refresh: $refresh');
     var mList = <RoutePoint>[];
@@ -39,6 +44,32 @@ class RoutesIsolate {
 
     mList.sort((a,b) => a.index!.compareTo(b.index!));
     pp('$xy routePoints for $routeId  == ${mList.length} ... ');
+
+    return res.toList();
+  }
+
+  Future<List<RouteLandmark>> getRouteLandmarksCached(String routeId) async {
+    pp('$xy get getRouteLandmarks for $routeId  ...');
+    var mList = <RouteLandmark>[];
+
+    final res = listApiDog.realm.query<RouteLandmark>('routeId == \$0',[routeId]);
+    mList = res.toList();
+    pp('$xy get getRouteLandmarks found ${mList.length}  ... ');
+
+    mList.sort((a,b) => a.index!.compareTo(b.index!));
+    pp('$xy RouteLandmarks for $routeId  == ${mList.length} ... ');
+
+    return res.toList();
+  }
+  Future<List<RouteLandmark>> getAllRouteLandmarksCached() async {
+    pp('$xy get getRouteLandmarks all routes  ...');
+    var mList = <RouteLandmark>[];
+
+    final res = listApiDog.realm.all<RouteLandmark>();
+    mList = res.toList();
+    pp('$xy get getRouteLandmarks found ${mList.length}  ... ');
+
+    mList.sort((a,b) => a.index!.compareTo(b.index!));
 
     return res.toList();
   }

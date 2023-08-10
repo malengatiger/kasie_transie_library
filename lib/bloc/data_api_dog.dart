@@ -4,12 +4,14 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
+import 'package:kasie_transie_library/data/vehicle_list.dart';
 import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
 import 'package:realm/realm.dart' as rlm;
 
 import '../data/calculated_distance_list.dart';
+import '../data/route_assignment_list.dart';
 import '../data/route_point_list.dart';
 import '../data/schemas.dart';
 import '../utils/emojis.dart';
@@ -52,11 +54,21 @@ class DataApiDog {
 
   DataApiDog(this.client, this.appAuth, this.cacheManager, this.prefsOGx,
       this.errorHandler) {
-    if (KasieEnvironment.currentStatus == 'dev') {
-      url = KasieEnvironment.devUrl;
-    } else {
-      url = KasieEnvironment.prodUrl;
+    url = KasieEnvironment.getUrl();
+  }
+
+
+  Future<List<RouteAssignment>> addRouteAssignments(RouteAssignmentList assignments) async {
+    final bag = assignments.toJson();
+    final cmd = '${url}addRouteAssignments';
+    List res = await _callPost(cmd, bag);
+    var list = <RouteAssignment>[];
+    for (var value in res) {
+      final lr = buildRouteAssignment(value);
+
     }
+    pp('$mm RouteAssignments added to database: ${list.length}');
+    return list;
   }
 
   Future<CommuterRequest> addCommuterRequest(CommuterRequest request) async {
@@ -575,25 +587,46 @@ class DataApiDog {
     pp('$mm DispatchRecords: ${list.length}  cached ${E.leaf}${E.leaf}');
     return list;
   }
+
 //
-  Future<List<DispatchRecord>> generateRouteDispatchRecords(
-      String routeId, int numberOfCars, int intervalInSeconds) async {
+  Future<List<Vehicle>> generateRouteDispatchRecords(
+      {required String routeId,
+      required int numberOfCars,
+      required int intervalInSeconds}) async {
     final cmd = '${url}generateRouteDispatchRecords?routeId=$routeId'
         '&numberOfCars=$numberOfCars&intervalInSeconds=$intervalInSeconds';
     List res = await _sendHttpGET(cmd);
-    var list = <DispatchRecord>[];
+    var list = <Vehicle>[];
     for (var mJson in res) {
-      list.add(buildDispatchRecord(mJson));
+      list.add(buildVehicle(mJson));
     }
     listApiDog.realm.write(() {
-      listApiDog.realm.addAll<DispatchRecord>(list, update: true);
+      listApiDog.realm.addAll<Vehicle>(list, update: true);
     });
-    pp('$mm DispatchRecords: ${list.length}  cached ${E.leaf}${E.leaf}');
+    pp('\n\n$mm generateRouteDispatchRecords: Demo Vehicles: ${list.length} cached ${E.leaf}${E.leaf}');
+    for (var value in list) {
+      pp('$mm demo vehicle: ${E.heartOrange} ${value.vehicleReg}');
+    }
     return list;
   }
+
+  //
+  Future<List<Vehicle>> generateRouteDispatchRecordsForCars(
+      {required VehicleList vehicleList}) async {
+    final cmd = '${url}generateRouteDispatchRecordsForCars';
+    List res = await _callPost(cmd, vehicleList.toJson());
+    var list = <Vehicle>[];
+    for (var value in res) {
+      list.add(buildVehicle(value));
+    }
+    pp('\n\n$mm generateRouteDispatchRecordsForCars sent: cars: ${list.length}  ${E.leaf}${E.leaf}');
+
+    return list;
+  }
+
 //
-  Future<List<CommuterRequest>> generateCommuterRequests(
-      String associationId, int numberOfCommuters, int intervalInSeconds) async {
+  Future<List<CommuterRequest>> generateCommuterRequests(String associationId,
+      int numberOfCommuters, int intervalInSeconds) async {
     final cmd = '${url}generateCommuterRequests?associationId=$associationId'
         '&numberOfCommuters=$numberOfCommuters&intervalInSeconds=$intervalInSeconds';
     List res = await _sendHttpGET(cmd);
@@ -624,10 +657,10 @@ class DataApiDog {
     return list;
   }
 
-
   Future<List<AmbassadorPassengerCount>> generateAmbassadorPassengerCounts(
       String associationId, int numberOfCars, int intervalInSeconds) async {
-    final cmd = '${url}generateAmbassadorPassengerCounts?associationId=$associationId'
+    final cmd =
+        '${url}generateAmbassadorPassengerCounts?associationId=$associationId'
         '&numberOfCars=$numberOfCars&intervalInSeconds=$intervalInSeconds';
     List res = await _sendHttpGET(cmd);
     var list = <AmbassadorPassengerCount>[];
@@ -656,7 +689,6 @@ class DataApiDog {
     pp('$mm AmbassadorPassengerCounts: ${list.length}  cached ${E.leaf}${E.leaf}');
     return list;
   }
-
 
   Future<List<VehicleHeartbeat>> generateHeartbeats(
       String associationId, int numberOfCars, int intervalInSeconds) async {

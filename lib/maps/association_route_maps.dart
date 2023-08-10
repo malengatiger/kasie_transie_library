@@ -225,6 +225,12 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
         color: color,
         width: 8,
         points: mPoints,
+        onTap: () {
+          pp('$mm ... polyLine tapped; route: ${points.first.routeName}');
+          if (mounted) {
+            showToast(message: '${points.first.routeName}', context: context);
+          }
+        },consumeTapEvents: true,
         polylineId: PolylineId(DateTime.now().toIso8601String()));
 
     _polyLines.add(polyLine);
@@ -245,7 +251,6 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
         final icon = await getMarkerBitmap(72,
             text: '${i + 1}',
             color: route.color!,
-            borderColor: Colors.black,
             fontSize: 28,
             fontWeight: FontWeight.w900);
         icons.add(icon);
@@ -328,9 +333,9 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
                   circles: _circles,
                   polylines: _polyLines,
                   initialCameraPosition: _myCurrentCameraPosition!,
-                  onTap: (latLng) {
-                    pp('$mm .......... on map tapped : $latLng .');
-                  },
+                  // onTap: (latLng) {
+                  //   pp('$mm .......... on map tapped : $latLng .');
+                  // },
                   onMapCreated: (GoogleMapController controller) {
                     pp('$mm .......... on onMapCreated .....');
                     _mapController.complete(controller);

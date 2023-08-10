@@ -55,6 +55,7 @@ final config = rm.Configuration.local(
     Commuter.schema,
     VehicleHeartbeat.schema,
     VehicleArrival.schema,
+    RouteAssignment.schema,
   ],
 );
 final ListApiDog listApiDog = ListApiDog(
@@ -91,11 +92,7 @@ class ListApiDog {
 
   ListApiDog(this.client, this.appAuth, this.cacheManager, this.prefsOGx,
       this.errorHandler, this.realm) {
-    if (KasieEnvironment.currentStatus == 'dev') {
-      url = KasieEnvironment.devUrl;
-    } else {
-      url = KasieEnvironment.prodUrl;
-    }
+    url = KasieEnvironment.getUrl();
     initializeRealm();
     getAuthToken();
   }
@@ -333,6 +330,37 @@ class ListApiDog {
     return list;
   }
 
+  Future<List<RouteAssignment>> getVehicleRouteAssignments(
+      String vehicleId, bool refresh) async {
+    final cmd = '${url}getVehicleRouteAssignments?vehicleId=$vehicleId';
+    rm.RealmResults<RouteAssignment> results =
+        realm.query<RouteAssignment>('vehicleId == \$0', [vehicleId]);
+    final list = <RouteAssignment>[];
+    if (refresh || results.isEmpty) {
+      return await getVehicleRouteAssignmentsFromBackend(vehicleId);
+    }
+
+    for (var element in results) {
+      list.add(element);
+    }
+    return list;
+  }
+  Future<List<RouteAssignment>> getRouteAssignments(
+      String routeId, bool refresh) async {
+    final cmd = '${url}getRouteAssignments?routeId=$routeId';
+    rm.RealmResults<RouteAssignment> results =
+    realm.query<RouteAssignment>('routeId == \$0', [routeId]);
+    final list = <RouteAssignment>[];
+    if (refresh || results.isEmpty) {
+      return await getRouteAssignmentsFromBackend(routeId);
+    }
+
+    for (var element in results) {
+      list.add(element);
+    }
+    return list;
+  }
+
   Future<List<CounterBag>> getVehicleCounts(String vehicleId) async {
     final cmd = '${url}getVehicleCounts?vehicleId=$vehicleId';
     List resp = await _sendHttpGET(cmd);
@@ -434,10 +462,8 @@ class ListApiDog {
   }
 
   Future<List<Vehicle>> getOwnerCarsFromBackend(String userId) async {
-    final cmd = '${url}getOwnerVehicles?userIdId=$userId';
-    if (userId == null) {
-      throw Exception('What the hell? No user');
-    }
+    final cmd = '${url}getOwnerVehicles?userId=$userId';
+
     List resp = await _sendHttpGET(cmd);
     var list = <Vehicle>[];
     for (var vehicleJson in resp) {
@@ -449,6 +475,40 @@ class ListApiDog {
       realm.addAll<Vehicle>(list, update: true);
     });
     pp('$mm cached owner vehicles from backend: ${list.length}');
+    return list;
+  }
+
+  Future<List<RouteAssignment>> getVehicleRouteAssignmentsFromBackend(
+      String vehicleId) async {
+    final cmd = '${url}getVehicleRouteAssignments?vehicleId=$vehicleId';
+
+    List resp = await _sendHttpGET(cmd);
+    var list = <RouteAssignment>[];
+    for (var json in resp) {
+      list.add(buildRouteAssignment(json));
+    }
+
+    realm.write(() {
+      realm.addAll<RouteAssignment>(list, update: true);
+    });
+    pp('$mm cached routeAssignments from backend: ${list.length}');
+    return list;
+  }
+
+  Future<List<RouteAssignment>> getRouteAssignmentsFromBackend(
+      String routeId) async {
+    final cmd = '${url}getRouteAssignments?routeId=$routeId';
+
+    List resp = await _sendHttpGET(cmd);
+    var list = <RouteAssignment>[];
+    for (var json in resp) {
+      list.add(buildRouteAssignment(json));
+    }
+
+    realm.write(() {
+      realm.addAll<RouteAssignment>(list, update: true);
+    });
+    pp('$mm cached routeAssignments from backend: ${list.length}');
     return list;
   }
 

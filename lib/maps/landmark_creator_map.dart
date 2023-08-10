@@ -152,7 +152,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     for (var routeLandmark in routeLandmarks) {
       final ic2 = await getMarkerBitmap(72, color: widget.route.color!,
           text: '${landmarkIndex + 1}',
-          borderColor: Colors.black, fontSize: 32, fontWeight: FontWeight.w900);
+           fontSize: 32, fontWeight: FontWeight.w900);
 
 
       final latLng = LatLng(routeLandmark.position!.coordinates.last,
@@ -259,7 +259,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     //     path: 'assets/landmark.png');
 
     final ic2 = await getMarkerBitmap(84,
-        color: widget.route.color!, borderColor: Colors.black, fontSize: 32, fontWeight: FontWeight.w900);
+        color: widget.route.color!,  fontSize: 32, fontWeight: FontWeight.w900);
 
     totalPoints = existingRoutePoints.length;
     // _clearMap();
@@ -372,7 +372,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
 
     final ic2 = await getMarkerBitmap(72, color: widget.route.color!,
         text: '${landmarkIndex + 1}',
-        borderColor: Colors.black, fontSize: 32, fontWeight: FontWeight.w900);
+       fontSize: 32, fontWeight: FontWeight.w900);
 
     pp('....... _addNewLandmark: landmarkIndex: $landmarkIndex');
 

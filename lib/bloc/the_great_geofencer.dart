@@ -3,6 +3,7 @@ import 'dart:collection';
 
 import 'package:geofence_service/geofence_service.dart' as geo;
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
+import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'package:kasie_transie_library/utils/parsers.dart';
 import 'package:realm/realm.dart';
 
@@ -14,6 +15,8 @@ import '../utils/functions.dart';
 import '../utils/local_finder.dart';
 import '../utils/prefs.dart';
 import 'package:sane_uuid/uuid.dart' as uu;
+
+import 'list_api_dog.dart';
 
 final geofenceService = geo.GeofenceService.instance.setup(
     interval: 5000,
@@ -51,6 +54,10 @@ class TheGreatGeofencer {
   var defaultRadiusInMetres = 150.0;
   var defaultDwellInMilliSeconds = 30;
 
+  Future<List<lib.RouteAssignment>> getRouteAssignments(String vehicleId) async {
+    return await listApiDog.getVehicleRouteAssignments(vehicleId, false);
+  }
+
   Future buildGeofences() async {
     pp('$xx buildGeofences .... build geofences for '
         'the association started ... 🌀 ');
@@ -59,36 +66,10 @@ class TheGreatGeofencer {
     _user = await prefs.getUser();
     _vehicle = await prefs.getCar();
 
-    var loc = await locationBloc.getLocation();
-
-    final marks = await localFinder.findNearestRouteLandmarks(
-        latitude: loc.latitude,
-        longitude: loc.longitude,
-        radiusInMetres: 1000 * 200);
-
-    pp('$xx buildGeofences .... routeLandmarks, unfiltered: ${marks.length} ');
-    pp('$xx buildGeofences .... filter by landmarkId ....');
-
-    var filteredLandmarks = <lib.RouteLandmark>[];
-    final map = HashMap<String, RouteLandmark>();
-
-    for (var value in marks) {
-      map[value.landmarkId!] = value;
+    var landmarks = await _getLandmarksFromAssignments(_vehicle!.vehicleId!);
+    if (landmarks.isEmpty) {
+      landmarks = await _getLandmarks();
     }
-
-    filteredLandmarks = map.values.toList();
-    pp('$xx buildGeofences .... filteredLandmarks: ${filteredLandmarks.length} ');
-    pp('$xx buildGeofences .... filter by name ....');
-    var filteredLandmarks2 = <lib.RouteLandmark>[];
-    final map2 = HashMap<String, RouteLandmark>();
-
-    for (var value in filteredLandmarks) {
-      map2[value.landmarkName!] = value;
-    }
-
-    filteredLandmarks2 = map2.values.toList();
-    pp('$xx buildGeofences .... filteredLandmarks2: ${filteredLandmarks2.length} ');
-
 
     int cnt = 0;
     var radius = 200.0;
@@ -98,7 +79,7 @@ class TheGreatGeofencer {
     pp('$xx buildGeofences .... radius in metres: $radius ');
 
     //
-    for (var landmark in filteredLandmarks2) {
+    for (var landmark in landmarks) {
       await addGeofence(
           landmarkId: landmark.landmarkId!,
           landmarkName: landmark.landmarkName!,
@@ -110,8 +91,16 @@ class TheGreatGeofencer {
         break;
       }
     }
+    final xList = [];
+    for (var element in _geofenceList) {
+      xList.add(element.data['landmarkName']);
+    }
+    xList.sort();
+    pp('\n$xx geofences added to service in alphabetic order\n');
 
-    pp('\n$xx ${_geofenceList.length} geofences added to service: ${filteredLandmarks2.length}\n');
+    for (var element in xList) {
+      pp('$xx geofence added to service: ${E.peach} $element');
+    }
     geofenceService.addGeofenceList(_geofenceList);
 
     geofenceService.addGeofenceStatusChangeListener(
@@ -134,6 +123,50 @@ class TheGreatGeofencer {
     }
   }
 
+  Future<List<lib.RouteLandmark>> _getLandmarksFromAssignments(String vehicleId) async {
+      final a = await listApiDog.getVehicleRouteAssignments(vehicleId, true);
+      pp('$xx _getLandmarksFromAssignments .... found: ${a.length} ');
+
+      final map = HashMap<String, String>();
+      for (var value in a) {
+        map[value.routeId!] = value.routeId!;
+      }
+      final List<lib.RouteLandmark> list = [];
+      final routeIds = map.values.toList();
+      for (var routeId in routeIds) {
+        list.addAll(await listApiDog.getRouteLandmarks(routeId, false));
+      }
+      pp('$xx _getLandmarksFromAssignments .... found: ${list.length} ');
+
+      final map2 = HashMap<String, lib.RouteLandmark>();
+      for (var rl in list) {
+        map2[rl.landmarkName!] = rl;
+      }
+      pp('$xx _getLandmarksFromAssignments .... filtered: ${map2.length} ');
+
+      return map2.values.toList();
+  }
+  Future<List<lib.RouteLandmark>> _getLandmarks() async {
+    final marks2 = await routesIsolate.getAllRouteLandmarksCached();
+
+    pp('$xx _getLandmarks .... routeLandmarks, unfiltered: ${marks2.length} ');
+
+    final map = HashMap<String, RouteLandmark>();
+    for (var value in marks2) {
+      map[value.landmarkId!] = value;
+    }
+
+    final filteredLandmarks = map.values.toList();
+    pp('$xx _getLandmarks .... filteredLandmarks: ${filteredLandmarks.length} ');
+    final map2 = HashMap<String, RouteLandmark>();
+
+    for (var value in filteredLandmarks) {
+      map2[value.landmarkName!] = value;
+    }
+    pp('$xx _getLandmarks .... found: ${map2.length} ');
+
+    return map2.values.toList();
+  }
   Future addGeofence(
       {required String landmarkName,
       required String landmarkId,

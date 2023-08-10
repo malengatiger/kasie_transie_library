@@ -180,7 +180,7 @@ class RouteMapViewerState extends State<RouteMapViewer> {
           landmark.position!.coordinates.first);
 
       final icon = await getMarkerBitmap(72, text: '${landmarkIndex+1}',
-          color: route!.color!, borderColor: Colors.black, fontSize: 28, fontWeight: FontWeight.w900);
+          color: route!.color!, fontSize: 28, fontWeight: FontWeight.w900);
 
       _markers.add(Marker(
           markerId: MarkerId('${landmark.landmarkId}'),
