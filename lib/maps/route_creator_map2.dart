@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart' as poly;
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
@@ -54,7 +53,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
 
   // List<lib.Landmark> _landmarks = [];
   List<lib.RoutePoint> existingRoutePoints = [];
-  List<poly.PointLatLng>? polylinePoints;
+  List<LatLng>? polylinePoints;
   final numberMarkers = <BitmapDescriptor>[];
 
   int routePointIndex = 0;

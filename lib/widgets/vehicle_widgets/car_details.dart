@@ -67,6 +67,10 @@ class CarDetailsState extends State<CarDetails>
   void dispose() {
     dispatchStreamSub.cancel();
     passengerStreamSub.cancel();
+    heartbeatStreamSub.cancel();
+    departureStreamSub.cancel();
+    arrivalStreamSub.cancel();
+    respSub.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -77,7 +81,7 @@ class CarDetailsState extends State<CarDetails>
     super.initState();
     _listen();
     _setTexts();
-    _getData();
+    _getData(false);
   }
 
   lib.LocationResponse? locationResponse;
@@ -193,13 +197,14 @@ class CarDetailsState extends State<CarDetails>
 
   var paCounts = <lib.AmbassadorPassengerCount>[];
 
-  void _getData() async {
+  void _getData(bool refresh) async {
     pp('$mm ... getData ...');
     setState(() {
       busy = true;
     });
     try {
       final m = DateTime.now().toUtc().subtract(Duration(days: days));
+      await listApiDog.getVehicleRouteAssignments(widget.vehicle.vehicleId!, refresh);
       counts = await listApiDog.getVehicleCountsByDate(
           widget.vehicle.vehicleId!, m.toIso8601String());
       paCounts = await listApiDog.getAmbassadorPassengerCountsByVehicle(
@@ -378,7 +383,7 @@ class CarDetailsState extends State<CarDetails>
                                     setState(() {
                                       days = d;
                                     });
-                                    _getData();
+                                    _getData(true);
                                   },
                                   hint: '',
                                 )
@@ -517,7 +522,7 @@ class CarDetailsState extends State<CarDetails>
                                 setState(() {
                                   days = d;
                                 });
-                                _getData();
+                                _getData(true);
                               },
                               hint: daysText == null ? 'Days' : daysText!,
                             )

@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart' as poly;
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
@@ -14,7 +13,6 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/local_finder.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/route_widgets/multi_route_chooser.dart';
-import 'package:kasie_transie_library/widgets/vehicle_passenger_count.dart';
 
 import '../isolates/routes_isolate.dart';
 import '../utils/emojis.dart';
@@ -55,7 +53,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   final List<lib.RoutePoint> rpList = [];
   List<lib.RoutePoint> existingRoutePoints = [];
 
-  List<poly.PointLatLng>? polylinePoints;
+  List<LatLng>? polylinePoints;
   Color color = Colors.black;
   var routeLandmarks = <lib.RouteLandmark>[];
   int landmarkIndex = 0;

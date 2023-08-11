@@ -332,7 +332,6 @@ class ListApiDog {
 
   Future<List<RouteAssignment>> getVehicleRouteAssignments(
       String vehicleId, bool refresh) async {
-    final cmd = '${url}getVehicleRouteAssignments?vehicleId=$vehicleId';
     rm.RealmResults<RouteAssignment> results =
         realm.query<RouteAssignment>('vehicleId == \$0', [vehicleId]);
     final list = <RouteAssignment>[];

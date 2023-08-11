@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart' as poly;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -53,7 +52,7 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
   List<lib.RoutePoint> existingRoutePoints = [];
   List<lib.Landmark> landmarksFromLocationSearch = [];
 
-  List<poly.PointLatLng>? polylinePoints;
+  List<LatLng>? polylinePoints;
 
   int index = 0;
   bool sending = false;

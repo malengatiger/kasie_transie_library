@@ -196,31 +196,6 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
 
   var routes = <lib.Route>[];
 
-  Future _routeExists(String routeId) async {
-    if (routes.isEmpty) {
-      await _handleRoute(routeId);
-    } else {
-      var found = false;
-      for (var value in routes) {
-        if (value.routeId == routeId) {
-          found = true;
-        }
-      }
-      if (!found) {
-        await _handleRoute(routeId);
-      }
-    }
-  }
-
-  Future<void> _handleRoute(String routeId) async {
-    final route = await listApiDog.getRoute(routeId);
-    if (route != null) {
-      routes.add(route);
-      _printRoutes();
-      _putRoutesOnMap(true);
-    }
-  }
-
   lib.Route? routeSelected;
   final Set<Marker> _routeMarkers = HashSet();
   final Set<Marker> _heartbeatMarkers = HashSet();
@@ -248,7 +223,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
       }
       var polyLine = Polyline(
           color: getColor(route.color!),
-          width: 12,
+          width: 6,
           points: latLngs,
           zIndex: 0,
           onTap: () {
@@ -447,11 +422,6 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     }
   }
 
-  void _putArrivalsOnMap() async {}
-
-  void _putCountsOnMap() async {}
-
-  void _putDeparturesOnMap() async {}
   bool hybrid = true;
 
   @override
@@ -495,47 +465,47 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
           style: myTextStyleMediumLargeWithColor(
               context, Theme.of(context).primaryColor, 24),
         ),
-        bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(48),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Hours',
-                      style: myTextStyleSmall(context),
-                    ),
-                    const SizedBox(
-                      width: 16,
-                    ),
-                    Text(
-                      '$hours',
-                      style: myTextStyleMediumLargeWithColor(
-                          context, Theme.of(context).primaryColor, 20),
-                    ),
-                    const SizedBox(
-                      width: 100,
-                    ),
-                    NumberDropDown(
-                        onNumberPicked: (number) {
-                          setState(() {
-                            hours = number;
-                          });
-                          _getVehicleBag();
-                        },
-                        color: Theme.of(context).primaryColor,
-                        count: 49,
-                        fontSize: 14),
-                    const SizedBox(
-                      width: 48,
-                    ),
-                    showDot ? Text(E.redDot) : gapH12,
-                  ],
-                ),
-                gapH12,
-              ],
-            )),
+        // bottom: PreferredSize(
+        //     preferredSize: const Size.fromHeight(48),
+        //     child: Column(
+        //       children: [
+        //         Row(
+        //           mainAxisAlignment: MainAxisAlignment.center,
+        //           children: [
+        //             Text(
+        //               'Hours',
+        //               style: myTextStyleSmall(context),
+        //             ),
+        //             const SizedBox(
+        //               width: 16,
+        //             ),
+        //             Text(
+        //               '$hours',
+        //               style: myTextStyleMediumLargeWithColor(
+        //                   context, Theme.of(context).primaryColor, 20),
+        //             ),
+        //             const SizedBox(
+        //               width: 100,
+        //             ),
+        //             NumberDropDown(
+        //                 onNumberPicked: (number) {
+        //                   setState(() {
+        //                     hours = number;
+        //                   });
+        //                   _getVehicleBag();
+        //                 },
+        //                 color: Theme.of(context).primaryColor,
+        //                 count: 49,
+        //                 fontSize: 14),
+        //             const SizedBox(
+        //               width: 48,
+        //             ),
+        //             showDot ? Text(E.redDot) : gapH12,
+        //           ],
+        //         ),
+        //         gapH12,
+        //       ],
+        //     )),
       ),
       body: Stack(
         children: [

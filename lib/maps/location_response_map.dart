@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -11,6 +12,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../isolates/routes_isolate.dart';
 import '../l10n/translation_handler.dart';
+import '../providers/kasie_providers.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
 
@@ -51,90 +53,111 @@ class LocationResponseMapState extends State<LocationResponseMap> {
     _setTexts();
   }
 
-  Future _findRoutesNearby() async {
-    pp('$mm _findRoutesNearby ........ ${E.leaf2}');
+  Future<void> _getRoutes() async {
+    pp('$mm ... getting routes ....');
+    final ass = await listApiDog.getVehicleRouteAssignments(
+        widget.locationResponse.vehicleId!, false);
+    var hash = HashMap<String, String>();
 
-    var status = await Permission.location.status;
-    if (!status.isGranted) {
-      try {
-        await Permission.location.request();
-      } catch (e) {
-        pp('$mm $e');
+    if (ass.isNotEmpty) {
+      for (var a in ass) {
+        hash[a.routeId!] = a.routeId!;
       }
+      final list = hash.keys.toList();
+      pp('$mm ... _filterRoutes found ${list.length} route ids from route assignments');
+
+      for (var routeId in list) {
+        final route = await listApiDog.getRoute(routeId);
+        if (route != null) {
+          routes.add(route);
+        }
+      }
+    } else {
+      routes = await listApiDog.getRoutes(AssociationParameter(widget.locationResponse.associationId!, false));
     }
+    pp('$mm ... ${routes.length} routes to be put on map ...');
 
-    setState(() {
-      busy = true;
-    });
-    user = await prefs.getUser();
-    try {
-      final loc = await locationBloc.getLocation();
-      routes = await localFinder.findNearestRoutes(
-          latitude: loc.latitude,
-          longitude: loc.longitude,
-          radiusInMetres: 5000);
-      var marks = await localFinder.findNearestRouteLandmarks(
-          latitude: loc.latitude,
-          longitude: loc.longitude,
-          radiusInMetres: 5000);
-      pp('$mm ... marks: ${marks.length}');
-      pp('$mm ... routes: ${routes.length}');
-      if (routes.isNotEmpty) {
-        pp('$mm  check for null: ${routes.first.name} color: ${routes.first.color}');
-      }
-      for (var value in routes) {
-        final lrs = await listApiDog.getRouteLandmarks(value.routeId!, false);
-        final points =
-            await routesIsolate.getRoutePoints(value.routeId!, false);
-        final bag = RouteDataBag(
-            route: value, routeLandmarks: lrs, routePoints: points);
-        bags.add(bag);
-
-        pp('$mm ... routeLandmarks: ${value.name} has ${lrs.length} landmarks');
-        pp('$mm ... routePoints: ${value.name} has ${points.length} points');
-      }
-
-      pp('$mm ... route bags: ${bags.length}');
-
-      _buildPolyLines();
-      await _buildLandmarks();
-      //putResponseOnMap();
-    } catch (e) {
-      pp(e);
-      if (mounted) {
-        showSnackBar(message: 'Error getting routes: $e', context: context);
-      }
+    if (routes.isNotEmpty) {
+      _putRoutesOnMap(true);
     }
-    setState(() {
-      busy = false;
-    });
   }
 
-  void _buildPolyLines() {
-    pp('$mm _buildPolyLines ...');
-    var routeIndex = 0;
+  Future _putRoutesOnMap(bool zoomTo) async {
+    pp('$mm ... _putRoutesOnMap: number of routes: ${routes.length}');
 
+    final hash = HashMap<String, List<lib.RoutePoint>>();
+    _markers.clear();
+    _polyLines.clear();
     for (var route in routes) {
-      final bag = bags[routeIndex];
-      final latLngs = <LatLng>[];
-      for (var point in bag.routePoints) {
-        final latLng = LatLng(
-            point.position!.coordinates[1], point.position!.coordinates[0]);
-        latLngs.add(latLng);
+      final points = await routesIsolate.getRoutePoints(route.routeId!, false);
+      final marks = await listApiDog.getRouteLandmarks(route.routeId!, false);
+      hash[route.routeId!] = points;
+      //add polyline
+      final List<LatLng> latLngs = [];
+      points.sort((a, b) => a.index!.compareTo(b.index!));
+      for (var rp in points) {
+        latLngs.add(
+            LatLng(rp.position!.coordinates[1], rp.position!.coordinates[0]));
       }
-      final polyLine = Polyline(
-        polylineId: PolylineId(route.routeId!),
-        points: latLngs,
-        width: 12,
-        onTap: () {
-          pp('$mm ... polyline tapped ... point below ...');
-        },
-        consumeTapEvents: true,
-        color: getColor(route.color!),
-      );
+      var polyLine = Polyline(
+          color: getColor(route.color!),
+          width: 6,
+          points: latLngs,
+          zIndex: 0,
+          onTap: () {
+            pp('$mm ... polyLine tapped; route: ${points.first.routeName}');
+            if (mounted) {
+              showToast(message: '${points.first.routeName}', context: context);
+            }
+          },
+          consumeTapEvents: true,
+          polylineId: PolylineId(route.routeId!));
+
       _polyLines.add(polyLine);
 
-      routeIndex++;
+      int index = 0;
+
+      for (var routeLandmark in marks) {
+        final icon = await getMarkerBitmap(64,
+            text: '${index + 1}',
+            color: route.color!,
+            fontSize: 28,
+            fontWeight: FontWeight.w900);
+
+        _markers.add(Marker(
+            markerId: MarkerId(routeLandmark.landmarkId!),
+            icon: icon,
+            zIndex: 1,
+            position: LatLng(routeLandmark.position!.coordinates[1],
+                routeLandmark.position!.coordinates[0]),
+            infoWindow: InfoWindow(
+                title: routeLandmark.landmarkName,
+                snippet:
+                '🍎Landmark on route:\n\n ${routeLandmark.routeName}')));
+        index++;
+      }
+    }
+
+    if (zoomTo) {
+      if (hash.isNotEmpty) {
+        final m = hash.values.first.first;
+        final latLng =
+        LatLng(m.position!.coordinates.last, m.position!.coordinates.first);
+        _zoomToPosition(latLng);
+      }
+    }
+  }
+
+  Future<void> _zoomToPosition(LatLng latLng) async {
+    var cameraPos = CameraPosition(target: latLng, zoom: 13.4);
+    try {
+      await googleMapController
+          .animateCamera(CameraUpdate.newCameraPosition(cameraPos));
+      setState(() {
+      });
+    } catch (e) {
+      pp('$mm some error with zooming? ${E.redDot} '
+          '$e ${E.redDot} ${E.redDot} ${E.redDot} ');
     }
   }
 
@@ -152,42 +175,6 @@ class LocationResponseMapState extends State<LocationResponseMap> {
     return icon;
   }
 
-  Future _buildLandmarks() async {
-    pp('$mm _buildLandmarks on map ...');
-    var routeIndex = 0;
-    for (var route in routes) {
-      pp('$mm route: ${route.name} - ${route.routeId} ${E.blueDot} color: ${route.color}');
-      final bag = bags[routeIndex];
-      var index = 0;
-
-      for (var mark in bag.routeLandmarks) {
-        final latLng = LatLng(
-            mark.position!.coordinates[1], mark.position!.coordinates[0]);
-
-        final icon = await getMarkerBitmap(72,
-            text: '${index + 1}',
-            color: route.color!,  fontSize: 28, fontWeight: FontWeight.normal);
-
-        _markers.add(Marker(
-            markerId: MarkerId(mark.landmarkId!),
-            icon: icon,
-            position: latLng,
-            onTap: () {
-              pp('$mm landmark tapped ...');
-              myPrettyJsonPrint(mark.toJson());
-            },
-            infoWindow: InfoWindow(
-              title: mark.landmarkName,
-              snippet: mark.routeName,
-            )));
-        index++;
-      }
-
-      pp('$mm route landmarks: ${route.name} has ${bag.routeLandmarks.length} '
-          'landmarks with ${bag.routePoints.length} routePoints');
-      routeIndex++;
-    }
-  }
 
   Future<void> putResponseOnMap() async {
     pp('$mm _putResponseOnMap .......................'
@@ -196,11 +183,11 @@ class LocationResponseMapState extends State<LocationResponseMap> {
     final latLng = LatLng(widget.locationResponse.position!.coordinates[1],
         widget.locationResponse.position!.coordinates[0]);
 
-    final icon = await getTaxiMapIcon(iconSize: 160,
+    final icon = await getTaxiMapIcon(iconSize: 220,
         text: widget.locationResponse.vehicleReg!, style: const TextStyle(
           color: Colors.yellow,
           fontWeight: FontWeight.w900,
-          fontSize: 20,
+          fontSize: 32,
         ), path: 'assets/car2.png');
     _markers.add(Marker(
         markerId: MarkerId(widget.locationResponse.vehicleId!),
@@ -209,7 +196,6 @@ class LocationResponseMapState extends State<LocationResponseMap> {
         position: latLng,
         onTap: () {
           pp('$mm ... car tapped. find routes ...');
-          _findRoutesNearby();
         },
         infoWindow: InfoWindow(
           title: widget.locationResponse.vehicleReg,
@@ -303,7 +289,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
                     mapToolbarEnabled: true,
                     polylines: _polyLines,
                     markers: _markers,
-                    onMapCreated: (cont) {
+                    onMapCreated: (cont) async {
                       pp('\n$mm .......... on onMapCreated .....');
                       googleMapController = cont;
                       try {
@@ -311,6 +297,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
                       } catch (e) {
                         pp('$mm error ignored: $e');
                       }
+                      await _getRoutes();
                       putResponseOnMap();
                     },
                   ),

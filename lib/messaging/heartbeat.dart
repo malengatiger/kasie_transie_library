@@ -13,26 +13,28 @@ import '../utils/emojis.dart';
 import '../utils/functions.dart';
 import '../utils/parsers.dart';
 
-final Heartbeat heartbeat = Heartbeat();
+final HeartbeatManager heartbeat = HeartbeatManager();
 
-class Heartbeat {
-  final mm = '🔴🔴🔴🔴🔴🔴 Heartbeat: 🔴🔴🔴🔴🔴🔴';
+class HeartbeatManager {
+  final mm = '🔴🔴🔴🔴🔴🔴 HeartbeatManager: 🔴🔴🔴🔴🔴🔴';
 
   late Timer timer;
 
   void startHeartbeat() async {
     pp('\n\n$mm start Heartbeat ................... are we falling here? .........................');
     final sett = await prefs.getSettings();
-    int seconds = 300; //10 minutes
+    int seconds = 180; //3 minutes
     if (sett != null) {
       seconds = sett.heartbeatIntervalSeconds!;
       //todo - remove after test - check default settings
-      if (seconds < 300) {
-        seconds = 300;
+      if (seconds < 180) {
+        seconds = 180;
       }
     }
-    // await addHeartbeat();
-    pp('$mm Heartbeat ......... timer will start with tick of ${E.leaf} $seconds seconds  ${E.leaf}');
+    //
+    await addHeartbeat();  //initial heartbeat
+    pp('$mm Heartbeat ......... initial heartbeat sent; ${E.nice} '
+        'timer will start with tick of ${E.leaf} $seconds seconds  ${E.leaf}');
 
     timer = Timer.periodic(Duration(seconds: seconds), (timer) {
       addHeartbeat();
@@ -44,6 +46,7 @@ class Heartbeat {
 
     if (car == null) {
       try {
+        pp('$mm ......... heartbeat to be sent in the background ...');
             await Firebase.initializeApp();
             final prefs1 = await SharedPreferences.getInstance();
             prefs1.reload(); // The magic line
@@ -59,11 +62,11 @@ class Heartbeat {
             pp(e);
           }
     }
-    final loc = await locationBloc.getLocation();
+    //
     if (car == null) {
       return;
     }
-
+    final loc = await locationBloc.getLocation();
 
     final heartbeat = getHeartbeat(car: car, latitude: loc.latitude, longitude: loc.longitude);
 
@@ -100,4 +103,3 @@ class Heartbeat {
     return heartbeat;
   }
 }
-// const cc = '🔴🔴🔴🔴🔴🔴🌀🌀 Workmanager Heartbeat:  🌀🌀🔴🔴🔴🔴';

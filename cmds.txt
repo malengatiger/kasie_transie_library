@@ -12,6 +12,7 @@ dart run build_runner build --delete-conflicting-outputs
     --output-dir=lib/l10n --no-use-deferred-loading \
     lib/main.dart lib/l10n/intl_*.arb
 
+ dart run realm_dart install
 dart run realm generate
 dart run realm generate --clean
 

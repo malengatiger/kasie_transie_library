@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart' as poly;
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
@@ -55,7 +54,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   List<lib.RoutePoint> existingRoutePoints = [];
   List<lib.Landmark> landmarksFromLocationSearch = [];
 
-  List<poly.PointLatLng>? polylinePoints;
+  List<LatLng>? polylinePoints;
   int totalLandmarks = 0;
 
   int index = 0;
