@@ -11,6 +11,7 @@ import 'package:kasie_transie_library/utils/kasie_exception.dart';
 import 'package:realm/realm.dart' as rlm;
 
 import '../data/calculated_distance_list.dart';
+import '../data/generation_request.dart';
 import '../data/route_assignment_list.dart';
 import '../data/route_point_list.dart';
 import '../data/schemas.dart';
@@ -24,13 +25,14 @@ import 'cache_manager.dart';
 
 final http.Client client = http.Client();
 final DataApiDog dataApiDog =
-    DataApiDog(client, appAuth, cacheManager, prefs, errorHandler);
+DataApiDog(client, appAuth, cacheManager, prefs, errorHandler);
 
 class DataApiDog {
   static const mm = '🌎🌎🌎🌎🌎🌎 DataApiDog: 🌎🌎';
 
   final StreamController<RouteLandmark> _routeLandmarkController =
-      StreamController.broadcast();
+  StreamController.broadcast();
+
   Stream<RouteLandmark> get routeLandmarkStream =>
       _routeLandmarkController.stream;
 
@@ -58,14 +60,14 @@ class DataApiDog {
   }
 
 
-  Future<List<RouteAssignment>> addRouteAssignments(RouteAssignmentList assignments) async {
+  Future<List<RouteAssignment>> addRouteAssignments(
+      RouteAssignmentList assignments) async {
     final bag = assignments.toJson();
     final cmd = '${url}addRouteAssignments';
     List res = await _callPost(cmd, bag);
     var list = <RouteAssignment>[];
     for (var value in res) {
       final lr = buildRouteAssignment(value);
-
     }
     pp('$mm RouteAssignments added to database: ${list.length}');
     return list;
@@ -160,7 +162,8 @@ class DataApiDog {
     final cmd =
         '${url}sendRouteUpdateMessage?associationId=$associationId&routeId=$routeId';
     final res = await _sendHttpGET(cmd);
-    pp('$mm .......... Route Update Message sent: $res, response 0 means GOOD!');
+    pp(
+        '$mm .......... Route Update Message sent: $res, response 0 means GOOD!');
   }
 
   Future<Landmark> addLandmark(Landmark landmark) async {
@@ -311,7 +314,8 @@ class DataApiDog {
     listApiDog.realm.write(() {
       listApiDog.realm.add<Route>(route, update: true);
     });
-    pp('$mm route with updated color cached ... ${route.name} - color: ${route.color}');
+    pp('$mm route with updated color cached ... ${route.name} - color: ${route
+        .color}');
     myPrettyJsonPrint(route.toJson());
     return route;
   }
@@ -344,7 +348,8 @@ class DataApiDog {
       listApiDog.realm.addAll(list, update: true);
     });
 
-    pp('$mm Association RouteLandmarks: ${list.length} updated and cached ${E.leaf}${E.leaf}');
+    pp('$mm Association RouteLandmarks: ${list.length} updated and cached ${E
+        .leaf}${E.leaf}');
     return list;
   }
 
@@ -358,7 +363,8 @@ class DataApiDog {
     listApiDog.realm.write(() {
       listApiDog.realm.addAll(list, update: true);
     });
-    pp('$mm Route Landmarks ${list.length} updated and cached ${E.leaf}${E.leaf}');
+    pp('$mm Route Landmarks ${list.length} updated and cached ${E.leaf}${E
+        .leaf}');
     return list;
   }
 
@@ -393,8 +399,8 @@ class DataApiDog {
     return res;
   }
 
-  Future<List<RoutePoint>> deleteRoutePointsFromIndex(
-      String routeId, int index) async {
+  Future<List<RoutePoint>> deleteRoutePointsFromIndex(String routeId,
+      int index) async {
     final cmd =
         '${url}deleteRoutePointsFromIndex?routeId=$routeId&index=$index';
     List res = await _sendHttpGET(cmd);
@@ -403,7 +409,7 @@ class DataApiDog {
 
     try {
       rlm.RealmResults<RoutePoint> existing =
-          listApiDog.realm.query('routeId == \$0', [routeId]);
+      listApiDog.realm.query('routeId == \$0', [routeId]);
       for (var element in existing) {
         routePoints.add(element);
       }
@@ -572,8 +578,8 @@ class DataApiDog {
   }
 
 //
-  Future<List<DispatchRecord>> generateDispatchRecords(
-      String associationId, int numberOfCars, int intervalInSeconds) async {
+  Future<List<DispatchRecord>> generateDispatchRecords(String associationId,
+      int numberOfCars, int intervalInSeconds) async {
     final cmd = '${url}generateDispatchRecords?associationId=$associationId'
         '&numberOfCars=$numberOfCars&intervalInSeconds=$intervalInSeconds';
     List res = await _sendHttpGET(cmd);
@@ -589,25 +595,14 @@ class DataApiDog {
   }
 
 //
-  Future<List<Vehicle>> generateRouteDispatchRecords(
-      {required String routeId,
-      required int numberOfCars,
-      required int intervalInSeconds}) async {
-    final cmd = '${url}generateRouteDispatchRecords?routeId=$routeId'
-        '&numberOfCars=$numberOfCars&intervalInSeconds=$intervalInSeconds';
-    List res = await _sendHttpGET(cmd);
-    var list = <Vehicle>[];
-    for (var mJson in res) {
-      list.add(buildVehicle(mJson));
-    }
-    listApiDog.realm.write(() {
-      listApiDog.realm.addAll<Vehicle>(list, update: true);
-    });
-    pp('\n\n$mm generateRouteDispatchRecords: Demo Vehicles: ${list.length} cached ${E.leaf}${E.leaf}');
-    for (var value in list) {
-      pp('$mm demo vehicle: ${E.heartOrange} ${value.vehicleReg}');
-    }
-    return list;
+  Future generateRouteDispatchRecords(GenerationRequest request) async {
+    final cmd = '${url}generateRouteDispatchRecords';
+    final res = await _callPost(cmd, request.toJson());
+
+    pp('\n\n$mm generateRouteDispatchRecords: Demo Vehicles: ${request
+        .vehicleIds.length}  $res ${E.leaf}${E.leaf}');
+
+    return res;
   }
 
   //
@@ -619,7 +614,8 @@ class DataApiDog {
     for (var value in res) {
       list.add(buildVehicle(value));
     }
-    pp('\n\n$mm generateRouteDispatchRecordsForCars sent: cars: ${list.length}  ${E.leaf}${E.leaf}');
+    pp('\n\n$mm generateRouteDispatchRecordsForCars sent: cars: ${list
+        .length}  ${E.leaf}${E.leaf}');
 
     return list;
   }
@@ -641,20 +637,13 @@ class DataApiDog {
     return list;
   }
 
-  Future<List<CommuterRequest>> generateRouteCommuterRequests(
-      String routeId, int numberOfCommuters, int intervalInSeconds) async {
+  Future generateRouteCommuterRequests(String routeId,
+      int numberOfCommuters, int intervalInSeconds) async {
     final cmd = '${url}generateRouteCommuterRequests?routeId=$routeId'
         '&numberOfCommuters=$numberOfCommuters&intervalInSeconds=$intervalInSeconds';
-    List res = await _sendHttpGET(cmd);
-    var list = <CommuterRequest>[];
-    for (var mJson in res) {
-      list.add(buildCommuterRequest(mJson));
-    }
-    listApiDog.realm.write(() {
-      listApiDog.realm.addAll<CommuterRequest>(list, update: true);
-    });
-    pp('$mm CommuterRequests: ${list.length}  cached ${E.leaf}${E.leaf}');
-    return list;
+    final res = await _sendHttpGET(cmd);
+    pp('$mm CommuterRequests: $res ${E.leaf}${E.leaf}');
+    return res;
   }
 
   Future<List<AmbassadorPassengerCount>> generateAmbassadorPassengerCounts(
@@ -670,7 +659,8 @@ class DataApiDog {
     listApiDog.realm.write(() {
       listApiDog.realm.addAll<AmbassadorPassengerCount>(list, update: true);
     });
-    pp('$mm AmbassadorPassengerCounts: ${list.length}  cached ${E.leaf}${E.leaf}');
+    pp('$mm AmbassadorPassengerCounts: ${list.length}  cached ${E.leaf}${E
+        .leaf}');
     return list;
   }
 
@@ -686,40 +676,19 @@ class DataApiDog {
     listApiDog.realm.write(() {
       listApiDog.realm.addAll<AmbassadorPassengerCount>(list, update: true);
     });
-    pp('$mm AmbassadorPassengerCounts: ${list.length}  cached ${E.leaf}${E.leaf}');
+    pp('$mm AmbassadorPassengerCounts: ${list.length}  cached ${E.leaf}${E
+        .leaf}');
     return list;
   }
 
-  Future<List<VehicleHeartbeat>> generateHeartbeats(
-      String associationId, int numberOfCars, int intervalInSeconds) async {
-    final cmd = '${url}generateHeartbeats?associationId=$associationId'
-        '&numberOfCars=$numberOfCars&intervalInSeconds=$intervalInSeconds';
-    List res = await _sendHttpGET(cmd);
-    var list = <VehicleHeartbeat>[];
-    for (var mJson in res) {
-      list.add(buildVehicleHeartbeat(mJson));
-    }
-    listApiDog.realm.write(() {
-      listApiDog.realm.addAll<VehicleHeartbeat>(list, update: true);
-    });
-    pp('$mm VehicleHeartbeats: ${list.length}  cached ${E.leaf}${E.leaf}');
-    return list;
-  }
 
-  Future<List<VehicleHeartbeat>> generateRouteHeartbeats(
-      String routeId, int numberOfCars, int intervalInSeconds) async {
-    final cmd = '${url}generateRouteHeartbeats?routeId=$routeId'
-        '&numberOfCars=$numberOfCars&intervalInSeconds=$intervalInSeconds';
-    List res = await _sendHttpGET(cmd);
-    var list = <VehicleHeartbeat>[];
-    for (var mJson in res) {
-      list.add(buildVehicleHeartbeat(mJson));
-    }
-    listApiDog.realm.write(() {
-      listApiDog.realm.addAll<VehicleHeartbeat>(list, update: true);
-    });
-    pp('$mm VehicleHeartbeats: ${list.length}  cached ${E.leaf}${E.leaf}');
-    return list;
+  Future generateRouteHeartbeats(GenerationRequest request) async {
+    final cmd = '${url}generateRouteHeartbeats';
+    final bag = request.toJson();
+    final res = await _callPost(cmd, bag);
+
+    pp('$mm VehicleHeartbeats: $res  ${E.leaf}${E.leaf}');
+    return res;
   }
 
   Future _callPost(String mUrl, Map? bag) async {
@@ -736,15 +705,17 @@ class DataApiDog {
     try {
       var resp = await client
           .post(
-            Uri.parse(mUrl),
-            body: mBag,
-            headers: headers,
-          )
+        Uri.parse(mUrl),
+        body: mBag,
+        headers: headers,
+      )
           .timeout(const Duration(seconds: timeOutInSeconds));
       if (resp.statusCode == 200) {
-        pp('$mm  _callWebAPIPost RESPONSE: 💙💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
+        pp('$mm  _callWebAPIPost RESPONSE: 💙💙 statusCode: 👌👌👌 ${resp
+            .statusCode} 👌👌👌 💙 for $mUrl');
       } else {
-        pp('$mm  👿👿👿_callWebAPIPost: 🔆 statusCode: 👿👿👿 ${resp.statusCode} 🔆🔆🔆 for $mUrl');
+        pp('$mm  👿👿👿_callWebAPIPost: 🔆 statusCode: 👿👿👿 ${resp
+            .statusCode} 🔆🔆🔆 for $mUrl');
         pp(resp.body);
         throw KasieException(
             message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
@@ -753,7 +724,9 @@ class DataApiDog {
             errorType: KasieException.socketException);
       }
       var end = DateTime.now();
-      pp('$mm  _callWebAPIPost: 🔆 elapsed time: ${end.difference(start).inSeconds} seconds 🔆');
+      pp('$mm  _callWebAPIPost: 🔆 elapsed time: ${end
+          .difference(start)
+          .inSeconds} seconds 🔆');
       try {
         var mJson = json.decode(resp.body);
         return mJson;
@@ -789,7 +762,8 @@ class DataApiDog {
       errorHandler.handleError(exception: gex);
       throw gex;
     } on TimeoutException {
-      pp("$mm  No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
+      pp(
+          "$mm  No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
       final gex = KasieException(
           message: 'Request timed out. No Internet connection',
           url: mUrl,
@@ -807,7 +781,8 @@ class DataApiDog {
     if (token != null) {
       // pp('$mm _sendHttpGET: 😡😡😡 Firebase Auth Token: 💙️ Token is GOOD! 💙 ');
     } else {
-      pp('$mm Firebase token missing ${E.redDot}${E.redDot}${E.redDot}${E.redDot}');
+      pp('$mm Firebase token missing ${E.redDot}${E.redDot}${E.redDot}${E
+          .redDot}');
       final gex = KasieException(
           message: 'Firebase Authentication token missing',
           url: mUrl,
@@ -820,13 +795,16 @@ class DataApiDog {
     try {
       var resp = await client
           .get(
-            Uri.parse(mUrl),
-            headers: headers,
-          )
+        Uri.parse(mUrl),
+        headers: headers,
+      )
           .timeout(const Duration(seconds: timeOutInSeconds));
-      pp('$mm http GET call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
+      pp('$mm http GET call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp
+          .statusCode} 👌👌👌 💙 for $mUrl');
       var end = DateTime.now();
-      pp('$mm http GET call: 🔆 elapsed time for http: ${end.difference(start).inSeconds} seconds 🔆 \n\n');
+      pp('$mm http GET call: 🔆 elapsed time for http: ${end
+          .difference(start)
+          .inSeconds} seconds 🔆 \n\n');
 
       if (resp.body.contains('not found')) {
         return false;
@@ -834,7 +812,8 @@ class DataApiDog {
 
       if (resp.statusCode == 403) {
         var msg =
-            '😡 😡 status code: ${resp.statusCode}, Request Forbidden 🥪 🥙 🌮  😡 ${resp.body}';
+            '😡 😡 status code: ${resp
+            .statusCode}, Request Forbidden 🥪 🥙 🌮  😡 ${resp.body}';
         pp(msg);
         final gex = KasieException(
             message: 'Forbidden call',
@@ -847,7 +826,8 @@ class DataApiDog {
 
       if (resp.statusCode != 200) {
         var msg =
-            '😡 😡 The response is not 200; it is ${resp.statusCode}, NOT GOOD, throwing up !! 🥪 🥙 🌮  😡 ${resp.body}';
+            '😡 😡 The response is not 200; it is ${resp
+            .statusCode}, NOT GOOD, throwing up !! 🥪 🥙 🌮  😡 ${resp.body}';
         pp(msg);
         final gex = KasieException(
             message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
@@ -899,7 +879,8 @@ class DataApiDog {
       }
       throw gex;
     } on TimeoutException {
-      pp("$mm No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
+      pp(
+          "$mm No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
       final gex = KasieException(
           message: 'No Internet connection. Request timed out',
           url: mUrl,

@@ -17,6 +17,8 @@ import 'package:kasie_transie_library/maps/cluster_maps/live_cluster_map.dart';
 import 'package:kasie_transie_library/widgets/route_widgets/route_activity.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
+import '../../data/generation_request.dart';
+
 class RouteManager extends StatefulWidget {
   const RouteManager({
     super.key,
@@ -92,8 +94,15 @@ class _RouteManagerState extends State<RouteManager> {
       busy = true;
     });
     try {
-      await dataApiDog.generateRouteDispatchRecords(routeId: route!.routeId!,
-          numberOfCars:numberOfCars, intervalInSeconds: 4);
+      final vehicleIds = <String>[];
+      final cars = await listApiDog.getAssociationVehicles(route!.associationId!, false);
+      for (var i = 0; i < numberOfCars; i++) {
+        vehicleIds.add(cars.elementAt(i).vehicleId!);
+      }
+
+      final startDate = DateTime.now().toUtc().subtract(const Duration(minutes: 60)).toIso8601String();
+      final gen = GenerationRequest(route!.routeId!, startDate, vehicleIds, 10);
+      await dataApiDog.generateRouteDispatchRecords(gen);
       _showSuccess('Dispatch record generation requests sent. Watch for action ...');
     } catch (e) {
       pp(e);

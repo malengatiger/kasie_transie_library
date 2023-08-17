@@ -435,6 +435,7 @@ VehicleHeartbeat buildVehicleHeartbeat(Map j) {
     associationId: j['associationId'],
     created: j['created'],
     ownerId: j['ownerId'],
+    appToBackground: j['appToBackground'],
     make: j['make'],
     model: j['model'],
     ownerName: j['ownerName'],

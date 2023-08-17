@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart';
+import 'package:kasie_transie_library/messaging/fcm_bloc.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:realm/realm.dart';
@@ -13,7 +14,7 @@ import '../utils/emojis.dart';
 import '../utils/functions.dart';
 import '../utils/parsers.dart';
 
-final HeartbeatManager heartbeat = HeartbeatManager();
+final HeartbeatManager heartbeatManager = HeartbeatManager();
 
 class HeartbeatManager {
   final mm = '🔴🔴🔴🔴🔴🔴 HeartbeatManager: 🔴🔴🔴🔴🔴🔴';
@@ -48,16 +49,7 @@ class HeartbeatManager {
       try {
         pp('$mm ......... heartbeat to be sent in the background ...');
             await Firebase.initializeApp();
-            final prefs1 = await SharedPreferences.getInstance();
-            prefs1.reload(); // The magic line
-            var string = prefs1.getString('car');
-            if (string == null) {
-              pp('... ${E.redDot}${E.redDot}${E.redDot} car is null in background ... 1');
-              return;
-            } else {
-              final json = jsonDecode(string);
-              car = buildVehicle(json);
-            }
+            car = await getCarInBackground();
           } catch (e) {
             pp(e);
           }

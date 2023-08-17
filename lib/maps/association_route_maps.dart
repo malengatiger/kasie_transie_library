@@ -111,6 +111,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
       cnt++;
     }
   }
+
   Future<void> _filter(List<lib.Route> mRoutes) async {
     routes.clear();
     for (var route in mRoutes) {

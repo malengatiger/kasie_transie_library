@@ -818,7 +818,7 @@ Future<void> kasieFirebaseMessagingBackgroundHandler(
 ///message handlers
 void handleLocationResponse(lib.LocationResponse response) async {
   pp('$mxx ... handleLocationResponse in background ...');
-  final user = await _getUser();
+  final user = await getUserInBackground();
 
   if (user != null) {
 
@@ -837,7 +837,7 @@ void handleLocationResponse(lib.LocationResponse response) async {
 void handleHeartbeat(lib.VehicleHeartbeat heartbeat) async {
   pp('$mxx ... handleHeartbeat in background ...');
 
-  final user = await _getUser();
+  final user = await getUserInBackground();
 
   if (user != null) {
 
@@ -856,7 +856,7 @@ void handleHeartbeat(lib.VehicleHeartbeat heartbeat) async {
 void handlePassengerCount(lib.AmbassadorPassengerCount passengerCount) async {
   pp('$mxx ... handlePassengerCount in background ...');
 
-  final user = await _getUser();
+  final user = await getUserInBackground();
 
   if (user != null) {
     if (user.userType == Constants.OWNER) {
@@ -874,7 +874,7 @@ void handlePassengerCount(lib.AmbassadorPassengerCount passengerCount) async {
 void handleDispatch(lib.DispatchRecord dispatchRecord) async {
   pp('$mxx ... handleDispatch in background ...');
 
-  final user = await _getUser();
+  final user = await getUserInBackground();
 
   if (user != null) {
 
@@ -893,7 +893,7 @@ void handleDispatch(lib.DispatchRecord dispatchRecord) async {
 void handleVehicleDeparture(lib.VehicleDeparture departure) async {
   pp('$mxx ... handleVehicleDeparture in background ...');
 
-  final user = await _getUser();
+  final user = await getUserInBackground();
 
   if (user != null) {
 
@@ -912,7 +912,7 @@ void handleVehicleDeparture(lib.VehicleDeparture departure) async {
 void handleVehicleArrival(lib.VehicleArrival arrival) async {
   pp('$mxx ... handleVehicleArrival in background ...');
 
-  final user = await _getUser();
+  final user = await getUserInBackground();
 
   if (user != null) {
 
@@ -964,7 +964,7 @@ void cacheDispatchRecord(lib.DispatchRecord object) {
   });
 }
 
-Future<lib.User?> _getUser() async {
+Future<lib.User?> getUserInBackground() async {
   lib.User? user;
   final prefs1 = await SharedPreferences.getInstance();
   prefs1.reload(); // The magic line
@@ -980,7 +980,8 @@ Future<lib.User?> _getUser() async {
 
   return user;
 }
-Future<lib.Vehicle?> _getCar() async {
+
+Future<lib.Vehicle?> getCarInBackground() async {
   lib.Vehicle? car;
   final prefs1 = await SharedPreferences.getInstance();
   prefs1.reload(); // The magic line
@@ -996,10 +997,11 @@ Future<lib.Vehicle?> _getCar() async {
 
   return car;
 }
+
 void handleLocationRequest(lib.LocationRequest request) async {
   pp('$mxx ... handleLocationRequest in background ...');
 
-  lib.Vehicle? car = await _getCar();
+  lib.Vehicle? car = await getCarInBackground();
   if (car == null) {
     return;
   }

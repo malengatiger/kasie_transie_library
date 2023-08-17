@@ -76,6 +76,8 @@ dependencies:
   shared_preferences: ^2.2.0
   package_info_plus: ^4.1.0
   play_integrity_flutter: ^0.0.1
+  archive: ^3.3.7
+  universal_io: ^2.2.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -466,7 +466,7 @@ class _VehicleHeartbeat {
   String? model;
   String? ownerId, ownerName;
   int? longDate;
-
+  bool? appToBackground = false;
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {};
     map['ownerId'] = ownerId;
@@ -474,6 +474,8 @@ class _VehicleHeartbeat {
     map['vehicleId'] = vehicleId;
     map['ownerName'] = ownerName;
     map['created'] = created;
+    map['appToBackground'] = appToBackground;
+
     map['geoHash'] = geoHash;
     map['longDate'] = longDate;
     map['vehicleReg'] = vehicleReg;

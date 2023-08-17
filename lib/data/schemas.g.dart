@@ -1804,6 +1804,8 @@ class UserGeofenceEvent extends _UserGeofenceEvent
 
 class VehicleHeartbeat extends _VehicleHeartbeat
     with RealmEntity, RealmObjectBase, RealmObject {
+  static var _defaultsSet = false;
+
   VehicleHeartbeat(
     ObjectId id, {
     String? vehicleHeartbeatId,
@@ -1818,7 +1820,13 @@ class VehicleHeartbeat extends _VehicleHeartbeat
     String? ownerId,
     String? ownerName,
     int? longDate,
+    bool? appToBackground = false,
   }) {
+    if (!_defaultsSet) {
+      _defaultsSet = RealmObjectBase.setDefaults<VehicleHeartbeat>({
+        'appToBackground': false,
+      });
+    }
     RealmObjectBase.set(this, 'id', id);
     RealmObjectBase.set(this, 'vehicleHeartbeatId', vehicleHeartbeatId);
     RealmObjectBase.set(this, 'position', position);
@@ -1832,6 +1840,7 @@ class VehicleHeartbeat extends _VehicleHeartbeat
     RealmObjectBase.set(this, 'ownerId', ownerId);
     RealmObjectBase.set(this, 'ownerName', ownerName);
     RealmObjectBase.set(this, 'longDate', longDate);
+    RealmObjectBase.set(this, 'appToBackground', appToBackground);
   }
 
   VehicleHeartbeat._();
@@ -1915,6 +1924,13 @@ class VehicleHeartbeat extends _VehicleHeartbeat
   set longDate(int? value) => RealmObjectBase.set(this, 'longDate', value);
 
   @override
+  bool? get appToBackground =>
+      RealmObjectBase.get<bool>(this, 'appToBackground') as bool?;
+  @override
+  set appToBackground(bool? value) =>
+      RealmObjectBase.set(this, 'appToBackground', value);
+
+  @override
   Stream<RealmObjectChanges<VehicleHeartbeat>> get changes =>
       RealmObjectBase.getChanges<VehicleHeartbeat>(this);
 
@@ -1943,6 +1959,7 @@ class VehicleHeartbeat extends _VehicleHeartbeat
       SchemaProperty('ownerId', RealmPropertyType.string, optional: true),
       SchemaProperty('ownerName', RealmPropertyType.string, optional: true),
       SchemaProperty('longDate', RealmPropertyType.int, optional: true),
+      SchemaProperty('appToBackground', RealmPropertyType.bool, optional: true),
     ]);
   }
 }

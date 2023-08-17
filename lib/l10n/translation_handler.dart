@@ -18,7 +18,6 @@ class TranslationHandler {
   TranslationHandler._internal() {
     // initialization logic
   }
-  final android = Platform.isAndroid;
   var localeMap = HashMap<String, String>();
   static const mm = '🌎🔵 mtX: ';
   String? currentLocale;
