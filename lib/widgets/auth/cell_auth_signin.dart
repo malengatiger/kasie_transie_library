@@ -89,10 +89,11 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification> {
 
     if (user != null) {
       myPrettyJsonPrint(user.toJson());
-      widget.onUserAuthenticated(user);
+      //widget.onUserAuthenticated(user);
       if (mounted) {
-        pp('\n\n\n$mm .............................. popping out from CustomPhoneVerification  🍎 🍎 ');
-        Navigator.pop(context);
+        pp('\n\n\n$mm .............................. '
+            'popping out from CustomPhoneVerification  🍎 🍎 with user: ${user.name} ');
+        Navigator.of(context).pop(user);
       }
     } else {
       if (mounted) {

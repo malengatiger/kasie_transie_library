@@ -194,16 +194,18 @@ class ListApiDog {
   }
 
   Future<BigBag> getOwnersBag(String userId, String startDate) async {
+    pp('$mm ............................ getOwnersBag, userId: $userId startDate: $startDate ....');
+    final url = KasieEnvironment.getUrl();
     final cmd = '${url}getOwnersBag?userId=$userId&startDate=$startDate';
     final resp = await _sendHttpGET(cmd);
     final bag = BigBag.fromJson(resp);
 
-    pp('$mm getOwnersBag: '
-        '\n vehicleHeartbeats: ${bag.vehicleHeartbeats.length} '
-        '\n vehicleArrivals: ${bag.vehicleArrivals.length} '
-        '\n dispatchRecords: ${bag.dispatchRecords.length} '
-        '\n passengerCounts: ${bag.passengerCounts.length} '
-        '\n vehicleDepartures: ${bag.vehicleDepartures.length}');
+    pp('$mm .......... getOwnersBag returned: '
+        '\n ${E.broc} vehicleHeartbeats: ${bag.vehicleHeartbeats.length} '
+        '\n ${E.broc} vehicleArrivals: ${bag.vehicleArrivals.length} '
+        '\n ${E.broc} dispatchRecords: ${bag.dispatchRecords.length} '
+        '\n ${E.broc} passengerCounts: ${bag.passengerCounts.length} '
+        '\n ${E.broc} vehicleDepartures: ${bag.vehicleDepartures.length}');
 
     return bag;
   }

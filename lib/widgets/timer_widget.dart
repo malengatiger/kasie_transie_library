@@ -5,11 +5,12 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:flutter_analog_clock/flutter_analog_clock.dart';
 
 class TimerWidget extends StatefulWidget {
-  const TimerWidget({Key? key, required this.title, this.subTitle})
+  const TimerWidget({Key? key, required this.title, this.subTitle, this.isSmallSize})
       : super(key: key);
 
   final String title;
   final String? subTitle;
+  final bool? isSmallSize;
 
   @override
   TimerWidgetState createState() => TimerWidgetState();
@@ -49,41 +50,41 @@ class TimerWidgetState extends State<TimerWidget>
   Widget build(BuildContext context) {
     final date = DateTime.now();
     return SizedBox(
-      width: 400,
-      height: 600,
+      width: widget.isSmallSize == null? 400: 300,
+      height: widget.isSmallSize == null? 400: 600,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding:  EdgeInsets.all(widget.isSmallSize == null? 8:16.0),
         child: Card(
           shape: getDefaultRoundedBorder(),
           elevation: 12,
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding:  EdgeInsets.all(widget.isSmallSize == null? 8: 20.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(
-                    height: 32,
+                   SizedBox(
+                    height: widget.isSmallSize == null? 8: 32,
                   ),
                   Text(
                     widget.title,
                     style: myTextStyleMediumLargeWithColor(
                         context, Colors.grey.shade700, 16),
                   ),
-                  const SizedBox(
-                    height: 32,
+                  SizedBox(
+                    height: widget.isSmallSize == null? 8:32,
                   ),
                   widget.subTitle == null
                       ? const SizedBox()
                       : Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                          padding: EdgeInsets.symmetric(horizontal: widget.isSmallSize == null? 8:32.0),
                           child: Text(widget.subTitle!),
                         ),
-                  const SizedBox(
-                    height: 48,
+                   SizedBox(
+                    height: widget.isSmallSize == null? 4: 48,
                   ),
-                  SizedBox(width: 120, height: 120,
+                  widget.isSmallSize == null? SizedBox(width: widget.isSmallSize == null? 72:120, height: widget.isSmallSize == null? 72:120,
                     child: AnalogClock(
                       dateTime: date,
                       isKeepTime: true,
@@ -92,17 +93,17 @@ class TimerWidgetState extends State<TimerWidget>
                         child: Text('GMT+2'),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 48,
+                  ): gapW16,
+                   SizedBox(
+                    height: widget.isSmallSize == null? 8:48,
                   ),
                   Text(
                     getFormattedTime(timeInSeconds: elapsed),
                     style: myTextStyleMediumLargeWithColor(
-                        context, Theme.of(context).primaryColor, 48),
+                        context, Theme.of(context).primaryColor, widget.isSmallSize == null? 20:48),
                   ),
-                  const SizedBox(
-                    height: 48,
+                   SizedBox(
+                    height: widget.isSmallSize == null? 16:48,
                   ),
                 ],
               ),

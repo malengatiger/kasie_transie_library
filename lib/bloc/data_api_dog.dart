@@ -68,8 +68,12 @@ class DataApiDog {
     var list = <RouteAssignment>[];
     for (var value in res) {
       final lr = buildRouteAssignment(value);
+      list.add(lr);
     }
-    pp('$mm RouteAssignments added to database: ${list.length}');
+    listApiDog.realm.write(() {
+      listApiDog.realm.addAll(list, update: true);
+    });
+    pp('$mm RouteAssignments added to database and cached on realm: ${list.length}');
     return list;
   }
 

@@ -5,7 +5,9 @@ import 'package:kasie_transie_library/data/route_assignment_list.dart';
 import 'package:kasie_transie_library/maps/association_route_maps.dart';
 import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
+import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/widgets/route_widgets/multi_route_chooser.dart';
+import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/multi_vehicle_chooser.dart';
 import 'package:realm/realm.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -33,6 +35,7 @@ class _RouteAssignerState extends State<RouteAssigner> {
   List<lib.Vehicle> cars = [];
   lib.Route? routePicked;
   List<lib.Vehicle> carsPicked = [];
+  var routesPicked = <lib.Route>[];
   bool busy = false;
 
   @override
@@ -50,6 +53,9 @@ class _RouteAssignerState extends State<RouteAssigner> {
       await _getCars();
     } catch (e) {
       pp(e);
+      if (mounted) {
+        showSnackBar(message: 'Error: $e', context: context);
+      }
     }
     setState(() {
       busy = false;
@@ -78,7 +84,7 @@ class _RouteAssignerState extends State<RouteAssigner> {
 
   void submitAssignments() async {
     pp('$mm ... submitAssignments ...');
-    if (routePicked == null) {
+    if (routesPicked.isEmpty) {
       showToast(
           backgroundColor: Colors.black,
           textStyle: const TextStyle(
@@ -106,17 +112,19 @@ class _RouteAssignerState extends State<RouteAssigner> {
     try {
       final List<lib.RouteAssignment> list = [];
       for (var car in carsPicked) {
-        list.add(lib.RouteAssignment(
-          ObjectId(),
-          routeId: routePicked!.routeId,
-          created: DateTime.now().toUtc().toIso8601String(),
-          active: 0,
-          associationId: routePicked!.associationId,
-          associationName: routePicked!.associationName,
-          routeName: routePicked!.name,
-          vehicleReg: car.vehicleReg,
-          vehicleId: car.vehicleId,
-        ));
+        for (var route in routesPicked) {
+          list.add(lib.RouteAssignment(
+            ObjectId(),
+            routeId: route.routeId,
+            created: DateTime.now().toUtc().toIso8601String(),
+            active: 0,
+            associationId: route.associationId,
+            associationName: route.associationName,
+            routeName: route.name,
+            vehicleReg: car.vehicleReg,
+            vehicleId: car.vehicleId,
+          ));
+        }
       }
       final RouteAssignmentList ral = RouteAssignmentList(assignments: list);
       final results = await dataApiDog.addRouteAssignments(ral);
@@ -125,10 +133,13 @@ class _RouteAssignerState extends State<RouteAssigner> {
         showSnackBar(
             backgroundColor: Colors.teal,
             textStyle: const TextStyle(color: Colors.white),
-            message: '${carsPicked.length} Route assignments saved for ${routePicked!.name}', context: context);
+            message:
+                '${carsPicked.length} cars have been assigned to ${routesPicked.length} routes',
+            context: context);
       }
+      //
       carsPicked.clear();
-      routePicked = null;
+      routesPicked.clear();
 
     } catch (e) {
       pp(e);
@@ -136,61 +147,84 @@ class _RouteAssignerState extends State<RouteAssigner> {
         showSnackBar(
             backgroundColor: Colors.pink,
             textStyle: const TextStyle(color: Colors.white),
-            message: '${carsPicked.length} Route assignments failed: $e', context: context);
+            message: 'Route assignments failed: $e',
+            context: context);
       }
     }
     setState(() {
       busy = false;
-
     });
   }
+
   void _displayCarsDialog() {
     pp('$mm ... _displayCarsDialog ...');
-    showDialog(context: context, builder: (ctx){
-      return AlertDialog(
-        icon: const Icon(Icons.airport_shuttle),
-        elevation: 16,
-        title: const Text('Cars Selected'),
-        actions: [
-          TextButton(onPressed: (){
-            Navigator.of(context).pop();
-          }, child: const Text('Close')),
-        ],
-        content: SizedBox(height: 300,
-          child: bd.Badge(
-            badgeContent: Text('${carsPicked.length}', style: myTextStyleTiny(context),),
-            badgeStyle: const bd.BadgeStyle(badgeColor: Colors.indigo, elevation: 16),
-            child: ListView.builder(
-                itemCount: carsPicked.length,
-                itemBuilder: (_,index){
-                  final car = carsPicked.elementAt(index);
-              return Card(
-                shape: getRoundedBorder(radius: 8),
-                elevation: 8,
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text('${car.vehicleReg}', style: myTextStyleMediumLargeWithColor(context, Theme.of(context).primaryColor,
-                      16),),
+    showDialog(
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            icon: const Icon(Icons.airport_shuttle),
+            elevation: 16,
+            title: const Text('Cars Selected'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Close')),
+            ],
+            content: SizedBox(
+              height: 300,
+              child: bd.Badge(
+                badgeContent: Text(
+                  '${carsPicked.length}',
+                  style: myTextStyleTiny(context),
                 ),
-              );
-            }),
-          ),
-        ),
-      );
-    });
+                badgeStyle: const bd.BadgeStyle(
+                    badgeColor: Colors.indigo, elevation: 16),
+                child: ListView.builder(
+                    itemCount: carsPicked.length,
+                    itemBuilder: (_, index) {
+                      final car = carsPicked.elementAt(index);
+                      return Card(
+                        shape: getRoundedBorder(radius: 8),
+                        elevation: 8,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text(
+                            '${car.vehicleReg}',
+                            style: myTextStyleMediumLargeWithColor(
+                                context, Theme.of(context).primaryColor, 16),
+                          ),
+                        ),
+                      );
+                    }),
+              ),
+            ),
+          );
+        });
   }
+
   bool showCars = true, showRoutes = false;
+
+  void _navigateToMultiRouteChooser() async {
+    routesPicked = await navigateWithScale(
+        MultiRouteChooser(
+            quitOnDone: true, onRoutesPicked: (r) {}, routes: routes),
+        context);
+
+    pp('$mm back from MultiRouteChooser: routes picked: ${routesPicked.length}');
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final type = getThisDeviceType();
     return SafeArea(
         child: Scaffold(
             appBar: AppBar(
               title: const Text('Route Assignments'),
               bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(240),
+                  preferredSize:  Size.fromHeight(carsPicked.isEmpty && routesPicked.isEmpty? 160:360),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Card(
@@ -200,11 +234,32 @@ class _RouteAssignerState extends State<RouteAssigner> {
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
                           children: [
+                            gapH16,
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text('Search for Routes', style: myTextStyleSmall(context),),
+                                gapW16,
+                                IconButton(
+                                    onPressed: () {
+                                      pp('$mm search for routes');
+                                      _navigateToMultiRouteChooser();
+                                    },
+                                    icon: Icon(
+                                      Icons.search,
+                                      size: 32,
+                                      color: Theme.of(context).primaryColor,
+                                    )),
+                              ],
+                            ),
+                            gapH16,
+                            carsPicked.isEmpty && routesPicked.isEmpty? gapH4:gapH32,
+                            carsPicked.isEmpty? gapW16: Row(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.end,
                               children: [
                                 GestureDetector(
-                                  onTap: (){
+                                  onTap: () {
                                     _displayCarsDialog();
                                   },
                                   child: Row(
@@ -213,55 +268,69 @@ class _RouteAssignerState extends State<RouteAssigner> {
                                         'Number of Cars',
                                         style: myTextStyleSmall(context),
                                       ),
-                                      gapW16,
+                                      gapW32,
                                       Text(
                                         '${carsPicked.length}',
-                                        style: myTextStyleMediumLargeWithColor(
-                                            context, Theme.of(context).primaryColor, 20),
+                                        style:
+                                            myTextStyleMediumLargeWithColor(
+                                                context,
+                                                Theme.of(context)
+                                                    .primaryColor,
+                                                20),
                                       ),
                                     ],
                                   ),
                                 ),
-                                IconButton(onPressed: (){
-                                  setState(() {
-                                    carsPicked.clear();
-                                  });
-                                }, icon: const Icon(Icons.remove_circle))
+                                gapW16,
+                                IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        carsPicked.clear();
+                                      });
+                                    },
+                                    icon: Icon(Icons.remove_circle,size: 32, color: Theme.of(context).primaryColor,))
                               ],
                             ),
                             gapH16,
-                            routePicked == null
-                                ? gapH4
-                                : Text(
-                                    '${routePicked!.name}',
-                                    style: myTextStyleMediumLargeWithColor(context,
-                                        Theme.of(context).primaryColor, 16),
-                                  ),
-                            gapH16,
-                            RouteDropDown(
-                                routes: routes,
-                                onRoutePicked: (route) {
-                                  pp('$mm route picked: ${route.name}');
-                                  setState(() {
-                                    routePicked = route;
-                                  });
-                                }),
-                            gapH16,
-                            routePicked != null && carsPicked.isNotEmpty? Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+
+                            routesPicked.isNotEmpty? Row(mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                ElevatedButton.icon(
-                                    onPressed: () {
-                                      submitAssignments();
-                                    },
-                                    icon: const Icon(Icons.add_box),
-                                    label: const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text('Save Assignments'),
-                                    )),
+                                 Text('Routes Selected',style: myTextStyleSmall(context),),
+                                gapW16,
+                                Text('${routesPicked.length}', style: myTextStyleMediumLargeWithColor(context, Theme.of(context).primaryColor,
+                                    20),),
+                                gapW16,
+                                IconButton(onPressed: (){
+                                  setState(() {
+                                    routesPicked.clear();
+                                  });
+                                }, icon: Icon(Icons.remove_circle, color: Theme.of(context).primaryColor,
+                                size: 32,))
                               ],
-                            ): gapH4,
-                            routePicked != null && carsPicked.isNotEmpty? gapH4: gapH32,
+
+                            ): gapW16,
+                            gapH16,
+                            routesPicked.isNotEmpty && carsPicked.isNotEmpty
+                                ? Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      ElevatedButton.icon(
+                                          onPressed: () {
+                                            submitAssignments();
+                                          },
+                                          style: const ButtonStyle(
+                                            elevation: MaterialStatePropertyAll(12),
+                                          ),
+                                          icon: const Icon(Icons.add_box),
+                                          label: const Padding(
+                                            padding: EdgeInsets.all(20.0),
+                                            child: Text('Save Assignments'),
+                                          )),
+                                    ],
+                                  )
+                                : gapH4,
+                            carsPicked.isEmpty && routesPicked.isEmpty?  gapH4
+                                : gapH16,
                           ],
                         ),
                       ),
@@ -270,33 +339,34 @@ class _RouteAssignerState extends State<RouteAssigner> {
             ),
             body: busy
                 ? const Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 6,
-                      backgroundColor: Colors.pink,
-                    ),
+                    child: TimerWidget(title: 'Sending assignments', isSmallSize: true,),
                   )
                 : ScreenTypeLayout.builder(
                     mobile: (_) {
-                      return Card(
-                        shape: getRoundedBorder(radius: 16),
-                        elevation: 4,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Stack(
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: MultiVehicleChooser(
-                                  vehicles: cars,
-                                  onVehiclePicked: (vehicle) {
-                                    setState(() {
-                                      carsPicked.add(vehicle);
-                                    });
-                                  }, vehiclesToHighlight: carsPicked,
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Card(
+                          shape: getRoundedBorder(radius: 16),
+                          elevation: 4,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Stack(
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8.0),
+                                  child: MultiVehicleChooser(
+                                    vehicles: cars,
+                                    onVehiclePicked: (vehicle) {
+                                      setState(() {
+                                        carsPicked.add(vehicle);
+                                      });
+                                    },
+                                    vehiclesToHighlight: carsPicked,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       );
@@ -321,12 +391,14 @@ class _RouteAssignerState extends State<RouteAssigner> {
                                 SizedBox(
                                   width: (width / 2) + 100,
                                   child: MultiRouteChooser(
-                                      onRoutesPicked: (rs) {
-                                        setState(() {
-                                          //routesPicked = rs;
-                                        });
-                                      },
-                                      routes: routes),
+                                    onRoutesPicked: (rs) {
+                                      setState(() {
+                                        routesPicked = rs;
+                                      });
+                                    },
+                                    routes: routes,
+                                    quitOnDone: true,
+                                  ),
                                 )
                               ],
                             );
@@ -347,12 +419,14 @@ class _RouteAssignerState extends State<RouteAssigner> {
                                 SizedBox(
                                   width: (width / 2) + 100,
                                   child: MultiRouteChooser(
-                                      onRoutesPicked: (rs) {
-                                        setState(() {
-                                          //routesPicked = rs;
-                                        });
-                                      },
-                                      routes: routes),
+                                    onRoutesPicked: (rs) {
+                                      setState(() {
+                                        routesPicked = rs;
+                                      });
+                                    },
+                                    routes: routes,
+                                    quitOnDone: true,
+                                  ),
                                 )
                               ],
                             );

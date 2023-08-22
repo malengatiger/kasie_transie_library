@@ -88,7 +88,7 @@ class PhotoHandlerState extends State<PhotoHandler>
         maxHeight: height,
         maxWidth: width,
         imageQuality: 100,
-        preferredCameraDevice: CameraDevice.rear);
+        preferredCameraDevice: CameraDevice.front);
 
     if (file != null) {
       await _processFile(file);

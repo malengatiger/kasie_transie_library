@@ -163,7 +163,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
                 Navigator.of(context).pop();
                 _buildHashMap();
               },
-              routes: routes,
+              routes: routes, quitOnDone: false,
             ),
           );
         });

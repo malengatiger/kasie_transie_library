@@ -74,7 +74,7 @@ class MultiVehicleChooserState extends State<MultiVehicleChooser> {
       children: [
         gapH16,
 
-       VehicleSearch(cars: widget.vehicles, carsFound: (carsFound){
+       widget.vehicles.length < 25? gapH32: VehicleSearch(cars: widget.vehicles, carsFound: (carsFound){
          setState(() {
            list = carsFound;
          });

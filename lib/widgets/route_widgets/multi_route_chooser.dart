@@ -8,11 +8,12 @@ import 'package:badges/badges.dart' as bd;
 import '../../l10n/translation_handler.dart';
 
 class MultiRouteChooser extends StatefulWidget {
-  const MultiRouteChooser({Key? key, required this.onRoutesPicked, required this.routes})
+  const MultiRouteChooser({Key? key, required this.onRoutesPicked, required this.routes, required this.quitOnDone})
       : super(key: key);
 
   final List<lib.Route> routes;
   final Function(List<lib.Route>) onRoutesPicked;
+  final bool quitOnDone;
 
   @override
   MultiRouteChooserState createState() => MultiRouteChooserState();
@@ -80,87 +81,99 @@ class MultiRouteChooserState extends State<MultiRouteChooser> {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
 
-    return Column(
-      children: [
-        gapH16,
-        Row(mainAxisAlignment: MainAxisAlignment.center,
+    return SafeArea(child: Scaffold(
+      appBar: AppBar(
+        leading: gapW16,
+        title: const Text('Route Selection'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
           children: [
-            Text('$selectedRoutes : ', style: myTextStyleMediumLargeWithColor(context,
-                Theme.of(context).primaryColorLight, 14),),
-             SizedBox(
-              width: type == 'phone'?12:64,
-            ),
-            Text(
-              '${list.length}',
-              style: myTextStyleMediumLargeWithColor(
-                  context, Theme.of(context).primaryColorLight, 20),
+            gapH16,
+            Row(mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('$selectedRoutes : ', style: myTextStyleMediumLargeWithColor(context,
+                    Theme.of(context).primaryColorLight, 14),),
+                SizedBox(
+                  width: type == 'phone'?12:64,
+                ),
+                Text(
+                  '${list.length}',
+                  style: myTextStyleMediumLargeWithColor(
+                      context, Theme.of(context).primaryColorLight, 20),
+                ),
+                const SizedBox(
+                  width: 24,
+                ),
+              ],
             ),
             const SizedBox(
-              width: 24,
+              height: 4,
+            ),
+            list.isEmpty
+                ? const SizedBox()
+                : ElevatedButton(
+                onPressed: () {
+                  widget.onRoutesPicked(list);
+                  if (widget.quitOnDone) {
+                    Navigator.of(context).pop(list);
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(6.0),
+                  child: Text(showRoutes),
+                )),
+            const SizedBox(
+              height: 8,
+            ),
+            Expanded(
+              child: bd.Badge(
+                badgeContent: Text('${widget.routes.length}'),
+                position: bd.BadgePosition.topEnd(top: 8, end: -8),
+                child: ListView.builder(
+                    itemCount: widget.routes.length,
+                    itemBuilder: (ctx, index) {
+                      final route = widget.routes.elementAt(index);
+                      final picked = checkList.isEmpty? false: checkList.elementAt(index);
+                      return Card(
+                        shape: getRoundedBorder(radius: 8),
+                        elevation: 12,
+                        child: Row(
+                          children: [
+                            Checkbox(
+                                value: picked,
+                                onChanged: (checked) {
+                                  pp('$mm ... Checkbox: checked: $checked ...');
+                                  if (checked != null) {
+                                    checkList[index] = checked;
+                                    if (checked) {
+                                      _addRoute(route);
+                                    } else {
+                                      _removeRoute(route);
+                                    }
+                                  }
+                                  setState(() {});
+
+                                }),
+                            const SizedBox(
+                              width: 2,
+                            ),
+                            Flexible(
+                              child: Text(
+                                '${route.name}',
+                                style: myTextStyleSmall(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+              ),
             ),
           ],
         ),
-        const SizedBox(
-          height: 4,
-        ),
-        list.isEmpty
-            ? const SizedBox()
-            : ElevatedButton(
-            onPressed: () {
-              widget.onRoutesPicked(list);
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(6.0),
-              child: Text(showRoutes),
-            )),
-        const SizedBox(
-          height: 8,
-        ),
-        Expanded(
-          child: bd.Badge(
-            badgeContent: Text('${widget.routes.length}'),
-            position: bd.BadgePosition.topEnd(top: 8, end: -8),
-            child: ListView.builder(
-                itemCount: widget.routes.length,
-                itemBuilder: (ctx, index) {
-                  final route = widget.routes.elementAt(index);
-                  final picked = checkList.isEmpty? false: checkList.elementAt(index);
-                  return Card(
-                    shape: getRoundedBorder(radius: 8),
-                    elevation: 12,
-                    child: Row(
-                      children: [
-                        Checkbox(
-                            value: picked,
-                            onChanged: (checked) {
-                              pp('$mm ... Checkbox: checked: $checked ...');
-                              if (checked != null) {
-                                checkList[index] = checked;
-                                if (checked) {
-                                  _addRoute(route);
-                                } else {
-                                  _removeRoute(route);
-                                }
-                              }
-                              setState(() {});
-
-                            }),
-                        const SizedBox(
-                          width: 2,
-                        ),
-                        Flexible(
-                          child: Text(
-                            '${route.name}',
-                            style: myTextStyleSmall(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-          ),
-        ),
-      ],
-    );
+      ),
+    ));
   }
 }
