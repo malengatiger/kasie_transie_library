@@ -320,10 +320,16 @@ Future<List> _processRoute(String routeId, String url, String token) async {
   int page = 0;
   bool stop = false;
   final points = [];
+  Map<String, String> headers = {
+    'Content-type': 'application/json',
+    'Accept': 'application/json',
+
+  };
+  headers['Authorization'] = 'Bearer $token';
 
   while (stop == false) {
     final mUrl = '${url}getRoutePoints?routeId=$routeId&page=$page';
-    List resp = await httpGet(mUrl, token);
+    List resp = await httpGet(mUrl, token, headers);
     pp('$xyz page of RoutePoints for routeId: $routeId: ${resp.length}');
 
     if (resp.isEmpty) {

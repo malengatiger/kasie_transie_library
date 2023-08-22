@@ -26,7 +26,7 @@ class SignInLanding extends StatelessWidget {
               40),
         ),
         const SizedBox(
-          height: 32,
+          height: 16,
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 28.0),
@@ -36,10 +36,10 @@ class SignInLanding extends StatelessWidget {
           ),
         ),
         const SizedBox(
-          height: 24,
+          height: 64,
         ),
         SizedBox(
-          width: 300,
+          width: 240,
           child: ElevatedButton(
             style: ButtonStyle(
               elevation: const MaterialStatePropertyAll(4.0),
@@ -54,7 +54,7 @@ class SignInLanding extends StatelessWidget {
           ),
         ),
         const SizedBox(
-          height: 80,
+          height: 100,
         ),
 
         SizedBox(
@@ -68,7 +68,7 @@ class SignInLanding extends StatelessWidget {
                 backgroundColor: MaterialStatePropertyAll(Theme.of(context).primaryColor),
               ),
               label: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(24.0),
                 child: Text(signInWithPhone, style: myTextStyleSmallBlack(context),),
               ),
               icon: const Icon(Icons.phone)),
@@ -78,7 +78,7 @@ class SignInLanding extends StatelessWidget {
         ),
         Container(color: Theme.of(context).primaryColorLight, width: 160, height: 2,),
         const SizedBox(
-          height: 24,
+          height: 32,
         ),
       ],
     );

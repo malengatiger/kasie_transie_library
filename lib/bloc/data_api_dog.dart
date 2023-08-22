@@ -637,10 +637,8 @@ class DataApiDog {
     return list;
   }
 
-  Future generateRouteCommuterRequests(String routeId,
-      int numberOfCommuters, int intervalInSeconds) async {
-    final cmd = '${url}generateRouteCommuterRequests?routeId=$routeId'
-        '&numberOfCommuters=$numberOfCommuters&intervalInSeconds=$intervalInSeconds';
+  Future generateRouteCommuterRequests(String routeId) async {
+    final cmd = '${url}generateRouteCommuterRequests?routeId=$routeId';
     final res = await _sendHttpGET(cmd);
     pp('$mm CommuterRequests: $res ${E.leaf}${E.leaf}');
     return res;

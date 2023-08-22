@@ -76,13 +76,19 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     });
     try {
       _user = await prefs.getUser();
+      var mRoutes = <lib.Route>[];
       if (widget.latitude != null && widget.longitude != null) {
         pp('\n\n$mm .......... find Association Routes by location ...');
-        final mRoutes = await localFinder.findNearestRoutes(
+        mRoutes = await localFinder.findNearestRoutes(
             latitude: widget.latitude!,
             longitude: widget.longitude!,
-            radiusInMetres:
-                widget.radiusInMetres == null ? distanceInKM * 1000 : widget.radiusInMetres!);
+            radiusInMetres: widget.radiusInMetres == null
+                ? distanceInKM * 1000
+                : widget.radiusInMetres!);
+        if (mRoutes.isEmpty) {
+          mRoutes = await listApiDog
+              .getRoutes(AssociationParameter(_user!.associationId!, refresh));
+        }
         await _filter(mRoutes);
       } else {
         pp('\n\n$mm .......... get all Association Routes ... refresh: $refresh');
@@ -90,14 +96,28 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
             .getRoutes(AssociationParameter(_user!.associationId!, refresh));
         _printy();
         await _filter(mRoutes);
+        if (mounted) {
+          showToast(
+              backgroundColor: Colors.black,
+              textStyle: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16),
+              padding: 24.0,
+              duration: const Duration(seconds: 3),
+              message: 'Please select routes',
+              context: context);
+        }
       }
     } catch (e) {
       pp(e);
-      showSnackBar(
-          backgroundColor: Colors.amber[700],
-          textStyle: myTextStyleMediumBlack(context),
-          message: 'Error: $e',
-          context: context);
+      if (mounted) {
+        showSnackBar(
+            backgroundColor: Colors.amber[700],
+            textStyle: myTextStyleMediumBlack(context),
+            message: 'Error: $e',
+            context: context);
+      }
     }
     setState(() {
       busy = false;
@@ -121,7 +141,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
       }
     }
     pp('routes have been filtered .. where is SpruitView?');
-   _printy();
+    _printy();
     pp('$mm ... routes filtered: ${routes.length}');
   }
 
@@ -129,21 +149,24 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
 
   void _showBottomSheet() async {
     final type = getThisDeviceType();
-    showModalBottomSheet(context: context, builder: (ctx){
-      return Padding(
-        padding:  EdgeInsets.symmetric(horizontal: type == 'phone'?12.0:48),
-        child: MultiRouteChooser(
-          onRoutesPicked: (routesPicked) {
-            setState(() {
-              this.routesPicked = routesPicked;
-            });
-            Navigator.of(context).pop();
-            _buildHashMap();
-          },
-          routes: routes,
-        ),
-      );
-    });
+    showModalBottomSheet(
+        context: context,
+        builder: (ctx) {
+          return Padding(
+            padding:
+                EdgeInsets.symmetric(horizontal: type == 'phone' ? 12.0 : 48),
+            child: MultiRouteChooser(
+              onRoutesPicked: (routesPicked) {
+                setState(() {
+                  this.routesPicked = routesPicked;
+                });
+                Navigator.of(context).pop();
+                _buildHashMap();
+              },
+              routes: routes,
+            ),
+          );
+        });
   }
 
   @override
@@ -229,7 +252,8 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
           if (mounted) {
             showToast(message: '${points.first.routeName}', context: context);
           }
-        },consumeTapEvents: true,
+        },
+        consumeTapEvents: true,
         polylineId: PolylineId(DateTime.now().toIso8601String()));
 
     _polyLines.add(polyLine);
@@ -282,39 +306,44 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     return Scaffold(
         appBar: AppBar(
           title: const Text('Route Map Finder'),
-          bottom: PreferredSize(preferredSize: const Size.fromHeight(64), child: Column(
-            children: [
-              Row(mainAxisAlignment: MainAxisAlignment.center,
+          bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(64),
+              child: Column(
                 children: [
-                  ElevatedButton(
-                      style: const ButtonStyle(
-                        elevation: MaterialStatePropertyAll(8.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                          style: const ButtonStyle(
+                            elevation: MaterialStatePropertyAll(8.0),
+                          ),
+                          onPressed: () {
+                            _showBottomSheet();
+                          },
+                          child: SizedBox(
+                            width: 160,
+                            child: Text('${routes.length} Routes'),
+                          )),
+                      gapW8,
+                       Text('Distance', style: myTextStyleSmall(context),),
+                      gapW8,
+                      DistanceDropDown(
+                        onDistancePicked: (dist) {
+                          setState(() {
+                            distanceInKM = dist;
+                          });
+                          _getRoutes(true);
+                        },
+                        color: Theme.of(context).primaryColor,
+                        count: 12,
+                        fontSize: 16,
+                        multiplier: 50,
                       ),
-                      onPressed: () {
-                        _showBottomSheet();
-                      },
-                      child: SizedBox(width: 200,
-                        child:
-                        Text('${routes.length} Routes'),
-                      )),
-                  gapW16,
-                  DistanceDropDown(
-                    onDistancePicked: (dist) {
-                      setState(() {
-                        distanceInKM = dist;
-                      });
-                      _getRoutes(true);
-                    },
-                    color: Theme.of(context).primaryColor,
-                    count: 12,
-                    fontSize: 16,
-                    multiplier: 50,
+                    ],
                   ),
+                  gapH16,
                 ],
-              ),
-              gapH16,
-            ],
-          )),
+              )),
         ),
         key: _key,
         body: _myCurrentCameraPosition == null
@@ -393,9 +422,20 @@ class RouteDropDown extends StatelessWidget {
     for (var r in routes) {
       items.add(DropdownMenuItem<lib.Route>(
           value: r,
-          child: Text(
-            r.name!,
-            style: myTextStyleSmall(context),
+          child: SizedBox(
+            // width: 600,
+            child: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    r.name!,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    style: myTextStyleSmall(context),
+                  ),
+                ),
+              ],
+            ),
           )));
     }
     return DropdownButton(

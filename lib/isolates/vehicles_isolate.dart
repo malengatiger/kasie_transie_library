@@ -163,10 +163,16 @@ Future<List> _processOwnerCars(String userId, String url, String token) async {
   int page = 0;
   bool stop = false;
   final allCars = [];
+  Map<String, String> headers = {
+    'Content-type': 'application/json',
+    'Accept': 'application/json',
+  };
+  headers['Authorization'] = 'Bearer $token';
+
 
   while (stop == false) {
     final mUrl = '${url}getOwnerVehicles?userId=$userId&page=$page';
-    List resp = await httpGet(mUrl, token);
+    List resp = await httpGet(mUrl, token, headers);
     pp('$xy2 page of cars for userId: $userId: ${resp.length}');
 
     if (resp.isEmpty) {
@@ -187,11 +193,16 @@ Future<List> _processAssociationCars(
   int page = 0;
   bool stop = false;
   final points = [];
+  Map<String, String> headers = {
+    'Content-type': 'application/json',
+    'Accept': 'application/json',
+  };
+  headers['Authorization'] = 'Bearer $token';
 
   while (stop == false) {
     final mUrl =
         '${url}getAssociationVehicles?associationId=$associationId&page=$page';
-    List resp = await httpGet(mUrl, token);
+    List resp = await httpGet(mUrl, token, headers);
     pp('$xy2 page of cars for associationId: $associationId: ${resp.length}');
 
     if (resp.isEmpty) {

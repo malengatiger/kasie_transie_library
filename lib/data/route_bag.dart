@@ -28,3 +28,17 @@ class RouteBag {
   }
 }
 
+class RouteBagList {
+  List<RouteBag> routeBags = [];
+  RouteBagList(this.routeBags);
+
+  RouteBagList.fromJson(Map data) {
+    List rpList = data['routeBags'];
+    for (var value in rpList) {
+      routeBags.add(RouteBag.fromJson(value));
+    }
+  }
+
+
+}
+

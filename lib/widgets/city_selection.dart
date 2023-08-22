@@ -208,7 +208,7 @@ class _CitySearchState extends State<CitySearch> {
 
     return Card(
       shape: getDefaultRoundedBorder(),
-      elevation: 6,
+      elevation: 12,
       child: Padding(
         padding:  EdgeInsets.all(leftPadding),
         child: Column(
@@ -227,9 +227,9 @@ class _CitySearchState extends State<CitySearch> {
             const SizedBox(
               height: 24,
             ),
-            Row(mainAxisAlignment: MainAxisAlignment.start,
+            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                SizedBox(width: 220,
+                SizedBox(width: type == 'phone'? 220: 400,
                   child: SearchBar(
                     controller: _textEditingController,
                     leading: IconButton(
@@ -260,24 +260,27 @@ class _CitySearchState extends State<CitySearch> {
               height: 24,
             ),
             Expanded(
-              child: ListView.builder(
-                  itemCount: _citiesToDisplay.length,
-                  itemBuilder: (ctx, index) {
-                    var city = _citiesToDisplay.elementAt(index);
-                    return GestureDetector(
-                      onTap: () {
-                        _close(city);
-                      },
-                      child: Card(
-                        elevation: 2,
-                        shape: getDefaultRoundedBorder(),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Text('${city.name}'),
+              child: Padding(
+                padding:  EdgeInsets.all(type == 'phone'?8:48.0),
+                child: ListView.builder(
+                    itemCount: _citiesToDisplay.length,
+                    itemBuilder: (ctx, index) {
+                      var city = _citiesToDisplay.elementAt(index);
+                      return GestureDetector(
+                        onTap: () {
+                          _close(city);
+                        },
+                        child: Card(
+                          elevation: 2,
+                          shape: getDefaultRoundedBorder(),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text('${city.name}'),
+                          ),
                         ),
-                      ),
-                    );
-                  }),
+                      );
+                    }),
+              ),
             ),
           ],
         ),

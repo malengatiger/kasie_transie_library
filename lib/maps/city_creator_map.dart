@@ -35,13 +35,12 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
   CameraPosition? _myCurrentCameraPosition;
   final _key = GlobalKey<ScaffoldState>();
   bool busy = false;
-  bool isHybrid = true;
+  bool isHybrid = false;
   lib.User? _user;
   geo.Position? _currentPosition;
   final Set<Marker> _markers = HashSet();
   final Set<Circle> _circles = HashSet();
   final Set<Polyline> _polyLines = {};
-  BitmapDescriptor? _dotMarker;
 
   final numberMarkers = <BitmapDescriptor>[];
 
@@ -97,8 +96,6 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
       await _getSettings();
       await _getUser();
       await _getCurrentLocation();
-      await _makeDotMarker();
-      await _buildLandmarkIcons();
     } catch (e) {
       pp(e);
     }
@@ -138,14 +135,14 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
     }
   }
 
-  Future _buildLandmarkIcons() async {
-    for (var i = 0; i < 10; i++) {
-      var intList =
-          await getBytesFromAsset("assets/numbers/number_${i + 1}.png", 84);
-      numberMarkers.add(BitmapDescriptor.fromBytes(intList));
-    }
-    pp('$mm have built ${numberMarkers.length} markers for landmarks');
-  }
+  // Future _buildLandmarkIcons() async {
+  //   for (var i = 0; i < 10; i++) {
+  //     var intList =
+  //         await getBytesFromAsset("assets/numbers/number_${i + 1}.png", 84);
+  //     numberMarkers.add(BitmapDescriptor.fromBytes(intList));
+  //   }
+  //   pp('$mm have built ${numberMarkers.length} markers for landmarks');
+  // }
 
   @override
   void dispose() {
@@ -154,12 +151,6 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
 
   Future _getUser() async {
     _user = await prefs.getUser();
-  }
-
-  Future _makeDotMarker() async {
-    var intList = await getBytesFromAsset("assets/markers/footprint.png", 40);
-    _dotMarker = BitmapDescriptor.fromBytes(intList);
-    pp('$mm custom marker 💜 assets/markers/dot2.png created');
   }
 
   Future<void> _zoomToCity(City city) async {
@@ -182,9 +173,12 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
   void _addNewCity() async {
     pp('$mm ... adding new city marker: $cityName ');
 
+    final icon = await getMarkerBitmap(200, text: 'OK',
+        color: 'black', fontSize: 40, fontWeight: FontWeight.w800);
+
     _markers.add(Marker(
         markerId: MarkerId(DateTime.now().toIso8601String()),
-        icon: _dotMarker!,
+        icon: icon,
         onTap: () {
           pp('$mm .............. marker tapped: $index');
           //_deleteRoutePoint(routePoint);
@@ -290,65 +284,7 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
                             )),
                       ),
                     )),
-                Positioned(
-                    left: 12,
-                    top: 20,
-                    child: GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: Card(
-                          color: Colors.black38,
-                          shape: getDefaultRoundedBorder(),
-                          elevation: 24,
-                          child: Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: SizedBox(
-                              height: 108,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  children: [
-                                    const SizedBox(
-                                      height: 4,
-                                    ),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          'Place Maker',
-                                          style:
-                                              myTextStyleMediumLarge(context, 20),
-                                        )
-                                      ],
-                                    ),
-                                    const SizedBox(
-                                      height: 4,
-                                    ),
-                                    Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.arrow_back_ios,
-                                          size: 18,
-                                          color: Colors.white,
-                                        ),
-                                        const SizedBox(
-                                          width: 2,
-                                        ),
-                                        Text(
-                                          _user!.name,
-                                          style: myTextStyleMediumWithColor(
-                                            context,
-                                            Colors.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ))),
+
                 _showCityForm
                     ? Positioned(
                         bottom: 80,

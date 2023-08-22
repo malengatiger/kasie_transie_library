@@ -9,16 +9,20 @@ import 'package:kasie_transie_library/widgets/tiny_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 import 'calculated_distances_widget.dart';
+import 'color_pad.dart';
 
 class RouteInfoWidget extends StatefulWidget {
-  const RouteInfoWidget({Key? key,
-    required this.routeId,
-    required this.onClose,
-    required this.onNavigateToMapViewer})
+  const RouteInfoWidget(
+      {Key? key,
+      required this.routeId,
+      required this.onClose,
+      required this.onNavigateToMapViewer,
+      required this.onColorChanged})
       : super(key: key);
   final String? routeId;
   final Function onClose;
   final Function onNavigateToMapViewer;
+  final Function(Color, String) onColorChanged;
 
   @override
   State<RouteInfoWidget> createState() => _RouteInfoWidgetState();
@@ -93,113 +97,47 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery
-        .of(context)
-        .size
-        .width;
-    final height = MediaQuery
-        .of(context)
-        .size
-        .height;
-
-    return route == null? Center(
-      child: Text('Waiting for Godot', style: myTextStyleMediumBoldGrey(context),),
-    ): Card(
-      shape: getDefaultRoundedBorder(),
-      elevation: 8,
-      child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ScreenTypeLayout.builder(
-            mobile: (ctx) {
-              return Column(
-                children: [
-                  route == null
-                      ? const SizedBox()
-                      : DetailsWidget(
-                    route: route!,
-                    numberOfLandmarks: numberOfLandmarks,
-                    fontSize: 18,
-                    numberOfPoints: numberOfPoints,
-                    routeColor: routeColor,
-                    routePointsMapped: routePointsMapped,
-                    routeLandmarks: routeLandmarks,
-                    routeDetails: routeDetails,
-                    onClose: () {
-                      widget.onClose();
-                    },
-                    onNavigateToMapViewer: () {
-                      widget.onNavigateToMapViewer();
-                    },
-                  ),
-                  Expanded(
-                    child: Card(
-                      shape: getDefaultRoundedBorder(),
-                      elevation: 12,
-                      child:
-                      CalculatedDistancesWidget(routeId: widget.routeId!),
-                    ),
-                  ),
-                ],
-              );
-            },
-            tablet: (ctx) {
-              return OrientationLayoutBuilder(
-                portrait: (ctx) {
-                  return Column(
-                    children: [
-                      route == null
-                          ? const SizedBox()
-                          : DetailsWidget(
-                            route: route!,
-                            fontSize: 16,
-                            numberOfLandmarks: numberOfLandmarks,
-                            numberOfPoints: numberOfPoints,
-                            onClose: () {
-                              widget.onClose();
-                            },
-                            onNavigateToMapViewer: () {
-                              widget.onNavigateToMapViewer();
-                            },
-                            routeColor: routeColor,
-                            routeLandmarks: routeLandmarks,
-                            routePointsMapped: routePointsMapped,
-                            routeDetails: routeDetails,
-                          ),
-                      widget.routeId == null? const SizedBox() : Expanded(
-                        child: Card(
-                          shape: getDefaultRoundedBorder(),
-                          elevation: 12,
-                          child: CalculatedDistancesWidget(
-                              routeId: widget.routeId!),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-                landscape: (ctx) {
-                  return SizedBox(
-                    height: height,
-                    child: Column(
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
+    final type = getThisDeviceType();
+    return route == null
+        ? Center(
+            child: Text(
+              'Waiting for Godot',
+              style: myTextStyleMediumBoldGrey(context),
+            ),
+          )
+        : Card(
+            shape: getDefaultRoundedBorder(),
+            elevation: 8,
+            child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ScreenTypeLayout.builder(
+                  mobile: (ctx) {
+                    return Column(
                       children: [
                         route == null
                             ? const SizedBox()
                             : DetailsWidget(
-                              route: route!,
-                              fontSize: 16,
-                              numberOfLandmarks: numberOfLandmarks,
-                              numberOfPoints: numberOfPoints,
-                              onClose: () {
-                                widget.onClose();
-                              },
-                              onNavigateToMapViewer: () {
-                                widget.onNavigateToMapViewer();
-                              },
-                              routeColor: routeColor,
-                              routeLandmarks: routeLandmarks,
-                              routePointsMapped: routePointsMapped,
-                              routeDetails: routeDetails,
-                            ),
-                        widget.routeId == null? const SizedBox() : Expanded(
+                                route: route!,
+                                numberOfLandmarks: numberOfLandmarks,
+                                fontSize: 18,
+                                numberOfPoints: numberOfPoints,
+                                routeColor: routeColor,
+                                routePointsMapped: routePointsMapped,
+                                routeLandmarks: routeLandmarks,
+                                routeDetails: routeDetails,
+                                onClose: () {
+                                  widget.onClose();
+                                },
+                                onNavigateToMapViewer: () {
+                                  widget.onNavigateToMapViewer();
+                                },
+                                onColorChanged: (color, string) {
+                                  widget.onColorChanged(color, string);
+                                },
+                              ),
+                        Expanded(
                           child: Card(
                             shape: getDefaultRoundedBorder(),
                             elevation: 12,
@@ -208,23 +146,102 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
                           ),
                         ),
                       ],
-                    ),
-                  );
-                },
-              );
-            },
-          )),
-    );
+                    );
+                  },
+                  tablet: (ctx) {
+                    return OrientationLayoutBuilder(
+                      portrait: (ctx) {
+                        return Column(
+                          children: [
+                            route == null
+                                ? const SizedBox()
+                                : DetailsWidget(
+                                    route: route!,
+                                    fontSize: 16,
+                                    numberOfLandmarks: numberOfLandmarks,
+                                    numberOfPoints: numberOfPoints,
+                                    onClose: () {
+                                      widget.onClose();
+                                    },
+                                    onNavigateToMapViewer: () {
+                                      widget.onNavigateToMapViewer();
+                                    },
+                                    routeColor: routeColor,
+                                    routeLandmarks: routeLandmarks,
+                                    routePointsMapped: routePointsMapped,
+                                    routeDetails: routeDetails,
+                                    onColorChanged: (color, string) {
+                                      widget.onColorChanged(color, string);
+                                    },
+                                  ),
+                            widget.routeId == null
+                                ? const SizedBox()
+                                : Expanded(
+                                    child: Card(
+                                      shape: getDefaultRoundedBorder(),
+                                      elevation: 12,
+                                      child: CalculatedDistancesWidget(
+                                          routeId: widget.routeId!),
+                                    ),
+                                  ),
+                          ],
+                        );
+                      },
+                      landscape: (ctx) {
+                        return SizedBox(
+                          height: height,
+                          child: Column(
+                            children: [
+                              route == null
+                                  ? const SizedBox()
+                                  : DetailsWidget(
+                                      route: route!,
+                                      fontSize: 16,
+                                      numberOfLandmarks: numberOfLandmarks,
+                                      numberOfPoints: numberOfPoints,
+                                      onClose: () {
+                                        widget.onClose();
+                                      },
+                                      onNavigateToMapViewer: () {
+                                        widget.onNavigateToMapViewer();
+                                      },
+                                      routeColor: routeColor,
+                                      routeLandmarks: routeLandmarks,
+                                      routePointsMapped: routePointsMapped,
+                                      routeDetails: routeDetails,
+                                      onColorChanged: (color, string) {
+                                        widget.onColorChanged(color, string);
+                                      },
+                                    ),
+                              widget.routeId == null
+                                  ? const SizedBox()
+                                  : Expanded(
+                                      child: Card(
+                                        shape: getDefaultRoundedBorder(),
+                                        elevation: 12,
+                                        child: CalculatedDistancesWidget(
+                                            routeId: widget.routeId!),
+                                      ),
+                                    ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                )),
+          );
   }
 }
 
 class Header extends StatelessWidget {
-  const Header({Key? key,
-    required this.onClose,
-    required this.routeName,
-    required this.fontSize,
-    required this.routeDetails,
-    required this.onNavigateToMapViewer})
+  const Header(
+      {Key? key,
+      required this.onClose,
+      required this.routeName,
+      required this.fontSize,
+      required this.routeDetails,
+      required this.onNavigateToMapViewer})
       : super(key: key);
 
   final Function onClose;
@@ -239,8 +256,8 @@ class Header extends StatelessWidget {
     final type = getThisDeviceType();
     return Column(
       children: [
-         SizedBox(
-          height: type == 'phone'? 4: 8,
+        SizedBox(
+          height: type == 'phone' ? 4 : 8,
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -248,30 +265,26 @@ class Header extends StatelessWidget {
             Text(
               routeDetails,
               style: myTextStyleMediumLargeWithColor(
-                  context, Theme
-                  .of(context)
-                  .primaryColorLight, fontSize),
+                  context, Theme.of(context).primaryColorLight, fontSize),
             ),
             SizedBox(
               width: type == 'phone' ? 48 : 64,
             ),
-            Row(mainAxisAlignment: MainAxisAlignment.end,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
                     onPressed: () {
                       onNavigateToMapViewer();
                     },
                     icon: const Icon(Icons.map)),
-                const SizedBox(
-                  width: 8,
-                ),
-                IconButton(
-                    onPressed: () {
-                      onClose();
-                    },
-                    icon: const Icon(Icons.close)),
-
-
+                type == 'phone'
+                    ? IconButton(
+                        onPressed: () {
+                          onClose();
+                        },
+                        icon: const Icon(Icons.close))
+                    : gapH16,
               ],
             )
           ],
@@ -284,9 +297,7 @@ class Header extends StatelessWidget {
           child: Text(
             routeName,
             style: myTextStyleMediumLargeWithColor(
-                context, Theme
-                .of(context)
-                .primaryColor, fontSize),
+                context, Theme.of(context).primaryColor, fontSize),
           ),
         ),
         const SizedBox(
@@ -298,17 +309,19 @@ class Header extends StatelessWidget {
 }
 
 class DetailsWidget extends StatelessWidget {
-  const DetailsWidget({Key? key,
-    required this.route,
-    required this.numberOfLandmarks,
-    required this.numberOfPoints,
-    required this.onClose,
-    required this.fontSize,
-    required this.routeColor,
-    required this.routeLandmarks,
-    required this.routePointsMapped,
-    required this.routeDetails,
-    required this.onNavigateToMapViewer})
+  const DetailsWidget(
+      {Key? key,
+      required this.route,
+      required this.numberOfLandmarks,
+      required this.numberOfPoints,
+      required this.onClose,
+      required this.fontSize,
+      required this.routeColor,
+      required this.routeLandmarks,
+      required this.routePointsMapped,
+      required this.routeDetails,
+      required this.onNavigateToMapViewer,
+      required this.onColorChanged})
       : super(key: key);
 
   final lib.Route route;
@@ -317,6 +330,21 @@ class DetailsWidget extends StatelessWidget {
   final double fontSize;
   final String routeColor, routeLandmarks, routePointsMapped, routeDetails;
   final Function onNavigateToMapViewer;
+  final Function(Color, String) onColorChanged;
+  final mm = '🍎🍎🍎🍎 DetailsWidget (RouteInfoWidget): 🔵🔵 ';
+
+  void _showColorDialog(
+    BuildContext context,
+  ) {
+    pp('show dialog ...');
+    showModalBottomSheet(
+        context: context,
+        builder: (ctx) {
+          return ColorPad(onColorPicked: (color, stringColor) {
+            onColorChanged(color, stringColor);
+          });
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -332,7 +360,6 @@ class DetailsWidget extends StatelessWidget {
             onNavigateToMapViewer();
           },
         ),
-
         Text(getFormattedDateLong(route!.created!)),
         const SizedBox(
           height: 8,
@@ -341,8 +368,8 @@ class DetailsWidget extends StatelessWidget {
           '${route.userName}',
           style: myTextStyleMediumBoldGrey(context),
         ),
-         SizedBox(
-          height: type == 'phone'? 24:48,
+        SizedBox(
+          height: type == 'phone' ? 24 : 48,
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -354,28 +381,33 @@ class DetailsWidget extends StatelessWidget {
             const SizedBox(
               width: 8,
             ),
-            Card(
-              shape: getRoundedBorder(radius: 8),
-              elevation: 8,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      color: getColor(route.color!),
-                    ),
-                    Icon(
-                      Icons.route,
-                      size: 32,
-                      color: getColor(route.color!),
-                    ),
-                  ],
+            GestureDetector(
+              onTap: () {
+                pp('..................... ... show color pad');
+                _showColorDialog(context);
+              },
+              child: Card(
+                shape: getRoundedBorder(radius: 8),
+                elevation: 8,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        color: getColor(route.color!),
+                      ),
+                      Icon(
+                        Icons.route,
+                        size: 32,
+                        color: getColor(route.color!),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-
           ],
         ),
         const SizedBox(
@@ -386,7 +418,7 @@ class DetailsWidget extends StatelessWidget {
           children: [
             SizedBox(
                 height: 80,
-                width: type == 'phone'? 140:160,
+                width: type == 'phone' ? 140 : 160,
                 child: Column(
                   children: [
                     Text(
@@ -399,12 +431,12 @@ class DetailsWidget extends StatelessWidget {
                     ),
                   ],
                 )),
-             SizedBox(
-              width: type == 'phone'? 12:24,
+            SizedBox(
+              width: type == 'phone' ? 12 : 24,
             ),
             SizedBox(
                 height: 80,
-                width: type == 'phone'? 140:160,
+                width: type == 'phone' ? 140 : 160,
                 child: Column(
                   children: [
                     Text(

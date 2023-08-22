@@ -147,6 +147,7 @@ class MyKeys {
     hashMap['ok'] = 'ok';
     hashMap['openMailApp'] = 'openMailApp';
     hashMap['openRouteMap'] = 'openRouteMap';
+    hashMap['operationsSummary'] = 'operationsSummary';
     hashMap['owner'] = 'owner';
     hashMap['ownerDash'] = 'ownerDash';
     hashMap['ownerUnknown'] = 'ownerUnknown';
@@ -240,6 +241,7 @@ class MyKeys {
     hashMap['serverUnreachable'] = 'serverUnreachable';
     hashMap['show Routes'] = 'show Routes';
     hashMap['signInComplete'] = 'signInComplete';
+    hashMap['signInFailed'] = 'signInFailed';
     hashMap['signInWithEmail'] = 'signInWithEmail';
     hashMap['signInWithPhone'] = 'signInWithPhone';
     hashMap['signedIn'] = 'signedIn';

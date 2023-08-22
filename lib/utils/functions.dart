@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_sim_country_code/flutter_sim_country_code.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -16,7 +17,7 @@ import 'package:intl/intl.dart' as intl;
 import 'package:path_provider/path_provider.dart';
 import 'package:pretty_json/pretty_json.dart';
 import 'package:video_thumbnail/video_thumbnail.dart' as vt;
-
+import 'package:intl_phone_field/countries.dart' as cc;
 import 'emojis.dart';
 
 pp(dynamic msg) {
@@ -703,6 +704,36 @@ void prettyJson(String input) {
   var object = decoder.convert(input);
   var prettyString = encoder.convert(object);
   prettyString.split('\n').forEach((element) => myPrint(element));
+}
+String getPhoneFormat(String phoneNumber) {
+  return phoneNumber.replaceAllMapped(RegExp(r'(\d{3})(\d{3})(\d+)'), (Match m) => "(${m[1]}) ${m[2]}-${m[3]}");
+
+}
+Future<cc.Country?> getDeviceCountry(String countryCode) async {
+  String? code;
+  cc.Country? country;
+  try {
+    code = await FlutterSimCountryCode.simCountryCode;
+    pp('....................... _countryCode: $code');
+    for (var value in cc.countries) {
+      if (value.code == code) {
+          country = value;
+      }
+    }
+  } on PlatformException {
+    return null;
+  }
+ return country;
+}
+Future<String?> getDeviceCountryCode() async {
+  String? code;
+  try {
+    code = await FlutterSimCountryCode.simCountryCode;
+    pp('....................... _countryCode: $code');
+  } on PlatformException {
+    return null;
+  }
+  return code;
 }
 
 void myPrettyJsonPrint(Map map) {

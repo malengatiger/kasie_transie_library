@@ -91,17 +91,6 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     }
   }
 
-  Future _buildLandmarkIcons(int total, int width) async {
-    numberMarkers.clear();
-    total++;
-    for (var i = 0; i < total; i++) {
-      var intList =
-          await getBytesFromAsset("assets/numbers/number_${i + 1}.png", width);
-      numberMarkers.add(BitmapDescriptor.fromBytes(intList));
-    }
-    pp('$mm have built ${numberMarkers.length} markers for landmarks');
-  }
-
   void _listen() async {
     completionSub =
         landmarkIsolate.completionStream.listen((resultRouteLandmarks) {
@@ -136,7 +125,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
         'route: ${widget.route.name}; found: ${routeLandmarks.length} ');
     await _putLandmarksOnMap();
     //
-    await _getRoutePoints(false);
+    await _getRoutePoints(true);
   }
 
   Future _putLandmarksOnMap() async {

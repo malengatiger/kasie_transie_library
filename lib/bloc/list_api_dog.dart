@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/data/counter_bag.dart';
 import 'package:kasie_transie_library/data/vehicle_bag.dart';
 import 'package:kasie_transie_library/isolates/country_cities_isolate.dart';
+import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
 import 'package:realm/realm.dart' as rm;
@@ -138,6 +139,12 @@ class ListApiDog {
   Future<User?> getUserById(String userId) async {
     final cmd = '${url}getUserById?userId=$userId';
     final resp = await _sendHttpGET(cmd);
+    pp('$mm getUserById: ........ response: $resp');
+    if (resp is String) {
+      if (resp.contains('not found')) {
+        throw Exception('User not found');
+      }
+    }
     final user = buildUser(resp);
 
     pp('$mm getUserById found this user: ${user.name} ');
@@ -1297,7 +1304,8 @@ class ListApiDog {
     pp('$mm ...... Routes from realm:: ${localList.length}');
 
     if (param.refresh || localList.isEmpty) {
-      final remoteList = await _getRoutesFromBackend(param);
+      final remoteList =
+      await routesIsolate.getRoutes(param.associationId);
       pp('$mm ... Routes from backend:: ${remoteList.length}');
       _routeController.sink.add(remoteList);
       return remoteList;
@@ -1519,7 +1527,7 @@ class ListApiDog {
       list.add(buildUser(value));
     }
     realm.write(() {
-      realm.addAll(list);
+      realm.addAll(list, update: true);
     });
     pp('$mm cached users: ${list.length}');
     return list;
@@ -1545,7 +1553,7 @@ class ListApiDog {
     }
 
     await realm.writeAsync(() {
-      realm.addAll(list);
+      realm.addAll(list, update: true);
     });
     rm.RealmResults? results;
     results = realm.all<Country>();
@@ -1584,7 +1592,7 @@ class ListApiDog {
       pp('$xz http GET call: 🔆 elapsed time for http: ${end.difference(start).inSeconds} seconds 🔆 \n\n');
 
       if (resp.body.contains('not found')) {
-        return false;
+        return resp.body;
       }
 
       if (resp.statusCode == 403) {

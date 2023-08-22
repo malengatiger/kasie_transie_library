@@ -119,7 +119,7 @@ class _RouteManagerState extends State<RouteManager> {
       busy = true;
     });
     try {
-      await dataApiDog.generateRouteCommuterRequests(route!.routeId!, 400, 10);
+      await dataApiDog.generateRouteCommuterRequests(route!.routeId!);
       _showSuccess('Commuter request generation has been sent!');
     } catch (e) {
       pp(e);

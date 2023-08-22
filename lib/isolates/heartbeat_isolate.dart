@@ -209,14 +209,10 @@ Future httpPost(String mUrl, Map? bag, String token) async {
   }
 }
 
-Future httpGet(String mUrl, String token) async {
+Future httpGet(String mUrl, String token, Map<String, String> headers) async {
   pp('$xyz _httpGet: 🔆 🔆 🔆 calling : 💙 $mUrl  💙');
   var start = DateTime.now();
-  Map<String, String> headers = {
-    'Content-type': 'application/json',
-    'Accept': 'application/json',
-  };
-  headers['Authorization'] = 'Bearer $token';
+
   try {
     final http.Client client = http.Client();
     var resp = await client

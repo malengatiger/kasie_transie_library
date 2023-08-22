@@ -10,7 +10,6 @@ import 'package:kasie_transie_library/utils/initializer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
-import '../utils/beeper.dart';
 
 class QRScanner extends StatefulWidget {
   const QRScanner(
