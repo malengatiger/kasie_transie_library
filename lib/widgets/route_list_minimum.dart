@@ -67,11 +67,12 @@ class RouteListMinimumState extends State<RouteListMinimum>
       });
       user = await prefs.getUser();
       if (refresh) {
-        routes = await routesIsolate.getRoutes(widget.association.associationId!);
+        routes = await routesIsolate.getRoutes(widget.association.associationId!, true);
       } else {
         routes = await listApiDog
             .getRoutes(AssociationParameter(widget.association.associationId!, refresh));
       }
+      routes.sort((a,b) => a.name!.compareTo(b.name!));
       pp('$mm ... found ${routes.length}');
     } catch (e) {
       pp(e);
@@ -143,7 +144,7 @@ class RouteListMinimumState extends State<RouteListMinimum>
             ),
           ),
           busy? const Positioned(child: Center(
-            child: TimerWidget(title: 'Loading Routes'),
+            child: TimerWidget(title: 'Loading Routes', isSmallSize: false,),
           )): gapH16,
         ],
       )

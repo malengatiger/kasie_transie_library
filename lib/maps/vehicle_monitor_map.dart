@@ -45,7 +45,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
   var passengerCounts = <lib.AmbassadorPassengerCount>[];
 
   VehicleBag? bag;
-  int hours = 1;
+  int hours = 24;
   bool busy = false;
   String title = "Maps";
 
@@ -56,13 +56,15 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
   late StreamSubscription<lib.VehicleDeparture> departureStreamSub;
   late StreamSubscription<lib.VehicleHeartbeat> heartbeatStreamSub;
   int totalPassengers = 0;
+  bool showPassengerCount = false;
+  bool retryDone = false;
 
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
     _listen();
-    _getVehicleBag();
+    _control();
   }
 
   void _listen() async {
@@ -118,30 +120,39 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
         .listen((lib.VehicleHeartbeat heartbeat) async {
       pp('$mm ... heartbeatStreamStream delivered heartbeat for: ${heartbeat.vehicleReg} at ${heartbeat.created}');
       if (heartbeat.vehicleId == widget.vehicle.vehicleId) {
-        //
         await _putHeartbeatOnMap(heartbeat);
       }
     });
   }
 
-  bool showPassengerCount = false;
-  bool retryDone = false;
-
-  Future _getVehicleBag() async {
-    pp('$mm ... getVehicleBag that shows the last ${E.blueDot} $hours hours .... ');
+  void _control() async {
     setState(() {
       busy = true;
     });
+    try {
+      await _getVehicleBag();
+      await _getRoutes();
+    } catch (e) {
+      pp(e);
+      if (mounted) {
+        showSnackBar(message: 'Error: $e', context: context);
+      }
+    }
+    setState(() {
+      busy = false;
+    });
+  }
+
+  lib.VehicleHeartbeat? lastHeartbeat;
+  Future _getVehicleBag() async {
+    pp('$mm ... getVehicleBag that shows the last ${E.blueDot} $hours hours .... ');
+
     final date = DateTime.now()
         .toUtc()
         .subtract(Duration(hours: hours))
         .toIso8601String();
     try {
       bag = await listApiDog.getVehicleBag(widget.vehicle.vehicleId!, date);
-      if (bag!.isEmpty()) {
-      } else {
-        await _getRoutes();
-      }
       if (mounted) {
         if (bag!.isEmpty()) {
           showSnackBar(
@@ -151,46 +162,39 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
           setState(() {
             busy = false;
           });
+          Navigator.of(context).pop();
           return;
+        } else {
+          if (bag!.heartbeats.isNotEmpty) {
+            bag!.heartbeats.sort((a, b) => b.created!.compareTo(a.created!));
+            lastHeartbeat = bag!.heartbeats.first;
+            _putHeartbeatOnMap(lastHeartbeat!);
+          }
         }
       }
     } catch (e) {
       pp(e);
       if (mounted) {
         showSnackBar(
+            backgroundColor: Colors.red,
             message: 'Could not get data for you. Please try again',
             context: context);
       }
     }
-    setState(() {
-      busy = false;
-    });
   }
 
   Future<void> _getRoutes() async {
-    final ass = await listApiDog.getVehicleRouteAssignments(
-        widget.vehicle.vehicleId!, false);
-    var hash = HashMap<String, String>();
-
-    if (ass.isNotEmpty) {
-      for (var a in ass) {
-        hash[a.routeId!] = a.routeId!;
-      }
-      final list = hash.keys.toList();
-      pp('$mm ... _filterRoutes found ${list.length} route ids from route assignments');
-
-      for (var routeId in list) {
-        final route = await listApiDog.getRoute(routeId);
-        if (route != null) {
-          routes.add(route);
-        }
-      }
-    } else {
-      routes = await listApiDog.getRoutes(AssociationParameter(widget.vehicle.associationId!, false));
+    routes = await listApiDog.getRoutesFilteredByAssignments(
+      associationId: widget.vehicle.associationId!,
+      vehicleId: widget.vehicle.vehicleId!,
+    );
+    if (routes.isEmpty) {
+      routes = await routesIsolate.getRoutesMappable(
+          widget.vehicle.associationId!, false);
     }
 
     if (routes.isNotEmpty) {
-      _putRoutesOnMap(true);
+      _putRoutesOnMap(false);
     }
   }
 
@@ -205,11 +209,12 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
   final Set<Polyline> _polyLines = {};
 
   Future _putRoutesOnMap(bool zoomTo) async {
-    pp('$mm ... _putRoutesOnMap: number of routes: ${routes.length}');
+    pp('\n\n$mm ... _putRoutesOnMap: number of routes: ${E.blueDot} ${routes.length}');
 
     final hash = HashMap<String, List<lib.RoutePoint>>();
     _routeMarkers.clear();
     _polyLines.clear();
+    lib.RouteLandmark? mLandmark;
     for (var route in routes) {
       final points = await routesIsolate.getRoutePoints(route.routeId!, false);
       final marks = await listApiDog.getRouteLandmarks(route.routeId!, false);
@@ -238,6 +243,9 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
       _polyLines.add(polyLine);
 
       int index = 0;
+      if (marks.isNotEmpty) {
+        mLandmark = marks.first;
+      }
 
       for (var routeLandmark in marks) {
         final icon = await getMarkerBitmap(64,
@@ -261,12 +269,13 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     }
     getAllMarkers();
     if (zoomTo) {
-      if (hash.isNotEmpty) {
-        final m = hash.values.first.first;
-        final latLng =
-            LatLng(m.position!.coordinates.last, m.position!.coordinates.first);
+      if (mLandmark != null) {
+        final latLng = LatLng(mLandmark.position!.coordinates.last,
+            mLandmark.position!.coordinates.first);
         _zoomToPosition(latLng);
       }
+    } else {
+      setState(() {});
     }
   }
 
@@ -438,21 +447,22 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
   bool showDot = false;
 
   void _showCounts() {
-    showModalBottomSheet(context: context, builder: (ctx){
-      return CountsGridWidget(
-        arrivals: arrivals.length,
-        departures: departures.length,
-        dispatches: dispatches.length,
-        passengerCounts: passengerCounts.length,  //todo calculate passengers
-        heartbeats: heartbeats.length,
-        arrivalsText: 'Arrivals',
-        departuresText: 'Departures',
-        dispatchesText: 'Dispatches',
-        heartbeatText: 'Heartbeats',
-        passengerCountsText: 'Passengers',
-
-      );
-    });
+    showModalBottomSheet(
+        context: context,
+        builder: (ctx) {
+          return CountsGridWidget(
+            arrivals: arrivals.length,
+            departures: departures.length,
+            dispatches: dispatches.length,
+            passengerCounts: passengerCounts.length, //todo calculate passengers
+            heartbeats: heartbeats.length,
+            arrivalsText: 'Arrivals',
+            departuresText: 'Departures',
+            dispatchesText: 'Dispatches',
+            heartbeatText: 'Heartbeats',
+            passengerCountsText: 'Passengers',
+          );
+        });
   }
 
   @override

@@ -72,9 +72,9 @@ class PassengerCount extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = <DropdownMenuItem<int>>[];
-    for (int index = 0; index < 51; index++) {
+    for (int index = 0; index < 31; index++) {
       items.add(DropdownMenuItem<int>(value: index, child: Text('$index', style:
-      myTextStyleMediumLargeWithColor(context, Theme.of(context).primaryColor, 32),)));
+      myTextStyleMediumLargeWithColor(context, Theme.of(context).primaryColor, 16),)));
     }
     return DropdownButton(
         hint: const Text('Passengers'), items: items, onChanged: onChanged);

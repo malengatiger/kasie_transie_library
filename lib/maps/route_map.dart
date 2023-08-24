@@ -93,29 +93,6 @@ class RouteMapState extends State<RouteMap> {
         await listApiDog.getRouteLandmarks(route.routeId!, refresh);
     pp('$mm _getRouteLandmarks ...  route: ${route.name}; found: ${routeLandmarks.length} ');
 
-    await _buildLandmarkIcons(routeLandmarks.length);
-
-    // landmarkIndex = 0;
-    // for (var landmark in routeLandmarks) {
-    //   final latLng = LatLng(landmark.position!.coordinates.last,
-    //       landmark.position!.coordinates.first);
-    //   _markers.add(Marker(
-    //       markerId: MarkerId('${landmark.landmarkId}'),
-    //       icon: numberMarkers.elementAt(landmarkIndex),
-    //       onTap: () {
-    //         pp('$mm .............. marker tapped: $index');
-    //       },
-    //       infoWindow: InfoWindow(
-    //           snippet:
-    //               '\nThis landmark is part of the route:\n ${route.name}\n\n',
-    //           title: '🍎 ${landmark.landmarkName}',
-    //           onTap: () {
-    //             pp('$mm ............. infoWindow tapped, point index: $index');
-    //             //_deleteLandmark(landmark);
-    //           }),
-    //       position: latLng));
-    //   landmarkIndex++;
-    // }
     setState(() {});
   }
 
@@ -182,9 +159,13 @@ class RouteMapState extends State<RouteMap> {
     _addPolyLine();
     landmarkIndex = 0;
     for (var rl in routeLandmarks) {
+      final icon = await getMarkerBitmap(text: '${landmarkIndex + 1}',
+          80, color: widget.route.color!,
+          fontSize: 20, fontWeight: FontWeight.w900);
       _markers.add(Marker(
           markerId: MarkerId(rl.landmarkId!),
-          icon: numberMarkers.elementAt(landmarkIndex),
+          icon: icon,
+          zIndex: 1,
           position:
               LatLng(rl.position!.coordinates[1], rl.position!.coordinates[0]),
           infoWindow: InfoWindow(
@@ -192,14 +173,17 @@ class RouteMapState extends State<RouteMap> {
       landmarkIndex++;
     }
     //add current location
-    await _buildCarIcon();
     final loc = await locationBloc.getLocation();
     final latLng = LatLng(loc.latitude, loc.longitude);
 
+    final icon = await getTaxiMapIcon(iconSize: 180, text: 'You are here',
+        style:const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16),
+        path: 'assets/car2.png');
     _markers.add(Marker(
         markerId: const MarkerId('myLocation'),
         position: latLng,
-        zIndex: 1.0,
+        icon: icon,
+        zIndex: 4.0,
         infoWindow: InfoWindow(
             title:
                 currentLocation == null ? 'Current Location' : currentLocation!,
@@ -262,21 +246,6 @@ class RouteMapState extends State<RouteMap> {
     setState(() {});
   }
 
-  Future _buildLandmarkIcons(int number) async {
-    for (var i = 0; i < number; i++) {
-      var intList =
-          await getBytesFromAsset("assets/numbers/number_${i + 1}.png", 84);
-      numberMarkers.add(BitmapDescriptor.fromBytes(intList));
-    }
-    pp('$mm have built ${numberMarkers.length} markers for landmarks');
-  }
-
-  late BitmapDescriptor carIcon;
-  Future _buildCarIcon() async {
-    var intList = await getBytesFromAsset("assets/numbers/number_0.png", 84);
-    carIcon = BitmapDescriptor.fromBytes(intList);
-    pp('$mm have built car marker ');
-  }
 
   _clearMap() {
     _polyLines.clear();

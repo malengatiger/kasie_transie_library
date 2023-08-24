@@ -114,6 +114,7 @@ class _MyPhoneInputState extends State<MyPhoneInput>
     _navigateToSMSInput(verificationId);
   }
 
+  int restartCount = 0;
   Future _initializeData() async {
     pp('$mm ...................... ${E.redDot} _initializeData; '
         '\n ${E.blueDot} verificationId: $verificationId ${E.blueDot} smsCode: $smsCode');
@@ -150,6 +151,11 @@ class _MyPhoneInputState extends State<MyPhoneInput>
           mUser = await listApiDog.getUserById(userCred.user!.uid);
         } catch (e) {
           pp('Error getting user: $e');
+          if (restartCount == 0) {
+            restartCount++;
+            _initializeData();
+            return;
+          }
           if (mounted) {
             setState(() {
               initializing = false;
@@ -358,7 +364,7 @@ class _MyPhoneInputState extends State<MyPhoneInput>
               gapH32,
               Expanded(
                 child: initializing
-                    ? const TimerWidget(title: 'Sending code to your phone')
+                    ? const TimerWidget(title: 'Sending code to your phone', isSmallSize: false,)
                     : NumericKeyboard(
                     textColor: Theme.of(context).primaryColorLight,
                     rightIcon: Icon(

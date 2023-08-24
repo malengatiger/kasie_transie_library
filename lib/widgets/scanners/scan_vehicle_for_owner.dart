@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
+import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
@@ -67,7 +68,13 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
         pp('$mm updated owner vehicle ${E.redDot}');
         myPrettyJsonPrint(updatedVehicle.toJson());
         vehicle = await dataApiDog.updateVehicle(updatedVehicle);
+        listApiDog.getOwnerVehicles(user!.userId!, true);
         pp('$mm ... updatedCar ... vehicle: ${vehicle!.vehicleReg!}');
+      }
+      if (mounted) {
+        showSnackBar(
+            backgroundColor: Colors.green.shade700,
+            message: 'Car updated OK', context: context);
       }
     } catch (e) {
       pp(e);

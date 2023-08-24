@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
@@ -304,17 +305,24 @@ class ListApiDog {
     return list;
   }
 
+  final StreamController<List<Vehicle>> _vehiclesStreamController = StreamController.broadcast();
+  Stream<List<Vehicle>> get vehiclesStream => _vehiclesStreamController.stream;
+
   Future<List<Vehicle>> getOwnerVehicles(String userId, bool refresh) async {
     rm.RealmResults<Vehicle> results =
         realm.query<Vehicle>('ownerId == \$0', [userId]);
+
     final list = <Vehicle>[];
     if (refresh || results.isEmpty) {
-      return await vehicleIsolate.getOwnerVehicles(userId);
+      final nList = await vehicleIsolate.getOwnerVehicles(userId);
+      _vehiclesStreamController.sink.add(nList);
+      return nList;
     }
 
     for (var element in results) {
       list.add(element);
     }
+
     pp('$mm cached owner vehicles from realm: ${list.length}');
 
     return list;
@@ -1295,6 +1303,30 @@ class ListApiDog {
     return bag;
   }
 
+  Future<List<Route>> getRoutesFilteredByAssignments({required String associationId, required String vehicleId}) async {
+    final assignments = await listApiDog.getVehicleRouteAssignments(
+        vehicleId, false);
+
+    pp('$mm ... getRoutesFilteredByAssignments found ${assignments.length} assignments');
+
+    var hash = HashMap<String, String>();
+    var routes = <Route>[];
+    if (assignments.isNotEmpty) {
+      for (var a in assignments) {
+        hash[a.routeId!] = a.routeId!;
+      }
+      final list = hash.keys.toList();
+      pp('$mm ... getRoutesFilteredByAssignments found ${list.length} route ids from route assignments');
+
+      for (var routeId in list) {
+        final route = await listApiDog.getRoute(routeId);
+        if (route != null) {
+          routes.add(route);
+        }
+      }
+    }
+    return routes;
+  }
   Future<List<Route>> getRoutes(AssociationParameter param) async {
     final localList = <Route>[];
     rm.RealmResults<Route> results = realm.all<Route>();
@@ -1307,7 +1339,7 @@ class ListApiDog {
 
     if (param.refresh || localList.isEmpty) {
       final remoteList =
-      await routesIsolate.getRoutes(param.associationId);
+      await routesIsolate.getRoutes(param.associationId, param.refresh);
       pp('$mm ... Routes from backend:: ${remoteList.length}');
       _routeController.sink.add(remoteList);
       return remoteList;

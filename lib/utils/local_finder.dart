@@ -129,7 +129,7 @@ class LocalFinder {
     } else {
       final user = await prefs.getUser();
       if (user != null) {
-        routesIsolate.getRoutes(user.associationId!);
+        routesIsolate.getRoutes(user.associationId!, false);
       }
     }
 
@@ -165,7 +165,7 @@ class LocalFinder {
     } else {
       final user = await prefs.getUser();
       if (user != null) {
-        rList = await routesIsolate.getRoutes(user.associationId!);
+        rList = await routesIsolate.getRoutes(user.associationId!, true);
       }
       final comm = await prefs.getCommuter();
       if (comm != null) {

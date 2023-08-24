@@ -23,7 +23,7 @@ class VehicleIsolate {
     try {
       final token = await appAuth.getAuthToken();
       if (token != null) {
-        final url = '${KasieEnvironment.getUrl()}';
+        final url = KasieEnvironment.getUrl();
         var bag = OwnerCarBag(userId, url, token);
         final cars = await _handleOwnerVehicles(bag);
 

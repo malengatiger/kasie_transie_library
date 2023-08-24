@@ -108,13 +108,13 @@ class Initializer {
   Future _getRoutes() async {
     if (car != null) {
       pp('\n\n\n$mm ... getting association routes in isolate ............ car: ${car!.vehicleReg} ');
-      await routesIsolate.getRoutes(car!.associationId!);
+      await routesIsolate.getRoutes(car!.associationId!, false);
       return;
     }
 
     if (user != null) {
       pp('\n\n$mm ... getting association routes in isolate ............ user: ${user!.name} ');
-      await routesIsolate.getRoutes(user!.associationId!);
+      await routesIsolate.getRoutes(user!.associationId!, false);
       return;
     }
     //

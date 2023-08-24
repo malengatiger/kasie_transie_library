@@ -271,7 +271,7 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
                   child: Column(
                     children: [
                       busy
-                          ? const TimerWidget(title: "Signing in ...")
+                          ?  const TimerWidget(title: "Signing in ...", isSmallSize: false,)
                           : const SizedBox(
                               height: 12,
                             ),

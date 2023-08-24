@@ -22,11 +22,13 @@ class RoutesIsolate {
   final xy = '☕️☕️☕️☕️☕️ Routes Isolate Functions: 🍎🍎';
 
   Future<int> countRoutePoints(String routeId) async {
-    final res = listApiDog.realm.query<RoutePoint>('routeId == \$0',[routeId]);
+    final res = listApiDog.realm.query<RoutePoint>('routeId == \$0', [routeId]);
     return res.length;
   }
+
   Future<int> countRouteLandmarks(String routeId) async {
-    final res = listApiDog.realm.query<RouteLandmark>('routeId == \$0',[routeId]);
+    final res =
+        listApiDog.realm.query<RouteLandmark>('routeId == \$0', [routeId]);
     return res.length;
   }
 
@@ -34,33 +36,42 @@ class RoutesIsolate {
     pp('$xy get routePoints for $routeId  ... refresh: $refresh');
     var mList = <RoutePoint>[];
 
-    final res = listApiDog.realm.query<RoutePoint>('routeId == \$0',[routeId]);
+    final res = listApiDog.realm.query<RoutePoint>('routeId == \$0', [routeId]);
     mList = res.toList();
-    pp('$xy get routePoints found ${mList.length}  ... ');
+    if (mList.isEmpty) {
+        final mRoutes = listApiDog.realm.query<Route>('routeId == \$0', [routeId]);;
+        pp('$xy ${E.redDot} ${E.redDot} ${E.redDot} '
+            'No routePoints found for route: ${mRoutes.first.name}, will try backend');
 
-    if (mList.isEmpty || refresh) {
-     mList = await _danceForOneRoute(routeId);
+    } else {
+      pp('$xy get routePoints found ${mList.length} ${E.leaf} route: ${mList.first.routeName}');
     }
 
-    mList.sort((a,b) => a.index!.compareTo(b.index!));
+    if (mList.isEmpty || refresh) {
+      mList = await _danceForOneRoute(routeId);
+    }
+
+    mList.sort((a, b) => a.index!.compareTo(b.index!));
     pp('$xy routePoints for $routeId  == ${mList.length} ... ');
 
-    return res.toList();
+    return mList;
   }
 
   Future<List<RouteLandmark>> getRouteLandmarksCached(String routeId) async {
     pp('$xy get getRouteLandmarks for $routeId  ...');
     var mList = <RouteLandmark>[];
 
-    final res = listApiDog.realm.query<RouteLandmark>('routeId == \$0',[routeId]);
+    final res =
+        listApiDog.realm.query<RouteLandmark>('routeId == \$0', [routeId]);
     mList = res.toList();
     pp('$xy get getRouteLandmarks found ${mList.length}  ... ');
 
-    mList.sort((a,b) => a.index!.compareTo(b.index!));
+    mList.sort((a, b) => a.index!.compareTo(b.index!));
     pp('$xy RouteLandmarks for $routeId  == ${mList.length} ... ');
 
     return res.toList();
   }
+
   Future<List<RouteLandmark>> getAllRouteLandmarksCached() async {
     pp('$xy get getRouteLandmarks all routes  ...');
     var mList = <RouteLandmark>[];
@@ -69,19 +80,18 @@ class RoutesIsolate {
     mList = res.toList();
     pp('$xy get getRouteLandmarks found ${mList.length}  ... ');
 
-    mList.sort((a,b) => a.index!.compareTo(b.index!));
+    mList.sort((a, b) => a.index!.compareTo(b.index!));
 
     return res.toList();
   }
 
   Future<List<RoutePoint>> _danceForOneRoute(String routeId) async {
-     final mList = <RoutePoint>[];
+    final mList = <RoutePoint>[];
     final token = await appAuth.getAuthToken();
     if (token != null) {
-      final bBag =
-      RoutePointsBag([routeId], KasieEnvironment.getUrl(), token);
+      final bBag = RoutePointsBag([routeId], KasieEnvironment.getUrl(), token);
       final string =
-      await Isolate.run(() async => _heavyTaskForRoutePoints(bBag));
+          await Isolate.run(() async => _heavyTaskForRoutePoints(bBag));
       List mJson = jsonDecode(string);
 
       for (var json in mJson) {
@@ -126,61 +136,81 @@ class RoutesIsolate {
     }
   }
 
-  Future<List<Route>> getRoutes(String associationId) async {
+  Future<List<Route>> getRoutesMappable(
+      String associationId, bool refresh) async {
+    final mRoutes = await getRoutes(associationId, refresh);
+    final fRoutes = <Route>[];
+    for (var value in mRoutes) {
+      final marks = await getRouteLandmarksCached(value.routeId!);
+      if (marks.length > 1) {
+        fRoutes.add(value);
+      }
+    }
+
+    return fRoutes;
+  }
+
+  Future<List<Route>> getRoutes(String associationId, bool refresh) async {
     pp('\n\n\n$xy ............................ getting routes ....');
     final start = DateTime.now();
 
-    try {
-      final token = await appAuth.getAuthToken();
-      if (token != null) {
-        final url =
-            '${KasieEnvironment.getUrl()}getAssociationRoutes?associationId=$associationId';
-        var bag = DonkeyBag(associationId, url, token);
-        List mRoutes = await _handleRoutes(bag);
-        pp('$xy hey Joe, do yo know where you are? ${E.redDot} ');
+    final mRoutes = listApiDog.realm.all<Route>();
 
-        var finalRoutes = <Route>[];
-        final routeIds = <String>[];
-        for (var value1 in mRoutes) {
-          routeIds.add(value1.routeId!);
-          final route = await listApiDog.getRoute(value1.routeId);
-          if (route != null) {
-            finalRoutes.add(route);
+    if (refresh) {
+      try {
+        final token = await appAuth.getAuthToken();
+        if (token != null) {
+          final url =
+              '${KasieEnvironment.getUrl()}getAssociationRoutes?associationId=$associationId';
+          var bag = DonkeyBag(associationId, url, token);
+          List mRoutes = await _handleRoutes(bag);
+          pp('$xy hey Joe, do yo know where you are? ${E.redDot} ');
+
+          var finalRoutes = <Route>[];
+          final routeIds = <String>[];
+          for (var value1 in mRoutes) {
+            routeIds.add(value1.routeId!);
+            final route = await listApiDog.getRoute(value1.routeId);
+            if (route != null) {
+              finalRoutes.add(route);
+            }
           }
+          pp('$xy get landmarks and routePoints for ${routeIds.length} routes ... ');
+
+          bag.url =
+              '${KasieEnvironment.getUrl()}getAssociationRouteLandmarks?associationId=${bag.associationId}';
+          await _handleRouteLandmarks(routeIds, bag);
+
+          bag.url = '${KasieEnvironment.getUrl()}';
+          await _handleRoutePoints(routeIds, bag);
+
+          bag.url =
+              '${KasieEnvironment.getUrl()}getAssociationRouteCities?associationId=${bag.associationId}';
+          await _handleRouteCities(routeIds, bag);
+
+          pp('$xy back from all the isolate functions ...${E.nice} looks OK to me! ... ');
+
+          pp('\n\n\n$xy ..... done getting association routes ....${E.leaf} '
+              'returning ${finalRoutes.length} routes\n\n');
+          final end = DateTime.now();
+          pp('$xyz Elapsed time for association routes downloaded: ${end.difference(start).inSeconds} seconds');
+
+          return finalRoutes;
+        } else {
+          final msg = '$xy ... getRoutes fell down and screamed! ${E.redDot} '
+              'no Firebase token found!!';
+          pp(msg);
+          throw Exception(msg);
         }
-        pp('$xy get landmarks and routePoints for ${routeIds.length} routes ... ');
-
-        bag.url =
-            '${KasieEnvironment.getUrl()}getAssociationRouteLandmarks?associationId=${bag.associationId}';
-        await _handleRouteLandmarks(routeIds, bag);
-
-        bag.url = '${KasieEnvironment.getUrl()}';
-        await _handleRoutePoints(routeIds, bag);
-
-        bag.url =
-            '${KasieEnvironment.getUrl()}getAssociationRouteCities?associationId=${bag.associationId}';
-        await _handleRouteCities(routeIds, bag);
-
-        pp('$xy back from all the isolate functions ...${E.nice} looks OK to me! ... ');
-
-        pp('\n\n\n$xy ..... done getting association routes ....${E.leaf} '
-            'returning ${finalRoutes.length} routes\n\n');
-        final end = DateTime.now();
-        pp('$xyz Elapsed time for association routes downloaded: ${end.difference(start).inSeconds} seconds');
-
-        return finalRoutes;
-      } else {
-        final msg = '$xy ... getRoutes fell down and screamed! ${E.redDot} '
-            'no Firebase token found!!';
+      } catch (e) {
+        final msg = '$xy ... getRoutes fell down and screamed! '
+            '${E.redDot}${E.redDot}${E.redDot} $e';
         pp(msg);
         throw Exception(msg);
       }
-    } catch (e) {
-      final msg = '$xy ... getRoutes fell down and screamed! '
-          '${E.redDot}${E.redDot}${E.redDot} $e';
-      pp(msg);
-      throw Exception(msg);
-    }
+    } else {}
+
+    return mRoutes.toList();
   }
 
   Future<List<Route>> _handleRoutes(DonkeyBag bag) async {
@@ -285,7 +315,6 @@ const xyz1 = '😎😎😎😎😎😎😎😎 HeavyTaskForRouteLandmarks: 🍎�
 const xyz2 = '🍟🍟🍟🍟🍟🍟 HeavyTaskForRoutePoints: 🍟🍟';
 const xyz3 = '🌸🌸🌸🌸🌸🌸🌸🌸🌸 HeavyTaskForRouteCities: 🌸🌸🌸';
 
-
 @pragma('vm:entry-point')
 Future<String> _heavyTaskForRoutes(DonkeyBag bag) async {
   pp('$xyz _heavyTaskForRoutes starting ................. ${bag.url}');
@@ -323,7 +352,6 @@ Future<List> _processRoute(String routeId, String url, String token) async {
   Map<String, String> headers = {
     'Content-type': 'application/json',
     'Accept': 'application/json',
-
   };
   headers['Authorization'] = 'Bearer $token';
 

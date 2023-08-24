@@ -196,10 +196,9 @@ class DispatchViaScanState extends State<DispatchViaScan>
                   context, Theme.of(context).primaryColor, 24),
             ),
             content: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(2.0),
               child: SizedBox(
                 height: 420,
-                width: 400,
                 child: Column(
                   children: [
                     const SizedBox(
@@ -256,11 +255,8 @@ class DispatchViaScanState extends State<DispatchViaScan>
                     Navigator.of(context).pop();
                   },
                   child: Text(no == null ? 'No' : no!)),
-              const SizedBox(
-                width: 48,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
+
+              SizedBox(width: 300,
                 child: ElevatedButton(
                     onPressed: () {
                       setState(() {
@@ -362,15 +358,13 @@ class DispatchViaScanState extends State<DispatchViaScan>
         child: Stack(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Card(
                 shape: getDefaultRoundedBorder(),
                 elevation: 4,
                 child: Column(
                   children: [
-                    const SizedBox(
-                      height: 4,
-                    ),
+                   gapH32,
                     selectedRoute == null
                         ? Text(
                             selectRouteText == null
@@ -394,9 +388,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
                                     Theme.of(context).primaryColorLight, 16),
                               ),
                             )),
-                    const SizedBox(
-                      height: 4,
-                    ),
+                    gapH32,
                     scannedVehicle == null
                         ? const Text('..............')
                         : Text(
@@ -448,10 +440,13 @@ class DispatchViaScanState extends State<DispatchViaScan>
                                 )
                               : const SizedBox(),
                           _showDispatches
-                              ? DispatchGrid(
-                                  dispatches: dispatches,
-                                  title: dispatchText!,
-                                )
+                              ? Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: DispatchGrid(
+                                    dispatches: dispatches,
+                                    title: dispatchText!,
+                                  ),
+                              )
                               : const SizedBox(),
                         ],
                       ),

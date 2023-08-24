@@ -4,6 +4,7 @@ import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/local_finder.dart';
+import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/qr_scanner.dart';
 import 'package:kasie_transie_library/widgets/vehicle_passenger_count.dart';
@@ -78,13 +79,11 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
         .vehicleReg}');
 
     Navigator.of(context).pop();
-    Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-      pp('$mm ....... inside navigator ... ${E.redDot} for car: ${vehicle!.vehicleReg}');
-      return VehiclePassengerCount(
-        vehicle: vehicle!,
-        route: selectedRoute!,
-      );
-    }));
+
+    navigateWithScale(VehiclePassengerCount(
+      vehicle: vehicle!,
+      route: selectedRoute!,
+    ), context);
     //
     setState(() {
       showStartButton = false;

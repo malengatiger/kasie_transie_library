@@ -31,7 +31,30 @@ https://stackoverflow.com/questions/65921257/flutter-display-log-in-release-mode
  adb pair 192.168.86.29:42541
  adb pair 192.168.86.249:43671
 
+ //fastlane
+ $ cd ios
+ $ gem install bundler
+ $ bundle init
+ $ echo "gem 'fastlane'" >> Gemfile
+ $ bundle install
 
+//in ios dir
+  2689  sudo gem install -n /usr/local/bin rubygems-update
+  2690  gem install bundler
+  2691  sudo gem install bundler -n /usr/local/bin rubygems-update
+  2692  sudo bundle init
+  2693  echo "gem 'fastlane'" >> Gemfile
+  2694  bundle install
+  2695  gem update --system 3.2.3
+  2696  sudo gem update --system 3.2.3
+
+ # ou simplesmente (não recomendado)
+ # $ gem install fastlane
+
+ touch ./Gemfile
+ bundle update
+
+touch ./Gemfile &&  bundle update
 
 Android phones
 +27 72 212 6971 - Redmi

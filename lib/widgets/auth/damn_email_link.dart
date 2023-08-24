@@ -221,7 +221,7 @@ class DamnEmailLinkState extends State<DamnEmailLink>
             await prefs.saveEmail(email);
             await prefs.saveUser(userFromRemote);
             await vehicleIsolate.getVehicles(mUser.associationId!);
-            await routesIsolate.getRoutes(mUser.associationId!);
+            await routesIsolate.getRoutes(mUser.associationId!, true);
 
             try {
               pp('$mm emailLinkAuthProvider: ${emailLinkAuthProvider.providerId} '
@@ -393,7 +393,7 @@ class DamnEmailLinkState extends State<DamnEmailLink>
                 busy
                     ? Positioned(
                         child:
-                            Center(child: TimerWidget(title: waitingForEmail)))
+                            Center(child: TimerWidget(title: waitingForEmail, isSmallSize: false,)))
                     : const SizedBox(),
               ],
             )));

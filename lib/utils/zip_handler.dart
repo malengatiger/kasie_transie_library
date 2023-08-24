@@ -235,10 +235,10 @@ class ZipHandler {
         listApiDog.realm.add<Route>(bag.route!, update: true);
       });
       //
-      pp('$xz ... 🌼🌼 Total Route cached: ${bag.route!.name!}'
+      pp('$xz ... 🌼🌼 Route cached: ${bag.route!.name!}'
           '\n🌼 landmarks: ${bag.routeLandmarks.length}'
-          '\n🍎 routePoints: ${bag.routePoints.length}'
-          '\n💙 routeCities: ${bag.routeCities.length}');
+          ' 🍎 routePoints: ${bag.routePoints.length}'
+          ' 💙 routeCities: ${bag.routeCities.length}');
 
     }
 

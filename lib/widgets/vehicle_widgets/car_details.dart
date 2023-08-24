@@ -36,7 +36,7 @@ class CarDetailsState extends State<CarDetails>
   late AnimationController _controller;
   static const mm = '🐦🐦🐦🐦🐦🐦🐦 CarDetails 🍎🍎';
   var counts = <CounterBag>[];
-  int days = 1;
+  int days = 7;
   bool busy = false;
   String? ownerDashboard,
       numberOfCars,
@@ -139,8 +139,8 @@ class CarDetailsState extends State<CarDetails>
         }
       }
     });
-    heartbeatStreamSub = fcmBloc.heartbeatStreamStream
-        .listen((lib.VehicleHeartbeat cunt) {
+    heartbeatStreamSub =
+        fcmBloc.heartbeatStreamStream.listen((lib.VehicleHeartbeat cunt) {
       pp('$mm ... fcmBloc.heartbeatStreamStream delivered heartbeat for: ${cunt.vehicleReg}');
       if (cunt.vehicleId == widget.vehicle.vehicleId) {
         heartbeats++;
@@ -204,7 +204,8 @@ class CarDetailsState extends State<CarDetails>
     });
     try {
       final m = DateTime.now().toUtc().subtract(Duration(days: days));
-      await listApiDog.getVehicleRouteAssignments(widget.vehicle.vehicleId!, refresh);
+      await listApiDog.getVehicleRouteAssignments(
+          widget.vehicle.vehicleId!, refresh);
       counts = await listApiDog.getVehicleCountsByDate(
           widget.vehicle.vehicleId!, m.toIso8601String());
       paCounts = await listApiDog.getAmbassadorPassengerCountsByVehicle(
@@ -325,9 +326,15 @@ class CarDetailsState extends State<CarDetails>
             appBar: AppBar(
               title: const Text('Vehicle Monitor'),
               actions: [
-                IconButton(onPressed: (){
-                  navigateWithScale(VehicleMonitorMap(vehicle: widget.vehicle), context);
-                }, icon: Icon(Icons.map, color: Theme.of(context).primaryColor,))
+                IconButton(
+                    onPressed: () {
+                      navigateWithScale(
+                          VehicleMonitorMap(vehicle: widget.vehicle), context);
+                    },
+                    icon: Icon(
+                      Icons.map,
+                      color: Theme.of(context).primaryColor,
+                    ))
               ],
             ),
             body: SizedBox(
@@ -351,10 +358,9 @@ class CarDetailsState extends State<CarDetails>
                             ),
                             Text(
                               widget.vehicle.vehicleReg!,
-                              style: myTextStyleMediumLargeWithColor(
-                                  context, Theme.of(context).primaryColorLight, 24),
+                              style: myTextStyleMediumLargeWithColor(context,
+                                  Theme.of(context).primaryColorLight, 32),
                             ),
-
                             SizedBox(
                               height: type == 'phone' ? 12 : 24,
                             ),
@@ -372,8 +378,10 @@ class CarDetailsState extends State<CarDetails>
                                 ),
                                 Text(
                                   '$days',
-                                  style: myTextStyleMediumLargeWithColor(context,
-                                      Theme.of(context).primaryColor, 24),
+                                  style: myTextStyleMediumLargeWithColor(
+                                      context,
+                                      Theme.of(context).primaryColor,
+                                      24),
                                 ),
                                 const SizedBox(
                                   width: 36,
@@ -389,47 +397,58 @@ class CarDetailsState extends State<CarDetails>
                                 )
                               ],
                             ),
-
-                            TextButton(
+                            gapH32,
+                            SizedBox(width: 300,
+                              child: ElevatedButton.icon(
                                 onPressed: () {
                                   _sendLocationRequest();
                                 },
-                                child: Padding(
+                                label: Padding(
                                   padding: const EdgeInsets.all(16.0),
                                   child: Text(requestLocation == null
                                       ? 'Request Current Location'
                                       : requestLocation!),
-                                )),
-                            SizedBox(
-                              height: type == 'phone' ? 8 : 32,
+                                ),
+                                icon: const Icon(Icons.map),
+                              ),
                             ),
-                            TextButton(
+                            SizedBox(
+                              height: type == 'phone' ? 24 : 32,
+                            ),
+                            SizedBox(width: 300,
+                              child: ElevatedButton.icon(
                                 onPressed: () {
                                   _sendMediaRequest();
                                 },
-                                child: Padding(
+                                icon: const Icon(Icons.camera_alt),
+                                label: Padding(
                                   padding: const EdgeInsets.all(16.0),
                                   child: Text(requestMedia == null
                                       ? 'Request Photo/Video'
                                       : requestMedia!),
-                                )),
-                            arrivalsText == null? gapW16: Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: CountsGridWidget(
-                                  arrivalsText: arrivalsText!,
-                                  departuresText: departuresText!,
-                                  dispatchesText: dispatchesText!,
-                                  heartbeatText: heartbeatText!,
-                                  arrivals: arrivals,
-                                  departures: departures,
-                                  heartbeats: heartbeats,
-                                  dispatches: dispatches,
-                                  passengerCountsText: passengerCountsText!,
-                                  passengerCounts: totalPassengers,
                                 ),
                               ),
                             ),
+                            arrivalsText == null
+                                ? gapW16
+                                : Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: CountsGridWidget(
+                                        arrivalsText: arrivalsText!,
+                                        departuresText: departuresText!,
+                                        dispatchesText: dispatchesText!,
+                                        heartbeatText: heartbeatText!,
+                                        arrivals: arrivals,
+                                        departures: departures,
+                                        heartbeats: heartbeats,
+                                        dispatches: dispatches,
+                                        passengerCountsText:
+                                            passengerCountsText!,
+                                        passengerCounts: totalPassengers,
+                                      ),
+                                    ),
+                                  ),
                           ],
                         ),
                       ),

@@ -33,41 +33,13 @@ class _SplashWidgetState extends State<SplashWidget> {
         duration: const Duration(milliseconds: 3000),
         child: Card(
           elevation: 24.0,
-          // shape: getDefaultRoundedBorder(),
-          child: Column(
-            children: [
-              const SizedBox(
-                height: 24,
-              ),
-              Center(
-                child: Image.asset(
-                  'assets/gio.png',
-                  height: 64,
-                  width: 64,
-                ),
-              ),
-              const SizedBox(
-                height: 4,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // const FaIcon(FontAwesomeIcons.anchorCircleCheck),
-
-                  Text(
-                    message == null ? 'We help you see more!' : message!,
-                    style: myTextStyleSmall(context),
-                  ),
-                  const SizedBox(
-                    width: 24,
-                  ),
-                  const Text('🔷🔷'),
-                ],
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-            ],
+          shape: getDefaultRoundedBorder(),
+          child:  Center(
+            child: Image.asset(
+              'assets/ktlogo_red.png',
+              height: 120,
+              width: 300,
+            ),
           ),
         ),
       ),
