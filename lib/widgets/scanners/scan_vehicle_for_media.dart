@@ -102,6 +102,11 @@ class ScanVehicleForMediaState extends State<ScanVehicleForMedia>
                       });
                       onCarScanned(car);
                     },
+                    onClear: (){
+                      setState(() {
+                        vehicle = null;
+                      });
+                    },
                     onUserScanned: (u) {},
                     onError: onError, quitAfterScan: true,
                   ),

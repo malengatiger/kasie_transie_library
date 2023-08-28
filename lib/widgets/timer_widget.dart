@@ -52,21 +52,21 @@ class TimerWidgetState extends State<TimerWidget>
     final date = DateTime.now();
     return SizedBox(
       width: widget.isSmallSize ? 300 : 400,
-      height: widget.isSmallSize ? 400 : 600,
+      height: widget.isSmallSize ? 400 : 500,
       child: Padding(
-        padding: EdgeInsets.all(widget.isSmallSize ? 8 : 16.0),
+        padding: EdgeInsets.all(widget.isSmallSize ? 8 : 12.0),
         child: Card(
           shape: getDefaultRoundedBorder(),
           elevation: 12,
           child: SingleChildScrollView(
             child: Padding(
-              padding: EdgeInsets.all(widget.isSmallSize ? 8 : 20.0),
+              padding: EdgeInsets.all(widget.isSmallSize ? 8 : 12.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
-                    height: widget.isSmallSize ? 16 : 32,
+                    height: widget.isSmallSize ? 16 : 24,
                   ),
                   Text(
                     widget.title,
@@ -74,7 +74,7 @@ class TimerWidgetState extends State<TimerWidget>
                         context, Colors.grey.shade700, 16),
                   ),
                   SizedBox(
-                    height: widget.isSmallSize ? 16 : 32,
+                    height: widget.isSmallSize ? 16 : 24,
                   ),
                   widget.subTitle == null
                       ? const SizedBox()
@@ -84,11 +84,11 @@ class TimerWidgetState extends State<TimerWidget>
                           child: Text(widget.subTitle!),
                         ),
                   SizedBox(
-                    height: widget.isSmallSize ? 24 : 48,
+                    height: widget.isSmallSize ? 48 : 64,
                   ),
                   SizedBox(
                           width: widget.isSmallSize ? 84 : 128,
-                          height: widget.isSmallSize ? 84 : 128,
+                          height: widget.isSmallSize ? 84 : 100,
                           child: AnalogClock(
                             dateTime: date,
                             isKeepTime: true,
@@ -100,17 +100,17 @@ class TimerWidgetState extends State<TimerWidget>
                         ),
 
                   SizedBox(
-                    height: widget.isSmallSize ? 32 : 48,
+                    height: widget.isSmallSize ? 48 : 64,
                   ),
                   Text(
                     getFormattedTime(timeInSeconds: elapsed),
                     style: myTextStyleMediumLargeWithColor(
                         context,
                         Theme.of(context).primaryColor,
-                        widget.isSmallSize ? 24 : 48),
+                        widget.isSmallSize ? 28 : 32),
                   ),
                   SizedBox(
-                    height: widget.isSmallSize ? 16 : 48,
+                    height: widget.isSmallSize ? 16 : 32,
                   ),
                 ],
               ),

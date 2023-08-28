@@ -294,7 +294,8 @@ class FCMBloc {
     }
 
     if (associationId == null) {
-      pp('$newMM ... association is null. cannot subscribe');
+      pp('$newMM ... association is null. ${E.redDot}${E.redDot}${E.redDot}'
+          ' cannot subscribe');
       return;
     }
     await firebaseMessaging

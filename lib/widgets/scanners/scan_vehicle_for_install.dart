@@ -123,6 +123,11 @@ class ScanVehicleForInstallState extends State<ScanVehicleForInstall>
                           });
                           onCarScanned(car);
                         },
+                        onClear: (){
+                          setState(() {
+                            vehicle = null;
+                          });
+                        },
                         onUserScanned: (u) {},
                         onError: onError,
                         quitAfterScan: true,

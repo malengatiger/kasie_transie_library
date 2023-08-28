@@ -203,7 +203,11 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
                         },
                         onUserScanned: (u) {},
                         onError: onError,
-                        quitAfterScan: true,
+                        quitAfterScan: true, onClear:  (){
+                        setState(() {
+                          vehicle = null;
+                        });
+                      },
                       ),
                     ),
                     const SizedBox(

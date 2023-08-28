@@ -4,7 +4,6 @@ import 'package:firebase_auth_platform_interface/src/providers/phone_auth.dart';
 // import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/countries.dart' as country;
-import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/zip_handler.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/widgets/auth/country_list.dart';
@@ -16,9 +15,6 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart' as ui;
 import '../../bloc/list_api_dog.dart';
 import '../../data/schemas.dart' as lib;
 
-import '../../isolates/country_cities_isolate.dart';
-import '../../isolates/routes_isolate.dart';
-import '../../isolates/vehicles_isolate.dart';
 import '../../utils/emojis.dart';
 import '../../utils/functions.dart';
 import '../../utils/prefs.dart';
@@ -66,12 +62,15 @@ class _MyPhoneInputState extends State<MyPhoneInput>
   }
 
   void _getCountry() async {
+    pp('$mm ... get country ...');
     var code = await getDeviceCountryCode();
     if (code != null) {
       countrySelected = await getDeviceCountry(code);
       if (mounted) {
         setState(() {});
       }
+    } else {
+      countrySelected = await getDeviceCountry('ZA');
     }
   }
 
@@ -110,6 +109,7 @@ class _MyPhoneInputState extends State<MyPhoneInput>
     this.verificationId = verificationId;
     setState(() {
       initializing = false;
+      enteredText = '';
     });
     _navigateToSMSInput(verificationId);
   }
@@ -161,8 +161,10 @@ class _MyPhoneInputState extends State<MyPhoneInput>
               initializing = false;
               enteredText = '';
             });
-            showSnackBar(duration: const Duration(seconds: 12),
-                message: 'Error input: $e', context: context);
+            showSnackBar(
+                duration: const Duration(seconds: 12),
+                message: 'Error input: $e',
+                context: context);
             Navigator.of(context).pop();
           } else {
             pp('... Widget not mounted ... ');
@@ -172,7 +174,6 @@ class _MyPhoneInputState extends State<MyPhoneInput>
       }
 
       if (mUser != null) {
-
         pp('$mm KasieTransie user found on database: 🍎 ${mUser.name} 🍎 will initialize ...');
         myPrettyJsonPrint(mUser.toJson());
         await prefs.saveUser(mUser);
@@ -193,7 +194,8 @@ class _MyPhoneInputState extends State<MyPhoneInput>
           await zipHandler.getCars(mUser.associationId!);
           await zipHandler.getRouteBags(associationId: mUser.associationId!);
           await zipHandler.getCities(myCountry!.countryId!);
-          final users = await listApiDog.getAssociationUsers(mUser.associationId!);
+          final users =
+              await listApiDog.getAssociationUsers(mUser.associationId!);
           //
           pp('$mm KasieTransie countries found on database:  🍎 ${countries.length} 🍎');
           pp('$mm KasieTransie users found on database:  🍎 ${users.length} 🍎');
@@ -303,106 +305,128 @@ class _MyPhoneInputState extends State<MyPhoneInput>
 
     provider.onCredentialReceived(credential, ui.AuthAction.signIn);
   }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-          appBar: AppBar(
-            title: const Text('Cellphone Authentication'),
-          ),
-          body: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              gapH16,
-              GestureDetector(
-                onTap: () {
-                  _navigateToCountryList();
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      'Select Country',
-                      style: myTextStyleSmall(context),
-                    ),
-                    gapW16,
-                    IconButton(onPressed: () {
+      appBar: AppBar(
+        title: const Text('Cellphone Authentication'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            gapH16,
+            GestureDetector(
+              onTap: () {
+                _navigateToCountryList();
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'Select Country',
+                    style: myTextStyleSmall(context),
+                  ),
+                  gapW16,
+                  IconButton(
+                    onPressed: () {
                       _navigateToCountryList();
-                    }, icon: Icon(
+                    },
+                    icon: Icon(
                       Icons.search,
                       color: Theme.of(context).primaryColor,
                       size: 48,
                     ),
-                    ),
-                    gapW8,
-                  ],
-                ),
-              ),
-              gapH32,
-              countrySelected == null
-                  ? gapW16
-                  : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('+${countrySelected!.dialCode}'),
-                  gapW16,
-                  Text(
-                    countrySelected!.name,
-                    style: myTextStyleMediumLargeWithColor(
-                        context, Theme.of(context).primaryColorLight, 18),
                   ),
+                  gapW8,
                 ],
               ),
-              gapH32,
-              countrySelected == null
-                  ? gapW16
-                  : initializing? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(),): Text(
-                '+${countrySelected!.dialCode}$enteredText',
-                style: myTextStyleLargePrimaryColor(context),
-              ),
-              gapH32,
-              Expanded(
-                child: initializing
-                    ? const TimerWidget(title: 'Sending code to your phone', isSmallSize: false,)
-                    : NumericKeyboard(
-                    textColor: Theme.of(context).primaryColorLight,
-                    rightIcon: Icon(
-                      Icons.backspace,
-                      color: Theme.of(context).primaryColor,
+            ),
+            gapH32,
+            countrySelected == null
+                ? gapW16
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('+${countrySelected!.dialCode}'),
+                      gapW16,
+                      Text(
+                        countrySelected!.name,
+                        style: myTextStyleMediumLargeWithColor(
+                            context, Theme.of(context).primaryColorLight, 18),
+                      ),
+                    ],
+                  ),
+            gapH32,
+            countrySelected == null
+                ? gapW16
+                : initializing
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(),
+                      )
+                    : Card(
+                        shape: getDefaultRoundedBorder(),
+                        elevation: 8,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                            '+${countrySelected!.dialCode}$enteredText',
+                            style: myTextStyleMediumLargeWithColor(
+                                context, Theme.of(context).primaryColor, 32),
+                          ),
+                      ),
                     ),
-                    rightButtonFn: () {
-                      setState(() {
-                        enteredText = '';
-                        mText = '';
-                      });
-                    },
-                    leftIcon: const Icon(
-                      Icons.check,
-                      size: 64,
-                      color: Colors.green,
-                    ),
-                    leftButtonFn: () {
-                      var m = enteredText.trim().replaceAll(' ', '');
-                      pp('$mm ... left button tapped; call provider.sendVerificationCode with : $m');
-                      ignoreTap = true;
-
-                      provider.sendVerificationCode(
-                          phoneNumber: '+${countrySelected!.dialCode}$m');
-                    },
-                    onKeyboardTap: (text) {
-                      if (!ignoreTap) {
+            gapH32,
+            Expanded(
+              child: initializing
+                  ? const TimerWidget(
+                      title: 'Sending code to your phone',
+                      isSmallSize: true,
+                    )
+                  : NumericKeyboard(
+                      textColor: Theme.of(context).primaryColorLight,
+                      rightIcon: Icon(
+                        Icons.backspace,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      rightButtonFn: () {
                         setState(() {
-                          enteredText = '$enteredText$text';
-                          mText = '$mText$text';
+                          enteredText = '';
+                          mText = '';
                         });
-                      }
-                      //widget.onSMSCode(v);
-                    }),
-              ),
-            ],
-          ),
-        ));
-  }
+                      },
+                      leftIcon: const Icon(
+                        Icons.check,
+                        size: 64,
+                        color: Colors.green,
+                      ),
+                      leftButtonFn: () {
+                        var m = enteredText.trim().replaceAll(' ', '');
+                        pp('$mm ... left button tapped; call provider.sendVerificationCode with : $m');
+                        ignoreTap = true;
 
+                        provider.sendVerificationCode(
+                            phoneNumber: '+${countrySelected!.dialCode}$m');
+                      },
+                      onKeyboardTap: (text) {
+                        if (!ignoreTap) {
+                          setState(() {
+                            enteredText = '$enteredText$text';
+                            mText = '$mText$text';
+                          });
+                        }
+                        //widget.onSMSCode(v);
+                      }),
+            ),
+          ],
+        ),
+      ),
+    ));
+  }
 }

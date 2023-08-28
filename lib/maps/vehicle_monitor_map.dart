@@ -45,7 +45,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
   var passengerCounts = <lib.AmbassadorPassengerCount>[];
 
   VehicleBag? bag;
-  int hours = 24;
+  int hours = 24 * 7;
   bool busy = false;
   String title = "Maps";
 
@@ -246,7 +246,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
       if (marks.isNotEmpty) {
         mLandmark = marks.first;
       }
-
+//AIzaSyCXzo0wT6tMvgc1PHFET6nml3xO0fL-vFg
       for (var routeLandmark in marks) {
         final icon = await getMarkerBitmap(64,
             text: '${index + 1}',
@@ -340,7 +340,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     pp('\n\n$mm put latest heartbeat on map ...');
     final key = DateTime.parse(heartbeat.created!);
     final iconLast = await getTaxiMapIcon(
-        iconSize: 220,
+        iconSize: 360,
         text: '${heartbeat.vehicleReg}',
         style: style,
         path: 'assets/car2.png');

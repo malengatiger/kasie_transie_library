@@ -404,10 +404,10 @@ class CarDetailsState extends State<CarDetails>
                                   _sendLocationRequest();
                                 },
                                 label: Padding(
-                                  padding: const EdgeInsets.all(16.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   child: Text(requestLocation == null
                                       ? 'Request Current Location'
-                                      : requestLocation!),
+                                      : requestLocation!, style: myTextStyleSmall(context),),
                                 ),
                                 icon: const Icon(Icons.map),
                               ),
@@ -422,10 +422,10 @@ class CarDetailsState extends State<CarDetails>
                                 },
                                 icon: const Icon(Icons.camera_alt),
                                 label: Padding(
-                                  padding: const EdgeInsets.all(16.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   child: Text(requestMedia == null
                                       ? 'Request Photo/Video'
-                                      : requestMedia!),
+                                      : requestMedia!, style: myTextStyleSmall(context)),
                                 ),
                               ),
                             ),

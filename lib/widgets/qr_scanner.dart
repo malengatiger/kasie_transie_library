@@ -16,12 +16,14 @@ class QRScanner extends StatefulWidget {
       {Key? key,
       required this.onCarScanned,
       required this.onUserScanned,
-      required this.onError, required this.quitAfterScan})
+      required this.onError, required this.quitAfterScan, required this.onClear})
       : super(key: key);
 
   final Function(lm.Vehicle) onCarScanned;
   final Function(lm.User) onUserScanned;
   final Function onError;
+  final Function onClear;
+
   final bool quitAfterScan;
 
   @override
@@ -57,9 +59,16 @@ class QRScannerState extends State<QRScanner>
   }
 
   Future _getCameraPermission() async {
+    pp('$mm ......... requesting camera permission ...');
     permissionStatus = await Permission.camera.status;
-    if (!permissionStatus!.isGranted) {
+    pp('$mm ......... requesting camera permissionStatus!.isGranted: ${permissionStatus!.isGranted} ...');
+    if (permissionStatus!.isGranted) {
+      pp('$mm ......... we cool ...');
+
+    } else {
+      pp('$mm ......... we NOT cool, will request permission  ${E.redDot}...');
       permissionStatus = await Permission.camera.request();
+
     }
     setState(() {});
   }
@@ -100,30 +109,29 @@ class QRScannerState extends State<QRScanner>
   Widget _buildQrView(BuildContext context) {
     pp('$mm _buildQrView ... get qr widget');
 
-    return permissionStatus!.isGranted
-        ? Container(color: Colors.black,
-            width: 300,
-            height: 300,
-            child: QRView(
-              key: qrKey,
-              onQRViewCreated: _onQRViewCreated,
-              overlay: QrScannerOverlayShape(
-                  borderColor: Theme.of(context).primaryColor,
-                  borderRadius: 16,
-                  borderLength: 30,
-                  borderWidth: 16,
-                  cutOutSize: 300),
-              onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
-            ),
-          )
-        : Center(
-            child: Card(
-              child: Text(
-                'No Permission!',
-                style: myTextStyleMediumLargeWithSize(context, 24),
+    return  GestureDetector(
+      onTap: (){
+        pp('$mm ............ scanner tapped!');
+        widget.onClear();
+        qrViewController?.resumeCamera();
+      },
+      child: Container(color: Colors.black,
+              width: 300,
+              height: 300,
+              child: QRView(
+                key: qrKey,
+                onQRViewCreated: _onQRViewCreated,
+                overlay: QrScannerOverlayShape(
+                    borderColor: Theme.of(context).primaryColor,
+                    borderRadius: 16,
+                    borderLength: 30,
+                    borderWidth: 16,
+                    cutOutSize: 300),
+                onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
               ),
             ),
-          );
+    );
+
   }
 
   void _onQRViewCreated(QRViewController controller) {

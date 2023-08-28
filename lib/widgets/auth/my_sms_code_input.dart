@@ -53,7 +53,7 @@ class _MySmsCodeInputState extends State<MySmsCodeInput> {
         title: const Text('SMS Code Input'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(12.0),
         child: Card(
           elevation: 8,
           shape: getDefaultRoundedBorder(),
@@ -63,22 +63,21 @@ class _MySmsCodeInputState extends State<MySmsCodeInput> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                gapH16,
                 SizedBox(
-                    width: 48, height: 48, child: Image.asset('assets/gio.png')),
+                    width: 300, height: 100, child: Image.asset('assets/ktlogo_red.png')),
                 const SizedBox(
-                  height: 64,
+                  height: 32,
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Text(
                     enterCode,
                     style: myTextStyleMediumLargeWithColor(
-                        context, Theme.of(context).primaryColorLight, 18),
+                        context, Theme.of(context).primaryColorLight, 14),
                   ),
                 ),
-                const SizedBox(
-                  height: 48,
-                ),
+                gapH32,
                 Card(
                   elevation: 16,
                   shape: getDefaultRoundedBorder(),
@@ -87,7 +86,7 @@ class _MySmsCodeInputState extends State<MySmsCodeInput> {
                     child: Text(
                       enteredText,
                       style: myTextStyleMediumLargeWithColor(
-                          context, Colors.white, 48),
+                          context, Colors.white, 36),
                     ),
                   ),
                 ),
@@ -122,9 +121,7 @@ class _MySmsCodeInputState extends State<MySmsCodeInput> {
                       });
                     }),
 
-                const SizedBox(
-                  height: 48,
-                ),
+                gapH16,
               ],
             ),
           ),

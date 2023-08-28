@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sim_country_code/flutter_sim_country_code.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image/image.dart' as img;
@@ -712,8 +713,10 @@ String getPhoneFormat(String phoneNumber) {
 Future<cc.Country?> getDeviceCountry(String countryCode) async {
   String? code;
   cc.Country? country;
+  code = WidgetsBinding.instance.platformDispatcher.locale.countryCode;
+
   try {
-    code = await FlutterSimCountryCode.simCountryCode;
+    //code = await FlutterSimCountryCode.simCountryCode;
     pp('....................... _countryCode: $code');
     for (var value in cc.countries) {
       if (value.code == code) {

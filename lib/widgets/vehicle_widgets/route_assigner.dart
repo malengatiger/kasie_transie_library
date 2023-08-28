@@ -252,7 +252,6 @@ class _RouteAssignerState extends State<RouteAssigner> {
                                     )),
                               ],
                             ),
-                            gapH16,
                             carsPicked.isEmpty && routesPicked.isEmpty? gapH4:gapH32,
                             carsPicked.isEmpty? gapW16: Row(
                               mainAxisAlignment:

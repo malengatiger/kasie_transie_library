@@ -7,7 +7,9 @@ import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/qr_scanner.dart';
 import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/widgets/scanners/qr_scanner_mobile.dart';
 import 'package:kasie_transie_library/widgets/vehicle_media_handler.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../utils/emojis.dart';
 
@@ -30,6 +32,7 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
     _controller = AnimationController(vsync: this);
     super.initState();
     _setTexts();
+    _getPermission();
   }
 
   @override
@@ -39,6 +42,30 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
   }
 
   lib.Vehicle? updatedVehicle;
+
+  void _getPermission() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.location,
+      Permission.storage,
+      Permission.camera,
+    ].request();
+    pp('$mm PermissionStatus: statuses: $statuses');
+    if (await Permission.camera.isPermanentlyDenied) {
+      // The user opted to never again see the permission request dialog for this
+      // app. The only way to change the permission's status now is to let the
+      // user manually enable it in the system settings.
+      await openAppSettings();
+      return;
+    }
+    final ok = await Permission.camera.request().isGranted;
+    if (!ok) {
+      if (mounted) {
+        showSnackBar(
+            duration: const Duration(seconds: 15),
+            message: 'Camera permission is required', context: context);
+      }
+    }
+  }
 
   void updateCar() async {
     pp('$mm ... updateCar on database ... for car: ${vehicle!.vehicleReg}');
@@ -166,6 +193,11 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
                       });
                       onCarScanned(car);
                     },
+                    onClear: (){
+                      setState(() {
+                        vehicle = null;
+                      });
+                    },
                     onUserScanned: (u) {},
                     onError: onError,
                     quitAfterScan: true,
@@ -247,13 +279,17 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
                                 )),
                           ],
                         )
-                      : Text(
-                          noVehicleScanned == null
-                              ? 'No Vehicle Scanned yet'
-                              : noVehicleScanned!,
-                          style: myTextStyleMediumLargeWithColor(
-                              context, Colors.grey.shade700, 20),
-                        ),
+                      : Row(mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                              noVehicleScanned == null
+                                  ? 'No Vehicle Scanned yet'
+                                  : noVehicleScanned!,
+                              style: myTextStyleMediumLargeWithColor(
+                                  context, Colors.grey.shade700, 20),
+                            ),
+                        ],
+                      ),
                 ],
               ),
             ),

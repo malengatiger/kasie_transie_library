@@ -1,24 +1,16 @@
-import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart' as ui;
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kasie_transie_library/data/color_and_locale.dart';
 import 'package:kasie_transie_library/widgets/auth/sign_in_landing.dart';
 
 import '../../auth/phone_auth_signin.dart';
-import '../../bloc/list_api_dog.dart';
 import '../../data/schemas.dart' as lib;
-import '../../isolates/country_cities_isolate.dart';
-import '../../isolates/routes_isolate.dart';
-import '../../isolates/vehicles_isolate.dart';
 import '../../l10n/translation_handler.dart';
-import '../../utils/emojis.dart';
 import '../../utils/functions.dart';
 import '../../utils/navigator_utils.dart';
 import '../../utils/prefs.dart';
 import '../language_and_color_chooser.dart';
 import 'my_phone_input.dart';
-import 'my_sms_code_input.dart';
 
 late ui.PhoneAuthProvider phoneAuthProvider;
 

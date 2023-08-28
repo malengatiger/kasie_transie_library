@@ -81,15 +81,17 @@ dependencies:
   intl_phone_field: ^3.2.0
   flutter_sim_country_code: ^0.1.2
   scrollable_positioned_list: ^0.3.8
+  mobile_scanner: ^3.4.1
+#  realm_dart: ^1.4.0
 
-  
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^2.0.2
   build_runner: ^2.4.6
-  hive_generator:
   mockito: ^5.4.2
   json_serializable: ^6.7.1
 

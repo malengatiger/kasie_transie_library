@@ -422,7 +422,11 @@ class DispatchViaScanState extends State<DispatchViaScan>
                                   onCarScanned: onCarScanned,
                                   onUserScanned: (user) {},
                                   onError: onError,
-                                  quitAfterScan: quitAfterScan),
+                                  quitAfterScan: quitAfterScan, onClear: (){
+                                setState(() {
+                                  scannedVehicle = null;
+                                });
+                              },),
                             ),
                           ),
                     Expanded(
