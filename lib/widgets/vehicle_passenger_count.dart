@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
+import 'package:kasie_transie_library/bloc/dispatch_helper.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart' as lib;
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
@@ -153,6 +154,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
       passengersIn = 0;
       currentCounts.add(passengerCount);
       _calculateCurrentPassengers();
+      dispatchHelper.sendPassengerCount(passengerCount);
       if (mounted) {
         showToast(
             duration: const Duration(seconds: 2),

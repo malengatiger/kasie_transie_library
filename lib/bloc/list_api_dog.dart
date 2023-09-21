@@ -533,7 +533,7 @@ class ListApiDog {
       String userId, int days) async {
     final startDate = DateTime.now().toUtc().subtract(Duration(days: days));
     final cmd =
-        '${url}getMarshalDispatchRecords?userId=$userId&startDate=$startDate';
+        '${url}getMarshalDispatchRecords?marshalId=$userId&startDate=$startDate';
     List resp = await _sendHttpGET(cmd);
     var list = <DispatchRecord>[];
     for (var vehicleJson in resp) {
@@ -1547,15 +1547,25 @@ class ListApiDog {
     //todo - remove from mongo
   }
 
-  Future<List<User>> getAssociationUsers(String associationId) async {
-    final list = <User>[];
+  Future<List<User>> getAssociationUsers(String associationId, bool refresh) async {
+    var list = <User>[];
+    if (refresh) {
+      await _getUsersFromBackEnd(associationId, list);
+      return list;
+    }
     rm.RealmResults<User> results = realm.all<User>();
     if (results.isNotEmpty) {
       for (var element in results) {
         list.add(element);
       }
       return list;
+    } else {
+      await _getUsersFromBackEnd(associationId, list);
     }
+    return list;
+  }
+
+  Future<List<User>> _getUsersFromBackEnd(String associationId, List<User> list) async {
     final cmd = '${url}getAssociationUsers?associationId=$associationId';
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {

@@ -68,7 +68,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
           final association =
               await listApiDog.getAssociationById(user!.associationId!);
           final users =
-              await listApiDog.getAssociationUsers(user!.associationId!);
+              await listApiDog.getAssociationUsers(user!.associationId!, true);
           final countries = await listApiDog.getCountries();
           lib.Country? myCountry;
           for (var country in countries) {

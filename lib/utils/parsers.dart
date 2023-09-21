@@ -228,7 +228,6 @@ RouteCity buildRouteCity(Map value) {
 Route buildRoute(Map value) {
   var id = rm.ObjectId.fromHexString(value['_id'] as String);
 
-  myPrettyJsonPrint(value);
   var startEnd = value['routeStartEnd'];
   List st = startEnd['startCityPosition']['coordinates'];
   var lat = st.last as double;
@@ -255,7 +254,6 @@ Route buildRoute(Map value) {
     endCityPosition: endCityPosition,
   );
 
-  pp('fucking heading: ${value['heading']}');
   try {
     var m = Route(
       id,

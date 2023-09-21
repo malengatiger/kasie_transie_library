@@ -213,7 +213,7 @@ Future _httpPost(String mUrl, Map? bag, String token) async {
       headers: headers,
     )
         .timeout(const Duration(seconds: 120));
-    if (resp.statusCode == 200) {
+    if (resp.statusCode == 200 || resp.statusCode == 201) {
       pp('$xyz  _httpPost RESPONSE: 💙💙 statusCode: 👌👌👌 '
           '${resp.statusCode} 👌👌👌 💙 for $mUrl');
     } else {

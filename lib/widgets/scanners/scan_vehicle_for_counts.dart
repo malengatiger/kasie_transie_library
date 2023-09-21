@@ -212,42 +212,62 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
         title: Text(
             passengerCounts == null ? 'Passenger Counts' : passengerCounts!),
         bottom: PreferredSize(
-            preferredSize: Size.fromHeight(_showRoutes?28:128),
-            child: _showRoutes? gapH16: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                gapH16,
-                GestureDetector(
-                  onTap: () {
-                    _navigateToScan();
-                  },
-                  child: Text(
-                    scanVehicle == null ? 'Scan Vehicle' : scanVehicle!,
-                    style: myTextStyleMediumLargeWithColor(
-                        context, Theme.of(context).primaryColor, 28),
-                  ),
-                ),
-                gapH32,
-                GestureDetector(
-                  onTap: () {
-                    _navigateToScan();
-                  },
-                  child: Text(
-                    scanTheVehicle == null
-                        ? 'Scan the vehicle that you want to work with'
-                        : scanTheVehicle!,
-                    style: myTextStyleSmall(context),
-                  ),
-                ),
-                const SizedBox(
-                  height: 32,
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-              ],
-            )),
+            preferredSize: Size.fromHeight(_showRoutes ? 28 : 400),
+            child: _showRoutes
+                ? gapH16
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      gapH16,
+                      selectedRoute == null
+                          ? gapW16
+                          : SizedBox(height: 80,
+                            child: Column(
+                              children: [
+                                const Text('Taxi Route Name'),
+                                gapH16,
+                                Text(
+                        '${selectedRoute!.name}',
+                        style: myTextStyleMediumLargeWithColor(
+                                  context, Theme.of(context).primaryColor, 18),
+                      ),
+                              ],
+                            ),
+                          ),
+
+                      gapH32,
+                      gapH32,
+                      GestureDetector(
+                        onTap: () {
+                          _navigateToScan();
+                        },
+                        child: Text(
+                          scanVehicle == null ? 'Scan Vehicle' : scanVehicle!,
+                          style: myTextStyleMediumLargeWithColor(
+                              context, Theme.of(context).primaryColor, 28),
+                        ),
+                      ),
+                      gapH32,
+                      GestureDetector(
+                        onTap: () {
+                          _navigateToScan();
+                        },
+                        child: Text(
+                          scanTheVehicle == null
+                              ? 'Scan the vehicle that you want to work with'
+                              : scanTheVehicle!,
+                          style: myTextStyleSmall(context),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 32,
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                    ],
+                  )),
         actions: [
           IconButton(
               onPressed: () {
@@ -277,16 +297,13 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      const SizedBox(
-                        height: 8,
-                      ),
+                      gapH8,
+
                       vehicle != null
                           ? Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const SizedBox(
-                                  height: 12,
-                                ),
+                                gapH16,
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -302,29 +319,7 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
                                 const SizedBox(
                                   height: 16,
                                 ),
-                                selectedRoute == null
-                                    ? TextButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            _showRoutes = true;
-                                          });
-                                        },
-                                        child: Text(selectRoute == null
-                                            ? 'Please select Route'
-                                            : selectRoute!))
-                                    : TextButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            _showRoutes = true;
-                                          });
-                                        },
-                                        child: Text(
-                                          '${selectedRoute!.name}',
-                                          style: myTextStyleMediumBold(context),
-                                        )),
-                                const SizedBox(
-                                  height: 8,
-                                ),
+
                                 showStartButton
                                     ? ElevatedButton(
                                         style: const ButtonStyle(

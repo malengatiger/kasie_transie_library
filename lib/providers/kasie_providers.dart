@@ -57,7 +57,7 @@ final routeLandmarkProvider = riv.FutureProvider.family<List<RouteLandmark>, Str
 //
 final usersProvider = riv.FutureProvider.family<List<User>, String>((ref,
     associationId) async {
-  final res = await listApiDog.getAssociationUsers(associationId);
+  final res = await listApiDog.getAssociationUsers(associationId, false);
   pp('$bb usersProvider did the job: ${res.length} users found.');
   return res;
 });

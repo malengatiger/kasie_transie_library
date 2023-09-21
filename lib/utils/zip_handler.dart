@@ -22,7 +22,7 @@ class ZipHandler {
   static const xz = '🍐🍐🍐🍐 ZipHandler : ';
 
   Future<List<Vehicle>> getCars(String associationId) async {
-    pp('$xz getVehiclesZippedFile: 🔆🔆🔆 get zipped data associationId: $associationId ...');
+    pp('$xz getVehiclesZippedFile: 🔆🔆🔆 get zipped car data associationId: $associationId ...');
 
     final mUrl =
         '${KasieEnvironment.getUrl()}getVehiclesZippedFile?associationId=$associationId';
@@ -80,8 +80,8 @@ class ZipHandler {
           }
         }
       }
-    } catch (e) {
-      pp('$xz ... Error dealing with zipped file: $e');
+    } catch (e, stack) {
+      pp('$xz ... Error dealing with zipped file: $e : $stack');
       rethrow;
     }
     return cars;
@@ -95,7 +95,7 @@ class ZipHandler {
   }
 
   Future<List<City>> getCities(String countryId) async {
-    pp('$xz getCities: 🔆🔆🔆 get zipped data countryId: $countryId ...');
+    pp('$xz getCities: 🔆🔆🔆 get zipped city data countryId: $countryId ...');
 
     final mUrl =
         '${KasieEnvironment.getUrl()}getCountryCitiesZippedFile?countryId=$countryId';
@@ -168,10 +168,12 @@ class ZipHandler {
   }
 
   Future<RouteBagList?> getRouteBags({required String associationId}) async {
-    pp('$xz _getRouteBag: 🔆🔆🔆 get zipped data associationId: $associationId ...');
+    pp('$xz _getRouteBag: 🔆🔆🔆 get zipped data; ... associationId: $associationId ...');
 
     final mUrl =
-        '${KasieEnvironment.getUrl()}getAssociationRouteZippedFile?associationId=$associationId';
+        '${KasieEnvironment.getUrl()}getAssociationRouteZippedFile?associationId'
+        '=$associationId';
+
     var start = DateTime.now();
     RouteBagList? routeBagList;
     final token = await appAuth.getAuthToken();
@@ -217,42 +219,34 @@ class ZipHandler {
           if (outFile.existsSync()) {
             var m = outFile.readAsStringSync(encoding: utf8);
             var mJson = json.decode(m);
-            List<Map<dynamic, dynamic>> maps = [];
 
-            for (var item in mJson.values.toList()) {
-              if (item is Map<dynamic, dynamic>) {
-                maps.add(item);
-              }
-            }
-            for (var map in maps) {
-              pp('$xz.......map: $map');
-            }
             List dRoutes = mJson['routes'];
             List dRoutePoints = mJson['points'];
             List dLandmarks = mJson['landmarks'];
             List dCities = mJson['cities'];
+
             for (var json in dRoutes) {
               routes.add(buildRoute(json));
             }
             pp('$xz _getRouteBag 🍎🍎 routes: ${routes.length}');
-            dLandmarks.forEach((marks) {
+            for (var marks in dLandmarks) {
               marks.forEach((element) {
                 landmarks.add(buildRouteLandmark(element));
               });
-            });
+            }
             pp('$xz _getRouteBag 🍎🍎 landmarks: ${landmarks.length}');
 
-            dRoutePoints.forEach((mPoints) {
+            for (var mPoints in dRoutePoints) {
               mPoints.forEach((element) {
                 routePoints.add(buildRoutePoint(element));
               });
-            });
+            }
             pp('$xz _getRouteBag 🍎🍎 routePoints: ${routePoints.length}');
-            dCities.forEach((mCities) {
+            for (var mCities in dCities) {
               mCities.forEach((element) {
                 cities.add(buildRouteCity(element));
               });
-            });
+            }
             pp('$xz _getRouteBag 🍎🍎 cities: ${cities.length}');
 
             await cacheBag(
@@ -261,7 +255,7 @@ class ZipHandler {
                 landmarks: landmarks,
                 cities: cities);
 
-            pp('$xz _getRouteBag 🍎🍎🍎🍎 bag has been filled!');
+            pp('$xz _getRouteBag 🍎🍎🍎🍎 route bag has been filled and cached!');
             var end = DateTime.now();
             var ms = end.difference(start).inSeconds;
             pp('$xz _getRouteBag 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎\n\n');

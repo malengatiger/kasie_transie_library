@@ -108,9 +108,10 @@ class _QRScannerMobileState extends State<QRScannerMobile> {
                         }
                         Map? mjson;
                         try {
-                          mjson = jsonDecode(convertStringToJson(barcode.rawValue!));
-                        } catch (e) {
                           mjson = jsonDecode(barcode.rawValue!);
+                        } catch (e) {
+                          mjson = jsonDecode(convertStringToJson(barcode.rawValue!));
+
                         }
                         pp('$mm mjson: $mjson');
                         tinyBloc.setScannerResult(mjson!);

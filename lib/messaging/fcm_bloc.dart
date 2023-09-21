@@ -813,13 +813,11 @@ class FCMBloc {
 ///Handling FCM messages in the background
 ///
 String? myName;
-var mxx = '💙💙💙💙💙💙 Background Processing:  💙💙💙💙💙💙';
+var mxx = '💙💙💙💙💙💙 Background Processing:  💙💙';
 
 @pragma('vm:entry-point')
 Future<void> kasieFirebaseMessagingBackgroundHandler(
     fb.RemoteMessage message) async {
-  pp("\n\n\n$mxx kasieFirebaseMessagingBackgroundHandler: "
-      "\n🍎🍎🍎🍎 will handle message in the background! 🍎🍎🍎🍎\n${message.data}");
 
   await Firebase.initializeApp();
 
@@ -829,7 +827,11 @@ Future<void> kasieFirebaseMessagingBackgroundHandler(
     mxx = '$mxx $myName :';
   }
 
+
   final map = message.data;
+  final type = getMessageType(message);
+  pp("\n\n\n$mxx kasieFirebaseMessagingBackgroundHandler: "
+      "\n🍎🍎🍎🍎 will handle message in the background! 🍎🍎🍎🍎type: $type");
 
   if (map[Constants.locationRequest] != null) {
     final va = map[Constants.locationRequest];

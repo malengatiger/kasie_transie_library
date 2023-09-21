@@ -230,7 +230,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
                     const SizedBox(
                       height: 48,
                     ),
-                    Text(
+                    scannedVehicle == null?gapH16: Text(
                       '${scannedVehicle!.vehicleReg}',
                       style: myNumberStyleLargest(context),
                     ),
@@ -283,7 +283,6 @@ class DispatchViaScanState extends State<DispatchViaScan>
                         _showRoutes = false;
                       });
                       _sendTheDispatchRecord();
-                      Navigator.of(context).pop();
 
                     },
                     child: Padding(
@@ -308,6 +307,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
   int passengerCount = 0;
   Future<void> _sendTheDispatchRecord() async {
     late lib.DispatchRecord m;
+    Navigator.of(context).pop();
     try {
       setState(() {
         busy = true;
@@ -341,6 +341,13 @@ class DispatchViaScanState extends State<DispatchViaScan>
       dispatchHelper.sendDispatch(m);
       _clearFields();
       dispatchIsolate.addDispatchRecord(m);
+      //Navigator.of(context).pop();
+      showToast(
+          padding: 24,
+          backgroundColor: Colors.green.shade900,
+          duration: Duration(seconds: 5),
+          textStyle: TextStyle(color: Colors.white),
+          message: 'Dispatch sent OK', context: context);
     } catch (e) {
       pp(e);
     }

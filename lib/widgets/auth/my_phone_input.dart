@@ -1,26 +1,26 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_auth_platform_interface/src/auth_credential.dart';
-import 'package:firebase_auth_platform_interface/src/providers/phone_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:firebase_ui_auth/firebase_ui_auth.dart' as ui;
+
 // import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/countries.dart' as country;
-import 'package:kasie_transie_library/utils/zip_handler.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
+import 'package:kasie_transie_library/utils/zip_handler.dart';
 import 'package:kasie_transie_library/widgets/auth/country_list.dart';
 import 'package:kasie_transie_library/widgets/auth/my_sms_code_input.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import 'package:numeric_keyboard/numeric_keyboard.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fb;
-import 'package:firebase_ui_auth/firebase_ui_auth.dart' as ui;
+
 import '../../bloc/list_api_dog.dart';
 import '../../data/schemas.dart' as lib;
-
 import '../../utils/emojis.dart';
 import '../../utils/functions.dart';
 import '../../utils/prefs.dart';
 
 class MyPhoneInput extends StatefulWidget {
   const MyPhoneInput({super.key, required this.onPhoneNumber});
+
   final Function(String) onPhoneNumber;
 
   @override
@@ -84,6 +84,7 @@ class _MyPhoneInputState extends State<MyPhoneInput>
   }
 
   bool ignoreTap = false;
+
   //@override
   // TODO: implement auth
   // FirebaseAuth get auth =>fb.FirebaseAuth.instance;
@@ -115,6 +116,7 @@ class _MyPhoneInputState extends State<MyPhoneInput>
   }
 
   int restartCount = 0;
+
   Future _initializeData() async {
     pp('$mm ...................... ${E.redDot} _initializeData; '
         '\n ${E.blueDot} verificationId: $verificationId ${E.blueDot} smsCode: $smsCode');
@@ -182,6 +184,7 @@ class _MyPhoneInputState extends State<MyPhoneInput>
 
         try {
           final countries = await listApiDog.getCountries();
+          pp('$mm KasieTransie countries found on database:  🍎 ${countries.length} 🍎');
           lib.Country? myCountry;
           for (var country in countries) {
             if (country.countryId == ass.countryId!) {
@@ -191,19 +194,26 @@ class _MyPhoneInputState extends State<MyPhoneInput>
               break;
             }
           }
-          pp('$mm KasieTransie countries found on database:  🍎 ${countries.length} 🍎');
-
           //
-          await zipHandler.getCars(mUser.associationId!);
-          await zipHandler.getRouteBags(associationId: mUser.associationId!);
-          await zipHandler.getCities(myCountry!.countryId!);
-          final users =
-              await listApiDog.getAssociationUsers(mUser.associationId!);
-          //
-          pp('$mm KasieTransie countries found on database:  🍎 ${countries.length} 🍎');
-          pp('$mm KasieTransie users found on database:  🍎 ${users.length} 🍎');
-          pp('$mm KasieTransie; my country the beloved:  🍎 ${myCountry.name!} 🍎');
 
+          try {
+            pp('$mm zipHandler.getAssociationUsers ...');
+            final users =
+                await listApiDog.getAssociationUsers(mUser.associationId!, true);
+            pp('$mm KasieTransie users found on database:  🍎 ${users.length} 🍎');
+
+            pp('$mm zipHandler.getCars ...');
+            await zipHandler.getCars(mUser.associationId!);
+
+            pp('$mm zipHandler.getRouteBags ...');
+            await zipHandler.getRouteBags(associationId: mUser.associationId!);
+
+            pp('$mm zipHandler.getCities ...');
+            await zipHandler.getCities(myCountry!.countryId!);
+          } catch (e, stackTrace) {
+            pp('$mm SOMETHING WRONG!, Bubba! : $e $stackTrace');
+          }
+          //
           final elapsed = DateTime.now().difference(start).inSeconds;
 
           pp('\n\n$mm ... ${E.leaf}${E.leaf} we should be good! .... '
@@ -266,10 +276,10 @@ class _MyPhoneInputState extends State<MyPhoneInput>
 
   @override
   void onError(Object error) {
-    pp('$mm ......... ${E.redDot}${E.redDot} onError, credential: $error');
-    if (mounted) {
-      showSnackBar(message: 'Error: $error', context: context);
-    }
+    pp('$mm ......... show snack but do nothing ... ??????  ${E.redDot}${E.redDot} onError, credential: $error');
+    // if (mounted) {
+    //   showSnackBar(message: 'Error: $error', context: context);
+    // }
   }
 
   @override
@@ -278,6 +288,7 @@ class _MyPhoneInputState extends State<MyPhoneInput>
   }
 
   String smsCode = '';
+
   Future<void> _navigateToSMSInput(verification) async {
     setState(() {
       initializing = false;
@@ -376,15 +387,15 @@ class _MyPhoneInputState extends State<MyPhoneInput>
                     : Card(
                         shape: getDefaultRoundedBorder(),
                         elevation: 8,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
                             '+${countrySelected!.dialCode}$enteredText',
                             style: myTextStyleMediumLargeWithColor(
                                 context, Theme.of(context).primaryColor, 32),
                           ),
+                        ),
                       ),
-                    ),
             gapH32,
             Expanded(
               child: initializing

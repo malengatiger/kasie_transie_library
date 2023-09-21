@@ -92,13 +92,13 @@ class Initializer {
   Future<List<User>> _getUsers() async {
     if (car != null) {
       pp('$mm ... getting association users ............ ');
-      var list = await listApiDog.getAssociationUsers(car!.associationId!);
+      var list = await listApiDog.getAssociationUsers(car!.associationId!, true);
       pp('$mm ... cached: ${list.length} users');
       return list;
     }
     if (user != null) {
       pp('$mm ... getting association users ............ ');
-      var list = await listApiDog.getAssociationUsers(user!.associationId!);
+      var list = await listApiDog.getAssociationUsers(user!.associationId!, true);
       pp('$mm ... cached: ${list.length} users');
       return list;
     }
