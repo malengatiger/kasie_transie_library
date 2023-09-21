@@ -10,6 +10,7 @@ import 'package:kasie_transie_library/isolates/country_cities_isolate.dart';
 import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
+import 'package:kasie_transie_library/utils/zip_handler.dart';
 import 'package:realm/realm.dart' as rm;
 
 import '../data/big_bag.dart';
@@ -294,7 +295,7 @@ class ListApiDog {
     rm.RealmResults<Vehicle> results = realm.all<Vehicle>();
     final list = <Vehicle>[];
     if (refresh || results.isEmpty) {
-      return await vehicleIsolate.getVehicles(associationId);
+      return await zipHandler.getCars(associationId);
     }
 
     for (var element in results) {

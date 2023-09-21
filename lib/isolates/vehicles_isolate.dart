@@ -55,7 +55,7 @@ class VehicleIsolate {
     try {
       final token = await appAuth.getAuthToken();
       if (token != null) {
-        final url = '${KasieEnvironment.getUrl()}';
+        final url = KasieEnvironment.getUrl();
         var bag = DonkeyBag(associationId, url, token);
         final cars = await _handleVehicles(bag);
 
@@ -199,18 +199,10 @@ Future<List> _processAssociationCars(
   };
   headers['Authorization'] = 'Bearer $token';
 
-  while (stop == false) {
-    final mUrl =
-        '${url}getAssociationVehicles?associationId=$associationId&page=$page';
-    List resp = await httpGet(mUrl, token, headers);
-    pp('$xy2 page of cars for associationId: $associationId: ${resp.length}');
-
-    if (resp.isEmpty) {
-      stop = true;
-    }
-    points.addAll(resp);
-    page++;
-  }
+  final mUrl =
+      '${url}getAssociationVehiclesZippedFile?associationId=$associationId';
+  final resp = await httpGet(mUrl, token, headers);
+  pp('$xy2 cars for associationId: $associationId: ${resp.length}');
 
   pp('$xy2 cars for associationId: $associationId: ${points.length}\n\n');
   return points;

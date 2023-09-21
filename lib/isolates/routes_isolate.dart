@@ -9,6 +9,7 @@ import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/parsers.dart';
+import 'package:kasie_transie_library/utils/zip_handler.dart';
 
 import '../data/route_bag.dart';
 import '../utils/emojis.dart';
@@ -39,10 +40,11 @@ class RoutesIsolate {
     final res = listApiDog.realm.query<RoutePoint>('routeId == \$0', [routeId]);
     mList = res.toList();
     if (mList.isEmpty) {
-        final mRoutes = listApiDog.realm.query<Route>('routeId == \$0', [routeId]);;
-        pp('$xy ${E.redDot} ${E.redDot} ${E.redDot} '
-            'No routePoints found for route: ${mRoutes.first.name}, will try backend');
-
+      final mRoutes =
+          listApiDog.realm.query<Route>('routeId == \$0', [routeId]);
+      ;
+      pp('$xy ${E.redDot} ${E.redDot} ${E.redDot} '
+          'No routePoints found for route: ${mRoutes.first.name}, will try backend');
     } else {
       pp('$xy get routePoints found ${mList.length} ${E.leaf} route: ${mList.first.routeName}');
     }
@@ -153,62 +155,68 @@ class RoutesIsolate {
   Future<List<Route>> getRoutes(String associationId, bool refresh) async {
     pp('\n\n\n$xy ............................ getting routes ....');
     final start = DateTime.now();
-
     final mRoutes = listApiDog.realm.all<Route>();
-
-    if (refresh) {
-      try {
-        final token = await appAuth.getAuthToken();
-        if (token != null) {
-          final url =
-              '${KasieEnvironment.getUrl()}getAssociationRoutes?associationId=$associationId';
-          var bag = DonkeyBag(associationId, url, token);
-          List mRoutes = await _handleRoutes(bag);
-          pp('$xy hey Joe, do yo know where you are? ${E.redDot} ');
-
-          var finalRoutes = <Route>[];
-          final routeIds = <String>[];
-          for (var value1 in mRoutes) {
-            routeIds.add(value1.routeId!);
-            final route = await listApiDog.getRoute(value1.routeId);
-            if (route != null) {
-              finalRoutes.add(route);
-            }
-          }
-          pp('$xy get landmarks and routePoints for ${routeIds.length} routes ... ');
-
-          bag.url =
-              '${KasieEnvironment.getUrl()}getAssociationRouteLandmarks?associationId=${bag.associationId}';
-          await _handleRouteLandmarks(routeIds, bag);
-
-          bag.url = '${KasieEnvironment.getUrl()}';
-          await _handleRoutePoints(routeIds, bag);
-
-          bag.url =
-              '${KasieEnvironment.getUrl()}getAssociationRouteCities?associationId=${bag.associationId}';
-          await _handleRouteCities(routeIds, bag);
-
-          pp('$xy back from all the isolate functions ...${E.nice} looks OK to me! ... ');
-
-          pp('\n\n\n$xy ..... done getting association routes ....${E.leaf} '
-              'returning ${finalRoutes.length} routes\n\n');
-          final end = DateTime.now();
-          pp('$xyz Elapsed time for association routes downloaded: ${end.difference(start).inSeconds} seconds');
-
-          return finalRoutes;
-        } else {
-          final msg = '$xy ... getRoutes fell down and screamed! ${E.redDot} '
-              'no Firebase token found!!';
-          pp(msg);
-          throw Exception(msg);
-        }
-      } catch (e) {
-        final msg = '$xy ... getRoutes fell down and screamed! '
-            '${E.redDot}${E.redDot}${E.redDot} $e';
-        pp(msg);
-        throw Exception(msg);
+    const list = <Route>[];
+    if (refresh || mRoutes.isEmpty) {
+      final res = await zipHandler.getRouteBags(associationId: associationId);
+      for (var value in res!.routeBags) {
+        list.add(value.route!);
       }
-    } else {}
+      return list;
+    }
+    // if (refresh) {
+    //   try {
+    //     final token = await appAuth.getAuthToken();
+    //     if (token != null) {
+    //       final url =
+    //           '${KasieEnvironment.getUrl()}getAssociationRoutes?associationId=$associationId';
+    //       var bag = DonkeyBag(associationId, url, token);
+    //       List mRoutes = await _handleRoutes(bag);
+    //       pp('$xy hey Joe, do yo know where you are? ${E.redDot} ');
+    //
+    //       var finalRoutes = <Route>[];
+    //       final routeIds = <String>[];
+    //       for (var value1 in mRoutes) {
+    //         routeIds.add(value1.routeId!);
+    //         final route = await listApiDog.getRoute(value1.routeId);
+    //         if (route != null) {
+    //           finalRoutes.add(route);
+    //         }
+    //       }
+    //       pp('$xy get landmarks and routePoints for ${routeIds.length} routes ... ');
+    //
+    //       bag.url =
+    //           '${KasieEnvironment.getUrl()}getAssociationRouteLandmarks?associationId=${bag.associationId}';
+    //       await _handleRouteLandmarks(routeIds, bag);
+    //
+    //       bag.url = KasieEnvironment.getUrl();
+    //       await _handleRoutePoints(routeIds, bag);
+    //
+    //       bag.url =
+    //           '${KasieEnvironment.getUrl()}getAssociationRouteCities?associationId=${bag.associationId}';
+    //       await _handleRouteCities(routeIds, bag);
+    //
+    //       pp('$xy back from all the isolate functions ...${E.nice} looks OK to me! ... ');
+    //
+    //       pp('\n\n\n$xy ..... done getting association routes ....${E.leaf} '
+    //           'returning ${finalRoutes.length} routes\n\n');
+    //       final end = DateTime.now();
+    //       pp('$xyz Elapsed time for association routes downloaded: ${end.difference(start).inSeconds} seconds');
+    //
+    //       return finalRoutes;
+    //     } else {
+    //       final msg = '$xy ... getRoutes fell down and screamed! ${E.redDot} '
+    //           'no Firebase token found!!';
+    //       pp(msg);
+    //       throw Exception(msg);
+    //     }
+    //   } catch (e) {
+    //     final msg = '$xy ... getRoutes fell down and screamed! '
+    //         '${E.redDot}${E.redDot}${E.redDot} $e';
+    //     pp(msg);
+    //     throw Exception(msg);
+    //   }
+    // } else {}
 
     return mRoutes.toList();
   }

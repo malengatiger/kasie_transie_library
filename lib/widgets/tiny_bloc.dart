@@ -23,9 +23,18 @@ class TinyBloc {
       StreamController.broadcast();
   Stream<String> get routeIdStream => routeIdStreamIdController.stream;
 
+  final StreamController<Map> scannerResultController =
+  StreamController.broadcast();
+  Stream<Map> get  scannerResultStream =>  scannerResultController.stream;
+
+
   void setRouteId(String routeId) {
     pp('$mm ... putting routeId on _streamIdController...');
     routeIdStreamIdController.sink.add(routeId);
+  }
+
+  void setScannerResult(Map map) {
+    scannerResultController.sink.add(map);
   }
 
   lib.Route? getRouteFromCache(String routeId) {

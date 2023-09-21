@@ -16,8 +16,10 @@ import 'package:kasie_transie_library/widgets/passenger_count.dart';
 import 'package:kasie_transie_library/widgets/qr_scanner.dart';
 import 'package:kasie_transie_library/widgets/route_widget.dart';
 import 'package:badges/badges.dart' as bd;
+import 'package:kasie_transie_library/widgets/scanners/qr_scanner_mobile.dart';
 import 'package:realm/realm.dart';
 
+import '../../utils/navigator_utils.dart';
 import '../media_reminder.dart';
 
 
@@ -135,7 +137,25 @@ class DispatchViaScanState extends State<DispatchViaScan>
   }
 
   lib.RouteLandmark? selectedRouteLandmark;
+  void _navigateToScan() async {
+    navigateWithScale( QRScannerMobile(onCarScanned: (car ) {
+      pp('$mm ... on car scanned: ${car.vehicleReg}');
+      showToast(
+          textStyle: myTextStyleMediumBoldWithColor(context: context, color: Theme.of(context).primaryColorLight),
+          padding: 24,
+          duration: const Duration(seconds: 5),
+          message: 'Scanned ${car.vehicleReg}', context: context);
+      onCarScanned(car);
+    }, onUserScanned: (user ) {  }, onError: (){
+      showToast(
+          textStyle: myTextStyleMediumBoldWithColor(context: context, color: Theme.of(context).primaryColorLight),
+          padding: 24,
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+          message: 'Scanner fucked!', context: context);
+    }, quitAfterScan: false,), context);
 
+  }
   @override
   void dispose() {
     _controller.dispose();

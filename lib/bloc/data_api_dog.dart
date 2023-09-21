@@ -712,7 +712,7 @@ class DataApiDog {
         headers: headers,
       )
           .timeout(const Duration(seconds: timeOutInSeconds));
-      if (resp.statusCode == 200) {
+      if (resp.statusCode == 200 || resp.statusCode == 201) {
         pp('$mm  _callWebAPIPost RESPONSE: 💙💙 statusCode: 👌👌👌 ${resp
             .statusCode} 👌👌👌 💙 for $mUrl');
       } else {

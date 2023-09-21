@@ -1,7 +1,6 @@
-import '../data/schemas.dart';
 import 'package:realm/realm.dart' as rm;
 
-import 'emojis.dart';
+import '../data/schemas.dart';
 import 'functions.dart';
 
 ///functions to parse data fromJson
@@ -112,12 +111,13 @@ SettingsModel buildSettingsModel(Map map) {
 }
 
 Country buildCountry(Map value) {
+  pp(value);
   var id = rm.ObjectId.fromHexString(value['_id'] as String);
   var m = Country(id,
       countryId: value['countryId'],
       name: value['name'],
-      latitude: value['latitude'],
-      longitude: value['longitude'],
+      latitude: value['latitude'] as double,
+      longitude: value['longitude'] as double,
       iso2: value['iso2'],
       iso3: value['iso3'],
       capital: value['capital'],
@@ -187,20 +187,26 @@ Landmark buildLandmark(Map map) {
 
 RouteLandmark buildRouteLandmark(Map value) {
   var id = rm.ObjectId.fromHexString(value['_id'] as String);
-  var m = RouteLandmark(
-    id,
-    routeName: value['routeName'],
-    routeId: value['routeId'],
-    associationId: value['associationId'],
-    landmarkId: value['landmarkId'],
-    created: value['created'],
-    routePointId: value['routePointId'],
-    index: value['index'],
-    routePointIndex: value['routePointIndex'],
-    landmarkName: value['landmarkName'],
-    position: buildPosition(value['position']),
-  );
-  return m;
+  try {
+    var m = RouteLandmark(
+      id,
+      routeName: value['routeName'],
+      routeId: value['routeId'],
+      associationId: value['associationId'],
+      landmarkId: value['landmarkId'],
+      created: value['created'],
+      routePointId: value['routePointId'],
+      index: value['index'],
+      routePointIndex: value['routePointIndex'],
+      landmarkName: value['landmarkName'],
+      position: buildPosition(value['position']),
+    );
+    return m;
+  } catch (e, stackTrace) {
+    pp('Error parsing JSON: $e');
+    pp('Stack trace: $stackTrace');
+    rethrow;
+  }
 }
 
 RouteCity buildRouteCity(Map value) {
@@ -222,6 +228,7 @@ RouteCity buildRouteCity(Map value) {
 Route buildRoute(Map value) {
   var id = rm.ObjectId.fromHexString(value['_id'] as String);
 
+  myPrettyJsonPrint(value);
   var startEnd = value['routeStartEnd'];
   List st = startEnd['startCityPosition']['coordinates'];
   var lat = st.last as double;
@@ -248,52 +255,73 @@ Route buildRoute(Map value) {
     endCityPosition: endCityPosition,
   );
 
-  var m = Route(
-    id,
-    countryId: value['countryId'],
-    routeId: value['routeId'],
-    associationId: value['associationId'],
-    userId: value['userId'],
-    created: value['created'],
-    heading: value['heading'],
-    name: value['name'],
-    routeStartEnd: se,
-    userName: value['userName'],
-    userUrl: value['userUrl'],
-    countryName: value['countryName'],
-    color: value['color'],
-    activationDate: value['activationDate'],
-    associationName: value['associationName'],
-    lengthInMetres: value['lengthInMetres'],
-    routeNumber: value['routeNumber'],
-  );
-  return m;
+  pp('fucking heading: ${value['heading']}');
+  try {
+    var m = Route(
+      id,
+      countryId: value['countryId'],
+      routeId: value['routeId'],
+      associationId: value['associationId'],
+      userId: value['userId'],
+      created: value['created'],
+      heading:
+          value['heading'] == null ? 0.0 : double.parse('${value['heading']}'),
+      name: value['name'],
+      routeStartEnd: se,
+      userName: value['userName'],
+      userUrl: value['userUrl'],
+      countryName: value['countryName'],
+      color: value['color'],
+      activationDate: value['activationDate'],
+      associationName: value['associationName'],
+      lengthInMetres: value['lengthInMetres'] == null
+          ? 0
+          : int.parse('${value['lengthInMetres']}'),
+      routeNumber: value['routeNumber'],
+    );
+    return m;
+  } catch (e, stackTrace) {
+    pp('Error parsing JSON: $e');
+    pp('Stack trace: $stackTrace');
+    rethrow;
+  }
 }
 
 RoutePoint buildRoutePoint(Map value) {
   var id = rm.ObjectId.fromHexString(value['_id'] as String);
 
-  final routePointId = value['routePointId'];
-  var routePoint = RoutePoint(
-    id,
-    routePointId: routePointId,
-    longitude: value['longitude'],
-    routeId: value['routeId'],
-    index: value['index'],
-    associationId: value['associationId'],
-    latitude: value['latitude'],
-    created: value['created'],
-    heading: value['heading'],
-    routeName: value['routeName'],
-    geoHash: value['geoHash'],
-    position: buildPosition(value['position']),
-  );
+  try {
+    final routePointId = value['routePointId'];
+    var routePoint = RoutePoint(
+      id,
+      routePointId: routePointId,
+      longitude: value['longitude'],
+      routeId: value['routeId'],
+      index: value['index'],
+      associationId: value['associationId'],
+      latitude: value['latitude'],
+      created: value['created'],
+      heading: value['heading']== null? 0.0: double.parse('${value['heading']}'),
+      routeName: value['routeName'],
+      geoHash: value['geoHash'],
+      position: buildPosition(value['position']),
+    );
 
-  return routePoint;
+    return routePoint;
+  } catch (e, stackTrace) {
+    pp('Error parsing JSON: $e');
+    pp('Stack trace: $stackTrace');
+    rethrow;
+  }
 }
 
 Vehicle buildVehicle(Map vehicleJson) {
-  var id = rm.ObjectId.fromHexString(vehicleJson['_id'] as String);
+  var id = rm.ObjectId();
+  try {
+    var id = rm.ObjectId.fromHexString(vehicleJson['_id'] as String);
+  } catch (e) {
+    pp('... ignoring _id error');
+  }
   var m = Vehicle(
     id,
     vehicleId: vehicleJson['vehicleId'],

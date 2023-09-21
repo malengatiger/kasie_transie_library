@@ -101,9 +101,10 @@ class _RouteManagerState extends State<RouteManager> {
       }
 
       final startDate = DateTime.now().toUtc().subtract(const Duration(minutes: 60)).toIso8601String();
-      final gen = GenerationRequest(route!.routeId!, startDate, vehicleIds, 10);
+      final gen = GenerationRequest(route!.routeId!, startDate, vehicleIds, 300);
       await dataApiDog.generateRouteDispatchRecords(gen);
       _showSuccess('Dispatch record generation requests sent. Watch for action ...');
+
     } catch (e) {
       pp(e);
       _showError(e);

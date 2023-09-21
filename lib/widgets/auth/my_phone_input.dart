@@ -187,9 +187,12 @@ class _MyPhoneInputState extends State<MyPhoneInput>
             if (country.countryId == ass.countryId!) {
               myCountry = country;
               await prefs.saveCountry(myCountry);
+              pp('$mm KasieTransie country:  🍎 ${country.toJson()} 🍎');
               break;
             }
           }
+          pp('$mm KasieTransie countries found on database:  🍎 ${countries.length} 🍎');
+
           //
           await zipHandler.getCars(mUser.associationId!);
           await zipHandler.getRouteBags(associationId: mUser.associationId!);

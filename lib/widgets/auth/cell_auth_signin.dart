@@ -35,7 +35,6 @@ class CustomPhoneVerification extends StatefulWidget {
 class CustomPhoneVerificationState extends State<CustomPhoneVerification> {
   final mm = '🥬🥬🥬🥬🥬🥬😡 CustomPhoneVerification: 😡';
 
-
   String loading = 'Loading data';
   String waiting = 'Wait data', notRegistered = '';
   bool busy = false;
@@ -53,7 +52,6 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification> {
   void initState() {
     super.initState();
     _control();
-
   }
 
   void _control() async {
@@ -74,14 +72,16 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification> {
     setState(() {});
   }
 
-
   Future<void> _navToPhoneInput() async {
-    lib.User? user = await navigateWithScale(MyPhoneInput(onPhoneNumber: (number ) {  },), context);
+    lib.User? user = await navigateWithScale(
+        MyPhoneInput(
+          onPhoneNumber: (number) {},
+        ),
+        context);
     pp('\n\n\n$mm .............................. back from MyPhoneInput  🍎 🍎 ');
 
     if (user != null) {
       myPrettyJsonPrint(user.toJson());
-      //widget.onUserAuthenticated(user);
       if (mounted) {
         pp('\n\n\n$mm .............................. '
             'popping out from CustomPhoneVerification  🍎 🍎 with user: ${user.name} ');
@@ -89,11 +89,12 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification> {
       }
     } else {
       if (mounted) {
-        showSnackBar(message: 'Something went wrong, please try again', context: context);
+        showSnackBar(
+            message: 'Something went wrong, please try again',
+            context: context);
       }
     }
   }
-
 
   ColorAndLocale? colorAndLocale;
 
@@ -114,32 +115,30 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification> {
     return SafeArea(
         child: Scaffold(
       body: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Card(
-                  shape: getDefaultRoundedBorder(),
-                  elevation: 8,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: SignInLanding(
-                        welcome: welcome,
-                        firstTime: firstTime,
-                        changeLanguage: changeLanguage,
-                        signInWithPhone: signInWithPhone,
-                        startEmailLinkSignin: '',
-                        onNavigateToEmailAuth: () {},
-                        onNavigateToPhoneAuth: () {
-                          _navToPhoneInput();
-                        },
-                        onNavigateToColor: () {
-                          _navigateToColor();
-                        }),
-                  ),
-                ),
-              ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Card(
+            shape: getDefaultRoundedBorder(),
+            elevation: 8,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SignInLanding(
+                  welcome: welcome,
+                  firstTime: firstTime,
+                  changeLanguage: changeLanguage,
+                  signInWithPhone: signInWithPhone,
+                  startEmailLinkSignin: '',
+                  onNavigateToEmailAuth: () {},
+                  onNavigateToPhoneAuth: () {
+                    _navToPhoneInput();
+                  },
+                  onNavigateToColor: () {
+                    _navigateToColor();
+                  }),
             ),
+          ),
+        ),
+      ),
     ));
   }
-
-
 }

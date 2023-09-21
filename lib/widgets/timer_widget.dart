@@ -4,14 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:flutter_analog_clock/flutter_analog_clock.dart';
 
+//todo - listen for progress on long downloads ...
 class TimerWidget extends StatefulWidget {
   const TimerWidget(
-      {Key? key, required this.title, this.subTitle, required this.isSmallSize})
+      {Key? key,
+      required this.title,
+      this.subTitle,
+      required this.isSmallSize,
+      this.listenForProgress})
       : super(key: key);
 
   final String title;
   final String? subTitle;
   final bool isSmallSize;
+  final bool? listenForProgress;
 
   @override
   TimerWidgetState createState() => TimerWidgetState();
@@ -22,6 +28,7 @@ class TimerWidgetState extends State<TimerWidget>
   late AnimationController _controller;
   static const mm = '🔵🔵🔵🔵🔵🔵🔵🔵️ TimerWidget: ❤️ ';
 
+  //todo - create subscriptions
   late Timer timer;
   int elapsed = 0;
 
@@ -87,18 +94,17 @@ class TimerWidgetState extends State<TimerWidget>
                     height: widget.isSmallSize ? 48 : 64,
                   ),
                   SizedBox(
-                          width: widget.isSmallSize ? 84 : 128,
-                          height: widget.isSmallSize ? 84 : 100,
-                          child: AnalogClock(
-                            dateTime: date,
-                            isKeepTime: true,
-                            child: const Align(
-                              alignment: FractionalOffset(0.5, 0.75),
-                              child: Text('GMT+2'),
-                            ),
-                          ),
-                        ),
-
+                    width: widget.isSmallSize ? 84 : 128,
+                    height: widget.isSmallSize ? 84 : 100,
+                    child: AnalogClock(
+                      dateTime: date,
+                      isKeepTime: true,
+                      child: const Align(
+                        alignment: FractionalOffset(0.5, 0.75),
+                        child: Text('GMT+2'),
+                      ),
+                    ),
+                  ),
                   SizedBox(
                     height: widget.isSmallSize ? 48 : 64,
                   ),

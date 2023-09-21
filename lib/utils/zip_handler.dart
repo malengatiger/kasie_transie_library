@@ -3,14 +3,15 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
+import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/app_auth.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/route_bag.dart';
-import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/data/schemas.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/parsers.dart';
 import 'package:path_provider/path_provider.dart';
+
 import 'emojis.dart';
 import 'functions.dart';
 import 'kasie_exception.dart';
@@ -23,7 +24,8 @@ class ZipHandler {
   Future<List<Vehicle>> getCars(String associationId) async {
     pp('$xz getVehiclesZippedFile: 🔆🔆🔆 get zipped data associationId: $associationId ...');
 
-    final mUrl = '${KasieEnvironment.getUrl()}getVehiclesZippedFile?associationId=$associationId';
+    final mUrl =
+        '${KasieEnvironment.getUrl()}getVehiclesZippedFile?associationId=$associationId';
     var start = DateTime.now();
     List<Vehicle> cars = [];
     final token = await appAuth.getAuthToken();
@@ -41,7 +43,8 @@ class ZipHandler {
 
     try {
       Directory dir = await getApplicationDocumentsDirectory();
-      File zipFile = File('${dir.path}/zipFile${DateTime.now().millisecondsSinceEpoch}.zip');
+      File zipFile = File(
+          '${dir.path}/zipFile${DateTime.now().millisecondsSinceEpoch}.zip');
       zipFile.writeAsBytesSync(response.bodyBytes);
       pp('$xz getCars: 🔆🔆🔆 handle file inside zip: ${await zipFile.length()} bytes');
 
@@ -83,16 +86,19 @@ class ZipHandler {
     }
     return cars;
   }
+
   Future cacheCars(List<Vehicle> cars) async {
     listApiDog.realm.write(() {
       listApiDog.realm.addAll<Vehicle>(cars, update: true);
     });
     pp('$xz ${cars.length} cars cached in realm');
   }
+
   Future<List<City>> getCities(String countryId) async {
     pp('$xz getCities: 🔆🔆🔆 get zipped data countryId: $countryId ...');
 
-    final mUrl = '${KasieEnvironment.getUrl()}getCountryCitiesZippedFile?countryId=$countryId';
+    final mUrl =
+        '${KasieEnvironment.getUrl()}getCountryCitiesZippedFile?countryId=$countryId';
     var start = DateTime.now();
     List<City> cities = [];
     final token = await appAuth.getAuthToken();
@@ -110,7 +116,8 @@ class ZipHandler {
 
     try {
       Directory dir = await getApplicationDocumentsDirectory();
-      File zipFile = File('${dir.path}/zipFile${DateTime.now().millisecondsSinceEpoch}.zip');
+      File zipFile = File(
+          '${dir.path}/zipFile${DateTime.now().millisecondsSinceEpoch}.zip');
       zipFile.writeAsBytesSync(response.bodyBytes);
       pp('$xz getCities: 🔆🔆🔆 handle file inside zip: ${await zipFile.length()} bytes');
 
@@ -155,16 +162,16 @@ class ZipHandler {
 
   Future cacheCities(List<City> cities) async {
     listApiDog.realm.write(() {
-        listApiDog.realm.addAll<City>(cities, update: true);
+      listApiDog.realm.addAll<City>(cities, update: true);
     });
     pp('$xz ${cities.length} cities cached in realm');
   }
 
-  Future<RouteBagList?> getRouteBags(
-      {required String associationId}) async {
+  Future<RouteBagList?> getRouteBags({required String associationId}) async {
     pp('$xz _getRouteBag: 🔆🔆🔆 get zipped data associationId: $associationId ...');
 
-    final mUrl = '${KasieEnvironment.getUrl()}getAssociationRouteZippedFile?associationId=$associationId';
+    final mUrl =
+        '${KasieEnvironment.getUrl()}getAssociationRouteZippedFile?associationId=$associationId';
     var start = DateTime.now();
     RouteBagList? routeBagList;
     final token = await appAuth.getAuthToken();
@@ -183,7 +190,8 @@ class ZipHandler {
 
     try {
       Directory dir = await getApplicationDocumentsDirectory();
-      File zipFile = File('${dir.path}/zipFile${DateTime.now().millisecondsSinceEpoch}.zip');
+      File zipFile = File(
+          '${dir.path}/zipFile${DateTime.now().millisecondsSinceEpoch}.zip');
       zipFile.writeAsBytesSync(response.bodyBytes);
       pp('$xz _getRouteBag: 🔆🔆🔆 handle file inside zip: ${await zipFile.length()} bytes');
 
@@ -194,56 +202,102 @@ class ZipHandler {
       pp('$xz _getRouteBag: 🔆🔆🔆 handle file inside zip archive: ${archive.files.length} files');
 
       for (var file in archive.files) {
-            if (file.isFile) {
-              final fileName = file.name;
-              pp('$xz _getRouteBag: file from inside archive ... ${file.size} bytes 🔵 isCompressed: ${file.isCompressed} 🔵 zipped file name: ${file.name}');
-              var outFile = File('${dir.path}/$fileName');
-              outFile = await outFile.create(recursive: true);
-              await outFile.writeAsBytes(file.content);
-              pp('$xz _getRouteBag: file after decompress ... ${await outFile.length()} bytes  🍎 path: ${outFile.path} 🍎');
+        if (file.isFile) {
+          final fileName = file.name;
+          pp('$xz _getRouteBag: file from inside archive ... ${file.size} bytes 🔵 isCompressed: ${file.isCompressed} 🔵 zipped file name: ${file.name}');
+          var outFile = File('${dir.path}/$fileName');
+          outFile = await outFile.create(recursive: true);
+          await outFile.writeAsBytes(file.content);
+          pp('$xz _getRouteBag: file after decompress ... ${await outFile.length()} bytes  🍎 path: ${outFile.path} 🍎');
+          List<Route> routes = [];
+          List<RoutePoint> routePoints = [];
+          List<RouteLandmark> landmarks = [];
+          List<RouteCity> cities = [];
 
-              if (outFile.existsSync()) {
-                var m = outFile.readAsStringSync(encoding: utf8);
-                var mJson = json.decode(m);
-                //mjson has multiple route bags
-                routeBagList = RouteBagList.fromJson(mJson);
-                await cacheBag(routeBagList);
-                pp('$xz _getRouteBag 🍎🍎🍎🍎 bag has been filled!');
-                var end = DateTime.now();
-                var ms = end.difference(start).inSeconds;
-                pp('$xz _getRouteBag 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎\n\n');
-              } else {
-                pp('$xz ERROR: could not find file. ${E.redDot}');
+          if (outFile.existsSync()) {
+            var m = outFile.readAsStringSync(encoding: utf8);
+            var mJson = json.decode(m);
+            List<Map<dynamic, dynamic>> maps = [];
+
+            for (var item in mJson.values.toList()) {
+              if (item is Map<dynamic, dynamic>) {
+                maps.add(item);
               }
             }
+            for (var map in maps) {
+              pp('$xz.......map: $map');
+            }
+            List dRoutes = mJson['routes'];
+            List dRoutePoints = mJson['points'];
+            List dLandmarks = mJson['landmarks'];
+            List dCities = mJson['cities'];
+            for (var json in dRoutes) {
+              routes.add(buildRoute(json));
+            }
+            pp('$xz _getRouteBag 🍎🍎 routes: ${routes.length}');
+            dLandmarks.forEach((marks) {
+              marks.forEach((element) {
+                landmarks.add(buildRouteLandmark(element));
+              });
+            });
+            pp('$xz _getRouteBag 🍎🍎 landmarks: ${landmarks.length}');
+
+            dRoutePoints.forEach((mPoints) {
+              mPoints.forEach((element) {
+                routePoints.add(buildRoutePoint(element));
+              });
+            });
+            pp('$xz _getRouteBag 🍎🍎 routePoints: ${routePoints.length}');
+            dCities.forEach((mCities) {
+              mCities.forEach((element) {
+                cities.add(buildRouteCity(element));
+              });
+            });
+            pp('$xz _getRouteBag 🍎🍎 cities: ${cities.length}');
+
+            await cacheBag(
+                routes: routes,
+                routePoints: routePoints,
+                landmarks: landmarks,
+                cities: cities);
+
+            pp('$xz _getRouteBag 🍎🍎🍎🍎 bag has been filled!');
+            var end = DateTime.now();
+            var ms = end.difference(start).inSeconds;
+            pp('$xz _getRouteBag 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎\n\n');
+          } else {
+            pp('$xz ERROR: could not find file. ${E.redDot}');
           }
-    } catch (e) {
-      pp('$xz ... Error dealing with zipped file: $e');
+        }
+      }
+    } catch (e, stackTrace) {
+      pp('Error parsing JSON: $e');
+      pp('Stack trace: $stackTrace');
       rethrow;
     }
     return routeBagList;
   }
 
-  Future cacheBag(RouteBagList bagList) async {
-    pp('$xz ... cacheBag RouteBagList ......... ');
+  Future cacheBag(
+      {required List<Route> routes,
+      required List<RoutePoint> routePoints,
+      required List<RouteLandmark> landmarks,
+      required List<RouteCity> cities}) async {
+    pp('$xz ... cacheBag - cache all the data for ${routes.length} routes ......... ');
     //
-    for (var bag in bagList.routeBags) {
-      listApiDog.realm.write(() {
-        listApiDog.realm.addAll<RouteLandmark>(bag.routeLandmarks, update: true);
-        listApiDog.realm.addAll<RoutePoint>(bag.routePoints, update: true);
-        listApiDog.realm.addAll<RouteCity>(bag.routeCities, update: true);
-        listApiDog.realm.add<Route>(bag.route!, update: true);
-      });
-      //
-      pp('$xz ... 🌼🌼 Route cached: ${bag.route!.name!}'
-          '\n🌼 landmarks: ${bag.routeLandmarks.length}'
-          ' 🍎 routePoints: ${bag.routePoints.length}'
-          ' 💙 routeCities: ${bag.routeCities.length}');
 
-    }
-
+    listApiDog.realm.write(() {
+      listApiDog.realm.addAll<RouteLandmark>(landmarks, update: true);
+      listApiDog.realm.addAll<RoutePoint>(routePoints, update: true);
+      listApiDog.realm.addAll<RouteCity>(cities, update: true);
+      listApiDog.realm.addAll<Route>(routes, update: true);
+    });
+    //
+    pp('$xz ... 🌼🌼 ..... Routes cached: ${routes.length}');
   }
-  Future<http.Response> getUsingHttp(String mUrl, String token, Map<String, String> headers) async {
+
+  Future<http.Response> getUsingHttp(
+      String mUrl, String token, Map<String, String> headers) async {
     pp('$xz httpGet: 🔆 🔆 🔆 calling : 💙 $mUrl  💙');
     var start = DateTime.now();
 
@@ -251,9 +305,9 @@ class ZipHandler {
       final http.Client client = http.Client();
       var resp = await client
           .get(
-        Uri.parse(mUrl),
-        headers: headers,
-      )
+            Uri.parse(mUrl),
+            headers: headers,
+          )
           .timeout(const Duration(seconds: 120));
       pp('$xz httpGet call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
       var end = DateTime.now();
@@ -323,5 +377,4 @@ class ZipHandler {
       throw gex;
     }
   }
-
 }

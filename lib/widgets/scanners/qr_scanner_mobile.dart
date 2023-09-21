@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:kasie_transie_library/data/schemas.dart' as lm;
+import 'package:kasie_transie_library/widgets/tiny_bloc.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -25,12 +27,12 @@ class _QRScannerMobileState extends State<QRScannerMobile> {
   MobileScannerController cameraController = MobileScannerController();
   PermissionStatus? permissionStatus;
   final mm = '🌀🌀🌀🌀🌀🌀🌀🌀QRScannerMobile 🍟🍟';
-
   @override
   void initState() {
     super.initState();
     _getCameraPermission();
   }
+
   Future _getCameraPermission() async {
     pp('$mm ......... requesting camera permission ...');
     permissionStatus = await Permission.camera.status;
@@ -82,50 +84,103 @@ class _QRScannerMobileState extends State<QRScannerMobile> {
           ),
         ],
       ),
-      body: MobileScanner(
-        // fit: BoxFit.contain,
-        controller: cameraController,
-        onDetect: (capture) {
-          final List<Barcode> barcodes = capture.barcodes;
-          final Uint8List? image = capture.image;
-          for (final barcode in barcodes) {
+      body: Stack(
+        children: [
+          Column(mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              gapH16,
+              Center(
+                child: SizedBox(height: 300, width: 300,
+                  child: MobileScanner(
+                    // fit: BoxFit.contain,
+                    controller: cameraController,
+                    fit: BoxFit.fill,
+                    onDetect: (capture) {
+                      cameraController.stop();
+                      final List<Barcode> barcodes = capture.barcodes;
+                      for (final barcode in barcodes) {
+                        pp('$mm fucking Barcode found!: ${barcode.rawValue}');
+                        var string = barcode.rawValue;
+                        pp('$mm string: $string');
+                        if (!string!.contains('{')) {
+                          string = '{\n$string\n}';
+                        }
+                        Map? mjson;
+                        try {
+                          mjson = jsonDecode(convertStringToJson(barcode.rawValue!));
+                        } catch (e) {
+                          mjson = jsonDecode(barcode.rawValue!);
+                        }
+                        pp('$mm mjson: $mjson');
+                        tinyBloc.setScannerResult(mjson!);
+                        Navigator.of(context).pop(mjson);
+                      }
+                    },
+                  ),
+                ),
+              ),
+              gapH32,
+              car == null? gapH16: Text('${car!.vehicleReg}', style: myTextStyleLarge(context),),
 
-            pp('$mm Barcode found! ${barcode.rawValue}');
-            final mjson = jsonDecode(barcode.rawValue!);
-            _returnScannedData(mjson);
-          }
-        },
+            ],
+          )
+        ],
       ),
     );
   }
-  void _returnScannedData(dynamic map) async {
-    pp('$mm _returnScannedData : ${E.leaf2}${E.leaf2}${E.leaf2}');
-
-    try {
-      final vehicleId = map['vehicleId'];
-      if (vehicleId != null) {
-        final vehicle = await listApiDog.getVehicle(vehicleId);
-        pp('$mm scanned vehicle retrieved from Realm : ${E.redDot}${E.redDot}${E.redDot}');
-        myPrettyJsonPrint(vehicle!.toJson());
-        widget.onCarScanned(vehicle);
-        if (widget.quitAfterScan) {
-          //qrViewController!.pauseCamera();
-        }
-
-        return;
+  String convertStringToJson(String input) {
+    pp(' Parse the string into a Map object');
+    Map<String, dynamic> keyValuePairs = {};
+    List<String> pairs = input.split(',');
+    for (String pair in pairs) {
+      List<String> parts = pair.split(':');
+      if (parts.length == 2) {
+        String key = parts[0].trim().replaceAll('"', '');
+        String value = parts[1].trim().replaceAll('"', '');
+        keyValuePairs[key] = value;
       }
-      final userId = map['userId'];
+    }
+
+    // Convert the Map object into a JSON string
+    String json = jsonEncode(keyValuePairs);
+    return json;
+  }
+  lm.Vehicle? car;
+  void _returnScannedData(Map json) async {
+    pp('$mm _returnScannedData : check id below .....  ${E.leaf2}${E.leaf2}${E.leaf2}');
+    myPrettyJsonPrint(json);
+    try {
+      final vehicleId = json['vehicleId'];
+      if (vehicleId != null) {
+        car = await listApiDog.getVehicle(vehicleId);
+        pp('$mm scanned car retrieved. widget.quitAfterScan: ${widget.quitAfterScan} : ${E.redDot}${E.redDot}${E.redDot}');
+        myPrettyJsonPrint(car!.toJson());
+        if (widget.quitAfterScan) {
+          cameraController.stop();
+        }
+        if (mounted) {
+          setState(() {
+          });
+        }
+        widget.onCarScanned(car!);
+        return;
+      } else {
+        pp('$mm _returnScannedData has no car!!! - why is it null? : ${E.leaf2}${E.leaf2}${E.leaf2}');
+
+      }
+      final userId = json['userId'];
       if (userId != null) {
-        // vehicle = await listApiDog.getVehicle(vehicleId);
-        // pp('$mm scanned vehicle retrieved from Realm : ${E.redDot}${E.redDot}${E.redDot}');
-        // myPrettyJsonPrint(vehicle!.toJson());
+        // car = await listApiDog.getVehicle(vehicleId);
+        // pp('$mm scanned car retrieved from Realm : ${E.redDot}${E.redDot}${E.redDot}');
+        // myPrettyJsonPrint(car!.toJson());
         return;
       }
     } catch (e) {
       pp(e);
     }
 
-    widget.onError();
+    // widget.onError();
   }
 
 }
