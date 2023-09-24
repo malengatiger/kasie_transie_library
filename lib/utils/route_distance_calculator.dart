@@ -61,15 +61,15 @@ class RouteDistanceCalculator {
     }
 
     //
-    pp('\n\n$mm ... calculateRouteDistances for ${routeLandmarks.length} routeLandmarks');
-    pp('$mm ... calculateRouteDistances for ${routePoints.length} points');
+    // pp('\n\n$mm ... calculateRouteDistances for ${routeLandmarks.length} routeLandmarks');
+    // pp('$mm ... calculateRouteDistances for ${routePoints.length} points');
 
     //
     routePoints.sort((a, b) => a.index!.compareTo(b.index!));
     final distances = <lib.CalculatedDistance>[];
     lib.RouteLandmark? prevRouteLandmark;
     int index = 0;
-    double mDistance = 0;
+    int mDistance = 0;
     //
     for (var routeLandmark in routeLandmarks) {
       if (index == 0) {
@@ -81,11 +81,11 @@ class RouteDistanceCalculator {
             toLandmark: routeLandmark,
             routePoints: routePoints);
 
-        mDistance += dist;
+        mDistance += dist.toInt();
 
         final m = lib.CalculatedDistance(
           ObjectId(),
-          distanceInMetres: dist,
+          distanceInMetres: dist.toInt(),
           routeId: routeId,
           index: index - 1,
           associationId: associationId,
@@ -103,7 +103,7 @@ class RouteDistanceCalculator {
         index++;
       }
     }
-    pp('\n\n$mm update the route with total distance: $mDistance metres');
+    pp('\n$mm update the route with total distance: $mDistance metres');
     pp('$mm update the route with distances between landmarks: ${distances.length}');
     pp('$mm route: ${routeLandmarks.first.routeName}');
 
@@ -112,7 +112,11 @@ class RouteDistanceCalculator {
           '${E.pear} distanceFromStart: ${calcDistance.distanceFromStart}'
           ' ${E.appleRed} ${calcDistance.fromLandmark} - ${calcDistance.toLandmark}');
     }
-    await dataApiDog.addCalculatedDistances(CalculatedDistanceList(distances));
+    try {
+      dataApiDog.addCalculatedDistances(CalculatedDistanceList(distances));
+    } catch (e, stack) {
+      pp('$e - $stack');
+    }
     return distances;
   }
 
@@ -159,7 +163,7 @@ class RouteDistanceCalculator {
     try {
       range = routePoints.getRange(
           fromLandmark.routePointIndex!, toLandmark.routePointIndex!);
-      pp('$mm ... range of points between: ${range.length}');
+      // pp('$mm ... range of points between: ${range.length}');
     } catch (e) {
       range = routePoints.getRange(
           fromLandmark.routePointIndex!, routePoints.length - 1);
@@ -182,7 +186,7 @@ class RouteDistanceCalculator {
         prevPoint = pointBetween;
       }
     }
-    pp('$mm ... returning calculate Distance for the pair: $mDistance metres');
+    // pp('$mm ... returning calculate Distance for the pair: $mDistance metres');
 
     return mDistance;
   }
@@ -270,7 +274,7 @@ class RouteDistanceCalculator {
     final routePoints = await routesIsolate.getRoutePoints(routeId, false);
     if (routePoints.isEmpty) {
       pp('$mm ... 2. stopping calculateRouteLengthInKM for $routeId, routePoints');
-      return 0;
+      return 0.0;
     }
     //
     pp('$mm ... calculateRouteLengthInKM for ${routePoints.length} points');

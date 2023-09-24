@@ -5,6 +5,8 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart' as ui;
 // import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/countries.dart' as country;
+import 'package:kasie_transie_library/isolates/routes_isolate.dart';
+import 'package:kasie_transie_library/isolates/vehicles_isolate.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/utils/zip_handler.dart';
 import 'package:kasie_transie_library/widgets/auth/country_list.dart';
@@ -183,7 +185,7 @@ class _MyPhoneInputState extends State<MyPhoneInput>
         await prefs.saveAssociation(ass);
 
         try {
-          final countries = await listApiDog.getCountries();
+          final countries = await routesIsolate.getCountries(true);
           pp('$mm KasieTransie countries found on database:  🍎 ${countries.length} 🍎');
           lib.Country? myCountry;
           for (var country in countries) {
@@ -197,21 +199,14 @@ class _MyPhoneInputState extends State<MyPhoneInput>
           //
 
           try {
-            pp('$mm zipHandler.getAssociationUsers ...');
-            final users =
-                await listApiDog.getAssociationUsers(mUser.associationId!, true);
+            final users = await routesIsolate.getUsers(mUser.associationId!, true);
             pp('$mm KasieTransie users found on database:  🍎 ${users.length} 🍎');
+            await vehicleIsolate.getVehicles(mUser.associationId!);
+            await routesIsolate.getCities(myCountry!.countryId!, true);
+            await routesIsolate.getRoutes(mUser.associationId!, true);
 
-            pp('$mm zipHandler.getCars ...');
-            await zipHandler.getCars(mUser.associationId!);
-
-            pp('$mm zipHandler.getRouteBags ...');
-            await zipHandler.getRouteBags(associationId: mUser.associationId!);
-
-            pp('$mm zipHandler.getCities ...');
-            await zipHandler.getCities(myCountry!.countryId!);
           } catch (e, stackTrace) {
-            pp('$mm SOMETHING WRONG!, Bubba! : $e $stackTrace');
+            pp('$mm SOMETHING REALLY WRONG!, Bubba! : $e $stackTrace');
           }
           //
           final elapsed = DateTime.now().difference(start).inSeconds;

@@ -41,134 +41,93 @@ class LandmarkParameters {
 }
 
 class LandmarkIsolate {
+  final StreamController<List<lib.RouteLandmark>> _compController =
+      StreamController.broadcast();
+  Stream<List<lib.RouteLandmark>> get completionStream =>
+      _compController.stream;
 
-  final StreamController<List<lib.RouteLandmark>> _compController = StreamController.broadcast();
-  Stream<List<lib.RouteLandmark>> get completionStream => _compController.stream;
-
-  Future<List<lib.RouteLandmark>> addRouteLandmark(LandmarkParameters parameters) async {
-
-    pp('\n\n$xyz addRouteLandmark (in main thread) starting ..............');
+  Future<List<lib.RouteLandmark>> deleteRouteLandmark(
+      String routeLandmarkId) async {
+    pp('\n\n$xyz deleteRouteLandmark (in main thread) starting ..............');
 
     var token = await appAuth.getAuthToken();
     if (token == null) {
       pp('$xyz ${E.redDot} - Firebase token no show!');
-      return [];
+      throw Exception('no token');
     }
-    parameters.authToken = token;
-
+    List<lib.RouteLandmark> list = [];
     ///build the async isolate and run it
-    await Isolate.run(() async => _heavyTaskForLandmark(parameters));
-    pp('$xyz LandmarkIsolate completed the job. 🔷🔷🔷🔷 Yay! ${E.heartOrange}\n\n');
-    final mList = await listApiDog.getRouteLandmarks(parameters.routeId, true);
-    _compController.sink.add(mList);
-    return mList;
+    final longString = await Isolate.run(() async => _heavyTaskForLandmarkDelete(routeLandmarkId, token));
+    List mJson = jsonDecode(longString);
+    _cacheLandmarks(mJson, list, routeLandmarkId);
+    return list;
   }
+
+Future<List<lib.RouteLandmark>> addRouteLandmark(
+    lib.RouteLandmark routeLandmark) async {
+  pp('\n\n$xyz addRouteLandmark (in main thread) starting ..............');
+
+  var token = await appAuth.getAuthToken();
+  if (token == null) {
+    pp('$xyz ${E.redDot} - Firebase token no show!');
+    throw Exception('no token');
+  }
+  List<lib.RouteLandmark> list = [];
+  ///build the async isolate and run it
+  final map = routeLandmark.toJson();
+  final longString = await Isolate.run(() async => _heavyTaskForLandmark(map, token));
+  List mJson = jsonDecode(longString);
+  _cacheLandmarks(mJson, list, routeLandmark.routeId!);
+  return list;
+}
+
+void _cacheLandmarks(List<dynamic> mJson, List<lib.RouteLandmark> list, String routeId) {
+   for (var map in mJson) {
+    list.add(buildRouteLandmark(map));
+  }
+  final items = listApiDog.realm.query<lib.RouteLandmark>('routeId == \$0', [routeId]);
+  listApiDog.realm.write(() {
+    listApiDog.realm.deleteMany(items);
+    listApiDog.realm.addAll(list, update: true);
+  });
+
+  pp('$xyz LandmarkIsolate completed the job. 🔷🔷🔷🔷 Yay! ${E.heartOrange}\n\n');
+  _compController.sink.add(list);
+}
 }
 
 /// Landmark processing isolate
 ///
 @pragma('vm:entry-point')
-Future<int> _heavyTaskForLandmark(
-    LandmarkParameters parameters) async {
+Future<String> _heavyTaskForLandmark(Map routeLandmarkJson, String token) async {
   pp('\n$xyz ............ _heavyTaskForLandmark starting ...');
-  final url = KasieEnvironment.getUrl();
-  final finderParams = LocationFinderParameter(
-    latitude: parameters.latitude,
-    longitude: parameters.longitude,
-    limit: parameters.limit,
-    radiusInKM: parameters.radius.toDouble(),
-  );
-  //
-  final cities =
-      await _findCitiesByLocation(finderParams, url, parameters.authToken);
-  pp('$xyz _heavyTaskForLandmark found ${cities.length} by location ...');
 
-  final routeInfo = lib.RouteInfo(
-    routeId: parameters.routeId,
-    routeName: parameters.routeName,
-  );
-  final landmark = lib.Landmark(
-    ObjectId(),
-    landmarkId: Uuid.v4().toString(),
-    landmarkName: parameters.landmarkName,
-    position: lib.Position(
-      type: point,
-      coordinates: [parameters.longitude, parameters.latitude],
-      latitude: parameters.latitude,
-      longitude: parameters.longitude,
-    ),
-    routeDetails: [routeInfo],
-  );
-  final routeLandmark = lib.RouteLandmark(ObjectId(),
-      routeId: parameters.routeId,
-      routeName: parameters.routeName,
-      routePointId: parameters.routePointId,
-      routePointIndex: parameters.routePointIndex,
-      index: parameters.index,
-      landmarkName: landmark.landmarkName,
-      landmarkId: landmark.landmarkId,
-      associationId: parameters.associationId,
-      created: DateTime.now().toUtc().toIso8601String(),
-      position: lib.Position(
-        type: point,
-        coordinates: [parameters.longitude, parameters.latitude],
-        latitude: parameters.latitude,
-        longitude: parameters.longitude,
-      ));
-  //
-  await _processNewLandmark(
-      landmark: landmark,
-      routeLandmark: routeLandmark,
-      cities: cities,
-      token: parameters.authToken);
-
-  return 0;
+  final res = await _processNewLandmark(
+      routeLandmark: buildRouteLandmark(routeLandmarkJson), token: token);
+  return res;
 }
-
-Future<int> _processNewLandmark(
-    {required lib.Landmark landmark,
-    required lib.RouteLandmark routeLandmark,
-    required List<lib.City> cities,
-    required token}) async {
-
-  pp('\n\n$xyz _processNewLandmark: landmark and routeLandmark '
-      'and ${cities.length} routeCity 🔆 🔆 🔆records to be sent to backend');
+@pragma('vm:entry-point')
+Future<String> _heavyTaskForLandmarkDelete(String routeLandmarkId, String token) async {
+  pp('\n$xyz ............ _heavyTaskForLandmarkDelete starting ...');
 
   var url = KasieEnvironment.getUrl();
-  var b = await _addLandmark(landmark, url, token);
-  pp('$xyz landmark added? found?  ............. see below');
-  myPrettyJsonPrint(b.toJson());
-
-  final mark = await _addRouteLandmark(routeLandmark, url, token);
-  pp('$xyz RouteLandmark added? found?  ............. see below');
-  myPrettyJsonPrint(mark.toJson());
-
-  int cnt = 1;
-  for (var city in cities) {
-    final rc = lib.RouteCity(ObjectId(),
-        routeId: routeLandmark.routeId,
-        routeName: routeLandmark.routeName,
-        created: DateTime.now().toUtc().toIso8601String(),
-        cityId: city.cityId,
-        cityName: city.name,
-        associationId: routeLandmark.associationId,
-        position: city.position);
-
-    final result = await _addRouteCity(rc, url, token);
-    pp('$xyz routeCity #$cnt added? ${result.cityName} added to ${result.routeName}');
-    myPrettyJsonPrint(result.toJson());
-    cnt++;
-
-    ///sleep; for avoiding rate limit on backend
-    pp('$xyz ....... sleeping for 1 seconds ... ${DateTime.now().toIso8601String()}');
-    sleep(const Duration(seconds: 1));
-    pp('$xyz ....... woke up from my slumber: ... ${DateTime.now().toIso8601String()}');
-  }
-
-  return 0;
+  final marks = await _deleteRouteLandmark(routeLandmarkId, url, token);
+  final res = jsonEncode(marks);
+  return res;
 }
 
-Future<List<lib.City>> _findCitiesByLocation(
+Future<String> _processNewLandmark(
+    {required lib.RouteLandmark routeLandmark, required token}) async {
+  pp('\n\n$xyz _processNewLandmark: routeLandmark: '
+      ' ${routeLandmark.landmarkName}  🔆 🔆 🔆to be sent to backend');
+
+  var url = KasieEnvironment.getUrl();
+  final marks = await _addRouteLandmark(routeLandmark, url, token);
+  pp('$xyz RouteLandmark added?  ............. ${marks.length} total landmarks');
+  return marks;
+}
+
+Future<List<lib.City>> findCitiesByLocation(
     LocationFinderParameter p, String url, String token) async {
   pp('$xyz _findCitiesByLocation looking for places ... limit: ${p.limit}');
   final cmd = '${url}findCitiesByLocation?latitude=${p.latitude}'
@@ -186,14 +145,32 @@ Future<List<lib.City>> _findCitiesByLocation(
   return list;
 }
 
-Future<lib.RouteLandmark> _addRouteLandmark(
+Future<String> _addRouteLandmark(
     lib.RouteLandmark routeLandmark, url, token) async {
+  List<lib.RouteLandmark> marks = [];
   final bag = routeLandmark.toJson();
   final cmd = '${url}addRouteLandmark';
-  final res = await _httpPost(cmd, bag, token);
+  List res = await _httpPost(cmd, bag, token);
   pp('$xyz RouteLandmark added to database ...');
-  final r = buildRouteLandmark(res);
-  return r;
+  for (var value in res) {
+    final r = buildRouteLandmark(value);
+    marks.add(r);
+  }
+
+  return jsonEncode(marks);
+}
+Future<List<lib.RouteLandmark>> _deleteRouteLandmark(
+    String routeLandmarkId, url, token) async {
+  List<lib.RouteLandmark> marks = [];
+  final cmd = '${url}deleteRouteLandmark?routeLandmarkId=$routeLandmarkId';
+  List res = await _httpGet(cmd, token);
+  pp('$xyz RouteLandmark removed from database ... returning ${res.length} landmarks');
+  for (var value in res) {
+    final r = buildRouteLandmark(value);
+    marks.add(r);
+  }
+
+  return marks;
 }
 
 Future<lib.Landmark> _addLandmark(lib.Landmark landmark, url, token) async {
@@ -335,7 +312,7 @@ Future _httpPost(String mUrl, Map? bag, String token) async {
           headers: headers,
         )
         .timeout(const Duration(seconds: 120));
-    if (resp.statusCode == 200) {
+    if (resp.statusCode == 200 || resp.statusCode == 201) {
       pp('$xyz  _httpPost RESPONSE: 💙💙 statusCode: 👌👌👌 '
           '${resp.statusCode} 👌👌👌 💙 for $mUrl');
     } else {

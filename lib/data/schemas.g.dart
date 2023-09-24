@@ -2584,8 +2584,8 @@ class CalculatedDistance extends _CalculatedDistance
     String? fromLandmarkId,
     String? toLandmarkId,
     String? associationId,
-    double? distanceInMetres,
-    double? distanceFromStart,
+    int? distanceInMetres,
+    int? distanceFromStart,
     int? fromRoutePointIndex,
     int? toRoutePointIndex,
     int? index,
@@ -2660,17 +2660,17 @@ class CalculatedDistance extends _CalculatedDistance
       RealmObjectBase.set(this, 'associationId', value);
 
   @override
-  double? get distanceInMetres =>
-      RealmObjectBase.get<double>(this, 'distanceInMetres') as double?;
+  int? get distanceInMetres =>
+      RealmObjectBase.get<int>(this, 'distanceInMetres') as int?;
   @override
-  set distanceInMetres(double? value) =>
+  set distanceInMetres(int? value) =>
       RealmObjectBase.set(this, 'distanceInMetres', value);
 
   @override
-  double? get distanceFromStart =>
-      RealmObjectBase.get<double>(this, 'distanceFromStart') as double?;
+  int? get distanceFromStart =>
+      RealmObjectBase.get<int>(this, 'distanceFromStart') as int?;
   @override
-  set distanceFromStart(double? value) =>
+  set distanceFromStart(int? value) =>
       RealmObjectBase.set(this, 'distanceFromStart', value);
 
   @override
@@ -2715,9 +2715,8 @@ class CalculatedDistance extends _CalculatedDistance
           optional: true),
       SchemaProperty('toLandmarkId', RealmPropertyType.string, optional: true),
       SchemaProperty('associationId', RealmPropertyType.string, optional: true),
-      SchemaProperty('distanceInMetres', RealmPropertyType.double,
-          optional: true),
-      SchemaProperty('distanceFromStart', RealmPropertyType.double,
+      SchemaProperty('distanceInMetres', RealmPropertyType.int, optional: true),
+      SchemaProperty('distanceFromStart', RealmPropertyType.int,
           optional: true),
       SchemaProperty('fromRoutePointIndex', RealmPropertyType.int,
           optional: true),

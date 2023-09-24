@@ -162,10 +162,10 @@ class DataApiDog {
     pp('$mm .......... VehicleHeartbeat added to database: $res');
   }
 
-  Future sendRouteUpdateMessage(String associationId, String routeId) async {
+  Future sendRouteUpdateMessage(RouteUpdateRequest req) async {
     final cmd =
-        '${url}sendRouteUpdateMessage?associationId=$associationId&routeId=$routeId';
-    final res = await _sendHttpGET(cmd);
+        '${url}addRouteUpdateRequest';
+    final res = await _callPost(cmd, req.toJson());
     pp(
         '$mm .......... Route Update Message sent: $res, response 0 means GOOD!');
   }
@@ -181,13 +181,10 @@ class DataApiDog {
     return m;
   }
 
-  Future addRoutePoints(RoutePointList routePointList) async {
-    pp('$mm ... adding routePoints to database ...');
-
-    final pointsJson = routePointList.toJson();
-
+  Future addRoutePoints(RoutePointList points) async {
+    pp('$mm ... adding routePoints to database ...${points.routePoints.length}');
     final cmd = '${url}addRoutePoints';
-    var res = await _callPost(cmd, pointsJson);
+    var res = await _callPost(cmd, points.toJson());
     pp('$mm routePoints added to database: $res');
     return res as int;
   }
@@ -196,10 +193,8 @@ class DataApiDog {
       CalculatedDistanceList calculatedDistanceList) async {
     pp('$mm ... adding CalculatedDistances to database ...');
 
-    final pointsJson = calculatedDistanceList.toJson();
-
     final cmd = '${url}addCalculatedDistances';
-    List res = await _callPost(cmd, pointsJson);
+    List res = await _callPost(cmd, calculatedDistanceList.toJson());
     pp('$mm CalculatedDistances added to database: ${res.length}');
     final items = <CalculatedDistance>[];
     for (var cd in res) {
@@ -693,7 +688,7 @@ class DataApiDog {
     return res;
   }
 
-  Future _callPost(String mUrl, Map? bag) async {
+  Future _callPost(String mUrl, dynamic bag) async {
     String? mBag;
     if (bag != null) {
       mBag = json.encode(bag);

@@ -679,7 +679,7 @@ class _CalculatedDistance {
 
   String? routeName, routeId;
   String? fromLandmark, toLandmark, fromLandmarkId, toLandmarkId, associationId;
-  double? distanceInMetres, distanceFromStart;
+  int? distanceInMetres, distanceFromStart;
   int? fromRoutePointIndex, toRoutePointIndex, index;
 
   Map<String, dynamic> toJson() {

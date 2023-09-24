@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:kasie_transie_library/data/schemas.dart';
 import 'package:kasie_transie_library/utils/parsers.dart';
 
@@ -26,16 +24,58 @@ class RouteBag {
       routeCities.add(buildRouteCity(value));
     }
   }
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['route'] = route!.toJson();
+    List points = [];
+    List marks = [];
+    List cities = [];
+    routePoints..forEach((m) {
+      points.add(m.toJson());
+    });
+    routeLandmarks.forEach((m) {
+      marks.add(m.toJson());
+    });
+    routeCities..forEach((m) {
+      cities.add(m.toJson());
+    });
+    map['routePoints'] = points;
+    map['routeLandmarks'] = marks;
+    map['routeCities'] = cities;
+    return map;
+  }
 }
 
-class RouteBagList {
-  List<RouteBag> routeBags = [];
-  RouteBagList(this.routeBags);
+class RouteData {
+  List<Route> routes = [];
+  List<RoutePoint> routePoints = [];
+  List<RouteLandmark> landmarks = [];
+  List<RouteCity> cities = [];
 
-  RouteBagList.fromJson(Map data) {
-    List rpList = data['routeBags'];
+
+  RouteData(
+      {required this.routes,
+        required this.routePoints,
+        required this.landmarks,
+        required this.cities});
+
+  RouteData.fromJson(Map data) {
+    List rpList = data['routes'];
     for (var value in rpList) {
-      routeBags.add(RouteBag.fromJson(value));
+      routes.add(buildRoute(value));
+    }
+    List rList = data['routePoints'];
+    for (var value in rList) {
+      routePoints.add(buildRoutePoint(value));
+    }
+    List mList = data['landmarks'];
+    for (var value in mList) {
+      landmarks.add(buildRouteLandmark(value));
+    }
+    List cList = data['cities'];
+    for (var value in cList) {
+      cities.add(buildRouteCity(value));
     }
   }
 

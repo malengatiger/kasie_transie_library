@@ -12,6 +12,7 @@ import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
+import 'package:realm/realm.dart';
 
 import '../isolates/routes_isolate.dart';
 import '../widgets/tiny_bloc.dart';
@@ -104,12 +105,13 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     });
   }
 
-  void _controlReads() async {
+  void _controlReads(bool refresh) async {
     setState(() {
       busy = true;
     });
     try {
-      await _getRouteLandmarks();
+      await _getRouteLandmarks(refresh);
+      await _getRoutePoints(refresh);
     } catch (e) {
       pp(e);
     }
@@ -118,14 +120,12 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     });
   }
 
-  Future _getRouteLandmarks() async {
+  Future _getRouteLandmarks(bool refresh) async {
     routeLandmarks =
-        await listApiDog.getRouteLandmarks(widget.route.routeId!, true);
+        await listApiDog.getRouteLandmarks(widget.route.routeId!, refresh);
     pp('\n\n$mm RouteLandmarks ...  ${E.appleRed} '
-        'route: ${widget.route.name}; found: ${routeLandmarks.length} ');
+        'route: ${widget.route.name}; found: ${routeLandmarks.length} refresh: $refresh');
     await _putLandmarksOnMap();
-    //
-    await _getRoutePoints(true);
   }
 
   Future _putLandmarksOnMap() async {
@@ -135,8 +135,6 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     if (routeLandmarks.isEmpty) {
       return;
     }
-    // await _buildLandmarkIcons(routeLandmarks.length, 84);
-
     for (var routeLandmark in routeLandmarks) {
       final ic2 = await getMarkerBitmap(72, color: widget.route.color!,
           text: '${landmarkIndex + 1}',
@@ -145,13 +143,6 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
 
       final latLng = LatLng(routeLandmark.position!.coordinates.last,
           routeLandmark.position!.coordinates.first);
-      // final icon = await getMarkerBitmap(72,
-      //     text: '${landmarkIndex + 1}',
-      //     color: widget.route.color!,
-      //     borderColor: Colors.black,
-      //     fontSize: 28,
-      //     fontWeight: FontWeight.w900);
-
       _markers.add(Marker(
           markerId: MarkerId('${routeLandmark.landmarkId}'),
           icon: ic2,
@@ -188,7 +179,6 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
 
       pp('$mm .......... existingRoutePoints ....  🍎 found: '
           '${existingRoutePoints.length} points');
-      //_buildExistingRoutePointMarkers();
       _addPolyLine();
     } catch (e) {
       pp(e);
@@ -204,6 +194,11 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     _polyLines.clear();
     var mPoints = <LatLng>[];
     existingRoutePoints.sort((a, b) => a.index!.compareTo(b.index!));
+    pp('$mm first few routePoints');
+    myPrettyJsonPrint(existingRoutePoints.first.toJson());
+    myPrettyJsonPrint(existingRoutePoints[1].toJson());
+    myPrettyJsonPrint(existingRoutePoints[2].toJson());
+
     for (var rp in existingRoutePoints) {
       mPoints.add(LatLng(
           rp.position!.coordinates.last, rp.position!.coordinates.first));
@@ -222,7 +217,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
 
     _polyLines.add(polyLine);
     //
-    var last = existingRoutePoints.last;
+    var last = existingRoutePoints.first;
     final latLng = LatLng(
         last.position!.coordinates.last, last.position!.coordinates.first);
     totalPoints = existingRoutePoints.length;
@@ -239,13 +234,6 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
       pp('$mm route points empty. WTF?');
       return;
     }
-
-    // final ic = await getTaxiMapIcon(
-    //     iconSize: 160,
-    //     text: '${landmarkIndex + 1}',
-    //     style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
-    //     path: 'assets/landmark.png');
-
     final ic2 = await getMarkerBitmap(84,
         color: widget.route.color!,  fontSize: 32, fontWeight: FontWeight.w900);
 
@@ -401,36 +389,34 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   String? landmarkName;
 
   Future<void> _processNewLandmark() async {
-    final parameters = LandmarkParameters(
-        latitude: routePointForLandmark!.position!.coordinates.last,
-        longitude: routePointForLandmark!.position!.coordinates.first,
+    final routeLandmark = lib.RouteLandmark(ObjectId(),
+        position: lib.Position(type: 'Point', coordinates: [routePointForLandmark!.position!.coordinates.first, routePointForLandmark!.position!.coordinates.last]),
         routeId: widget.route.routeId!,
-        radius: radius.toDouble(),
         landmarkName: landmarkName!,
-        limit: 10,
-        index: landmarkIndex,
+        index: landmarkIndex, created: DateTime.now().toUtc().toIso8601String(),
+        landmarkId: Uuid.v4().toString(),
         routePointId: routePointForLandmark!.routePointId!,
         routePointIndex: routePointForLandmark!.index!,
         associationId: widget.route.associationId!,
-        routeName: widget.route.name!,
-        authToken: '');
-    landmarkIsolate.addRouteLandmark(parameters);
+        routeName: widget.route.name!);
+
+    landmarkIsolate.addRouteLandmark(routeLandmark);
     pp('$mm landmark isolate started! ... 😎😎😎 Good Fucking Luck!!');
   }
 
-  void _deleteLandmark(lib.Landmark point) async {
+  void _deleteLandmark(lib.RouteLandmark landmark) async {
     setState(() {
       busy = true;
     });
     try {
-      var id = point.landmarkId!;
+      var id = landmark.landmarkId!;
       var res = _markers.remove(Marker(markerId: MarkerId(id)));
       totalPoints--;
       pp('$mm ... removed marker from map: $res, ${E.nice} = true, if not, we fucked!');
-      myPrettyJsonPrint(point.toJson());
+      myPrettyJsonPrint(landmark.toJson());
       try {
         pp('$mm ... start delete ...');
-        final result = await dataApiDog.deleteLandmark(id);
+        final result = await landmarkIsolate.deleteRouteLandmark(landmark.landmarkId!);
         pp('$mm ... removed landmark from database: $result; ${E.nice} 0 is good, Boss!');
         await _getRoutePoints(true);
       } catch (e) {}
@@ -501,7 +487,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
                     _mapController.complete(controller);
                     googleMapController = controller;
                     _zoomToStartCity();
-                    _controlReads();
+                    _controlReads(false);
                   },
                 ),
                 Positioned(
@@ -619,7 +605,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
                         children: [
                           IconButton(
                               onPressed: () async {
-                                _controlReads();
+                                _controlReads(true);
                               },
                               icon: Icon(
                                 Icons.toggle_on,

@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/services.dart';
 import 'package:kasie_transie_library/bloc/app_auth.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart';
@@ -10,6 +12,7 @@ import 'package:kasie_transie_library/utils/parsers.dart';
 
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
+import '../utils/zip_handler.dart';
 import 'heartbeat_isolate.dart';
 
 final VehicleIsolate vehicleIsolate = VehicleIsolate();
@@ -21,25 +24,13 @@ class VehicleIsolate {
     final start = DateTime.now();
 
     try {
-      final token = await appAuth.getAuthToken();
-      if (token != null) {
-        final url = KasieEnvironment.getUrl();
-        var bag = OwnerCarBag(userId, url, token);
-        final cars = await _handleOwnerVehicles(bag);
-
+        final cars = await _handleOwnerVehicles(userId);
         pp('\n\n\n$xy2 ..... ${E.nice}${E.nice} done getting owner cars ....${E.leaf} '
             'returning ${cars.length} cars');
         final end = DateTime.now();
         pp('$xy2 Elapsed time for owner cars downloaded: ${end.difference(start).inSeconds} seconds\n\n');
 
         return cars;
-      } else {
-        final msg =
-            '$xy2 ... getOwnerVehicles fell down and screamed! ${E.redDot} '
-            'no Firebase token found!!';
-        pp(msg);
-        throw Exception(msg);
-      }
     } catch (e) {
       final msg = '$xy2 ... getOwnerVehicles fell down and screamed! '
           '${E.redDot}${E.redDot}${E.redDot} $e';
@@ -53,11 +44,8 @@ class VehicleIsolate {
     final start = DateTime.now();
 
     try {
-      final token = await appAuth.getAuthToken();
-      if (token != null) {
-        final url = KasieEnvironment.getUrl();
-        var bag = DonkeyBag(associationId, url, token);
-        final cars = await _handleVehicles(bag);
+
+        final cars = await _handleVehicles(associationId);
 
         pp('\n\n\n$xy2 ..... ${E.nice}${E.nice} done getting association cars ....${E.leaf} '
             'returning ${cars.length} cars');
@@ -65,12 +53,7 @@ class VehicleIsolate {
         pp('$xy2 Elapsed time for association cars downloaded: ${end.difference(start).inSeconds} seconds\n\n');
 
         return cars;
-      } else {
-        final msg = '$xy2 ... getVehicles fell down and screamed! ${E.redDot} '
-            'no Firebase token found!!';
-        pp(msg);
-        throw Exception(msg);
-      }
+
     } catch (e) {
       final msg = '$xy2 ... getVehicles fell down and screamed! '
           '${E.redDot}${E.redDot}${E.redDot} $e';
@@ -79,52 +62,85 @@ class VehicleIsolate {
     }
   }
 
-  Future<List<Vehicle>> _handleOwnerVehicles(OwnerCarBag bag) async {
+  Future<List<Vehicle>> _handleOwnerVehicles(String userId) async {
     pp('$xy2 ................ _handleOwnerVehicles .... ');
     final start = DateTime.now();
-
-    final s = await Isolate.run(() async => _heavyTaskForOwnerCars(bag));
-    final list = jsonDecode(s);
-    var cars = <Vehicle>[];
-    for (var value in list) {
-      cars.add(buildVehicle(value));
+    final List<Vehicle> list = [];
+    final token = await appAuth.getAuthToken();
+    if (token != null) {
+      final rootToken = ServicesBinding.rootIsolateToken!;
+      final s = await Isolate.run(
+              () async => _heavyTaskForZippedOwnerCars(userId, token, rootToken));
+      List json = jsonDecode(s);
+      for (var value in json) {
+        list.add(buildVehicle(value));
+      }
     }
-    pp('$xy2 _handleOwnerVehicles attempting to cache ${cars.length} cars.... ');
+
+    pp('$xy2 _handleVehicles attempting to cache ${list.length} cars.... ');
 
     listApiDog.realm.write(() {
-      listApiDog.realm.addAll<Vehicle>(cars, update: true);
+      listApiDog.realm.addAll<Vehicle>(list, update: true);
     });
     var end = DateTime.now();
-    pp('$xy2 should have cached ${cars.length} owner cars in realm; elapsed time: '
+    pp('$xy2 should have cached ${list.length} cars in realm; elapsed time: '
         '${end.difference(start).inSeconds} seconds');
-    return cars;
+    return list;
   }
 }
 
-Future<List<Vehicle>> _handleVehicles(DonkeyBag bag) async {
+Future<List<Vehicle>> _handleVehicles(String associationId) async {
   pp('$xy2 ................ _handleVehicles .... ');
   final start = DateTime.now();
-
-  final s = await Isolate.run(() async => _heavyTaskForCars(bag));
-  final list = jsonDecode(s);
-  var cars = <Vehicle>[];
-  for (var value in list) {
-    cars.add(buildVehicle(value));
+  final List<Vehicle> list = [];
+  final token = await appAuth.getAuthToken();
+  if (token != null) {
+    final rootToken = ServicesBinding.rootIsolateToken!;
+    final s = await Isolate.run(
+            () async => _heavyTaskForZippedCars(associationId, token, rootToken));
+    List json = jsonDecode(s);
+    for (var value in json) {
+      list.add(buildVehicle(value));
+    }
   }
-  pp('$xy2 _handleVehicles attempting to cache ${cars.length} cars.... ');
+
+  pp('$xy2 _handleVehicles attempting to cache ${list.length} cars.... ');
 
   listApiDog.realm.write(() {
-    listApiDog.realm.addAll<Vehicle>(cars, update: true);
+    listApiDog.realm.addAll<Vehicle>(list, update: true);
   });
   var end = DateTime.now();
-  pp('$xy2 should have cached ${cars.length} cars in realm; elapsed time: '
+  pp('$xy2 should have cached ${list.length} cars in realm; elapsed time: '
       '${end.difference(start).inSeconds} seconds');
-  return cars;
+  return list;
 }
 
 ///Isolate to get association routes
 const xyz = '🌀🌀🌀🌀🌀🌀🌀🌀🌀 HeavyTaskForCars: 🍎🍎';
+@pragma('vm:entry-point')
+Future<String> _heavyTaskForZippedCars(
+    String associationId, String token, RootIsolateToken rootToken) async {
+  pp('\n\n$xyz _heavyTaskForZippedCars 🅿️ 🅿️ 🅿️  starting '
+      '... calling zipHandler.getCars() ...');
+  BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
+  Firebase.initializeApp();
 
+  final List<Vehicle> res = await zipHandler.getCars(associationId, token);
+  final s = jsonEncode(res);
+  return s;
+}
+@pragma('vm:entry-point')
+Future<String> _heavyTaskForZippedOwnerCars(
+    String userId, String token, RootIsolateToken rootToken) async {
+  pp('\n\n$xyz _heavyTaskForZippedOwnerCars 🅿️ 🅿️ 🅿️  starting '
+      '... calling zipHandler.getOwnerCars() ...');
+  BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
+  Firebase.initializeApp();
+
+  final List<Vehicle> res = await zipHandler.getOwnerCars(userId, token);
+  final s = jsonEncode(res);
+  return s;
+}
 @pragma('vm:entry-point')
 Future<String> _heavyTaskForCars(DonkeyBag bag) async {
   pp('$xy2 _heavyTaskForCars starting ................associationId:  ${bag.associationId} .');

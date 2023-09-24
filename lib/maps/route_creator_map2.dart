@@ -13,6 +13,7 @@ import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/local_finder.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
+import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import 'package:realm/realm.dart';
 
 import '../isolates/routes_isolate.dart';
@@ -98,35 +99,47 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
   }
 
   Future getRouteLandmarks(bool refresh) async {
-    routeLandmarks =
-        await listApiDog.getRouteLandmarks(widget.route.routeId!, refresh);
-    pp('\n\n$mm _getRouteLandmarks ...  ${E.appleRed} route: ${widget.route.name}; found: ${routeLandmarks.length} ');
-    routeLandmarks.sort((a, b) => a.created!.compareTo(b.created!));
-    landmarkIndex = 0;
-    for (var landmark in routeLandmarks) {
-      final latLng = LatLng(landmark.position!.coordinates.last,
-          landmark.position!.coordinates.first);
-      final icon = await getMarkerBitmap(72,
-          text: '${landmarkIndex+1}',
-          color: widget.route.color!, borderColor: Colors.black, fontSize: 28, fontWeight: FontWeight.w900);
-      _markers.add(Marker(
-          markerId: MarkerId('${landmark.landmarkId}'),
-          icon: icon,
-          onTap: () {
-            pp('$mm .............. marker tapped: $routePointIndex');
-            //_deleteRoutePoint(routePoint);
-          },
-          infoWindow: InfoWindow(
-              snippet:
-                  '\nThis landmark is part of the route: \n${widget.route.name}\n\n',
-              title: '🔵 ${landmark.landmarkName}',
-              onTap: () {
-                pp('$mm ............. infoWindow tapped, point index: $routePointIndex');
-                //_deleteLandmark(landmark);
-              }),
-          position: latLng));
-      landmarkIndex++;
-      pp('$mm ... routeLandmark added to markers: ${_markers.length}');
+
+    try {
+      routeLandmarks =
+      await listApiDog.getRouteLandmarks(widget.route.routeId!, refresh);
+      pp('\n\n$mm _getRouteLandmarks ...  ${E.appleRed} route: ${widget.route.name}; found: ${routeLandmarks.length} ');
+      if (routeLandmarks.isEmpty) {
+        pp('$mm ... NO ROUTE LANDMARKS FOUND for ${widget.route.name}');
+        return;
+      }
+      routeLandmarks.sort((a, b) => a.created!.compareTo(b.created!));
+      landmarkIndex = 0;
+      for (var landmark in routeLandmarks) {
+            final latLng = LatLng(landmark.position!.coordinates.last,
+                landmark.position!.coordinates.first);
+            final icon = await getMarkerBitmap(72,
+                text: '${landmarkIndex+1}',
+                color: widget.route.color!, borderColor: Colors.black, fontSize: 28, fontWeight: FontWeight.w900);
+            _markers.add(Marker(
+                markerId: MarkerId('${landmark.landmarkId}'),
+                icon: icon,
+                onTap: () {
+                  pp('$mm .............. marker tapped: $routePointIndex');
+                  //_deleteRoutePoint(routePoint);
+                },
+                infoWindow: InfoWindow(
+                    snippet:
+                        '\nThis landmark is part of the route: \n${widget.route.name}\n\n',
+                    title: '🔵 ${landmark.landmarkName}',
+                    onTap: () {
+                      pp('$mm ............. infoWindow tapped, point index: $routePointIndex');
+                      //_deleteLandmark(landmark);
+                    }),
+                position: latLng));
+            landmarkIndex++;
+            pp('$mm ... routeLandmark added to markers: ${_markers.length}');
+          }
+    } catch (e, stack) {
+      pp('$mm $e $stack');
+      if (mounted) {
+        showSnackBar(message: '$e', context: context);
+      }
     }
     setState(() {});
 
@@ -144,10 +157,8 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
   }
 
   Future getRoutePoints(bool refresh) async {
-    pp('$mm getRoutePoints ... refresh $refresh');
-    setState(() {
-      busy = true;
-    });
+    pp('$mm .... getRoutePoints ... refresh $refresh');
+
     try {
       color = getColor(widget.route.color!);
       pp('$mm getting existing RoutePoints ....... refresh: $refresh');
@@ -160,36 +171,43 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
           '${existingRoutePoints.length} points');
       routePointIndex = existingRoutePoints.length;
       _addPolyLine();
-    } catch (e) {
-      pp(e);
+    } catch (e, stack) {
+      pp('$mm ERROR: $e - $stack');
     }
   }
 
   void _addPolyLine() {
-    pp('$mm .......... _addPolyLine ....... .');
-    _polyLines.clear();
-    var mPoints = <LatLng>[];
-    existingRoutePoints.sort((a, b) => a.index!.compareTo(b.index!));
-    for (var rp in existingRoutePoints) {
-      mPoints.add(LatLng(
-          rp.position!.coordinates.last, rp.position!.coordinates.first));
+    try {
+      _polyLines.clear();
+      var mPoints = <LatLng>[];
+      existingRoutePoints.sort((a, b) => a.index!.compareTo(b.index!));
+      for (var rp in existingRoutePoints) {
+            mPoints.add(LatLng(
+                rp.position!.coordinates.last, rp.position!.coordinates.first));
+          }
+      final id = DateTime.now().toIso8601String();
+      var polyLine = Polyline(
+              color: color,
+              width: 10,
+              points: mPoints,
+              polylineId: PolylineId(id));
+
+      _polyLines.add(polyLine);
+      //
+      var last = existingRoutePoints.last;
+      final latLng = LatLng(
+              last.position!.coordinates.last, last.position!.coordinates.first);
+      totalPoints = existingRoutePoints.length;
+      routePointIndex = existingRoutePoints.length;
+
+      _animateCamera(latLng, 16);
+      setState(() {});
+    } catch (e, stack) {
+      pp('$mm _addPolyLine: $e - $stack');
+      showSnackBar(
+          backgroundColor: Colors.red,
+          message: '$e', context: context);
     }
-    var polyLine = Polyline(
-        color: color,
-        width: 10,
-        points: mPoints,
-        polylineId: PolylineId(DateTime.now().toIso8601String()));
-
-    _polyLines.add(polyLine);
-    //
-    var last = existingRoutePoints.last;
-    final latLng = LatLng(
-        last.position!.coordinates.last, last.position!.coordinates.first);
-    totalPoints = existingRoutePoints.length;
-    routePointIndex = existingRoutePoints.length;
-
-    _animateCamera(latLng, 16);
-    setState(() {});
   }
 
   @override
@@ -239,8 +257,6 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
         pp('\n\n\n$mm ... this is probably a rogue routePoint: ${E.redDot} '
             '${E.redDot}${E.redDot} distance from previous point:  ${E.redDot} $dist metres');
         return false;
-      } else {
-        pp('$mm distance from previous point: ${E.appleGreen} $dist metres');
       }
     } catch (e) {
       pp('$mm checkDistance failed: ${E.redDot} ');
@@ -249,25 +265,25 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
   }
 
   void _removeRoutePoints(LatLng latLng) async {
-    pp('$mm _removeRoutePoints: ...  find nearest route point : $latLng');
+    pp('$mm _removeRoutePoints: ...  routesIsolate.deleteRoutePoints, point : $latLng');
     try {
-      final k = await localFinder.findNearestRoutePoint(
-          latitude: latLng.latitude,
-          longitude: latLng.longitude,
-          radiusInMetres: 50);
-      if (k != null) {
-        existingRoutePoints =
-            await dataApiDog.deleteRoutePointsFromIndex(k.routeId!, k.index!);
+        existingRoutePoints = await routesIsolate.deleteRoutePoints(routeId: widget.route.routeId!, latitude: latLng.latitude,
+            longitude: latLng.longitude);
         routePointIndex = existingRoutePoints.length;
         pp('$mm ...  existingRoutePoints remaining : ${existingRoutePoints.length}');
         _addPolyLine();
+        if (mounted) {
+          showOKToast(message: 'Route points removed', context: context);
+        }
         return;
+
+    } catch (e, stack) {
+      pp('$mm $e - $stack');
+      if (mounted) {
+        showErrorSnackBar(message: "Route point removal failed, please try again", context: context);
       }
-    } catch (e) {
-      pp(e);
     }
-    pp('$mm _removeRoutePoints: ... ${E.redDot} '
-        'find nearest route point did not find anything ... quitting!');
+
   }
 
   String deleteRoutePoints = 'Do you want to delete all '
@@ -332,8 +348,8 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
       startTimer();
     }
     totalPoints++;
-    pp('$mm RoutePoint added to map; index: $routePointIndex '
-        '🔵 🔵 🔵 total points: $totalPoints');
+    // pp('$mm RoutePoint added to map; index: $routePointIndex '
+    //     '🔵 🔵 🔵 total points: $totalPoints');
 
     routePointIndex++;
     var routePoint = lib.RoutePoint(ObjectId(),
@@ -470,12 +486,12 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
             mapType: isHybrid ? MapType.hybrid : MapType.normal,
             myLocationEnabled: true,
             markers: _markers,
-            circles: _circles,
             polylines: _polyLines,
-            initialCameraPosition: _myCurrentCameraPosition!,
+            initialCameraPosition: _myCurrentCameraPosition,
             onTap: _addNewRoutePoint,
             onLongPress: _confirmDelete,
             onMapCreated: (GoogleMapController controller) {
+              pp('\n$mm ..... Google Map has been created and is ready to have shit placed on iit!\n');
               _mapController.complete(controller);
               googleMapController = controller;
               _zoomToStartCity();
@@ -608,14 +624,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
           busy
               ? const Positioned(
                   child: Center(
-                    child: SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 4,
-                        backgroundColor: Colors.purple,
-                      ),
-                    ),
+                    child: TimerWidget(title: 'Loading ...', isSmallSize: true),
                   ))
               : const SizedBox(),
         ]));

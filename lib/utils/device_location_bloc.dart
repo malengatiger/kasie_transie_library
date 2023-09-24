@@ -71,7 +71,7 @@ class DeviceLocationBloc {
     var distanceBetweenPoints =
         SphericalUtil.computeDistanceBetween(latLngFrom, latLngTo);
     var m = distanceBetweenPoints.toDouble();
-    pp('$mm getDistance between 2 points calculated: $m metres');
+    //pp('$mm getDistance between 2 points calculated: $m metres');
 
     return m;
   }

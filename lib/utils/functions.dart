@@ -772,6 +772,27 @@ showSnackBar(
   ));
 }
 
+showErrorSnackBar(
+    {required String message,
+      required BuildContext context,
+      Duration? duration,
+      double? padding,
+      double? elevation}) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    duration: duration ?? const Duration(seconds: 5),
+    backgroundColor: Colors.red,
+    showCloseIcon: true,
+    elevation: elevation ?? 8,
+    content: Padding(
+      padding: EdgeInsets.all(padding ?? 8),
+      child: Text(
+        message,
+        style: const TextStyle(color: Colors.white),
+      ),
+    ),
+  ));
+}
+
 Future<BitmapDescriptor> getTaxiMapIcon(
     {required double iconSize,
     required String text,
@@ -1090,7 +1111,54 @@ showToast(
     pp('$mm 👿👿👿👿👿 we have a small TOAST problem, Boss! - 👿 $e');
   }
 }
+showOKToast(
+    {required String message,
+      required BuildContext context,
+      Color? backgroundColor,
+      TextStyle? textStyle,
+      Duration? duration,
+      double? padding,
+      ToastGravity? toastGravity}) {
+  FToast fToast = FToast();
+  const mm = 'FunctionsAndShit: 💀 💀 💀 💀 💀 : ';
+  try {
+    fToast.init(context);
+  } catch (e) {
+    pp('$mm FToast may already be initialized');
+  }
+  Widget toastContainer = Container(
+    width: 320,
+    padding: EdgeInsets.symmetric(
+        horizontal: padding ?? 20.0, vertical: padding ?? 20.0),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(8.0),
+      color: backgroundColor ?? Colors.green.shade900,
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Text(
+            message,
+            textAlign: TextAlign.center,
+            style: textStyle ?? const TextStyle(color: Colors.white),
+          ),
+        ),
+      ],
+    ),
+  );
 
+  try {
+    fToast.showToast(
+      child: toastContainer,
+      gravity: toastGravity ?? ToastGravity.CENTER,
+      toastDuration: duration ?? const Duration(seconds: 3),
+    );
+  } catch (e) {
+    pp('$mm 👿👿👿👿👿 we have a small TOAST problem, Boss! - 👿 $e');
+  }
+}
 Future<String> getStringFromAssets(String path) async {
   final mPath = 'assets/l10n/$path.json';
 

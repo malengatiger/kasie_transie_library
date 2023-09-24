@@ -111,25 +111,30 @@ SettingsModel buildSettingsModel(Map map) {
 }
 
 Country buildCountry(Map value) {
-  pp(value);
-  var id = rm.ObjectId.fromHexString(value['_id'] as String);
-  var m = Country(id,
-      countryId: value['countryId'],
-      name: value['name'],
-      latitude: value['latitude'] as double,
-      longitude: value['longitude'] as double,
-      iso2: value['iso2'],
-      iso3: value['iso3'],
-      capital: value['capital'],
-      subregion: value['subregion'],
-      region: value['region'],
-      currency: value['currency'],
-      emoji: value['emoji'],
-      currency_name: value['currency_name'],
-      currency_symbol: value['currency_symbol'],
-      phone_code: value['phone_code']);
+  late Country m;
+  try {
+    var id = rm.ObjectId.fromHexString(value['_id'] as String);
+    m = Country(id,
+        countryId: value['countryId'],
+        name: value['name'],
+        latitude: value['latitude'] is int ? double.parse('${value['latitude']}') : value['latitude'],
+        longitude: value['longitude'] is int ? double.parse('${value['longitude']}') : value['longitude'],
+        iso2: value['iso2'],
+        iso3: value['iso3'],
+        capital: value['capital'],
+        subregion: value['subregion'],
+        region: value['region'],
+        currency: value['currency'],
+        emoji: value['emoji'],
+        currency_name: value['currency_name'],
+        currency_symbol: value['currency_symbol'],
+        phone_code: value['phone_code']);
 
+  } catch (e, stack) {
+    pp("ERROR: $e : $stack");
+  }
   return m;
+
 }
 
 //
@@ -144,8 +149,9 @@ City buildCity(Map map) {
     countryId: map['countryId'],
     stateName: map['stateName'],
     stateId: map['stateId'],
-    longitude: map['longitude'],
-    latitude: map['latitude'],
+    latitude: map['latitude'] is int ? double.parse('${map['latitude']}') : map['latitude'],
+    longitude: map['longitude'] is int ? double.parse('${map['longitude']}') : map['longitude'],
+
     position: buildPosition(map['position']),
     distance: map['distance'],
   );
@@ -153,9 +159,10 @@ City buildCity(Map map) {
 }
 
 Position buildPosition(Map map) {
+
   List st = map['coordinates'];
-  var lat = st.last as double;
-  var lng = st.first as double;
+  var lat = st.last is int? double.parse('${st.last}') : st.last;
+  var lng = st.first is int? double.parse('${st.first}') : st.first;
   final m = Position(
       type: point, coordinates: [lng, lat], latitude: lat, longitude: lng);
 
@@ -299,7 +306,8 @@ RoutePoint buildRoutePoint(Map value) {
       associationId: value['associationId'],
       latitude: value['latitude'],
       created: value['created'],
-      heading: value['heading']== null? 0.0: double.parse('${value['heading']}'),
+      heading:
+          value['heading'] == null ? 0.0 : double.parse('${value['heading']}'),
       routeName: value['routeName'],
       geoHash: value['geoHash'],
       position: buildPosition(value['position']),
@@ -479,7 +487,7 @@ CalculatedDistance buildCalculatedDistance(Map map) {
     id,
     routeId: map['routeId'],
     index: map['index'],
-    distanceFromStart: map['distanceFromStart'],
+    distanceFromStart: map['distanceFromStart'] ,
     fromLandmark: map['fromLandmark'],
     toLandmarkId: map['toLandmarkId'],
     associationId: map['associationId'],
@@ -640,6 +648,7 @@ VehicleMediaRequest buildVehicleMediaRequest(Map j) {
 }
 
 RouteUpdateRequest buildRouteUpdateRequest(Map j) {
+  myPrettyJsonPrint(j);
   var id = rm.ObjectId.fromHexString(j['_id'] as String);
   var m = RouteUpdateRequest(
     id,

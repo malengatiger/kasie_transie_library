@@ -5,6 +5,7 @@ import '../utils/functions.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart' as env;
 
 final AppAuth appAuth = AppAuth(FirebaseAuth.instance);
+
 String? fcmToken;
 
 class AppAuth {

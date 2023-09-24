@@ -10,6 +10,7 @@ import 'package:kasie_transie_library/isolates/country_cities_isolate.dart';
 import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
+import 'package:kasie_transie_library/utils/route_distance_calculator.dart';
 import 'package:kasie_transie_library/utils/zip_handler.dart';
 import 'package:realm/realm.dart' as rm;
 
@@ -294,8 +295,11 @@ class ListApiDog {
       String associationId, bool refresh) async {
     rm.RealmResults<Vehicle> results = realm.all<Vehicle>();
     final list = <Vehicle>[];
+    final token = await appAuth.getAuthToken();
     if (refresh || results.isEmpty) {
-      return await zipHandler.getCars(associationId);
+      if (token != null) {
+        return await vehicleIsolate.getVehicles(associationId);
+      }
     }
 
     for (var element in results) {
@@ -306,7 +310,9 @@ class ListApiDog {
     return list;
   }
 
-  final StreamController<List<Vehicle>> _vehiclesStreamController = StreamController.broadcast();
+  final StreamController<List<Vehicle>> _vehiclesStreamController =
+      StreamController.broadcast();
+
   Stream<List<Vehicle>> get vehiclesStream => _vehiclesStreamController.stream;
 
   Future<List<Vehicle>> getOwnerVehicles(String userId, bool refresh) async {
@@ -362,11 +368,12 @@ class ListApiDog {
     }
     return list;
   }
+
   Future<List<RouteAssignment>> getRouteAssignments(
       String routeId, bool refresh) async {
     final cmd = '${url}getRouteAssignments?routeId=$routeId';
     rm.RealmResults<RouteAssignment> results =
-    realm.query<RouteAssignment>('routeId == \$0', [routeId]);
+        realm.query<RouteAssignment>('routeId == \$0', [routeId]);
     final list = <RouteAssignment>[];
     if (refresh || results.isEmpty) {
       return await getRouteAssignmentsFromBackend(routeId);
@@ -612,6 +619,35 @@ class ListApiDog {
         realm.write(() {
           realm.addAll<RouteLandmark>(localList, update: true);
         });
+      } catch (e) {
+        pp(e);
+      }
+    }
+    //
+
+    return localList;
+  }
+  Future<List<RoutePoint>> getRoutePoints(
+      String routeId, bool refresh) async {
+    var localList = <RoutePoint>[];
+    rm.RealmResults<RoutePoint> results =
+    realm.query<RoutePoint>("routeId == \$0", [routeId]);
+    if (results.isNotEmpty) {
+      for (var element in results) {
+        localList.add(element);
+      }
+    }
+    pp('$mm RoutePoints from realm:: ${localList.length}');
+    if (localList.isEmpty || refresh) {
+      try {
+        final token = await appAuth.getAuthToken();
+        if (token != null) {
+        localList = await zipHandler.getRoutePoints(routeId: routeId, token: token);
+        pp('$mm RoutePoints from backend via zip: ${localList.length}');
+        realm.write(() {
+          realm.addAll<RoutePoint>(localList, update: true);
+        });
+        }
       } catch (e) {
         pp(e);
       }
@@ -1252,7 +1288,7 @@ class ListApiDog {
   }
 
   Future<List<CalculatedDistance>> getCalculatedDistances(
-      String routeId, bool refresh) async {
+      String routeId, String associationId, bool refresh) async {
     pp('$mm .................. getCalculatedDistances refresh: $refresh');
 
     var localList = <CalculatedDistance>[];
@@ -1271,12 +1307,14 @@ class ListApiDog {
         realm.write(() {
           realm.addAll<CalculatedDistance>(localList, update: true);
         });
-      } catch (e) {
-        pp(e);
+        pp('$mm CalculatedDistances cached in realm:: ${localList.length}');
+      } catch (e, stack) {
+        pp('$mm $e - $stack');
       }
     }
-    //
-
+    if (localList.isEmpty) {
+      localList = await routeDistanceCalculator.calculateRouteDistances(routeId, associationId);
+    }
     return localList;
   }
 
@@ -1304,9 +1342,10 @@ class ListApiDog {
     return bag;
   }
 
-  Future<List<Route>> getRoutesFilteredByAssignments({required String associationId, required String vehicleId}) async {
-    final assignments = await listApiDog.getVehicleRouteAssignments(
-        vehicleId, false);
+  Future<List<Route>> getRoutesFilteredByAssignments(
+      {required String associationId, required String vehicleId}) async {
+    final assignments =
+        await listApiDog.getVehicleRouteAssignments(vehicleId, false);
 
     pp('$mm ... getRoutesFilteredByAssignments found ${assignments.length} assignments');
 
@@ -1328,6 +1367,7 @@ class ListApiDog {
     }
     return routes;
   }
+
   Future<List<Route>> getRoutes(AssociationParameter param) async {
     final localList = <Route>[];
     rm.RealmResults<Route> results = realm.all<Route>();
@@ -1340,7 +1380,7 @@ class ListApiDog {
 
     if (param.refresh || localList.isEmpty) {
       final remoteList =
-      await routesIsolate.getRoutes(param.associationId, param.refresh);
+          await routesIsolate.getRoutes(param.associationId, param.refresh);
       pp('$mm ... Routes from backend:: ${remoteList.length}');
       _routeController.sink.add(remoteList);
       return remoteList;
@@ -1525,7 +1565,8 @@ class ListApiDog {
     final list1 = realmResults.toList();
     if (realmResults.toList().isEmpty || refresh) {
       pp('$mm country cities found in local Realm: ${list1.length}');
-      return await countryCitiesIsolate.getCountryCities(countryId);
+      final gList = await routesIsolate.getCities(countryId, refresh);
+      return gList.length;
     }
 
     pp('$mm cached country cities: ${list1.length}');
@@ -1547,7 +1588,8 @@ class ListApiDog {
     //todo - remove from mongo
   }
 
-  Future<List<User>> getAssociationUsers(String associationId, bool refresh) async {
+  Future<List<User>> getAssociationUsers(
+      String associationId, bool refresh) async {
     var list = <User>[];
     if (refresh) {
       await _getUsersFromBackEnd(associationId, list);
@@ -1565,7 +1607,8 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<User>> _getUsersFromBackEnd(String associationId, List<User> list) async {
+  Future<List<User>> _getUsersFromBackEnd(
+      String associationId, List<User> list) async {
     final cmd = '${url}getAssociationUsers?associationId=$associationId';
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
