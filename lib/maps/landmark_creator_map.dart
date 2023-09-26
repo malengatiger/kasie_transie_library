@@ -15,6 +15,7 @@ import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:realm/realm.dart';
 
 import '../isolates/routes_isolate.dart';
+import '../widgets/timer_widget.dart';
 import '../widgets/tiny_bloc.dart';
 
 class LandmarkCreatorMap extends StatefulWidget {
@@ -131,15 +132,17 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   Future _putLandmarksOnMap() async {
     pp('$mm ..._putLandmarksOnMap: routeLandmarks: ${routeLandmarks.length}');
 
-    landmarkIndex = 0;
     if (routeLandmarks.isEmpty) {
       return;
     }
+    _markers.clear();
+    landmarkIndex = 0;
     for (var routeLandmark in routeLandmarks) {
-      final ic2 = await getMarkerBitmap(72, color: widget.route.color!,
+      final ic2 = await getMarkerBitmap(72,
+          color: widget.route.color!,
           text: '${landmarkIndex + 1}',
-           fontSize: 32, fontWeight: FontWeight.w900);
-
+          fontSize: 32,
+          fontWeight: FontWeight.w900);
 
       final latLng = LatLng(routeLandmark.position!.coordinates.last,
           routeLandmark.position!.coordinates.first);
@@ -148,20 +151,19 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
           icon: ic2,
           onTap: () {
             pp('$mm .............. routeLandmark marker tapped, index: $index $latLng');
-            //_deleteRoutePoint(routePoint);
           },
           infoWindow: InfoWindow(
               snippet: 'This routeLandmark is part of the route.',
               title: '🔵 ${routeLandmark.landmarkName}',
               onTap: () {
-                pp('$mm ............. infoWindow tapped, point index: $index');
-                //_deleteLandmark(routeLandmark);
+                pp('$mm ............. infoWindow tapped, point index: $index ... confirm delete!');
+                _confirmDelete(routeLandmark);
               }),
           position: latLng));
       landmarkIndex++;
-      pp('$mm ... routeLandmark added to markers: ${_markers.length}');
     }
-    pp('$mm ... setting state .... and animating camera ...');
+    pp('$mm ... routeLandmark added to markers: ${_markers.length}');
+
     setState(() {});
     var last = routeLandmarks.last;
     final latLng = LatLng(
@@ -193,11 +195,11 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     }
     _polyLines.clear();
     var mPoints = <LatLng>[];
-    existingRoutePoints.sort((a, b) => a.index!.compareTo(b.index!));
-    pp('$mm first few routePoints');
-    myPrettyJsonPrint(existingRoutePoints.first.toJson());
-    myPrettyJsonPrint(existingRoutePoints[1].toJson());
-    myPrettyJsonPrint(existingRoutePoints[2].toJson());
+    try {
+      existingRoutePoints.sort((a, b) => a.index!.compareTo(b.index!));
+    } catch (e) {
+      pp(e);
+    }
 
     for (var rp in existingRoutePoints) {
       mPoints.add(LatLng(
@@ -227,44 +229,6 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     setState(() {});
   }
 
-  Future<void> _buildExistingRoutePointMarkers() async {
-    pp('$mm .......... _buildExistingRoutePointMarkers starting ... ');
-
-    if (existingRoutePoints.isEmpty) {
-      pp('$mm route points empty. WTF?');
-      return;
-    }
-    final ic2 = await getMarkerBitmap(84,
-        color: widget.route.color!,  fontSize: 32, fontWeight: FontWeight.w900);
-
-    totalPoints = existingRoutePoints.length;
-    // _clearMap();
-    for (var routePoint in existingRoutePoints) {
-      var latLng = LatLng(routePoint.position!.coordinates.last,
-          routePoint.position!.coordinates.first);
-      _markers.add(Marker(
-          markerId: MarkerId('${routePoint.routePointId}'),
-          icon: ic2,
-          onTap: () {
-            pp('$mm .............. ${E.pear}${E.pear}${E.pear} '
-                'marker tapped: routePoint: ${routePoint.toJson()}');
-            setState(() {
-              routePointForLandmark = routePoint;
-              _showLandmark = true;
-            });
-          },
-          position: LatLng(latLng.latitude, latLng.longitude)));
-    }
-    setState(() {});
-    //
-    var last = existingRoutePoints.last;
-    final latLng = LatLng(
-        last.position!.coordinates.last, last.position!.coordinates.first);
-    totalPoints = existingRoutePoints.length;
-    index = existingRoutePoints.length - 1;
-    await _animateCamera(latLng, 16);
-  }
-
   Future<void> _animateCamera(LatLng latLng, double zoom) async {
     var cameraPos = CameraPosition(target: latLng, zoom: zoom);
     googleMapController
@@ -288,7 +252,6 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   Future _getUser() async {
     _user = await prefs.getUser();
   }
-
 
   Future _getCurrentLocation() async {
     pp('$mm .......... get current location ....');
@@ -346,9 +309,11 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
 
     landmarkIndex = (routeLandmarks.length - 1) + pendingCount;
 
-    final ic2 = await getMarkerBitmap(72, color: widget.route.color!,
+    final ic2 = await getMarkerBitmap(72,
+        color: widget.route.color!,
         text: '${landmarkIndex + 1}',
-       fontSize: 32, fontWeight: FontWeight.w900);
+        fontSize: 32,
+        fontWeight: FontWeight.w900);
 
     pp('....... _addNewLandmark: landmarkIndex: $landmarkIndex');
 
@@ -364,7 +329,6 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
             title: '🔵 $landmarkName',
             onTap: () {
               pp('$mm ............. infoWindow tapped, point index: $index');
-              //_deleteLandmark(landmark);
             }),
         position: LatLng(routePointForLandmark!.position!.coordinates.last,
             routePointForLandmark!.position!.coordinates.first)));
@@ -386,14 +350,69 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     _processNewLandmark();
   }
 
+  void _confirmDelete(lib.RouteLandmark landmark) async {
+    showDialog(
+        barrierDismissible: false,
+        context: (context),
+        builder: (ctx) {
+          return AlertDialog(
+            title: Text(
+              'Route Landmark Removal',
+              style: myTextStyleMediumLargeWithColor(
+                  context, Theme.of(context).primaryColorLight, 20),
+            ),
+            content: SizedBox(
+              height: 200,
+              child: Center(
+                child: Column(
+                  children: [
+                    gapH32,
+                    const Text('Do you want to remove this landmark?'),
+                    gapH16,
+                    Text(
+                      '${landmark.landmarkName}',
+                      style: myTextStyleMediumLargeWithColor(
+                          context, Colors.white, 16),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'No',
+                    textAlign: TextAlign.end,
+                  )),
+              TextButton(
+                  onPressed: () {
+                    _deleteLandmark(landmark);
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'Yes',
+                    textAlign: TextAlign.end,
+                  )),
+            ],
+          );
+        });
+  }
+
   String? landmarkName;
 
   Future<void> _processNewLandmark() async {
     final routeLandmark = lib.RouteLandmark(ObjectId(),
-        position: lib.Position(type: 'Point', coordinates: [routePointForLandmark!.position!.coordinates.first, routePointForLandmark!.position!.coordinates.last]),
+        position: lib.Position(type: 'Point', coordinates: [
+          routePointForLandmark!.position!.coordinates.first,
+          routePointForLandmark!.position!.coordinates.last
+        ]),
         routeId: widget.route.routeId!,
         landmarkName: landmarkName!,
-        index: landmarkIndex, created: DateTime.now().toUtc().toIso8601String(),
+        index: landmarkIndex,
+        created: DateTime.now().toUtc().toIso8601String(),
         landmarkId: Uuid.v4().toString(),
         routePointId: routePointForLandmark!.routePointId!,
         routePointIndex: routePointForLandmark!.index!,
@@ -411,17 +430,20 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     try {
       var id = landmark.landmarkId!;
       var res = _markers.remove(Marker(markerId: MarkerId(id)));
-      totalPoints--;
       pp('$mm ... removed marker from map: $res, ${E.nice} = true, if not, we fucked!');
       myPrettyJsonPrint(landmark.toJson());
-      try {
-        pp('$mm ... start delete ...');
-        final result = await landmarkIsolate.deleteRouteLandmark(landmark.landmarkId!);
-        pp('$mm ... removed landmark from database: $result; ${E.nice} 0 is good, Boss!');
-        await _getRoutePoints(true);
-      } catch (e) {}
+
+      pp('$mm ........................................... start delete ...');
+      routeLandmarks =
+          await landmarkIsolate.deleteRouteLandmark(landmark.landmarkId!);
+      pp('$mm ... removed landmark from database: ${routeLandmarks.length} total remaining; ${E.nice}');
+      landmarkIndex = 0;
+      _controlReads(true);
     } catch (e) {
       pp('$mm $e');
+      if (mounted) {
+        showErrorSnackBar(message: 'Landmark removal failed', context: context);
+      }
     }
     setState(() {
       busy = false;
@@ -447,29 +469,8 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     return Scaffold(
         key: _key,
         body: _myCurrentCameraPosition == null
-            ? Center(
-                child: SizedBox(
-                  height: 100,
-                  child: Column(
-                    children: [
-                      const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 6,
-                          backgroundColor: Colors.pink,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 48,
-                      ),
-                      Text(
-                        'Waiting for GPS location ...',
-                        style: myTextStyleMediumBold(context),
-                      ),
-                    ],
-                  ),
-                ),
+            ? const Center(
+                child: TimerWidget(title: 'Waiting for GPS', isSmallSize: true),
               )
             : Stack(children: [
                 GoogleMap(
@@ -487,7 +488,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
                     _mapController.complete(controller);
                     googleMapController = controller;
                     _zoomToStartCity();
-                    _controlReads(false);
+                    _controlReads(true);
                   },
                 ),
                 Positioned(
@@ -525,7 +526,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
                             child: SizedBox(
                               height: 108,
                               child: Padding(
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(4.0),
                                 child: Column(
                                   children: [
                                     const SizedBox(
@@ -536,7 +537,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
                                         Text(
                                           'Route Landmarks',
                                           style: myTextStyleMediumLarge(
-                                              context, 20),
+                                              context, 16),
                                         )
                                       ],
                                     ),

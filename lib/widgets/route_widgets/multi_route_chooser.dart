@@ -8,12 +8,13 @@ import 'package:badges/badges.dart' as bd;
 import '../../l10n/translation_handler.dart';
 
 class MultiRouteChooser extends StatefulWidget {
-  const MultiRouteChooser({Key? key, required this.onRoutesPicked, required this.routes, required this.quitOnDone})
+  const MultiRouteChooser({Key? key, required this.onRoutesPicked, required this.routes, required this.quitOnDone, required this.hideAppBar})
       : super(key: key);
 
   final List<lib.Route> routes;
   final Function(List<lib.Route>) onRoutesPicked;
-  final bool quitOnDone;
+  final bool quitOnDone, hideAppBar;
+
 
   @override
   MultiRouteChooserState createState() => MultiRouteChooserState();
@@ -78,16 +79,14 @@ class MultiRouteChooserState extends State<MultiRouteChooser> {
   @override
   Widget build(BuildContext context) {
     final type = getThisDeviceType();
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
 
     return SafeArea(child: Scaffold(
       appBar: AppBar(
         leading: gapW16,
-        title: const Text('Route Selection'),
+        title: widget.hideAppBar? gapW32: const Text('Route Selection'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
             gapH16,
@@ -101,7 +100,7 @@ class MultiRouteChooserState extends State<MultiRouteChooser> {
                 Text(
                   '${list.length}',
                   style: myTextStyleMediumLargeWithColor(
-                      context, Theme.of(context).primaryColorLight, 20),
+                      context, Theme.of(context).primaryColor, 24),
                 ),
                 const SizedBox(
                   width: 24,
@@ -112,18 +111,20 @@ class MultiRouteChooserState extends State<MultiRouteChooser> {
               height: 4,
             ),
             list.isEmpty
-                ? const SizedBox()
-                : ElevatedButton(
-                onPressed: () {
-                  widget.onRoutesPicked(list);
-                  if (widget.quitOnDone) {
-                    Navigator.of(context).pop(list);
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(6.0),
-                  child: Text(showRoutes),
-                )),
+                ? gapH32
+                : SizedBox(width: 300,
+                  child: ElevatedButton(
+                  onPressed: () {
+                    widget.onRoutesPicked(list);
+                    if (widget.quitOnDone) {
+                      Navigator.of(context).pop(list);
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(6.0),
+                    child: Text(showRoutes),
+                  )),
+                ),
             const SizedBox(
               height: 8,
             ),
@@ -177,3 +178,5 @@ class MultiRouteChooserState extends State<MultiRouteChooser> {
     ));
   }
 }
+
+

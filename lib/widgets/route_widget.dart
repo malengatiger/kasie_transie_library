@@ -14,11 +14,8 @@ class RouteWidget extends StatelessWidget {
         shape: getDefaultRoundedBorder(),
         elevation: 8,
         child: ListTile(
-          title: Text('${route.name}'),
-          subtitle: Text(
-            '${route.associationName}',
-            style: myTextStyleTiny(context),
-          ),
+          title: Text('${route.name}', style: myTextStyleSmall(context),),
+
           leading: Icon(
             Icons.water_damage,
             color: Theme.of(context).primaryColor,

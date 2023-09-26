@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:kasie_transie_library/bloc/app_auth.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart';
-import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/parsers.dart';
 
 import '../utils/emojis.dart';
@@ -24,13 +23,13 @@ class VehicleIsolate {
     final start = DateTime.now();
 
     try {
-        final cars = await _handleOwnerVehicles(userId);
-        pp('\n\n\n$xy2 ..... ${E.nice}${E.nice} done getting owner cars ....${E.leaf} '
-            'returning ${cars.length} cars');
-        final end = DateTime.now();
-        pp('$xy2 Elapsed time for owner cars downloaded: ${end.difference(start).inSeconds} seconds\n\n');
+      final cars = await _handleOwnerVehicles(userId);
+      pp('\n\n\n$xy2 ..... ${E.nice}${E.nice} done getting owner cars ....${E.leaf} '
+          'returning ${cars.length} cars');
+      final end = DateTime.now();
+      pp('$xy2 Elapsed time for owner cars downloaded: ${end.difference(start).inSeconds} seconds\n\n');
 
-        return cars;
+      return cars;
     } catch (e) {
       final msg = '$xy2 ... getOwnerVehicles fell down and screamed! '
           '${E.redDot}${E.redDot}${E.redDot} $e';
@@ -44,16 +43,14 @@ class VehicleIsolate {
     final start = DateTime.now();
 
     try {
+      final cars = await _handleVehicles(associationId);
 
-        final cars = await _handleVehicles(associationId);
+      pp('\n\n\n$xy2 ..... ${E.nice}${E.nice} done getting association cars ....${E.leaf} '
+          'returning ${cars.length} cars');
+      final end = DateTime.now();
+      pp('$xy2 Elapsed time for association cars downloaded: ${end.difference(start).inSeconds} seconds\n\n');
 
-        pp('\n\n\n$xy2 ..... ${E.nice}${E.nice} done getting association cars ....${E.leaf} '
-            'returning ${cars.length} cars');
-        final end = DateTime.now();
-        pp('$xy2 Elapsed time for association cars downloaded: ${end.difference(start).inSeconds} seconds\n\n');
-
-        return cars;
-
+      return cars;
     } catch (e) {
       final msg = '$xy2 ... getVehicles fell down and screamed! '
           '${E.redDot}${E.redDot}${E.redDot} $e';
@@ -70,7 +67,7 @@ class VehicleIsolate {
     if (token != null) {
       final rootToken = ServicesBinding.rootIsolateToken!;
       final s = await Isolate.run(
-              () async => _heavyTaskForZippedOwnerCars(userId, token, rootToken));
+          () async => _heavyTaskForZippedOwnerCars(userId, token, rootToken));
       List json = jsonDecode(s);
       for (var value in json) {
         list.add(buildVehicle(value));
@@ -97,7 +94,7 @@ Future<List<Vehicle>> _handleVehicles(String associationId) async {
   if (token != null) {
     final rootToken = ServicesBinding.rootIsolateToken!;
     final s = await Isolate.run(
-            () async => _heavyTaskForZippedCars(associationId, token, rootToken));
+        () async => _heavyTaskForZippedCars(associationId, token, rootToken));
     List json = jsonDecode(s);
     for (var value in json) {
       list.add(buildVehicle(value));
@@ -106,17 +103,30 @@ Future<List<Vehicle>> _handleVehicles(String associationId) async {
 
   pp('$xy2 _handleVehicles attempting to cache ${list.length} cars.... ');
 
+  try {
+    final old = listApiDog.realm.query('associationId == \$0', [associationId]);
+    if (old.isNotEmpty) {
+      listApiDog.realm.write(() {
+        listApiDog.realm.deleteMany(old);
+      });
+    }
+  } catch (e, stack) {
+    pp('$xy2 $e - $stack');
+  }
   listApiDog.realm.write(() {
     listApiDog.realm.addAll<Vehicle>(list, update: true);
   });
   var end = DateTime.now();
+  final res = listApiDog.realm.query('associationId == \$0', [associationId]);
   pp('$xy2 should have cached ${list.length} cars in realm; elapsed time: '
-      '${end.difference(start).inSeconds} seconds');
+      '${end.difference(start).inSeconds} seconds. Cars in cache: ${res.length}');
+
   return list;
 }
 
 ///Isolate to get association routes
 const xyz = '🌀🌀🌀🌀🌀🌀🌀🌀🌀 HeavyTaskForCars: 🍎🍎';
+
 @pragma('vm:entry-point')
 Future<String> _heavyTaskForZippedCars(
     String associationId, String token, RootIsolateToken rootToken) async {
@@ -129,6 +139,7 @@ Future<String> _heavyTaskForZippedCars(
   final s = jsonEncode(res);
   return s;
 }
+
 @pragma('vm:entry-point')
 Future<String> _heavyTaskForZippedOwnerCars(
     String userId, String token, RootIsolateToken rootToken) async {
@@ -141,6 +152,7 @@ Future<String> _heavyTaskForZippedOwnerCars(
   final s = jsonEncode(res);
   return s;
 }
+
 @pragma('vm:entry-point')
 Future<String> _heavyTaskForCars(DonkeyBag bag) async {
   pp('$xy2 _heavyTaskForCars starting ................associationId:  ${bag.associationId} .');
@@ -184,7 +196,6 @@ Future<List> _processOwnerCars(String userId, String url, String token) async {
     'Accept': 'application/json',
   };
   headers['Authorization'] = 'Bearer $token';
-
 
   while (stop == false) {
     final mUrl = '${url}getOwnerVehicles?userId=$userId&page=$page';

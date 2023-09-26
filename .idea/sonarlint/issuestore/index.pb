@@ -111,22 +111,16 @@ _
 /lib/maps/cluster_maps/commuter_cluster_map.dart,9/e/9e056ef085ffe5fbbd8dc21b10ca032cb4ccf407
 f
 6lib/maps/cluster_maps/passenger_count_cluster_map.dart,f/1/f193f0f3fb1efadc06c0f34e4d45a54e5742f943
-E
-lib/data/big_bag.dart,1/7/178212d9172943ef10dde785d5c4cec618b33f34
 J
 lib/widgets/color_pad.dart,e/6/e63096aea4abf56d8d908e312322904122aec7a8
 O
 lib/utils/base_initializer.dart,1/5/1576457d9a774507c4dbc6a37850b29dc73da11c
-L
-lib/utils/error_handler.dart,1/0/10a99e756989f9692ff3b288cdfdb0dc6a40787b
 I
 lib/data/vehicle_bag.dart,4/6/4605b0293d9ed3d404f41d5b6740751389e0e172
 R
 "lib/maps/passenger_count_card.dart,1/8/18faad6ec4e9599a83108015c1af7900bfd0b1b4
 c
 3lib/widgets/vehicle_widgets/vehicle_dispatches.dart,b/4/b4169f09efb121ee1b82324e55379e33bb3e2467
-Y
-)lib/widgets/vehicle_widgets/car_list.dart,1/9/1941994139a5f019992acd2af196213b401567e4
 a
 1lib/maps/cluster_maps/cluster_map_controller.dart,6/2/62ca8e2e5704a13efb1cba37e4c43ccaba4bf16b
 _
@@ -139,8 +133,6 @@ J
 lib/data/vehicle_list.dart,d/c/dcdd4fccaaa18855006a051ba64d4dab1bf38e2a
 S
 #lib/maps/location_response_map.dart,6/5/655cc572da548cc96be1776f121da9a500982f67
-N
-lib/maps/route_map_viewer.dart,2/d/2d66cd26f69125332295544233b149a97cfba76b
 S
 #lib/data/route_assignment_list.dart,8/9/8972506840160424f9a80932776575d387d91e82
 E
@@ -167,8 +159,6 @@ N
 -lib/widgets/route_widgets/route_activity.dart,5/d/5d4535b706840a9376a2c24daabcb092456d3779
 Y
 )lib/utils/device_background_location.dart,1/e/1efc5ba4b8bb851e5c438dac3827db57b42c5c29
-M
-lib/widgets/route_widget.dart,b/7/b711d115f86b66d65ede6f01f9a3e8d6dc1e5def
 R
 "lib/widgets/drop_down_widgets.dart,1/6/16bbeac24cbb7c4ccf626488b531b640057980c7
 N
@@ -183,8 +173,6 @@ f
 6lib/widgets/vehicle_widgets/multi_vehicle_chooser.dart,0/6/06eacec1161604b39e50b736c3d680901f2df6df
 N
 lib/widgets/photo_handler.dart,0/d/0d9722f04fac14afa5b744911acbcd9f1ac461d4
-b
-2lib/widgets/route_widgets/multi_route_chooser.dart,8/c/8c0eb440e29ac2f9bb66009e2f49f72b511baeac
 [
 +lib/widgets/language_and_color_chooser.dart,e/0/e084d864c6026e18c64f9423376c69244ac839b1
 E
@@ -218,10 +206,6 @@ N
 ,lib/widgets/vehicle_widgets/car_details.dart,f/2/f2a05c8b7bea6c089346da83e1593409c0c4ad7c
 ;
 kt_build.sh,0/7/071b703b41e396b1c6bfc35f4fe0d41d1475a370
-Q
-!lib/maps/vehicle_monitor_map.dart,e/3/e33a85397de485191203d796396bc48177968671
-_
-/lib/widgets/vehicle_widgets/route_assigner.dart,0/6/06ec32852a1809307dbec57d6a2bc124f148938a
 `
 0lib/widgets/scanners/scan_vehicle_for_media.dart,9/7/972db87fc13dc0cb9f7fbe6843888dd333d8b55b
 K
@@ -240,8 +224,6 @@ S
 #lib/widgets/route_list_minimum.dart,c/a/ca6048750b8f977dbaecf7727536068c66eae2db
 L
 lib/messaging/heartbeat.dart,b/1/b14f98b7711cc4bb9ca72552b2ac79fb8d7dfc73
-J
-lib/utils/environment.dart,2/9/29aa30c893fdd0dcb85853c0a069b2d7d001deae
 V
 &lib/widgets/auth/cell_auth_signin.dart,f/8/f865f6036340f26489dd0ede60b705c8269dce5f
 J
@@ -256,8 +238,6 @@ M
 lib/bloc/dispatch_helper.dart,e/c/ec2900543724ef57a746746c5d53acbf07698314
 R
 "lib/isolates/dispatch_isolate.dart,a/7/a71f0e60cb52599660eb8c7812f089ed5a71ae67
-[
-+lib/widgets/scanners/dispatch_via_scan.dart,c/6/c698d61e46efffadcd9f84d909b35dffe553fb80
 [
 +lib/widgets/scanners/qr_scanner_mobile.dart,9/4/947b65276ef81c737c27f5c26d08ab649c26f27d
 a

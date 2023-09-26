@@ -41,12 +41,12 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
     super.initState();
     _listen();
     _setTexts();
-    _getVehicles();
+    _getVehicles(false);
   }
 
   void _listen() async {}
 
-  void _getVehicles() async {
+  void _getVehicles(bool refresh) async {
     pp('$mm ........... _getVehicles  ');
 
     setState(() {
@@ -55,10 +55,10 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
     try {
       if (widget.associationId != null) {
         cars = await listApiDog.getAssociationVehicles(
-            widget.associationId!, false);
+            widget.associationId!, refresh);
       }
       if (widget.ownerId != null) {
-        cars = await listApiDog.getOwnerVehicles(widget.ownerId!, false);
+        cars = await listApiDog.getOwnerVehicles(widget.ownerId!, refresh);
       }
       //
       cars.sort((a, b) => a.vehicleReg!.compareTo(b.vehicleReg!));
@@ -180,9 +180,15 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
               actions: [
                 IconButton(
                     onPressed: () {
+                      _getVehicles(true);
+                    },
+                    icon:  Icon(Icons.refresh, color: Theme.of(context).primaryColor,)),
+                IconButton(
+                    onPressed: () {
                       _navigateToScanner();
                     },
                     icon:  Icon(Icons.airport_shuttle, color: Theme.of(context).primaryColor,))
+
               ],
               bottom: const PreferredSize(preferredSize: Size.fromHeight(48), child: Column()),
             ),

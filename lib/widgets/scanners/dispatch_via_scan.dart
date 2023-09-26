@@ -417,7 +417,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
                             )),
                     gapH32,
                     scannedVehicle == null
-                        ? const Text('..............')
+                        ? gapH32
                         : Text(
                             '${scannedVehicle!.vehicleReg}',
                             style: myTextStyleMediumLargeWithColor(

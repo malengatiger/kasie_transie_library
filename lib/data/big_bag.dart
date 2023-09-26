@@ -9,14 +9,14 @@ class BigBag {
   List<AmbassadorPassengerCount> passengerCounts = [];
 
 
-  BigBag(
-      {required this.vehicleArrivals,
-      required this.vehicleDepartures,
-      required this.dispatchRecords,
-        required this.passengerCounts,
-      required this.vehicleHeartbeats});
+  BigBag({required this.vehicleArrivals,
+    required this.vehicleDepartures,
+    required this.dispatchRecords,
+    required this.passengerCounts,
+    required this.vehicleHeartbeats});
 
   BigBag.fromJson(Map data) {
+    print(data);
     List va = data['vehicleArrivals'];
     for (var value in va) {
       vehicleArrivals.add(buildVehicleArrival(value));

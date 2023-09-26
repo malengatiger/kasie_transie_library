@@ -4,12 +4,10 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:kasie_transie_library/bloc/cache_manager.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/schemas.dart' as lib;
 import 'package:kasie_transie_library/data/vehicle_bag.dart';
 import 'package:kasie_transie_library/maps/passenger_count_card.dart';
-import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/vehicle_dispatches.dart';
 
@@ -17,7 +15,6 @@ import '../isolates/routes_isolate.dart';
 import '../messaging/fcm_bloc.dart';
 import '../utils/emojis.dart';
 import '../widgets/counts_widget.dart';
-import '../widgets/drop_down_widgets.dart';
 
 class VehicleMonitorMap extends StatefulWidget {
   const VehicleMonitorMap({Key? key, required this.vehicle}) : super(key: key);

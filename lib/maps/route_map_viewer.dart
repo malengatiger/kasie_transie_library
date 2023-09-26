@@ -15,6 +15,7 @@ import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 
 import '../widgets/color_pad.dart';
+import '../widgets/timer_widget.dart';
 import '../widgets/tiny_bloc.dart';
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 
@@ -129,8 +130,10 @@ class RouteMapViewerState extends State<RouteMapViewer> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(changeColor,
-                      style: myTextStyleMediumLargeWithColor(context, Theme.of(context).primaryColorLight, 24),
+                    Text(
+                      changeColor,
+                      style: myTextStyleMediumLargeWithColor(
+                          context, Theme.of(context).primaryColorLight, 24),
                     ),
                     const SizedBox(
                       width: 28,
@@ -145,7 +148,8 @@ class RouteMapViewerState extends State<RouteMapViewer> {
                 const SizedBox(
                   height: 8,
                 ),
-                SizedBox(height: 220,
+                SizedBox(
+                  height: 220,
                   child: ColorPad(
                     onColorPicked: (mColor, string) {
                       pp('$mm ....... 🍎🍎🍎🍎🍎🍎 onColorPicked picked ... $stringColor');
@@ -178,8 +182,11 @@ class RouteMapViewerState extends State<RouteMapViewer> {
       final latLng = LatLng(landmark.position!.coordinates.last,
           landmark.position!.coordinates.first);
 
-      final icon = await getMarkerBitmap(72, text: '${landmarkIndex+1}',
-          color: route!.color!, fontSize: 28, fontWeight: FontWeight.w900);
+      final icon = await getMarkerBitmap(72,
+          text: '${landmarkIndex + 1}',
+          color: route!.color!,
+          fontSize: 28,
+          fontWeight: FontWeight.w900);
 
       _markers.add(Marker(
           markerId: MarkerId('${landmark.landmarkId}'),
@@ -346,10 +353,7 @@ class RouteMapViewerState extends State<RouteMapViewer> {
         key: _key,
         body: _myCurrentCameraPosition == null
             ? Center(
-                child: Text(
-                  waitingForGPS,
-                  style: myTextStyleMediumBold(context),
-                ),
+                child: TimerWidget(title: waitingForGPS, isSmallSize: true),
               )
             : Stack(children: [
                 GoogleMap(
@@ -409,7 +413,8 @@ class RouteMapViewerState extends State<RouteMapViewer> {
                                         const SizedBox(
                                           height: 4,
                                         ),
-                                        Text(routeMapViewer,
+                                        Text(
+                                          routeMapViewer,
                                           style:
                                               myTextStyleMediumLargeWithColor(
                                                   context, Colors.white, 24),

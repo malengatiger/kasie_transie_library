@@ -60,6 +60,8 @@ class LandmarkIsolate {
     final longString = await Isolate.run(() async => _heavyTaskForLandmarkDelete(routeLandmarkId, token));
     List mJson = jsonDecode(longString);
     _cacheLandmarks(mJson, list, routeLandmarkId);
+    pp('$xyz LandmarkIsolate completed the job. 🔷🔷🔷🔷 ${E.heartOrange}\n\n');
+
     return list;
   }
 
@@ -78,6 +80,8 @@ Future<List<lib.RouteLandmark>> addRouteLandmark(
   final longString = await Isolate.run(() async => _heavyTaskForLandmark(map, token));
   List mJson = jsonDecode(longString);
   _cacheLandmarks(mJson, list, routeLandmark.routeId!);
+  pp('$xyz LandmarkIsolate completed the job. 🔷🔷🔷🔷 ${E.heartOrange}\n\n');
+
   return list;
 }
 
@@ -90,8 +94,9 @@ void _cacheLandmarks(List<dynamic> mJson, List<lib.RouteLandmark> list, String r
     listApiDog.realm.deleteMany(items);
     listApiDog.realm.addAll(list, update: true);
   });
+   final items2 = listApiDog.realm.query<lib.RouteLandmark>('routeId == \$0', [routeId]);
 
-  pp('$xyz LandmarkIsolate completed the job. 🔷🔷🔷🔷 Yay! ${E.heartOrange}\n\n');
+  pp('$xyz _cacheLandmarks completed the job. 🔷🔷🔷🔷 newly cached landmarks: ${items2.length}! ${E.heartOrange}\n\n');
   _compController.sink.add(list);
 }
 }
@@ -171,36 +176,6 @@ Future<List<lib.RouteLandmark>> _deleteRouteLandmark(
   }
 
   return marks;
-}
-
-Future<lib.Landmark> _addLandmark(lib.Landmark landmark, url, token) async {
-  final bag = landmark.toJson();
-  final cmd = '${url}addBasicLandmark';
-  final res = await _httpPost(cmd, bag, token);
-  pp('$xyz Landmark added to database ...');
-  final r = buildLandmark(res);
-
-  return r;
-}
-
-Future<lib.RouteCity> _addRouteCity(lib.RouteCity routeCity, url, token) async {
-  final bag = routeCity.toJson();
-  final cmd = '${url}addRouteCity';
-  try {
-    final res = await _httpPost(cmd, bag, token);
-    pp('$xyz RouteCity added to database ...');
-    final r = buildRouteCity(res);
-
-    return r;
-  } catch (e) {
-    pp('$xyz error adding RouteCity; probable dup');
-    if (e.toString().contains('duplicate')) {
-      pp('$xyz .... it is indeed a DUPLICATE! ${E.heartRed} ${E.heartRed} ${E.heartRed} ');
-      return routeCity;
-    } else {
-      rethrow;
-    }
-  }
 }
 
 Map<String, String> headers = {

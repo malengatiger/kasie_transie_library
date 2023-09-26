@@ -616,7 +616,10 @@ class ListApiDog {
       try {
         localList = await _getRouteLandmarksFromBackend(routeId: routeId);
         pp('$mm RouteLandmarks from backend:: ${localList.length}');
+        rm.RealmResults<RouteLandmark> results =
+        realm.query<RouteLandmark>("routeId == \$0", [routeId]);
         realm.write(() {
+          realm.deleteMany(results);
           realm.addAll<RouteLandmark>(localList, update: true);
         });
       } catch (e) {

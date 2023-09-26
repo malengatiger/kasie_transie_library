@@ -108,14 +108,22 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
         pp('$mm ... NO ROUTE LANDMARKS FOUND for ${widget.route.name}');
         return;
       }
-      routeLandmarks.sort((a, b) => a.created!.compareTo(b.created!));
+      try {
+        routeLandmarks.sort((a, b) => a.index!.compareTo(b.index!));
+      } catch (e, stack) {
+        pp('$mm $e - $stack');
+      }
       landmarkIndex = 0;
+      Color borderColor = Colors.black;
+      if (widget.route.color == 'black') {
+        borderColor = Colors.white;
+      }
       for (var landmark in routeLandmarks) {
             final latLng = LatLng(landmark.position!.coordinates.last,
                 landmark.position!.coordinates.first);
             final icon = await getMarkerBitmap(72,
                 text: '${landmarkIndex+1}',
-                color: widget.route.color!, borderColor: Colors.black, fontSize: 28, fontWeight: FontWeight.w900);
+                color: widget.route.color!, borderColor: borderColor, fontSize: 28, fontWeight: FontWeight.w900);
             _markers.add(Marker(
                 markerId: MarkerId('${landmark.landmarkId}'),
                 icon: icon,
@@ -134,6 +142,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
                 position: latLng));
             landmarkIndex++;
             pp('$mm ... routeLandmark added to markers: ${_markers.length}');
+            myPrettyJsonPrint(landmark.toJson());
           }
     } catch (e, stack) {
       pp('$mm $e $stack');

@@ -209,6 +209,7 @@ class _RouteAssignerState extends State<RouteAssigner> {
   void _navigateToMultiRouteChooser() async {
     routesPicked = await navigateWithScale(
         MultiRouteChooser(
+            hideAppBar: false,
             quitOnDone: true, onRoutesPicked: (r) {}, routes: routes),
         context);
 
@@ -390,6 +391,7 @@ class _RouteAssignerState extends State<RouteAssigner> {
                                 SizedBox(
                                   width: (width / 2) + 100,
                                   child: MultiRouteChooser(
+                                  hideAppBar: true,
                                     onRoutesPicked: (rs) {
                                       setState(() {
                                         routesPicked = rs;
@@ -418,13 +420,14 @@ class _RouteAssignerState extends State<RouteAssigner> {
                                 SizedBox(
                                   width: (width / 2) + 100,
                                   child: MultiRouteChooser(
+
                                     onRoutesPicked: (rs) {
                                       setState(() {
                                         routesPicked = rs;
                                       });
                                     },
                                     routes: routes,
-                                    quitOnDone: true,
+                                    quitOnDone: true, hideAppBar: true,
                                   ),
                                 )
                               ],

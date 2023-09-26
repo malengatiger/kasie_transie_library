@@ -17,6 +17,7 @@ import 'package:kasie_transie_library/widgets/route_widgets/multi_route_chooser.
 import '../isolates/routes_isolate.dart';
 import '../utils/emojis.dart';
 import '../widgets/drop_down_widgets.dart';
+import '../widgets/timer_widget.dart';
 
 class AssociationRouteMaps extends StatefulWidget {
   const AssociationRouteMaps({
@@ -109,6 +110,8 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
               context: context);
         }
       }
+        _showBottomSheet();
+
     } catch (e) {
       pp(e);
       if (mounted) {
@@ -156,6 +159,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
             padding:
                 EdgeInsets.symmetric(horizontal: type == 'phone' ? 12.0 : 48),
             child: MultiRouteChooser(
+              hideAppBar: true,
               onRoutesPicked: (routesPicked) {
                 setState(() {
                   this.routesPicked = routesPicked;
@@ -212,19 +216,23 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
       {required List<lib.RouteLandmark> routeLandmarks,
       required List<BitmapDescriptor> icons,
       required String color}) async {
-    pp('$mm .......... _addLandmarks ....... .');
+    pp('$mm .......... _addLandmarks ....... .routeLandmarks: ${routeLandmarks.length}');
 
     int landmarkIndex = 0;
-    for (var routeLandmark in routeLandmarks) {
-      _markers.add(Marker(
-          markerId: MarkerId(routeLandmark.landmarkId!),
-          icon: icons.elementAt(landmarkIndex),
-          position: LatLng(routeLandmark.position!.coordinates[1],
-              routeLandmark.position!.coordinates[0]),
-          infoWindow: InfoWindow(
-              title: routeLandmark.landmarkName,
-              snippet: '🍎Part of ${routeLandmark.routeName}')));
-      landmarkIndex++;
+    try {
+      for (var routeLandmark in routeLandmarks) {
+            _markers.add(Marker(
+                markerId: MarkerId(routeLandmark.landmarkId!),
+                icon: icons.elementAt(landmarkIndex),
+                position: LatLng(routeLandmark.position!.coordinates[1],
+                    routeLandmark.position!.coordinates[0]),
+                infoWindow: InfoWindow(
+                    title: routeLandmark.landmarkName,
+                    snippet: '🍎Part of ${routeLandmark.routeName}')));
+            landmarkIndex++;
+          }
+    } catch (e, stack) {
+      pp('$mm $e - $stack');
     }
   }
 
@@ -300,12 +308,13 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   }
 
   int distanceInKM = 100;
+  bool showSheet = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Route Map Finder'),
+          title: const Text('Route Map'),
           bottom: PreferredSize(
               preferredSize: const Size.fromHeight(64),
               child: Column(
@@ -325,20 +334,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
                             child: Text('${routes.length} Routes'),
                           )),
                       gapW8,
-                       Text('Distance', style: myTextStyleSmall(context),),
-                      gapW8,
-                      DistanceDropDown(
-                        onDistancePicked: (dist) {
-                          setState(() {
-                            distanceInKM = dist;
-                          });
-                          _getRoutes(true);
-                        },
-                        color: Theme.of(context).primaryColor,
-                        count: 12,
-                        fontSize: 16,
-                        multiplier: 50,
-                      ),
+
                     ],
                   ),
                   gapH16,
@@ -347,12 +343,9 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
         ),
         key: _key,
         body: _myCurrentCameraPosition == null
-            ? Center(
-                child: Text(
-                  'Waiting for GPS location ...',
-                  style: myTextStyleMediumBold(context),
-                ),
-              )
+            ? const Center(
+          child: TimerWidget(title: 'Loading ...', isSmallSize: false),
+        )
             : Stack(children: [
                 GoogleMap(
                   mapType: isHybrid ? MapType.hybrid : MapType.normal,
@@ -367,6 +360,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
                   onMapCreated: (GoogleMapController controller) {
                     pp('$mm .......... on onMapCreated .....');
                     _mapController.complete(controller);
+                    showSheet = true;
                     _getRoutes(false);
                   },
                 ),
