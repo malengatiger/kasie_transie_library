@@ -1146,8 +1146,8 @@ class _Landmark {
     Map<String, dynamic> map = {
       '_id': id.hexString,
       'landmarkId': landmarkId,
-      'latitude': position != null ? position!.coordinates![1] : null,
-      'longitude': position != null ? position!.coordinates![0] : null,
+      'latitude': position != null ? position!.coordinates[1] : null,
+      'longitude': position != null ? position!.coordinates[0] : null,
       'distance': distance ?? 0.0,
       'landmarkName': landmarkName,
       'position': position != null ? position!.toJson() : null,

@@ -22,7 +22,7 @@ final ZipHandler zipHandler = ZipHandler();
 class ZipHandler {
   static const xz = '🍐🍐🍐🍐 ZipHandler : ';
 
-  Future<List<Vehicle>> getCars(String associationId, String token) async {
+  Future<String> getCars(String associationId, String token) async {
     pp('$xz getVehiclesZippedFile: 🔆🔆🔆 get zipped car data associationId: $associationId ...');
 
     final mUrl =
@@ -68,7 +68,6 @@ class ZipHandler {
             for (var v in mJson) {
               cars.add(buildVehicle(v));
             }
-            await cacheCars(cars);
             pp('$xz getCars 🍎🍎🍎🍎 list of ${cars.length} cars has been filled!');
             var end = DateTime.now();
             var ms = end.difference(start).inSeconds;
@@ -82,10 +81,10 @@ class ZipHandler {
       pp('$xz ... Error dealing with zipped file: $e : $stack');
       rethrow;
     }
-    return cars;
+    return jsonEncode(cars);
   }
 
-  Future<List<Vehicle>> getOwnerCars(String userId, String token) async {
+  Future<String> getOwnerCars(String userId, String token) async {
     pp('$xz getOwnerCars: 🔆🔆🔆 get zipped owner car data userId: $userId ...');
 
     final mUrl =
@@ -131,7 +130,7 @@ class ZipHandler {
             for (var v in mJson) {
               cars.add(buildVehicle(v));
             }
-            await cacheCars(cars);
+
             pp('$xz getCars 🍎🍎🍎🍎 list of ${cars.length} cars has been filled!');
             var end = DateTime.now();
             var ms = end.difference(start).inSeconds;
@@ -145,17 +144,11 @@ class ZipHandler {
       pp('$xz ... Error dealing with zipped file: $e : $stack');
       rethrow;
     }
-    return cars;
+    return jsonEncode(cars);
   }
 
-  Future cacheCars(List<Vehicle> cars) async {
-    listApiDog.realm.write(() {
-      listApiDog.realm.addAll<Vehicle>(cars, update: true);
-    });
-    pp('$xz ${cars.length} cars cached in realm');
-  }
 
-  Future<List<City>> getCities(String countryId, String token) async {
+  Future<String> getCities(String countryId, String token) async {
     pp('$xz getCities: 🔆🔆🔆 get zipped city data countryId: $countryId ...');
 
     final mUrl =
@@ -201,7 +194,7 @@ class ZipHandler {
             for (var v in mJson) {
               cities.add(buildCity(v));
             }
-            await cacheCities(cities);
+
             pp('$xz getCities 🍎🍎🍎🍎 list of ${cities.length} cities has been filled!');
             var end = DateTime.now();
             var ms = end.difference(start).inSeconds;
@@ -215,17 +208,11 @@ class ZipHandler {
       pp('$xz ... Error dealing with zipped file: $e');
       rethrow;
     }
-    return cities;
+    return jsonEncode(cities);
   }
 
-  Future cacheCities(List<City> cities) async {
-    listApiDog.realm.write(() {
-      listApiDog.realm.addAll<City>(cities, update: true);
-    });
-    pp('$xz ${cities.length} cities cached in realm');
-  }
 
-  Future<RouteData> getRouteData(
+  Future<String> getRouteData(
       {required String associationId, required String token}) async {
     pp('$xz _getRouteBag: 🔆🔆🔆 get zipped data; ... associationId: $associationId ...');
 
@@ -311,16 +298,12 @@ class ZipHandler {
                 routePoints: routePoints,
                 landmarks: landmarks,
                 cities: cities);
-            await cacheBag(
-                routes: routes,
-                routePoints: routePoints,
-                landmarks: landmarks,
-                cities: cities);
 
             pp('$xz _getRouteBag 🍎🍎🍎🍎 route bag has been filled and cached!');
             var end = DateTime.now();
             var ms = end.difference(start).inSeconds;
-            pp('$xz _getRouteBag 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎\n\n');
+            pp('$xz _getRouteBag 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎 return string ...\n\n');
+            return jsonEncode(routeData.toJson());
           }
         }
       }
@@ -329,18 +312,15 @@ class ZipHandler {
       pp('Stack trace: $stackTrace');
       rethrow;
     }
-    return routeData;
+    throw Exception('Bad moon rising!');
   }
 
-  Future<List<RoutePoint>> getRoutePoints(
+  Future<String> getRoutePoints(
       {required String routeId, required String token}) async {
     pp('$xz getRoutePoints: 🔆🔆🔆 get zipped data; ... routeId: $routeId ...');
 
     final mUrl = '${KasieEnvironment.getUrl()}getRoutePointsZipped?routeId'
         '=$routeId';
-
-    var start = DateTime.now();
-    List<RoutePoint> routePoints = [];
 
     Map<String, String> headers = {
       'Authorization': 'Bearer $token',
@@ -349,11 +329,12 @@ class ZipHandler {
     headers['Authorization'] = 'Bearer $token';
 
     http.Response response = await getUsingHttp(mUrl, token, headers);
-
-    return await _getPointsFromArchive(response);
+    final list =
+     await _getPointsFromArchive(response);
+    return jsonEncode(list);
   }
 
-  Future<List<RoutePoint>> deleteRoutePoints(
+  Future<String> deleteRoutePoints(
       {required String routeId,
       required double latitude,
       required double longitude,
@@ -368,8 +349,8 @@ class ZipHandler {
       'Accept': '*/*',
     };
     http.Response response = await getUsingHttp(mUrl, token, headers);
-
-    return await _getPointsFromArchive(response);
+    final points = await _getPointsFromArchive(response);
+    return jsonEncode(points);
   }
 
   Future<List<RoutePoint>> _getPointsFromArchive(http.Response response) async {
@@ -480,23 +461,7 @@ class ZipHandler {
     return bag;
   }
 
-  Future cacheBag(
-      {required List<Route> routes,
-      required List<RoutePoint> routePoints,
-      required List<RouteLandmark> landmarks,
-      required List<RouteCity> cities}) async {
-    pp('$xz ... cacheBag - cache all the data for ${routes.length} routes ......... ');
-    //
 
-    listApiDog.realm.write(() {
-      listApiDog.realm.addAll<RouteLandmark>(landmarks, update: true);
-      listApiDog.realm.addAll<RoutePoint>(routePoints, update: true);
-      listApiDog.realm.addAll<RouteCity>(cities, update: true);
-      listApiDog.realm.addAll<Route>(routes, update: true);
-    });
-    //
-    pp('$xz ... 🌼🌼 ..... Routes cached: ${routes.length}');
-  }
 
   Future<http.Response> getUsingHttp(
       String mUrl, String token, Map<String, String> headers) async {

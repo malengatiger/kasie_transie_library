@@ -51,7 +51,7 @@ class _RouteManagerState extends State<RouteManager> {
       final loc = await locationBloc.getLocation();
       pp('$mm ... location found: ${E.redDot} $loc');
       var mRoutes = await listApiDog.getRoutes(
-          AssociationParameter(widget.association.associationId!, false));
+          widget.association.associationId!, false);
       await _filter(mRoutes);
     } catch (e) {
       pp(e);

@@ -49,7 +49,7 @@ class DeviceLocationBloc {
       {required double latitude, required double longitude}) async {
     var pos = await getLocation();
 
-    var latLngFrom = LatLng(pos.latitude!, pos.longitude!);
+    var latLngFrom = LatLng(pos.latitude, pos.longitude);
     var latLngTo = LatLng(latitude, longitude);
 
     var distanceBetweenPoints =

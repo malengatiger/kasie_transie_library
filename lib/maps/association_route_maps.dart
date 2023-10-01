@@ -88,13 +88,13 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
                 : widget.radiusInMetres!);
         if (mRoutes.isEmpty) {
           mRoutes = await listApiDog
-              .getRoutes(AssociationParameter(_user!.associationId!, refresh));
+              .getRoutes(_user!.associationId!, refresh);
         }
         await _filter(mRoutes);
       } else {
         pp('\n\n$mm .......... get all Association Routes ... refresh: $refresh');
         final mRoutes = await listApiDog
-            .getRoutes(AssociationParameter(_user!.associationId!, refresh));
+            .getRoutes(_user!.associationId!, refresh);
         _printy();
         await _filter(mRoutes);
         if (mounted) {

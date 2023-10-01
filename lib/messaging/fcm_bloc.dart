@@ -13,6 +13,7 @@ import 'package:kasie_transie_library/messaging/local_notif.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
+import 'package:kasie_transie_library/utils/kasie_error.dart';
 import 'package:kasie_transie_library/utils/parsers.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:realm/realm.dart';
@@ -101,7 +102,20 @@ class FCMBloc {
 
   static const red = '🍎🍎';
   var newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMBloc: 🌀🌀🌀🌀';
+  Future<void> subscribeForBackendMonitor(String app) async {
+    appName = app;
+    if (!newMM.contains(app)) {
+    newMM = '$newMM$app 🔷🔷';
+    }
+    await firebaseMessaging
+        .subscribeToTopic('kasieError');
+    pp('$newMM ..... FCM: subscribed to topic kasieError');
+    //
+    await firebaseMessaging
+        .subscribeToTopic('appError');
+    pp('$newMM ..... FCM: subscribed to topic appError');
 
+  }
   Future<void> subscribeForDemoDriver(String app) async {
     String? associationId;
     appName = app;
@@ -433,6 +447,13 @@ class FCMBloc {
         final req = buildRouteUpdateRequest(data);
         _processRouteUpdate(req);
         break;
+      case Constants.appError:
+        _appErrorStreamController.sink.add(data);
+        break;
+      case Constants.kasieError:
+        _kasieErrorStreamController.sink.add(data);
+        break;
+
 
       default:
         pp('$newMM ... SWITCH statement fell all the way through: type: $type ... ');
@@ -732,6 +753,18 @@ class FCMBloc {
 
   Stream<lib.AmbassadorPassengerCount> get passengerCountStream =>
       _passengerCountStreamController.stream;
+
+  final StreamController<Map<String, dynamic>>
+  _appErrorStreamController = StreamController.broadcast();
+
+  Stream<Map<String, dynamic>> get appErrorStream =>
+      _appErrorStreamController.stream;
+
+  final StreamController<Map<String, dynamic>>
+  _kasieErrorStreamController = StreamController.broadcast();
+
+  Stream<Map<String, dynamic>> get kasieErrorStream =>
+      _kasieErrorStreamController.stream;
 }
 
 ///Handling FCM messages in the background
@@ -788,8 +821,8 @@ Future<void> kasieFirebaseMessagingBackgroundHandler(
     case Constants.routeUpdateRequest:
       final d = buildRouteUpdateRequest(data);
       routesIsolate.refreshRoute(d.routeId!);
-
       break;
+
   }
 
 }

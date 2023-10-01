@@ -60,7 +60,7 @@ class ErrorHandler {
       final loc = await locationBloc.getLocation();
       pp('$mm ... location ok? $loc');
       errorPosition = Position(
-          coordinates: [loc.longitude, loc.latitude!],
+          coordinates: [loc.longitude, loc.latitude],
           type: 'Point',
           latitude: loc.latitude,
           longitude: loc.latitude);
@@ -93,7 +93,7 @@ class ErrorHandler {
         errorMessage: exception.toString(),
         model: deviceData['model'],
         created: DateTime.now().toUtc().toIso8601String(),
-        userId: user == null ? null : user!.userId,
+        userId: user?.userId,
         userName: user?.name,
         errorPosition: errorPosition,
         versionCodeName: deviceData['versionCodeName'],

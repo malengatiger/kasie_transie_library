@@ -38,6 +38,7 @@ class VehicleBag {
     for (var value in di) {
       dispatchRecords.add(buildDispatchRecord(value));
     }
+
     List pc = data['passengerCounts'];
     for (var value in pc) {
       passengerCounts.add(buildAmbassadorPassengerCount(value));

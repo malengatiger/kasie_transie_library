@@ -70,7 +70,7 @@ class RouteListMinimumState extends State<RouteListMinimum>
         routes = await routesIsolate.getRoutes(widget.association.associationId!, true);
       } else {
         routes = await listApiDog
-            .getRoutes(AssociationParameter(widget.association.associationId!, refresh));
+            .getRoutes(widget.association.associationId!, refresh);
       }
       routes.sort((a,b) => a.name!.compareTo(b.name!));
       pp('$mm ... found ${routes.length}');

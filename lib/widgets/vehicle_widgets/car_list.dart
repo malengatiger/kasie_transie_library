@@ -39,12 +39,9 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
-    _listen();
     _setTexts();
     _getVehicles(false);
   }
-
-  void _listen() async {}
 
   void _getVehicles(bool refresh) async {
     pp('$mm ........... _getVehicles  ');
@@ -72,8 +69,8 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
         _showSearch = true;
       }
       pp('$mm ..... cars found: ${cars.length}');
-    } catch (e) {
-      pp(e);
+    } catch (e, stack) {
+      pp('$mm $e - $stack');
     }
 
     setState(() {
@@ -248,11 +245,11 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
                                     child: ListView.builder(
                                         itemCount: carsToDisplay.length,
                                         itemBuilder: (ctx, index) {
-                                          final ass = carsToDisplay
+                                          final car = carsToDisplay
                                               .elementAt(index);
                                           return GestureDetector(
                                             onTap: () {
-                                              _onCarSelected(ass);
+                                              _onCarSelected(car);
                                             },
                                             child: Card(
                                               shape: getRoundedBorder(
@@ -260,13 +257,13 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
                                               elevation: 4,
                                               child: ListTile(
                                                 title: Text(
-                                                  '${ass.vehicleReg}',
+                                                  '${car.vehicleReg}',
                                                   style:
                                                       myTextStyleMediumBold(
                                                           context),
                                                 ),
                                                 subtitle: Text(
-                                                  '${ass.make} ${ass.model} - ${ass.year}',
+                                                  '${car.make} ${car.model} - ${car.year}',
                                                   style: myTextStyleSmall(
                                                       context),
                                                 ),

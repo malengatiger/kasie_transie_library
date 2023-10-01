@@ -64,7 +64,7 @@ class NumberAndCaption extends StatelessWidget {
   Widget build(BuildContext context) {
     final fmt = NumberFormat.decimalPattern();
     return SizedBox(
-      height: 64,
+      height: 100,
       child: Column(
         children: [
           Text(

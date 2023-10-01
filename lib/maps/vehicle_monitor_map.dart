@@ -117,7 +117,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
         .listen((lib.VehicleHeartbeat heartbeat) async {
       pp('$mm ... heartbeatStreamStream delivered heartbeat for: ${heartbeat.vehicleReg} at ${heartbeat.created}');
       if (heartbeat.vehicleId == widget.vehicle.vehicleId) {
-        await _putHeartbeatOnMap(heartbeat);
+        await _putLastHeartbeatOnMap(heartbeat);
       }
     });
   }
@@ -164,13 +164,13 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
         } else {
           if (bag!.heartbeats.isNotEmpty) {
             bag!.heartbeats.sort((a, b) => b.created!.compareTo(a.created!));
-            lastHeartbeat = bag!.heartbeats.first;
-            _putHeartbeatOnMap(lastHeartbeat!);
+            lastHeartbeat = bag!.heartbeats.last;
+            _putLastHeartbeatOnMap(lastHeartbeat!);
           }
         }
       }
-    } catch (e) {
-      pp(e);
+    } catch (e, stack) {
+      pp('$e - $stack');
       if (mounted) {
         showSnackBar(
             backgroundColor: Colors.red,
@@ -181,17 +181,23 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
   }
 
   Future<void> _getRoutes() async {
-    routes = await listApiDog.getRoutesFilteredByAssignments(
-      associationId: widget.vehicle.associationId!,
-      vehicleId: widget.vehicle.vehicleId!,
-    );
-    if (routes.isEmpty) {
-      routes = await routesIsolate.getRoutesMappable(
-          widget.vehicle.associationId!, false);
-    }
-
-    if (routes.isNotEmpty) {
-      _putRoutesOnMap(false);
+    try {
+      // pp('$mm ..... getRoutesFilteredByAssignments ..');
+      // routes = await listApiDog.getRoutesFilteredByAssignments(
+      //   associationId: widget.vehicle.associationId!,
+      //   vehicleId: widget.vehicle.vehicleId!,
+      // );
+      // if (routes.isEmpty) {
+        pp('$mm ..... getRoutes ..');
+        routes =
+            await routesIsolate.getRoutesMappable(widget.vehicle.associationId!, false);
+      // }
+      _printRoutes();
+      if (routes.isNotEmpty) {
+        _putRoutesOnMap(false);
+      }
+    } catch (e, stack) {
+      pp('$mm $e $stack');
     }
   }
 
@@ -243,7 +249,6 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
       if (marks.isNotEmpty) {
         mLandmark = marks.first;
       }
-//AIzaSyCXzo0wT6tMvgc1PHFET6nml3xO0fL-vFg
       for (var routeLandmark in marks) {
         final icon = await getMarkerBitmap(64,
             text: '${index + 1}',
@@ -383,6 +388,67 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     }
   }
 
+  Future _putLastHeartbeatOnMap(lib.VehicleHeartbeat heartbeat) async {
+    heartbeats.sort((a, b) => a.created!.compareTo(b.created!));
+    _heartbeatMarkers.clear();
+    if (mounted) {
+      setState(() {
+        showDot = true;
+      });
+    }
+
+
+    // final icon = await getTaxiMapIcon(
+    //     iconSize: 360,
+    //     text: '${heartbeat.vehicleReg}',
+    //     style: style,
+    //     path: 'assets/car2.png');
+    final icon = await getMarkerBitmap(160,
+        text:  '${heartbeat.vehicleReg}',
+        color: 'pink',
+        fontSize: 24,
+        fontWeight: FontWeight.w900);
+
+      final latLng = LatLng(
+          heartbeat.position!.coordinates[1], heartbeat.position!.coordinates[0]);
+
+      final key = DateTime.parse(heartbeat.created!);
+      _heartbeatMarkers.add(Marker(
+          markerId: MarkerId('hb_$key'),
+          icon: icon,
+          zIndex: 4,
+          position: latLng,
+          onTap: () {
+            pp('$mm ... on Marker tapped ...');
+          },
+          infoWindow: InfoWindow(
+              title: heartbeat.vehicleReg,
+              onTap: () async {
+                pp('$mm ... on infoWindow tapped...${heartbeat.created}');
+                _handleTap();
+              },
+              snippet:
+              '${E.blueDot} ${getFormattedDateLong(heartbeat.created!)}')));
+    //
+    getAllMarkers();
+    if (mounted) {
+      setState(() {});
+    }
+
+    try {
+      await _zoomToPosition(LatLng(heartbeat.position!.coordinates.last,
+          heartbeat.position!.coordinates.first));
+      if (mounted) {
+        setState(() {
+          showDot = false;
+        });
+      }
+    } catch (e) {
+      pp('$mm some error with zooming? ${E.redDot}${E.redDot}${E.redDot}${E.redDot}'
+          ' $e');
+    }
+  }
+
   void _handleTap() async {
     setState(() {
       busy = true;
@@ -407,7 +473,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
   bool showDetails = false;
 
   Future<void> _zoomToPosition(LatLng latLng) async {
-    var cameraPos = CameraPosition(target: latLng, zoom: 13.4);
+    var cameraPos = CameraPosition(target: latLng, zoom: 16.4);
     try {
       await googleMapController
           .animateCamera(CameraUpdate.newCameraPosition(cameraPos));
@@ -468,9 +534,9 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
         child: Scaffold(
       appBar: AppBar(
         title: Text(
-          '${widget.vehicle.vehicleReg}',
+          'Vehicle Map: ${widget.vehicle.vehicleReg}',
           style: myTextStyleMediumLargeWithColor(
-              context, Theme.of(context).primaryColor, 24),
+              context, Theme.of(context).primaryColor, 20),
         ),
         // bottom: PreferredSize(
         //     preferredSize: const Size.fromHeight(48),

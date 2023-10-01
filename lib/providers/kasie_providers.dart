@@ -30,15 +30,15 @@ final nearbyCitiesProvider = riv.FutureProvider.family<
   return res;
 });
 //
-final routesProvider = riv.FutureProvider.family<List<Route>,
-    AssociationParameter>((ref, associationParameter) async {
-  final res = await listApiDog.getRoutes(associationParameter);
-  pp('$bb routesProvider did the job: ${res.length} routes found.');
-  for (var r in res) {
-    pp('$bb routesProvider route: ❤️❤️ ${r.name}');
-  }
-  return res;
-});
+// final routesProvider = riv.FutureProvider.family<List<Route>,
+//     AssociationParameter>((ref, associationParameter) async {
+//   final res = await listApiDog.getRoutes(associationParameter);
+//   pp('$bb routesProvider did the job: ${res.length} routes found.');
+//   for (var r in res) {
+//     pp('$bb routesProvider route: ❤️❤️ ${r.name}');
+//   }
+//   return res;
+// });
 //
 // final routePointProvider = riv.FutureProvider.family<List<RoutePoint>, String>((ref,
 //     routeId) async {

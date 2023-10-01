@@ -78,7 +78,7 @@ class ClusterMapControllerState extends State<ClusterMapController> {
     });
     try {
       final mRoutes = await listApiDog.getRoutes(
-          AssociationParameter(association!.associationId!, refresh));
+          association!.associationId!, refresh);
       _filter(mRoutes);
       dispatches = await listApiDog.getAssociationDispatchRecords(
           associationId: association!.associationId!,

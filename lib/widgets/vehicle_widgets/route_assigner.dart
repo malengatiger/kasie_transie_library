@@ -66,7 +66,7 @@ class _RouteAssignerState extends State<RouteAssigner> {
     pp('$mm ................................... _getRoutes ......');
     final user = await prefs.getUser();
     routes = await listApiDog
-        .getRoutes(AssociationParameter(user!.associationId!, false));
+        .getRoutes(user!.associationId!, false);
     pp('$mm ... _getRoutes ...... ${routes.length} routes found');
   }
 

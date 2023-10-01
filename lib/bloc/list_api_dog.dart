@@ -6,7 +6,6 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/data/counter_bag.dart';
 import 'package:kasie_transie_library/data/vehicle_bag.dart';
-import 'package:kasie_transie_library/isolates/country_cities_isolate.dart';
 import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
@@ -617,7 +616,7 @@ class ListApiDog {
         localList = await _getRouteLandmarksFromBackend(routeId: routeId);
         pp('$mm RouteLandmarks from backend:: ${localList.length}');
         rm.RealmResults<RouteLandmark> results =
-        realm.query<RouteLandmark>("routeId == \$0", [routeId]);
+            realm.query<RouteLandmark>("routeId == \$0", [routeId]);
         realm.write(() {
           realm.deleteMany(results);
           realm.addAll<RouteLandmark>(localList, update: true);
@@ -630,11 +629,11 @@ class ListApiDog {
 
     return localList;
   }
-  Future<List<RoutePoint>> getRoutePoints(
-      String routeId, bool refresh) async {
+
+  Future<List<RoutePoint>> getRoutePoints(String routeId, bool refresh) async {
     var localList = <RoutePoint>[];
     rm.RealmResults<RoutePoint> results =
-    realm.query<RoutePoint>("routeId == \$0", [routeId]);
+        realm.query<RoutePoint>("routeId == \$0", [routeId]);
     if (results.isNotEmpty) {
       for (var element in results) {
         localList.add(element);
@@ -645,11 +644,18 @@ class ListApiDog {
       try {
         final token = await appAuth.getAuthToken();
         if (token != null) {
-        localList = await zipHandler.getRoutePoints(routeId: routeId, token: token);
-        pp('$mm RoutePoints from backend via zip: ${localList.length}');
-        realm.write(() {
-          realm.addAll<RoutePoint>(localList, update: true);
-        });
+          final s =
+              await zipHandler.getRoutePoints(routeId: routeId, token: token);
+          localList = jsonDecode(s);
+          pp('$mm RoutePoints from backend via zip: ${localList.length}');
+          realm.write(() {
+            if (results.isNotEmpty) {
+              realm.deleteMany(results);
+            }
+            realm.addAll<RoutePoint>(localList, update: true);
+            pp('$mm RoutePoints cached: ${localList.length}');
+
+          });
         }
       } catch (e) {
         pp(e);
@@ -736,6 +742,9 @@ class ListApiDog {
           vehicleId: vehicleId, startDate: startDate);
       pp('$mm AmbassadorPassengerCounts from backend:: ${localList.length}');
       realm.write(() {
+        if (results.isNotEmpty) {
+          realm.deleteMany(results);
+        }
         realm.addAll<AmbassadorPassengerCount>(localList, update: true);
       });
     } catch (e) {
@@ -1316,7 +1325,8 @@ class ListApiDog {
       }
     }
     if (localList.isEmpty) {
-      localList = await routeDistanceCalculator.calculateRouteDistances(routeId, associationId);
+      localList = await routeDistanceCalculator.calculateRouteDistances(
+          routeId, associationId);
     }
     return localList;
   }
@@ -1371,7 +1381,7 @@ class ListApiDog {
     return routes;
   }
 
-  Future<List<Route>> getRoutes(AssociationParameter param) async {
+  Future<List<Route>> getRoutes(String associationId, bool refresh) async {
     final localList = <Route>[];
     rm.RealmResults<Route> results = realm.all<Route>();
     if (results.isNotEmpty) {
@@ -1381,9 +1391,9 @@ class ListApiDog {
     }
     pp('$mm ...... Routes from realm:: ${localList.length}');
 
-    if (param.refresh || localList.isEmpty) {
+    if (refresh || localList.isEmpty) {
       final remoteList =
-          await routesIsolate.getRoutes(param.associationId, param.refresh);
+          await routesIsolate.getRoutes(associationId, refresh);
       pp('$mm ... Routes from backend:: ${remoteList.length}');
       _routeController.sink.add(remoteList);
       return remoteList;
@@ -1733,7 +1743,7 @@ class ListApiDog {
       errorHandler.handleError(exception: gex);
       throw gex;
     } on FormatException {
-      pp("$xz Bad response format 👎");
+      pp("$xz ............ Bad response format 👎");
       final gex = KasieException(
           message: 'Bad response format',
           url: mUrl,

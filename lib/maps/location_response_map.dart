@@ -73,7 +73,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
         }
       }
     } else {
-      routes = await listApiDog.getRoutes(AssociationParameter(widget.locationResponse.associationId!, false));
+      routes = await listApiDog.getRoutes(widget.locationResponse.associationId!, false);
     }
     pp('$mm ... ${routes.length} routes to be put on map ...');
 

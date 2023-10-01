@@ -20,6 +20,8 @@ class Constants {
   static const userGeofenceEvent = 'userGeofenceEvent';
   static const vehicleMediaRequest = 'vehicleMediaRequest';
   static const routeUpdateRequest = 'routeUpdateRequest';
+  static const appError = 'appError';
+  static const kasieError = 'kasieError';
 
 
 

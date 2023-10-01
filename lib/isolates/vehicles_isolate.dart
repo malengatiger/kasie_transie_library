@@ -24,6 +24,18 @@ class VehicleIsolate {
 
     try {
       final cars = await _handleOwnerVehicles(userId);
+      pp('$xy2 _handleOwnerVehicles attempting to cache ${cars.length} cars.... ');
+      try {
+        final mList = listApiDog.realm.query<Vehicle>('ownerId == \$0', [userId]);
+        listApiDog.realm.write(() {
+          if (mList.isNotEmpty) {
+            listApiDog.realm.deleteMany(mList);
+          }
+          listApiDog.realm.addAll<Vehicle>(cars, update: true);
+        });
+      } catch (e, stack) {
+        pp('$xy2 $e - $stack');
+      }
       pp('\n\n\n$xy2 ..... ${E.nice}${E.nice} done getting owner cars ....${E.leaf} '
           'returning ${cars.length} cars');
       final end = DateTime.now();
@@ -73,12 +85,6 @@ class VehicleIsolate {
         list.add(buildVehicle(value));
       }
     }
-
-    pp('$xy2 _handleVehicles attempting to cache ${list.length} cars.... ');
-
-    listApiDog.realm.write(() {
-      listApiDog.realm.addAll<Vehicle>(list, update: true);
-    });
     var end = DateTime.now();
     pp('$xy2 should have cached ${list.length} cars in realm; elapsed time: '
         '${end.difference(start).inSeconds} seconds');
@@ -100,24 +106,24 @@ Future<List<Vehicle>> _handleVehicles(String associationId) async {
       list.add(buildVehicle(value));
     }
   }
-
   pp('$xy2 _handleVehicles attempting to cache ${list.length} cars.... ');
 
   try {
-    final old = listApiDog.realm.query('associationId == \$0', [associationId]);
+    final old = listApiDog.realm.query<Vehicle>('associationId == \$0', [associationId]);
     if (old.isNotEmpty) {
       listApiDog.realm.write(() {
         listApiDog.realm.deleteMany(old);
       });
     }
+    listApiDog.realm.write(() {
+      listApiDog.realm.addAll<Vehicle>(list, update: true);
+    });
   } catch (e, stack) {
     pp('$xy2 $e - $stack');
   }
-  listApiDog.realm.write(() {
-    listApiDog.realm.addAll<Vehicle>(list, update: true);
-  });
+
   var end = DateTime.now();
-  final res = listApiDog.realm.query('associationId == \$0', [associationId]);
+  final res = listApiDog.realm.query<Vehicle>('associationId == \$0', [associationId]);
   pp('$xy2 should have cached ${list.length} cars in realm; elapsed time: '
       '${end.difference(start).inSeconds} seconds. Cars in cache: ${res.length}');
 
@@ -135,9 +141,8 @@ Future<String> _heavyTaskForZippedCars(
   BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
   Firebase.initializeApp();
 
-  final List<Vehicle> res = await zipHandler.getCars(associationId, token);
-  final s = jsonEncode(res);
-  return s;
+  return await zipHandler.getCars(associationId, token);
+
 }
 
 @pragma('vm:entry-point')
@@ -148,9 +153,7 @@ Future<String> _heavyTaskForZippedOwnerCars(
   BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
   Firebase.initializeApp();
 
-  final List<Vehicle> res = await zipHandler.getOwnerCars(userId, token);
-  final s = jsonEncode(res);
-  return s;
+  return await zipHandler.getOwnerCars(userId, token);
 }
 
 @pragma('vm:entry-point')
@@ -167,50 +170,6 @@ Future<String> _heavyTaskForCars(DonkeyBag bag) async {
   pp('$xy2 _heavyTaskForCars returning raw string .................');
 
   return jsonList;
-}
-
-@pragma('vm:entry-point')
-Future<String> _heavyTaskForOwnerCars(OwnerCarBag bag) async {
-  pp('$xy2 _heavyTaskForOwnerCars starting ................userId:  ${bag.userId} .');
-
-  var cars = [];
-  final token = bag.token;
-  pp('$xy2 cars for owner processed so far ... ${E.appleGreen} total: ${cars.length}');
-  cars = await _processOwnerCars(bag.userId, bag.url, token);
-
-  final jsonList = jsonEncode(cars);
-  pp('$xy2 Owner cars delivered: ${cars.length}');
-  pp('$xy2 _heavyTaskForOwnerCars returning raw string .................');
-
-  return jsonList;
-}
-
-Future<List> _processOwnerCars(String userId, String url, String token) async {
-  pp('\n\n$xyz _processOwnerCars for userId: $userId');
-
-  int page = 0;
-  bool stop = false;
-  final allCars = [];
-  Map<String, String> headers = {
-    'Content-type': 'application/json',
-    'Accept': 'application/json',
-  };
-  headers['Authorization'] = 'Bearer $token';
-
-  while (stop == false) {
-    final mUrl = '${url}getOwnerVehicles?userId=$userId&page=$page';
-    List resp = await httpGet(mUrl, token, headers);
-    pp('$xy2 page of cars for userId: $userId: ${resp.length}');
-
-    if (resp.isEmpty) {
-      stop = true;
-    }
-    allCars.addAll(resp);
-    page++;
-  }
-
-  pp('$xy2 cars for userId: $userId: ${allCars.length}\n\n');
-  return allCars;
 }
 
 Future<List> _processAssociationCars(

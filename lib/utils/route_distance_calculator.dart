@@ -25,7 +25,7 @@ class RouteDistanceCalculator {
     pp('... starting ... calculateAssociationRouteDistances ...');
     final user = await prefs.getUser();
     final routes = await listApiDog
-        .getRoutes(AssociationParameter(user!.associationId!, false));
+        .getRoutes(user!.associationId!, false);
     final distances = <lib.CalculatedDistance>[];
     for (var value in routes) {
       final list =

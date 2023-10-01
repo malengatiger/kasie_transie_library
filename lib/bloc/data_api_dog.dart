@@ -215,7 +215,7 @@ class DataApiDog {
     pp('$mm route added to database ...');
     myPrettyJsonPrint(res);
     final r = buildRoute(res);
-    listApiDog.getRoutes(AssociationParameter(route.associationId!, true));
+    listApiDog.getRoutes(route.associationId!, true);
     return r;
   }
 

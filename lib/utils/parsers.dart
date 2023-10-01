@@ -647,6 +647,36 @@ VehicleMediaRequest buildVehicleMediaRequest(Map j) {
   return m;
 }
 
+AppError buildAppError(Map j) {
+  myPrettyJsonPrint(j);
+  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+
+  var m = AppError(
+    id,
+    vehicleId: j['vehicleId'],
+    vehicleReg: j['vehicleReg'],
+    associationId: j['associationId'],
+    errorMessage: j['errorMessage'],
+    created: j['created'],
+    appErrorId: j['appErrorId'],
+    deviceType: j['deviceType'],
+    baseOS: j['baseOS'],
+    model: j['model'],
+    uploadedDate: j['uploadedDate'],
+    brand: j['brand'],
+    errorPosition: j['errorPosition'] == null? null:buildPosition(j['errorPosition']),
+    userUrl: j['userUrl'],
+    userName: j['userName'],
+    userId: j['userId'],
+    manufacturer: j['manufacturer'],
+    versionCodeName: j['versionCodeName'],
+    iosName: j['iosName'],
+    iosSystemName: j['iosSystemName'],
+  );
+  return m;
+}
+
+
 RouteUpdateRequest buildRouteUpdateRequest(Map j) {
   myPrettyJsonPrint(j);
   var id = rm.ObjectId.fromHexString(j['_id'] as String);

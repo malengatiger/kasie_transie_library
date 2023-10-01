@@ -30,7 +30,7 @@ class RoutesIsolate {
 
   Future<int> countRouteLandmarks(String routeId) async {
     final res =
-    listApiDog.realm.query<RouteLandmark>('routeId == \$0', [routeId]);
+        listApiDog.realm.query<RouteLandmark>('routeId == \$0', [routeId]);
     return res.length;
   }
 
@@ -49,9 +49,10 @@ class RoutesIsolate {
     return mList;
   }
 
-  Future<List<RoutePoint>> deleteRoutePoints({required String routeId,
-    required double latitude,
-    required double longitude}) async {
+  Future<List<RoutePoint>> deleteRoutePoints(
+      {required String routeId,
+      required double latitude,
+      required double longitude}) async {
     final mList = <RoutePoint>[];
     try {
       final rootToken = ServicesBinding.rootIsolateToken!;
@@ -96,7 +97,7 @@ class RoutesIsolate {
     try {
       final rootToken = ServicesBinding.rootIsolateToken!;
       final aString = await Isolate.run(
-              () => _heavyTaskForZippedRoutePoints(routeId, token, rootToken));
+          () => _heavyTaskForZippedRoutePoints(routeId, token, rootToken));
       List mJson = jsonDecode(aString);
       for (var p in mJson) {
         mList.add(buildRoutePoint(p));
@@ -115,7 +116,7 @@ class RoutesIsolate {
     var mList = <RouteLandmark>[];
 
     final res =
-    listApiDog.realm.query<RouteLandmark>('routeId == \$0', [routeId]);
+        listApiDog.realm.query<RouteLandmark>('routeId == \$0', [routeId]);
     mList = res.toList();
     pp('$xy get getRouteLandmarks found ${mList.length}  ... ');
 
@@ -146,11 +147,10 @@ class RoutesIsolate {
       final rootToken = ServicesBinding.rootIsolateToken!;
 
       final string = await Isolate.run(
-              () async => _heavyTaskForSingleRoute(routeId, token, rootToken));
+          () async => _heavyTaskForSingleRoute(routeId, token, rootToken));
       final mJson = jsonDecode(string);
       final routeBag = RouteBag.fromJson(mJson);
-      pp('$xy back from isolate ... writing the bag to realm  ${routeBag.route!
-          .name}  ... ');
+      pp('$xy back from isolate ... writing the bag to realm  ${routeBag.route!.name}  ... ');
 
       listApiDog.realm.write(() {
         listApiDog.realm.add<Route>(routeBag.route!, update: true);
@@ -165,8 +165,8 @@ class RoutesIsolate {
     }
   }
 
-  Future<List<Route>> getRoutesMappable(String associationId,
-      bool refresh) async {
+  Future<List<Route>> getRoutesMappable(
+      String associationId, bool refresh) async {
     final mRoutes = await getRoutes(associationId, refresh);
     final fRoutes = <Route>[];
     for (var value in mRoutes) {
@@ -180,38 +180,80 @@ class RoutesIsolate {
   }
 
   Future<List<Route>> getRoutes(String associationId, bool refresh) async {
-    pp(
-        '\n\n\n$xy ............................ getting routes using isolate ....');
     final mRoutes = listApiDog.realm.all<Route>();
+    pp('\n$xy getRoutes: ... routes already in cache: ${mRoutes.length}');
     if (refresh || mRoutes.isEmpty) {
+      pp('\n$xy getRoutes: ... getting routes from backend ....');
       final token = await appAuth.getAuthToken();
       if (token != null) {
         final rootToken = ServicesBinding.rootIsolateToken!;
         final s = await Isolate.run(() async =>
             _heavyTaskForZippedRoutes(associationId, token, rootToken));
-        List json = jsonDecode(s);
-        List<Route> list = [];
-        for (var value in json) {
-          list.add(buildRoute(value));
+
+        final data = jsonDecode(s);
+        pp(data);
+        //todo - cache the routes here ---
+        List routesJson = jsonDecode(data['routes']);
+        List routePointsJson = jsonDecode(data['routePoints']);
+        List landmarksJson = jsonDecode(data['landmarks']);
+        List citiesJson = jsonDecode(data['cities']);
+        final routes = <Route>[];
+        final routePoints = <RoutePoint>[];
+        final landmarks = <RouteLandmark>[];
+        final cities = <RouteCity>[];
+
+        for (var value in routesJson) {
+          routes.add(buildRoute(value));
         }
-        return list;
+        for (var map in routePointsJson) {
+          routePoints.add(buildRoutePoint(map));
+        }
+        for (var map in landmarksJson) {
+          landmarks.add(buildRouteLandmark(map));
+        }
+        for (var map in citiesJson) {
+          cities.add(buildRouteCity(map));
+        }
+        await cacheBag(
+            routes: routes,
+            routePoints: routePoints,
+            landmarks: landmarks,
+            cities: cities);
+
+        return routes;
       }
     }
 
     return mRoutes.toList();
   }
 
+  Future cacheBag(
+      {required List<Route> routes,
+      required List<RoutePoint> routePoints,
+      required List<RouteLandmark> landmarks,
+      required List<RouteCity> cities}) async {
+    pp('$xy ... cacheBag - cache all the data for ${routes.length} routes ......... ');
+    //
+
+    listApiDog.realm.write(() {
+      listApiDog.realm.addAll<RouteLandmark>(landmarks, update: true);
+      listApiDog.realm.addAll<RoutePoint>(routePoints, update: true);
+      listApiDog.realm.addAll<RouteCity>(cities, update: true);
+      listApiDog.realm.addAll<Route>(routes, update: true);
+    });
+    //
+    pp('$xy ... 🌼🌼 ..... Routes, points, landmarks & cities cached: ${routes.length}');
+  }
+
   Future<List<City>> getCities(String countryId, bool refresh) async {
-    pp(
-        '\n\n\n$xy ............................ getting routes using isolate ....');
+    pp('\n\n\n$xy ............................ getting routes using isolate ....');
     final mRoutes = listApiDog.realm.all<City>();
     if (refresh || mRoutes.isEmpty) {
       final token = await appAuth.getAuthToken();
       if (token != null) {
         final rootToken = ServicesBinding.rootIsolateToken!;
         final s = await Isolate.run(
-                () async =>
-                _heavyTaskForZippedCities(countryId, token, rootToken));
+            () async => _heavyTaskForZippedCities(countryId, token, rootToken));
         List<City> mCities = [];
         List json = jsonDecode(s);
         for (var value in json) {
@@ -225,8 +267,7 @@ class RoutesIsolate {
   }
 
   Future<List<User>> getUsers(String associationId, bool refresh) async {
-    pp(
-        '\n\n\n$xy ............................ getting users using isolate ....');
+    pp('\n\n\n$xy ............................ getting users using isolate ....');
     final mRoutes = listApiDog.realm.all<User>();
     if (refresh || mRoutes.isEmpty) {
       final token = await appAuth.getAuthToken();
@@ -246,14 +287,13 @@ class RoutesIsolate {
   }
 
   Future<List<Country>> getCountries(bool refresh) async {
-    pp(
-        '\n\n\n$xy ............................ getting countries using isolate ....');
+    pp('\n\n\n$xy ............................ getting countries using isolate ....');
     final list = listApiDog.realm.all<Country>();
     if (refresh || list.isEmpty) {
       final token = await appAuth.getAuthToken();
       if (token != null) {
         final s =
-        await Isolate.run(() async => _heavyTaskCountries(token: token));
+            await Isolate.run(() async => _heavyTaskCountries(token: token));
         List<Country> mCountries = [];
         List json = jsonDecode(s);
         for (var value in json) {
@@ -275,20 +315,19 @@ const xyz2 = '🍟🍟🍟🍟🍟🍟 HeavyTaskForRoutePoints: 🍟🍟';
 const xyz3 = '🌸🌸🌸🌸🌸🌸🌸🌸🌸 HeavyTaskForRouteCities: 🌸🌸🌸';
 
 @pragma('vm:entry-point')
-Future<String> _heavyTaskForDeletingRoutePoints({required String routeId,
-  required double latitude,
-  required double longitude,
-  required String token,
-  required RootIsolateToken rootToken}) async {
+Future<String> _heavyTaskForDeletingRoutePoints(
+    {required String routeId,
+    required double latitude,
+    required double longitude,
+    required String token,
+    required RootIsolateToken rootToken}) async {
   pp('\n\n$xyz4 _heavyTaskForDeletingRoutePoints 🅿️ 🅿️ 🅿️  starting '
       '... calling zipHandler.deleteRoutePoints() ...');
   BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
   Firebase.initializeApp();
 
-  final List<RoutePoint> res = await zipHandler.deleteRoutePoints(
+  return await zipHandler.deleteRoutePoints(
       routeId: routeId, token: token, latitude: latitude, longitude: longitude);
-  final s = jsonEncode(res);
-  return s;
 }
 
 @pragma('vm:entry-point')
@@ -303,33 +342,28 @@ Future<String> _heavyTaskForRoutes(DonkeyBag bag) async {
 }
 
 @pragma('vm:entry-point')
-Future<String> _heavyTaskForZippedRoutes(String associationId, String token,
-    RootIsolateToken rootToken) async {
+Future<String> _heavyTaskForZippedRoutes(
+    String associationId, String token, RootIsolateToken rootToken) async {
   pp('\n\n$xyz _heavyTaskForZippedRoutes 🅿️ 🅿️ 🅿️  starting '
       '... calling zipHandler.getRouteBags() ...');
   BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
   Firebase.initializeApp();
 
-  final RouteData res =
-  await zipHandler.getRouteData(associationId: associationId, token: token);
-  pp('🅿️ 🅿️ 🅿️ 🅿️ 🅿️ 🅿️ .... do we get her, Bob? 🅿️ 🅿️ 🅿️ routes: ${res.routes
-      .length}');
-  final s = jsonEncode(res.routes);
-  pp('🅿️ 🅿️ 🅿️ 🅿️ 🅿️ 🅿️ .... do we get her, Jack? 🅿️ 🅿️ 🅿️');
-  return s;
+  final res =
+      await zipHandler.getRouteData(associationId: associationId, token: token);
+  pp('🅿️ 🅿️ 🅿️ 🅿️ 🅿️ 🅿️ .... do we get here, Jack? 🅿️ 🅿️ 🅿️ ${res.length} bytes in string');
+  return res;
 }
 
 @pragma('vm:entry-point')
-Future<String> _heavyTaskForZippedCities(String userId, String token,
-    RootIsolateToken rootToken) async {
+Future<String> _heavyTaskForZippedCities(
+    String userId, String token, RootIsolateToken rootToken) async {
   pp('\n\n$xyz _heavyTaskForZippedCities 🅿️ 🅿️ 🅿️  starting '
       '... calling zipHandler.getCities() ...');
   BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
   Firebase.initializeApp();
 
-  final List<City> res = await zipHandler.getCities(userId, token);
-  final s = jsonEncode(res);
-  return s;
+  return await zipHandler.getCities(userId, token);
 }
 
 @pragma('vm:entry-point')
@@ -337,11 +371,9 @@ Future<String> _heavyTaskForUsers({
   required String associationId,
   required String token,
 }) async {
-  pp(
-      '$xyz2 _heavyTaskForUsers starting ................associationId:  $associationId .');
+  pp('$xyz2 _heavyTaskForUsers starting ................associationId:  $associationId .');
   final cmd =
-      '${KasieEnvironment
-      .getUrl()}getAssociationUsers?associationId=$associationId';
+      '${KasieEnvironment.getUrl()}getAssociationUsers?associationId=$associationId';
 
   final users = <User>[];
   List resp = await _httpGet(cmd, token);
@@ -355,17 +387,14 @@ Future<String> _heavyTaskForUsers({
 
 //getRoutePointsZipped
 @pragma('vm:entry-point')
-Future<String> _heavyTaskForZippedRoutePoints(String routeId, String token,
-    RootIsolateToken rootToken) async {
+Future<String> _heavyTaskForZippedRoutePoints(
+    String routeId, String token, RootIsolateToken rootToken) async {
   pp('\n\n$xyz _heavyTaskForZippedRoutePoints 🅿️ 🅿️ 🅿️  starting '
       '... calling zipHandler.getRoutePoints() ...');
   BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
   Firebase.initializeApp();
 
-  final List<RoutePoint> res =
-  await zipHandler.getRoutePoints(routeId: routeId, token: token);
-  final s = jsonEncode(res);
-  return s;
+  return await zipHandler.getRoutePoints(routeId: routeId, token: token);
 }
 
 @pragma('vm:entry-point')
@@ -433,9 +462,7 @@ Future<String> _heavyTaskCountries({
 
 @pragma('vm:entry-point')
 Future<String> _heavyTaskForRouteLandmarks(BunnyBag bag) async {
-  pp(
-      '$xyz1 _heavyTaskForRouteLandmarks starting .................associationId: ${bag
-          .associationId} .');
+  pp('$xyz1 _heavyTaskForRouteLandmarks starting .................associationId: ${bag.associationId} .');
 
   final routeLandmarks = [];
   final token = bag.token;
@@ -443,16 +470,13 @@ Future<String> _heavyTaskForRouteLandmarks(BunnyBag bag) async {
   List resp = await _httpGet(bag.url, token);
   routeLandmarks.addAll(resp);
   final jsonList = jsonEncode(routeLandmarks);
-  pp('$xyz1 Association RouteLandmarks for all routes: ${routeLandmarks
-      .length}');
+  pp('$xyz1 Association RouteLandmarks for all routes: ${routeLandmarks.length}');
   return jsonList;
 }
 
 @pragma('vm:entry-point')
 Future<String> _heavyTaskForRouteCities(BunnyBag bag) async {
-  pp(
-      '$xyz3 _heavyTaskForRouteCities starting ................. associationId; ${bag
-          .associationId} .');
+  pp('$xyz3 _heavyTaskForRouteCities starting ................. associationId; ${bag.associationId} .');
 
   final routeCities = [];
   final token = bag.token;
@@ -465,27 +489,24 @@ Future<String> _heavyTaskForRouteCities(BunnyBag bag) async {
 }
 
 @pragma('vm:entry-point')
-Future<String> _heavyTaskForSingleRoute(String routeId, String token,
-    RootIsolateToken rootToken) async {
-  pp(
-      '$xyz _heavyTaskForSingleRoute starting ................. routeId; $routeId ');
+Future<String> _heavyTaskForSingleRoute(
+    String routeId, String token, RootIsolateToken rootToken) async {
+  pp('$xyz _heavyTaskForSingleRoute starting ................. routeId; $routeId ');
 
   final start = DateTime.now();
   BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
   Firebase.initializeApp();
 
   RouteBag? routeBag =
-  await zipHandler.refreshRoute(routeId: routeId, token: token);
+      await zipHandler.refreshRoute(routeId: routeId, token: token);
   pp('$xyz Route refreshed ${E.nice} for ${routeBag!.route!.name} '
-      '\n routeLandmarks: ${routeBag!.routeLandmarks.length}'
+      '\n routeLandmarks: ${routeBag.routeLandmarks.length}'
       '\n routePoints: ${routeBag.routePoints.length}'
       '\n routeCities: ${routeBag.routeCities.length}');
   final s = routeBag.toJson();
   final jsonList = jsonEncode(s);
   final end = DateTime.now();
-  pp('$xyz Elapsed time for route refresh: ${end
-      .difference(start)
-      .inSeconds} seconds');
+  pp('$xyz Elapsed time for route refresh: ${end.difference(start).inSeconds} seconds');
   return jsonList;
 }
 
@@ -501,16 +522,13 @@ Future _httpGet(String mUrl, String token) async {
     final http.Client client = http.Client();
     var resp = await client
         .get(
-      Uri.parse(mUrl),
-      headers: headers,
-    )
+          Uri.parse(mUrl),
+          headers: headers,
+        )
         .timeout(const Duration(seconds: 600));
-    pp('$xyz _httpGet call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp
-        .statusCode} 👌👌👌 💙 for $mUrl');
+    pp('$xyz _httpGet call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
     var end = DateTime.now();
-    pp('$xyz _httpGet call: 🔆 elapsed time for http: ${end
-        .difference(start)
-        .inSeconds} seconds 🔆 \n\n');
+    pp('$xyz _httpGet call: 🔆 elapsed time for http: ${end.difference(start).inSeconds} seconds 🔆 \n\n');
 
     if (resp.body.contains('not found')) {
       return false;
@@ -518,8 +536,7 @@ Future _httpGet(String mUrl, String token) async {
 
     if (resp.statusCode == 403) {
       var msg =
-          '😡 😡 status code: ${resp
-          .statusCode}, Request Forbidden 🥪 🥙 🌮  😡 ${resp.body}';
+          '😡 😡 status code: ${resp.statusCode}, Request Forbidden 🥪 🥙 🌮  😡 ${resp.body}';
       pp(msg);
       // final gex = KasieException(
       //     message: 'Forbidden call',
@@ -532,8 +549,7 @@ Future _httpGet(String mUrl, String token) async {
 
     if (resp.statusCode > 201) {
       var msg =
-          '😡 😡 The response is not 200 or 201; it is ${resp
-          .statusCode}, NOT GOOD, throwing up !! 🥪 🥙 🌮  😡 ${resp.body}';
+          '😡 😡 The response is not 200 or 201; it is ${resp.statusCode}, NOT GOOD, throwing up !! 🥪 🥙 🌮  😡 ${resp.body}';
       pp(msg);
       final gex = KasieException(
           message: 'Bad status code: ${resp.statusCode} - ${resp.body}',

@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:ui';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -9,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sim_country_code/flutter_sim_country_code.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image/image.dart' as img;
@@ -491,7 +491,7 @@ TextStyle myTextStyleMediumBoldWithColor(
   return GoogleFonts.lato(
     textStyle: Theme.of(context).textTheme.headlineMedium,
     fontWeight: FontWeight.w900,
-    fontSize: fontSize == null ? 18.0 : fontSize!,
+    fontSize: fontSize ?? 18.0,
     color: color,
   );
 }
@@ -549,7 +549,7 @@ TextStyle myTextStyleMediumLarge(BuildContext context, double? size) {
   return GoogleFonts.roboto(
       textStyle: Theme.of(context).textTheme.headlineLarge,
       fontWeight: FontWeight.w900,
-      fontSize: size == null ? 24 : size!);
+      fontSize: size ?? 24);
 }
 
 TextStyle myTextStyleMediumLargeWithSize(BuildContext context, double size) {
@@ -801,7 +801,7 @@ Future<BitmapDescriptor> getTaxiMapIcon(
   final ByteData byteData = await rootBundle.load(path);
   final imageData = byteData.buffer.asUint8List();
 
-  final ui.Codec codec = await ui.instantiateImageCodec(imageData);
+  final ui.Codec codec = await instantiateImageCodec(imageData);
   final ui.Image image = (await codec.getNextFrame()).image;
 
   final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
