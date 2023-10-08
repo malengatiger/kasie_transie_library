@@ -15,9 +15,10 @@ import '../l10n/translation_handler.dart';
 class RouteListMinimum extends StatefulWidget {
   final Function(lib.Route) onRoutePicked;
   final lib.Association association;
+  final bool isMappable;
   const RouteListMinimum({
     Key? key,
-    required this.onRoutePicked, required this.association,
+    required this.onRoutePicked, required this.association, required this.isMappable,
   }) : super(key: key);
 
   @override
@@ -69,8 +70,13 @@ class RouteListMinimumState extends State<RouteListMinimum>
       if (refresh) {
         routes = await routesIsolate.getRoutes(widget.association.associationId!, true);
       } else {
+        if (widget.isMappable) {
+          routes = await routesIsolate.getRoutesMappable(
+              widget.association.associationId!, refresh);
+        } else {
         routes = await listApiDog
             .getRoutes(widget.association.associationId!, refresh);
+        }
       }
       routes.sort((a,b) => a.name!.compareTo(b.name!));
       pp('$mm ... found ${routes.length}');

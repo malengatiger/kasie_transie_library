@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/vehicle_list.dart';
-import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
 import 'package:realm/realm.dart' as rlm;
@@ -73,7 +72,8 @@ class DataApiDog {
     listApiDog.realm.write(() {
       listApiDog.realm.addAll(list, update: true);
     });
-    pp('$mm RouteAssignments added to database and cached on realm: ${list.length}');
+    pp('$mm RouteAssignments added to database and cached on realm: ${list
+        .length}');
     return list;
   }
 
@@ -132,8 +132,7 @@ class DataApiDog {
       listApiDog.realm.write(() {
         listApiDog.realm.add<DispatchRecord>(r, update: true);
       });
-      pp('$mm DispatchRecord added to database: $res');
-      myPrettyJsonPrint(res);
+      pp('$mm DispatchRecord added to database');
       return r;
     } catch (e) {
       await cacheManager.saveDispatchRecord(dispatchRecord);
@@ -145,21 +144,21 @@ class DataApiDog {
     final bag = event.toJson();
     final cmd = '${url}addVehicleArrival';
     final res = await _callPost(cmd, bag);
-    pp('$mm VehicleArrival added to database: $res');
+    pp('$mm VehicleArrival added to database');
   }
 
   Future addVehicleDeparture(VehicleDeparture event) async {
     final bag = event.toJson();
     final cmd = '${url}addVehicleDeparture';
     final res = await _callPost(cmd, bag);
-    pp('$mm VehicleDeparture added to database: $res');
+    pp('$mm VehicleDeparture added to database');
   }
 
   Future addVehicleHeartbeat(VehicleHeartbeat event) async {
     final bag = event.toJson();
     final cmd = '${url}addVehicleHeartbeat';
     final res = await _callPost(cmd, bag);
-    pp('$mm .......... VehicleHeartbeat added to database: $res');
+    pp('$mm .......... VehicleHeartbeat added to database');
   }
 
   Future sendRouteUpdateMessage(RouteUpdateRequest req) async {
@@ -182,7 +181,8 @@ class DataApiDog {
   }
 
   Future addRoutePoints(RoutePointList points) async {
-    pp('$mm ... adding routePoints to database ...${points.routePoints.length}');
+    pp('$mm ... adding routePoints to database ...${points.routePoints
+        .length}');
     final cmd = '${url}addRoutePoints';
     var res = await _callPost(cmd, points.toJson());
     pp('$mm routePoints added to database: $res');
@@ -690,90 +690,111 @@ class DataApiDog {
 
   Future _callPost(String mUrl, dynamic bag) async {
     String? mBag;
-    if (bag != null) {
-      mBag = json.encode(bag);
-    }
+    mBag = json.encode(bag);
+    const maxRetries = 3;
+    var retryCount = 0;
+    var waitTime = Duration(seconds: 2);
     var start = DateTime.now();
     var token = await appAuth.getAuthToken();
     if (token == null) {
       throw Exception('No fucking token!');
     }
     headers['Authorization'] = 'Bearer $token';
-    try {
-      var resp = await client
-          .post(
-        Uri.parse(mUrl),
-        body: mBag,
-        headers: headers,
-      )
-          .timeout(const Duration(seconds: timeOutInSeconds));
-      if (resp.statusCode == 200 || resp.statusCode == 201) {
-        pp('$mm  _callWebAPIPost RESPONSE: 💙💙 statusCode: 👌👌👌 ${resp
-            .statusCode} 👌👌👌 💙 for $mUrl');
-      } else {
-        pp('$mm  👿👿👿_callWebAPIPost: 🔆 statusCode: 👿👿👿 ${resp
-            .statusCode} 🔆🔆🔆 for $mUrl');
-        pp(resp.body);
-        throw KasieException(
-            message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
+    while (retryCount < maxRetries) {
+      try {
+        var resp = await client
+            .post(
+          Uri.parse(mUrl),
+          body: mBag,
+          headers: headers,
+        )
+            .timeout(const Duration(seconds: timeOutInSeconds));
+        if (resp.statusCode == 200 || resp.statusCode == 201) {
+          pp('$mm  _callWebAPIPost RESPONSE: 💙💙 statusCode: 👌👌👌 ${resp
+              .statusCode} 👌👌👌 💙 for $mUrl');
+        } else {
+          pp('$mm  👿👿👿_callWebAPIPost: 🔆 statusCode: 👿👿👿 ${resp
+              .statusCode} 🔆🔆🔆 for $mUrl');
+          pp(resp.body);
+          throw KasieException(
+              message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
+              url: mUrl,
+              translationKey: 'serverProblem',
+              errorType: KasieException.socketException);
+        }
+        var end = DateTime.now();
+        pp('$mm  _callWebAPIPost: 🔆 elapsed time: ${end
+            .difference(start)
+            .inSeconds} seconds 🔆');
+        try {
+          var mJson = json.decode(resp.body);
+          return mJson;
+        } catch (e) {
+          pp("$mm 👿👿👿👿👿👿👿 json.decode failed, returning response body");
+          return resp.body;
+        }
+      } on SocketException catch (e) {
+        pp(
+            '$mm  SocketException: really means that server cannot be reached 😑');
+        final gex = KasieException(
+            message: 'Server not available: $e',
             url: mUrl,
             translationKey: 'serverProblem',
             errorType: KasieException.socketException);
+        errorHandler.handleError(exception: gex);
+        throw gex;
+      } on HttpException catch (e) {
+        pp("$mm  HttpException occurred 😱");
+        final gex = KasieException(
+            message: 'Server not available: $e',
+            url: mUrl,
+            translationKey: 'serverProblem',
+            errorType: KasieException.httpException);
+        errorHandler.handleError(exception: gex);
+        throw gex;
+      } on http.ClientException catch (e) {
+        pp("$mm   http.ClientException  occurred 😱");
+        final gex = KasieException(
+            message: 'ClientException: $e',
+            url: mUrl,
+            translationKey: 'serverProblem',
+            errorType: KasieException.httpException);
+        errorHandler.handleError(exception: gex);
+        retryCount++;
+        if (retryCount < maxRetries) {
+          // Calculate the exponential backoff wait time
+          waitTime *= 2;
+          await Future.delayed(waitTime);
+        }
+      } on FormatException catch (e) {
+        pp("$mm  Bad response format 👎");
+        final gex = KasieException(
+            message: 'Bad response format: $e',
+            url: mUrl,
+            translationKey: 'serverProblem',
+            errorType: KasieException.formatException);
+        errorHandler.handleError(exception: gex);
+        throw gex;
+      } on TimeoutException catch (e) {
+        pp(
+            "$mm  No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
+        final gex = KasieException(
+            message: 'Request timed out. No Internet connection: $e',
+            url: mUrl,
+            translationKey: 'networkProblem',
+            errorType: KasieException.timeoutException);
+        errorHandler.handleError(exception: gex);
+        throw gex;
       }
-      var end = DateTime.now();
-      pp('$mm  _callWebAPIPost: 🔆 elapsed time: ${end
-          .difference(start)
-          .inSeconds} seconds 🔆');
-      try {
-        var mJson = json.decode(resp.body);
-        return mJson;
-      } catch (e) {
-        pp("$mm 👿👿👿👿👿👿👿 json.decode failed, returning response body");
-        return resp.body;
-      }
-    } on SocketException {
-      pp('$mm  SocketException: really means that server cannot be reached 😑');
-      final gex = KasieException(
-          message: 'Server not available',
-          url: mUrl,
-          translationKey: 'serverProblem',
-          errorType: KasieException.socketException);
-      errorHandler.handleError(exception: gex);
-      throw gex;
-    } on HttpException {
-      pp("$mm  HttpException occurred 😱");
-      final gex = KasieException(
-          message: 'Server not available',
-          url: mUrl,
-          translationKey: 'serverProblem',
-          errorType: KasieException.httpException);
-      errorHandler.handleError(exception: gex);
-      throw gex;
-    } on FormatException {
-      pp("$mm  Bad response format 👎");
-      final gex = KasieException(
-          message: 'Bad response format',
-          url: mUrl,
-          translationKey: 'serverProblem',
-          errorType: KasieException.formatException);
-      errorHandler.handleError(exception: gex);
-      throw gex;
-    } on TimeoutException {
-      pp(
-          "$mm  No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
-      final gex = KasieException(
-          message: 'Request timed out. No Internet connection',
-          url: mUrl,
-          translationKey: 'networkProblem',
-          errorType: KasieException.timeoutException);
-      errorHandler.handleError(exception: gex);
-      throw gex;
     }
   }
 
   Future _sendHttpGET(String mUrl) async {
     pp('$mm _sendHttpGET: 🔆 🔆 🔆 calling : 💙 $mUrl  💙');
     var start = DateTime.now();
+    const maxRetries = 3;
+    var retryCount = 0;
+    var waitTime = Duration(seconds: 2);
     var token = await appAuth.getAuthToken();
     if (token != null) {
       // pp('$mm _sendHttpGET: 😡😡😡 Firebase Auth Token: 💙️ Token is GOOD! 💙 ');
@@ -789,106 +810,107 @@ class DataApiDog {
       throw gex;
     }
     headers['Authorization'] = 'Bearer $token';
-    try {
-      var resp = await client
-          .get(
-        Uri.parse(mUrl),
-        headers: headers,
-      )
-          .timeout(const Duration(seconds: timeOutInSeconds));
-      pp('$mm http GET call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp
-          .statusCode} 👌👌👌 💙 for $mUrl');
-      var end = DateTime.now();
-      pp('$mm http GET call: 🔆 elapsed time for http: ${end
-          .difference(start)
-          .inSeconds} seconds 🔆 \n\n');
+    while (retryCount < maxRetries) {
+      try {
+        var resp = await client
+            .get(
+          Uri.parse(mUrl),
+          headers: headers,
+        )
+            .timeout(const Duration(seconds: timeOutInSeconds));
+        pp('$mm http GET call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp
+            .statusCode} 👌👌👌 💙 for $mUrl');
+        var end = DateTime.now();
+        pp('$mm http GET call: 🔆 elapsed time for http: ${end
+            .difference(start)
+            .inSeconds} seconds 🔆 \n\n');
 
-      if (resp.body.contains('not found')) {
-        return false;
-      }
+        if (resp.body.contains('not found')) {
+          return false;
+        }
 
-      if (resp.statusCode == 403) {
-        var msg =
-            '😡 😡 status code: ${resp
-            .statusCode}, Request Forbidden 🥪 🥙 🌮  😡 ${resp.body}';
-        pp(msg);
+        if (resp.statusCode == 403) {
+          var msg =
+              '😡 😡 status code: ${resp
+              .statusCode}, Request Forbidden 🥪 🥙 🌮  😡 ${resp.body}';
+          pp(msg);
+          final gex = KasieException(
+              message: 'Forbidden call',
+              url: mUrl,
+              translationKey: 'serverProblem',
+              errorType: KasieException.httpException);
+          errorHandler.handleError(exception: gex);
+          throw gex;
+        }
+
+        if (resp.statusCode != 200) {
+          var msg =
+              '😡 😡 The response is not 200; it is ${resp
+              .statusCode}, NOT GOOD, throwing up !! 🥪 🥙 🌮  😡 ${resp.body}';
+          pp(msg);
+          final gex = KasieException(
+              message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
+              url: mUrl,
+              translationKey: 'serverProblem',
+              errorType: KasieException.socketException);
+          errorHandler.handleError(exception: gex);
+          throw gex;
+        }
+        var mJson = json.decode(resp.body);
+        return mJson;
+      } on SocketException catch (e) {
+        pp(
+            '$mm  SocketException: really means that server cannot be reached 😑');
         final gex = KasieException(
-            message: 'Forbidden call',
-            url: mUrl,
-            translationKey: 'serverProblem',
-            errorType: KasieException.httpException);
-        errorHandler.handleError(exception: gex);
-        throw gex;
-      }
-
-      if (resp.statusCode != 200) {
-        var msg =
-            '😡 😡 The response is not 200; it is ${resp
-            .statusCode}, NOT GOOD, throwing up !! 🥪 🥙 🌮  😡 ${resp.body}';
-        pp(msg);
-        final gex = KasieException(
-            message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
+            message: 'Server not available: $e',
             url: mUrl,
             translationKey: 'serverProblem',
             errorType: KasieException.socketException);
         errorHandler.handleError(exception: gex);
         throw gex;
-      }
-      var mJson = json.decode(resp.body);
-      return mJson;
-    } on SocketException {
-      pp('$mm SocketException, really means that server cannot be reached 😑');
-      final gex = KasieException(
-          message: 'Server not available',
-          url: mUrl,
-          translationKey: 'serverProblem',
-          errorType: KasieException.socketException);
-      try {
+      } on HttpException catch (e) {
+        pp("$mm  HttpException occurred 😱");
+        final gex = KasieException(
+            message: 'Server not available: $e',
+            url: mUrl,
+            translationKey: 'serverProblem',
+            errorType: KasieException.httpException);
         errorHandler.handleError(exception: gex);
-      } catch (e) {
-        //ignore
-      }
-      throw gex;
-    } on HttpException {
-      pp("$mm HttpException occurred 😱");
-      final gex = KasieException(
-          message: 'Server not available',
-          url: mUrl,
-          translationKey: 'serverProblem',
-          errorType: KasieException.httpException);
-      try {
+        throw gex;
+      } on http.ClientException catch (e) {
+        pp("$mm   http.ClientException  occurred 😱");
+        final gex = KasieException(
+            message: 'ClientException: $e',
+            url: mUrl,
+            translationKey: 'serverProblem',
+            errorType: KasieException.httpException);
         errorHandler.handleError(exception: gex);
-      } catch (e) {
-        //ignore
-      }
-      throw gex;
-    } on FormatException {
-      pp("$mm Bad response format 👎");
-      final gex = KasieException(
-          message: 'Bad response format',
-          url: mUrl,
-          translationKey: 'serverProblem',
-          errorType: KasieException.formatException);
-      try {
+        retryCount++;
+        if (retryCount < maxRetries) {
+          // Calculate the exponential backoff wait time
+          waitTime *= 2;
+          await Future.delayed(waitTime);
+        }
+      } on FormatException catch (e) {
+        pp("$mm  Bad response format 👎");
+        final gex = KasieException(
+            message: 'Bad response format: $e',
+            url: mUrl,
+            translationKey: 'serverProblem',
+            errorType: KasieException.formatException);
         errorHandler.handleError(exception: gex);
-      } catch (e) {
-        //ignore
-      }
-      throw gex;
-    } on TimeoutException {
-      pp(
-          "$mm No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
-      final gex = KasieException(
-          message: 'No Internet connection. Request timed out',
-          url: mUrl,
-          translationKey: 'networkProblem',
-          errorType: KasieException.timeoutException);
-      try {
+        throw gex;
+      } on TimeoutException catch (e) {
+        pp(
+            "$mm  No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
+        final gex = KasieException(
+            message: 'Request timed out. No Internet connection: $e',
+            url: mUrl,
+            translationKey: 'networkProblem',
+            errorType: KasieException.timeoutException);
         errorHandler.handleError(exception: gex);
-      } catch (e) {
-        //ignore
+        throw gex;
       }
-      throw gex;
     }
   }
 }

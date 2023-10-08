@@ -1634,6 +1634,20 @@ class ListApiDog {
     return list;
   }
 
+  Future<List<Commuter>> getRandomCommuters(int limit) async {
+
+    final cmd = '${url}getRandomCommuters?limit=$limit';
+    List resp = await _sendHttpGET(cmd);
+    final list = <Commuter>[];
+    for (var value in resp) {
+      list.add(buildCommuter(value));
+    }
+    pp('\n\n$mm random commuters found: '
+        '${list.length} \n');
+    return list;
+  }
+
+
   Future<List<Country>> getCountries() async {
     rm.RealmResults<Country>? realmResults;
     realmResults = realm.all<Country>();

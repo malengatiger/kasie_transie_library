@@ -286,6 +286,7 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
                   child: association == null
                       ? gapW16
                       : RouteListMinimum(
+                    isMappable: false,
                           onRoutePicked: (route) {
                             setState(() {
                               selectedRoute = route;

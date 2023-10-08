@@ -13,7 +13,6 @@ import 'package:kasie_transie_library/messaging/local_notif.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
-import 'package:kasie_transie_library/utils/kasie_error.dart';
 import 'package:kasie_transie_library/utils/parsers.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:realm/realm.dart';
@@ -102,20 +101,19 @@ class FCMBloc {
 
   static const red = '🍎🍎';
   var newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMBloc: 🌀🌀🌀🌀';
+
   Future<void> subscribeForBackendMonitor(String app) async {
     appName = app;
     if (!newMM.contains(app)) {
-    newMM = '$newMM$app 🔷🔷';
+      newMM = '$newMM$app 🔷🔷';
     }
-    await firebaseMessaging
-        .subscribeToTopic('kasieError');
+    await firebaseMessaging.subscribeToTopic('kasieError');
     pp('$newMM ..... FCM: subscribed to topic kasieError');
     //
-    await firebaseMessaging
-        .subscribeToTopic('appError');
+    await firebaseMessaging.subscribeToTopic('appError');
     pp('$newMM ..... FCM: subscribed to topic appError');
-
   }
+
   Future<void> subscribeForDemoDriver(String app) async {
     String? associationId;
     appName = app;
@@ -377,7 +375,6 @@ class FCMBloc {
   }
 
   Future<void> processFCMMessage(fb.RemoteMessage message, String type) async {
-
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     myName = packageInfo.appName;
     if (!newMM.contains(myName!)) {
@@ -453,7 +450,6 @@ class FCMBloc {
       case Constants.kasieError:
         _kasieErrorStreamController.sink.add(data);
         break;
-
 
       default:
         pp('$newMM ... SWITCH statement fell all the way through: type: $type ... ');
@@ -532,7 +528,7 @@ class FCMBloc {
   void _processLocationResponse(lib.LocationResponse resp) async {
     pp('$newMM _processLocationResponse ... ${resp.vehicleReg}');
 
-    myPrettyJsonPrint(resp.toJson());
+    //myPrettyJsonPrint(resp.toJson());
     if (user == null) {
       return;
     }
@@ -754,14 +750,14 @@ class FCMBloc {
   Stream<lib.AmbassadorPassengerCount> get passengerCountStream =>
       _passengerCountStreamController.stream;
 
-  final StreamController<Map<String, dynamic>>
-  _appErrorStreamController = StreamController.broadcast();
+  final StreamController<Map<String, dynamic>> _appErrorStreamController =
+      StreamController.broadcast();
 
   Stream<Map<String, dynamic>> get appErrorStream =>
       _appErrorStreamController.stream;
 
-  final StreamController<Map<String, dynamic>>
-  _kasieErrorStreamController = StreamController.broadcast();
+  final StreamController<Map<String, dynamic>> _kasieErrorStreamController =
+      StreamController.broadcast();
 
   Stream<Map<String, dynamic>> get kasieErrorStream =>
       _kasieErrorStreamController.stream;
@@ -773,9 +769,10 @@ String? myName;
 var mxx = '💙💙💙💙💙💙FCM Background Processing:  💙💙';
 
 @pragma('vm:entry-point')
-Future<void> kasieFirebaseMessagingBackgroundHandler(
+Future kasieFirebaseMessagingBackgroundHandler(
     fb.RemoteMessage message) async {
-  await Firebase.initializeApp();
+  // await Firebase.initializeApp();
+  pp("\n\n$mxx 🍎🍎🍎🍎handle message in background 🍎🍎🍎🍎 ....");
 
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
   myName = packageInfo.appName;
@@ -786,45 +783,48 @@ Future<void> kasieFirebaseMessagingBackgroundHandler(
   final data = message.data;
   final type = getMessageType(message);
 
-  pp("\n\n$mxx 🍎🍎🍎🍎handle message in background! 🍎🍎🍎🍎type: $type");
+  pp("$mxx 🍎🍎🍎🍎handle message in background! NO-OP except for locationRequest! 🍎🍎🍎🍎type: $type");
 
-  switch(type) {
-    case Constants.locationRequest:
-      final locReq = buildLocationRequest(data);
-      handleLocationRequest(locReq);
-      break;
-    case Constants.locationResponse:
-      final r = buildLocationResponse(data);
-      handleLocationResponse(r);
-      break;
-    case Constants.dispatchRecord:
-      final dispatch = buildDispatchRecord(data);
-      handleDispatch(dispatch);
-      break;
-    case Constants.passengerCount:
-
-      final count = buildAmbassadorPassengerCount(data);
-      handlePassengerCount(count);
-      break;
-    case Constants.heartbeat:
-      final h = buildVehicleHeartbeat(data);
-      handleHeartbeat(h);
-      break;
-    case Constants.vehicleArrival:
-      final a = buildVehicleArrival(data);
-      handleVehicleArrival(a);
-      break;
-    case Constants.vehicleDeparture:
-      final d = buildVehicleDeparture(data);
-      handleVehicleDeparture(d);
-      break;
-    case Constants.routeUpdateRequest:
-      final d = buildRouteUpdateRequest(data);
-      routesIsolate.refreshRoute(d.routeId!);
-      break;
-
+  try {
+    switch (type) {
+      case Constants.locationRequest:
+        final locReq = buildLocationRequest(data);
+        handleLocationRequest(locReq);
+        break;
+      // case Constants.locationResponse:
+      //   final r = buildLocationResponse(data);
+      //   handleLocationResponse(r);
+      //   break;
+      // case Constants.dispatchRecord:
+      //   final dispatch = buildDispatchRecord(data);
+      //   handleDispatch(dispatch);
+      //   break;
+      // case Constants.passengerCount:
+      //   final count = buildAmbassadorPassengerCount(data);
+      //   handlePassengerCount(count);
+      //   break;
+      // case Constants.heartbeat:
+      //   final h = buildVehicleHeartbeat(data);
+      //   handleHeartbeat(h);
+      //   break;
+      // case Constants.vehicleArrival:
+      //   final a = buildVehicleArrival(data);
+      //   handleVehicleArrival(a);
+      //   break;
+      // case Constants.vehicleDeparture:
+      //   final d = buildVehicleDeparture(data);
+      //   handleVehicleDeparture(d);
+      //   break;
+      // case Constants.routeUpdateRequest:
+      //   final d = buildRouteUpdateRequest(data);
+      //   routesIsolate.refreshRoute(d.routeId!);
+      //   break;
+    }
+  } catch (e, s) {
+    pp('${E.redDot}${E.redDot}${E.redDot}${E.redDot}${E.redDot}${E.redDot}'
+        '${E.redDot}${E.redDot} stackTrace: $s');
+    pp('$e $s');
   }
-
 }
 
 ///message handlers
@@ -835,12 +835,12 @@ void handleLocationResponse(lib.LocationResponse response) async {
   if (user != null) {
     if (user.userType == Constants.OWNER) {
       if (user.userId == response.userId) {
-        cacheLocationResponse(response);
+        //cacheLocationResponse(response);
       }
     }
 
     if (user.userType == Constants.ASSOCIATION_OFFICIAL) {
-      cacheLocationResponse(response);
+      //cacheLocationResponse(response);
     }
   }
 }
@@ -853,12 +853,12 @@ void handleHeartbeat(lib.VehicleHeartbeat heartbeat) async {
   if (user != null) {
     if (user.userType == Constants.OWNER) {
       if (user.userId == heartbeat.ownerId) {
-        cacheHeartbeat(heartbeat);
+        //cacheHeartbeat(heartbeat);
       }
     }
 
     if (user.userType == Constants.ASSOCIATION_OFFICIAL) {
-      cacheHeartbeat(heartbeat);
+      //cacheHeartbeat(heartbeat);
     }
   }
 }
@@ -871,12 +871,12 @@ void handlePassengerCount(lib.AmbassadorPassengerCount passengerCount) async {
   if (user != null) {
     if (user.userType == Constants.OWNER) {
       if (user.userId == passengerCount.ownerId) {
-        cachePassengerCount(passengerCount);
+        //cachePassengerCount(passengerCount);
       }
     }
 
     if (user.userType == Constants.ASSOCIATION_OFFICIAL) {
-      cachePassengerCount(passengerCount);
+      //cachePassengerCount(passengerCount);
     }
   }
 }
@@ -889,12 +889,12 @@ void handleDispatch(lib.DispatchRecord dispatchRecord) async {
   if (user != null) {
     if (user.userType == Constants.OWNER) {
       if (user.userId == dispatchRecord.ownerId) {
-        cacheDispatchRecord(dispatchRecord);
+        //cacheDispatchRecord(dispatchRecord);
       }
     }
 
     if (user.userType == Constants.ASSOCIATION_OFFICIAL) {
-      cacheDispatchRecord(dispatchRecord);
+      //cacheDispatchRecord(dispatchRecord);
     }
   }
 }
@@ -907,12 +907,12 @@ void handleVehicleDeparture(lib.VehicleDeparture departure) async {
   if (user != null) {
     if (user.userType == Constants.OWNER) {
       if (user.userId == departure.ownerId) {
-        cacheVehicleDeparture(departure);
+        //cacheVehicleDeparture(departure);
       }
     }
 
     if (user.userType == Constants.ASSOCIATION_OFFICIAL) {
-      cacheVehicleDeparture(departure);
+      //cacheVehicleDeparture(departure);
     }
   }
 }
@@ -925,51 +925,51 @@ void handleVehicleArrival(lib.VehicleArrival arrival) async {
   if (user != null) {
     if (user.userType == Constants.OWNER) {
       if (user.userId == arrival.ownerId) {
-        cacheVehicleArrival(arrival);
+        //cacheVehicleArrival(arrival);
       }
     }
 
     if (user.userType == Constants.ASSOCIATION_OFFICIAL) {
-      cacheVehicleArrival(arrival);
+      //cacheVehicleArrival(arrival);
     }
   }
 }
 
-void cacheLocationResponse(lib.LocationResponse object) {
-  listApiDog.realm.write(() {
-    listApiDog.realm.add<lib.LocationResponse>(object);
-  });
-}
-
-void cachePassengerCount(lib.AmbassadorPassengerCount object) {
-  listApiDog.realm.write(() {
-    listApiDog.realm.add<lib.AmbassadorPassengerCount>(object);
-  });
-}
-
-void cacheHeartbeat(lib.VehicleHeartbeat object) {
-  listApiDog.realm.write(() {
-    listApiDog.realm.add<lib.VehicleHeartbeat>(object);
-  });
-}
-
-void cacheVehicleArrival(lib.VehicleArrival object) {
-  listApiDog.realm.write(() {
-    listApiDog.realm.add<lib.VehicleArrival>(object);
-  });
-}
-
-void cacheVehicleDeparture(lib.VehicleDeparture object) {
-  listApiDog.realm.write(() {
-    listApiDog.realm.add<lib.VehicleDeparture>(object);
-  });
-}
-
-void cacheDispatchRecord(lib.DispatchRecord object) {
-  listApiDog.realm.write(() {
-    listApiDog.realm.add<lib.DispatchRecord>(object);
-  });
-}
+// void cacheLocationResponse(lib.LocationResponse object) {
+//   listApiDog.realm.write(() {
+//     listApiDog.realm.add<lib.LocationResponse>(object);
+//   });
+// }
+//
+// void cachePassengerCount(lib.AmbassadorPassengerCount object) {
+//   listApiDog.realm.write(() {
+//     listApiDog.realm.add<lib.AmbassadorPassengerCount>(object);
+//   });
+// }
+//
+// void cacheHeartbeat(lib.VehicleHeartbeat object) {
+//   listApiDog.realm.write(() {
+//     listApiDog.realm.add<lib.VehicleHeartbeat>(object);
+//   });
+// }
+//
+// void cacheVehicleArrival(lib.VehicleArrival object) {
+//   listApiDog.realm.write(() {
+//     listApiDog.realm.add<lib.VehicleArrival>(object);
+//   });
+// }
+//
+// void cacheVehicleDeparture(lib.VehicleDeparture object) {
+//   listApiDog.realm.write(() {
+//     listApiDog.realm.add<lib.VehicleDeparture>(object);
+//   });
+// }
+//
+// void cacheDispatchRecord(lib.DispatchRecord object) {
+//   listApiDog.realm.write(() {
+//     listApiDog.realm.add<lib.DispatchRecord>(object);
+//   });
+// }
 
 Future<lib.User?> getUserInBackground() async {
   lib.User? user;
@@ -983,7 +983,7 @@ Future<lib.User?> getUserInBackground() async {
   var jx = json.decode(string);
   user = buildUser(jx);
   pp('$mxx ... this user is responding while in background');
-  myPrettyJsonPrint(user.toJson());
+  //myPrettyJsonPrint(user.toJson());
 
   return user;
 }
@@ -1000,7 +1000,7 @@ Future<lib.Vehicle?> getCarInBackground() async {
   var jx = json.decode(string);
   car = buildVehicle(jx);
   pp('$mxx ... this car is responding while in background');
-  myPrettyJsonPrint(car.toJson());
+  //myPrettyJsonPrint(car.toJson());
 
   return car;
 }
@@ -1044,7 +1044,7 @@ void respondToLocationRequest(
     pp('$mxx sending background location response! ${E.blueDot}');
     final result = await _sendLocationResponse(resp, token);
     pp('$mxx background location response successfully sent! ${E.leaf} ');
-    myPrettyJsonPrint(result);
+    //myPrettyJsonPrint(result);
   } catch (e) {
     pp(e);
   }
@@ -1134,7 +1134,7 @@ Future _sendLocationResponse(lib.LocationResponse resp, String fcmToken) async {
 
 //
 String getMessageType(fb.RemoteMessage message) {
-  myPrettyJsonPrint(message.data);
+  //myPrettyJsonPrint(message.data);
   final data = message.data;
   var type = data['type'];
   pp("$mxx onMessage: ${E.pear} ${E.pear}${E.pear} $type - FCM message has arrived!  ... ${E.pear}${E.pear} ");

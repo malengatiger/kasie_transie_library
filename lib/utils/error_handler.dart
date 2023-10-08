@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -14,7 +12,7 @@ import '../data/schemas.dart';
 import 'device_location_bloc.dart';
 import 'emojis.dart';
 import 'functions.dart';
-
+import 'dart:io';
 final ErrorHandler errorHandler = ErrorHandler(locationBloc, prefs);
 
 class ErrorHandler {

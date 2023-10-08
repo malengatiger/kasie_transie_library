@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
@@ -198,7 +199,7 @@ class CarDetailsState extends State<CarDetails>
   var paCounts = <lib.AmbassadorPassengerCount>[];
 
   void _getData(bool refresh) async {
-    pp('$mm ... getData ...');
+    pp('$mm .............................. getData ...');
     setState(() {
       busy = true;
     });
@@ -218,22 +219,34 @@ class CarDetailsState extends State<CarDetails>
       }
 
       pp('$mm ... counts retrieved ...');
+
+      final kk = jsonEncode(counts);
+      final jj = jsonDecode(kk);
+      pp(jj);
+
       for (var c in counts) {
         switch (c.description) {
           case 'VehicleArrival':
             arrivals = c.count!;
+            pp('$mm ${E.blueDot} arrivals: ${c.count}');
             break;
           case 'VehicleDeparture':
             departures = c.count!;
+            pp('$mm ${E.blueDot} departures: ${c.count}');
+
             break;
           case 'VehicleHeartbeat':
             heartbeats = c.count!;
+            pp('$mm ${E.blueDot} heartbeats: ${c.count}');
+
             break;
           case 'DispatchRecord':
             dispatches = c.count!;
+            pp('$mm ${E.blueDot} dispatches: ${c.count}');
+
             break;
           case 'AmbassadorPassengerCount':
-            totalPassengers = c.count!;
+            pp('$mm ${E.blueDot} totalPassengers: $totalPassengers');
             break;
         }
       }

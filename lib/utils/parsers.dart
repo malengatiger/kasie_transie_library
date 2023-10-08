@@ -7,7 +7,7 @@ import 'functions.dart';
 ///
 ///
 Association buildAssociation(Map map) {
-  var id = rm.ObjectId.fromHexString(map['_id'] as String);
+  late rm.ObjectId id = _getId(map);
 
   final m = Association(
     id,
@@ -29,7 +29,7 @@ Association buildAssociation(Map map) {
 }
 
 StateProvince buildState(Map map) {
-  var id = rm.ObjectId.fromHexString(map['_id'] as String);
+  late rm.ObjectId id = _getId(map);
 
   final m = StateProvince(
     id,
@@ -43,8 +43,8 @@ StateProvince buildState(Map map) {
 
 Commuter buildCommuter(Map map) {
   // pp('${E.broc}  json for User, check _id .......');
-  // myPrettyJsonPrint(map);
-  var id = rm.ObjectId.fromHexString(map['_id'] as String);
+  // //myPrettyJsonPrint(map);
+  late rm.ObjectId id = _getId(map);
   final m = Commuter(
     id,
     commuterId: map['commuterId'],
@@ -65,8 +65,8 @@ Commuter buildCommuter(Map map) {
 
 User buildUser(Map map) {
   // pp('${E.broc}  json for User, check _id .......');
-  // myPrettyJsonPrint(map);
-  var id = rm.ObjectId.fromHexString(map['_id'] as String);
+  // //myPrettyJsonPrint(map);
+  late rm.ObjectId id = _getId(map);
   final m = User(
     id,
     userId: map['userId'],
@@ -88,7 +88,7 @@ User buildUser(Map map) {
 }
 
 SettingsModel buildSettingsModel(Map map) {
-  var id = rm.ObjectId.fromHexString(map['_id'] as String);
+  late rm.ObjectId id = _getId(map);
   final m = SettingsModel(
     id,
     associationId: map['associationId'],
@@ -117,8 +117,10 @@ Country buildCountry(Map value) {
     m = Country(id,
         countryId: value['countryId'],
         name: value['name'],
-        latitude: value['latitude'] is int ? double.parse('${value['latitude']}') : value['latitude'],
-        longitude: value['longitude'] is int ? double.parse('${value['longitude']}') : value['longitude'],
+        latitude: value['latitude'] is int ? double.parse(
+            '${value['latitude']}') : value['latitude'],
+        longitude: value['longitude'] is int ? double.parse(
+            '${value['longitude']}') : value['longitude'],
         iso2: value['iso2'],
         iso3: value['iso3'],
         capital: value['capital'],
@@ -129,17 +131,15 @@ Country buildCountry(Map value) {
         currency_name: value['currency_name'],
         currency_symbol: value['currency_symbol'],
         phone_code: value['phone_code']);
-
   } catch (e, stack) {
     pp("ERROR: $e : $stack");
   }
   return m;
-
 }
 
 //
 City buildCity(Map map) {
-  var id = rm.ObjectId.fromHexString(map['_id'] as String);
+  late rm.ObjectId id = _getId(map);
 
   final m = City(
     id,
@@ -149,8 +149,12 @@ City buildCity(Map map) {
     countryId: map['countryId'],
     stateName: map['stateName'],
     stateId: map['stateId'],
-    latitude: map['latitude'] is int ? double.parse('${map['latitude']}') : map['latitude'],
-    longitude: map['longitude'] is int ? double.parse('${map['longitude']}') : map['longitude'],
+    latitude: map['latitude'] is int
+        ? double.parse('${map['latitude']}')
+        : map['latitude'],
+    longitude: map['longitude'] is int
+        ? double.parse('${map['longitude']}')
+        : map['longitude'],
 
     position: buildPosition(map['position']),
     distance: map['distance'],
@@ -159,10 +163,9 @@ City buildCity(Map map) {
 }
 
 Position buildPosition(Map map) {
-
   List st = map['coordinates'];
-  var lat = st.last is int? double.parse('${st.last}') : st.last;
-  var lng = st.first is int? double.parse('${st.first}') : st.first;
+  var lat = st.last is int ? double.parse('${st.last}') : st.last;
+  var lng = st.first is int ? double.parse('${st.first}') : st.first;
   final m = Position(
       type: point, coordinates: [lng, lat], latitude: lat, longitude: lng);
 
@@ -170,7 +173,7 @@ Position buildPosition(Map map) {
 }
 
 Landmark buildLandmark(Map map) {
-  var id = rm.ObjectId.fromHexString(map['_id'] as String);
+  late rm.ObjectId id = _getId(map);
   List details = map['routeDetails'];
   var info = <RouteInfo>[];
   for (var e in details) {
@@ -270,7 +273,7 @@ Route buildRoute(Map value) {
       userId: value['userId'],
       created: value['created'],
       heading:
-          value['heading'] == null ? 0.0 : double.parse('${value['heading']}'),
+      value['heading'] == null ? 0.0 : double.parse('${value['heading']}'),
       name: value['name'],
       routeStartEnd: se,
       userName: value['userName'],
@@ -307,7 +310,7 @@ RoutePoint buildRoutePoint(Map value) {
       latitude: value['latitude'],
       created: value['created'],
       heading:
-          value['heading'] == null ? 0.0 : double.parse('${value['heading']}'),
+      value['heading'] == null ? 0.0 : double.parse('${value['heading']}'),
       routeName: value['routeName'],
       geoHash: value['geoHash'],
       position: buildPosition(value['position']),
@@ -349,7 +352,7 @@ Vehicle buildVehicle(Map vehicleJson) {
 }
 
 RouteAssignment buildRouteAssignment(Map map) {
-  var id = rm.ObjectId.fromHexString(map['_id'] as String);
+  late rm.ObjectId id = _getId(map);
   var m = RouteAssignment(
     id,
     vehicleId: map['vehicleId'],
@@ -365,7 +368,8 @@ RouteAssignment buildRouteAssignment(Map map) {
 }
 
 DispatchRecord buildDispatchRecord(Map j) {
-  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  //myPrettyJsonPrint(j);
+  late rm.ObjectId id = _getId(j);
   var m = DispatchRecord(
     id,
     vehicleId: j['vehicleId'],
@@ -385,13 +389,14 @@ DispatchRecord buildDispatchRecord(Map j) {
     routeLandmarkId: j['routeLandmarkId'],
     landmarkName: j['landmarkName'],
     routeId: j['routeId'],
-    position: buildPosition(j['position']),
+    position: j['position'] == null? null: buildPosition(j['position']),
   );
   return m;
 }
 
 CommuterRequest buildCommuterRequest(Map j) {
-  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  late rm.ObjectId id = _getId(j);
+
   var m = CommuterRequest(
     id,
     commuterId: j['commuterId'],
@@ -414,7 +419,10 @@ CommuterRequest buildCommuterRequest(Map j) {
 }
 
 VehicleArrival buildVehicleArrival(Map j) {
-  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  //
+  //myPrettyJsonPrint(j);
+
+  late rm.ObjectId id = _getId(j);
   var m = VehicleArrival(
     id,
     vehicleId: j['vehicleId'],
@@ -431,13 +439,17 @@ VehicleArrival buildVehicleArrival(Map j) {
     dispatched: j['dispatched'],
     geoHash: j['geoHash'],
     landmarkId: j['landmarkId'],
-    position: buildPosition(j['position']),
+    position: j['position'] == null? null: buildPosition(j['position']),
   );
   return m;
 }
 
 VehicleDeparture buildVehicleDeparture(Map j) {
-  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  //
+  //myPrettyJsonPrint(j);
+
+  late rm.ObjectId id = _getId(j);
+
   var m = VehicleDeparture(
     id,
     vehicleId: j['vehicleId'],
@@ -454,13 +466,15 @@ VehicleDeparture buildVehicleDeparture(Map j) {
     dispatched: j['dispatched'],
     geoHash: j['geoHash'],
     landmarkId: j['landmarkId'],
-    position: buildPosition(j['position']),
+    position: j['position'] == null? null: buildPosition(j['position']),
   );
   return m;
 }
 
 VehicleHeartbeat buildVehicleHeartbeat(Map j) {
-  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  //
+  //myPrettyJsonPrint(j);
+  late rm.ObjectId id = _getId(j);
   var m = VehicleHeartbeat(
     id,
     vehicleId: j['vehicleId'],
@@ -474,20 +488,35 @@ VehicleHeartbeat buildVehicleHeartbeat(Map j) {
     model: j['model'],
     ownerName: j['ownerName'],
     geoHash: j['geoHash'],
-    position: buildPosition(j['position']),
+    position: j['position'] == null? null: buildPosition(j['position']),
     longDate: j['longDate'],
   );
   return m;
 }
 
+rm.ObjectId _getId(Map<dynamic, dynamic> j) {
+  // late rm.ObjectId id;
+  // try {
+  //   if (j['_id'] == null) {
+  //       id = rm.ObjectId();
+  //     } else {
+  //       id = rm.ObjectId.fromHexString(j['_id'] as String);
+  //     }
+  // } catch (e,s) {
+  //   pp('.... PROBLEM WITH ID .......');
+  //   pp('$e $s');
+  // }
+  return rm.ObjectId();
+}
+
 CalculatedDistance buildCalculatedDistance(Map map) {
-  var id = rm.ObjectId.fromHexString(map['_id'] as String);
+  late rm.ObjectId id = _getId(map);
 
   final m = CalculatedDistance(
     id,
     routeId: map['routeId'],
     index: map['index'],
-    distanceFromStart: map['distanceFromStart'] ,
+    distanceFromStart: map['distanceFromStart'],
     fromLandmark: map['fromLandmark'],
     toLandmarkId: map['toLandmarkId'],
     associationId: map['associationId'],
@@ -502,7 +531,7 @@ CalculatedDistance buildCalculatedDistance(Map map) {
 }
 
 UserGeofenceEvent buildUserGeofenceEvent(Map j) {
-  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  late rm.ObjectId id = _getId(j);
   var m = UserGeofenceEvent(
     id,
     userId: j['userId'],
@@ -522,7 +551,7 @@ UserGeofenceEvent buildUserGeofenceEvent(Map j) {
 }
 
 LocationRequest buildLocationRequest(Map j) {
-  var id = rm.ObjectId.fromHexString(j['_id'] as String);
+  late rm.ObjectId id = _getId(j);
   var m = LocationRequest(
     id,
     userId: j['userId'],
@@ -631,7 +660,7 @@ VehicleVideo buildVehicleVideo(Map j) {
 }
 
 VehicleMediaRequest buildVehicleMediaRequest(Map j) {
-  myPrettyJsonPrint(j);
+  //myPrettyJsonPrint(j);
   var id = rm.ObjectId.fromHexString(j['_id'] as String);
   var m = VehicleMediaRequest(
     id,
@@ -648,7 +677,7 @@ VehicleMediaRequest buildVehicleMediaRequest(Map j) {
 }
 
 AppError buildAppError(Map j) {
-  myPrettyJsonPrint(j);
+  //myPrettyJsonPrint(j);
   var id = rm.ObjectId.fromHexString(j['_id'] as String);
 
   var m = AppError(
@@ -664,7 +693,8 @@ AppError buildAppError(Map j) {
     model: j['model'],
     uploadedDate: j['uploadedDate'],
     brand: j['brand'],
-    errorPosition: j['errorPosition'] == null? null:buildPosition(j['errorPosition']),
+    errorPosition: j['errorPosition'] == null ? null : buildPosition(
+        j['errorPosition']),
     userUrl: j['userUrl'],
     userName: j['userName'],
     userId: j['userId'],
@@ -678,7 +708,7 @@ AppError buildAppError(Map j) {
 
 
 RouteUpdateRequest buildRouteUpdateRequest(Map j) {
-  myPrettyJsonPrint(j);
+  //myPrettyJsonPrint(j);
   var id = rm.ObjectId.fromHexString(j['_id'] as String);
   var m = RouteUpdateRequest(
     id,
