@@ -1,3 +1,8 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'heartbeat_meta.g.dart';
+@JsonSerializable()
+
 class HeartbeatMeta {
   String? vehicleId;
   String? associationId;
@@ -14,39 +19,20 @@ class HeartbeatMeta {
       required this.latitude,
       required this.longitude});
 
-  Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    map['vehicleId'] = vehicleId;
-    map['associationId'] = associationId;
-    map['ownerId'] = ownerId;
-    map['vehicleReg'] = vehicleReg;
-    map['latitude'] = latitude;
-    map['longitude'] = longitude;
+  factory HeartbeatMeta.fromJson(Map<String, dynamic> json) =>
+      _$HeartbeatMetaFromJson(json);
 
-    return map;
-  }
-
-  HeartbeatMeta.fromJson(Map map) {
-    vehicleId = map['vehicleId'];
-    associationId = map['associationId'];
-    ownerId = map['ownerId'];
-    vehicleReg = map['vehicleReg'];
-    latitude = map['latitude'];
-    longitude = map['longitude'];
-  }
+  Map<String, dynamic> toJson() => _$HeartbeatMetaToJson(this);
 }
-
+@JsonSerializable()
 class HeartbeatTimeSeries {
   late DateTime created;
   late HeartbeatMeta heartbeatMeta;
 
   HeartbeatTimeSeries({required this.created, required this.heartbeatMeta});
 
-  Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    map['heartbeatMeta'] = heartbeatMeta.toJson();
-    map['created'] = DateTime.parse(created.toLocal().toIso8601String());
+  factory HeartbeatTimeSeries.fromJson(Map<String, dynamic> json) =>
+      _$HeartbeatTimeSeriesFromJson(json);
 
-    return map;
-  }
+  Map<String, dynamic> toJson() => _$HeartbeatTimeSeriesToJson(this);
 }

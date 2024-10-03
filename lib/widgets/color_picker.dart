@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ColorPicker extends StatelessWidget {
-  const ColorPicker({Key? key, required this.onColorPicked}) : super(key: key);
+  const ColorPicker({super.key, required this.onColorPicked});
 
   final Function(String, Color) onColorPicked;
 

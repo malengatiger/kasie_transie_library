@@ -1,30 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
-import 'package:kasie_transie_library/bloc/dispatch_helper.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/isolates/dispatch_isolate.dart';
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/local_finder.dart';
-import 'package:kasie_transie_library/utils/parsers.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/widgets/passenger_count.dart';
 import 'package:kasie_transie_library/widgets/qr_scanner.dart';
 import 'package:kasie_transie_library/widgets/route_widget.dart';
 import 'package:badges/badges.dart' as bd;
-import 'package:kasie_transie_library/widgets/scanners/qr_scanner_mobile.dart';
-import 'package:realm/realm.dart';
 
-import '../../utils/navigator_utils.dart';
+import '../../isolates/local_finder.dart';
 import '../media_reminder.dart';
+import 'dispatch_helper.dart';
 
 
 class DispatchViaScan extends StatefulWidget {
-  const DispatchViaScan({Key? key}) : super(key: key);
+  const DispatchViaScan({super.key});
 
   @override
   DispatchViaScanState createState() => DispatchViaScanState();
@@ -35,6 +32,8 @@ class DispatchViaScanState extends State<DispatchViaScan>
   late AnimationController _controller;
   final mm = '${E.heartOrange}${E.heartOrange}${E.heartOrange}${E.heartOrange}'
       ' ScanDispatch: ${E.heartOrange}${E.heartOrange} ';
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
 
   String? dispatchText,
       selectRouteText,
@@ -60,7 +59,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
   bool _showRoutes = true, busy = false;
   bool _showDispatches = false, _showDispatchButton = false;
   Future _setTexts() async {
-    final c = await prefs.getColorAndLocale();
+    final c = prefs.getColorAndLocale();
     final loc = c.locale;
     dispatchText = await translator.translate('dispatch', loc);
     selectRouteText = await translator.translate('pleaseSelectRoute', loc);
@@ -85,7 +84,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
   }
 
   Future _getAssociationVehicleMediaRequests(bool refresh) async {
-    user = await prefs.getUser();
+    user = prefs.getUser();
     final startDate = DateTime.now()
         .toUtc()
         .subtract(const Duration(days: 30))
@@ -98,13 +97,13 @@ class DispatchViaScanState extends State<DispatchViaScan>
   Future _getRoutes() async {
     final loc = await locationBloc.getLocation();
     //
-    routes = await localFinder.findNearestRoutes(
-        latitude: loc.latitude,
-        longitude: loc.longitude,
-        radiusInMetres: 500.0);
+    // const liist  = await localFinder.findNearestRoutes(
+    //     latitude: loc.latitude,
+    //     longitude: loc.longitude,
+    //     radiusInMetres: 500.0);
 
     //check ... selected ...
-    final prevRoute = await prefs.getRoute();
+    final prevRoute = prefs.getRoute();
     bool found = false;
     if (selectedRoute != null) {
       for (var value in routes) {
@@ -137,25 +136,6 @@ class DispatchViaScanState extends State<DispatchViaScan>
   }
 
   lib.RouteLandmark? selectedRouteLandmark;
-  void _navigateToScan() async {
-    navigateWithScale( QRScannerMobile(onCarScanned: (car ) {
-      pp('$mm ... on car scanned: ${car.vehicleReg}');
-      showToast(
-          textStyle: myTextStyleMediumBoldWithColor(context: context, color: Theme.of(context).primaryColorLight),
-          padding: 24,
-          duration: const Duration(seconds: 5),
-          message: 'Scanned ${car.vehicleReg}', context: context);
-      onCarScanned(car);
-    }, onUserScanned: (user ) {  }, onError: (){
-      showToast(
-          textStyle: myTextStyleMediumBoldWithColor(context: context, color: Theme.of(context).primaryColorLight),
-          padding: 24,
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 5),
-          message: 'Scanner fucked!', context: context);
-    }, quitAfterScan: false,), context);
-
-  }
   @override
   void dispose() {
     _controller.dispose();
@@ -173,7 +153,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
 
   void onRoutePicked(lib.Route route) async {
     selectedRoute = route;
-    await prefs.saveRoute(route);
+     prefs.saveRoute(route);
     setState(() {
       _showRoutes = false;
       _showDispatches = true;
@@ -314,8 +294,8 @@ class DispatchViaScanState extends State<DispatchViaScan>
       });
       final loc = await locationBloc.getLocation();
       lib.RouteLandmark? mark = await findNearestLandmark(loc);
-      m = lib.DispatchRecord(ObjectId(),
-          dispatchRecordId: Uuid.v4().toString(),
+      m = lib.DispatchRecord(
+          dispatchRecordId: DateTime.now().toIso8601String(),
           routeName: selectedRoute!.name,
           routeId: selectedRoute!.routeId,
           created: DateTime.now().toUtc().toIso8601String(),
@@ -329,7 +309,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
           passengers: passengerCount,
           associationName: scannedVehicle!.associationName,
           position: lib.Position(
-            type: point,
+            type: 'Point',
             coordinates: [loc.longitude, loc.latitude],
             latitude: loc.latitude,
             longitude: loc.longitude,
@@ -342,12 +322,14 @@ class DispatchViaScanState extends State<DispatchViaScan>
       _clearFields();
       dispatchIsolate.addDispatchRecord(m);
       //Navigator.of(context).pop();
-      showToast(
-          padding: 24,
-          backgroundColor: Colors.green.shade900,
-          duration: Duration(seconds: 5),
-          textStyle: TextStyle(color: Colors.white),
-          message: 'Dispatch sent OK', context: context);
+      if (mounted) {
+        showToast(
+                  padding: 24,
+                  backgroundColor: Colors.green.shade900,
+                  duration: const Duration(seconds: 5),
+                  textStyle: const TextStyle(color: Colors.white),
+                  message: 'Dispatch sent OK', context: context);
+      }
     } catch (e) {
       pp(e);
     }
@@ -519,7 +501,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
                                 ElevatedButton(
                                     style: const ButtonStyle(
                                         elevation:
-                                            MaterialStatePropertyAll(8.0)),
+                                            WidgetStatePropertyAll(8.0)),
                                     onPressed: () {
                                       setState(() {
                                         _showDispatchButton = false;
@@ -560,8 +542,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
 }
 
 class DispatchGrid extends StatelessWidget {
-  const DispatchGrid({Key? key, required this.dispatches, required this.title})
-      : super(key: key);
+  const DispatchGrid({super.key, required this.dispatches, required this.title});
   final String title;
   final List<lib.DispatchRecord> dispatches;
   @override
@@ -579,8 +560,7 @@ class DispatchGrid extends StatelessWidget {
 
 //
 class DispatchCarPlate extends StatelessWidget {
-  const DispatchCarPlate({Key? key, required this.dispatchRecord})
-      : super(key: key);
+  const DispatchCarPlate({super.key, required this.dispatchRecord});
   final lib.DispatchRecord dispatchRecord;
 
   @override

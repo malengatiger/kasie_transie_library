@@ -1,3 +1,8 @@
+import 'package:json_annotation/json_annotation.dart';
+part 'route_pair.g.dart';
+
+@JsonSerializable()
+
 class RoutePair {
   String? routeId1, routeId2, routeName1, routePairId;
   String? routeName2, created, updated;
@@ -14,28 +19,8 @@ class RoutePair {
         required this.routePairId,
       required this.associationName});
 
-  RoutePair.fromJson(Map data) {
-    routeId1 = data['routeId1'];
-    routeId2 = data['routeId2'];
-    routeName1 = data['routeName1'];
-    routeName2 = data['routeName2'];
-    routePairId = data['routePairId'];
+  factory RoutePair.fromJson(Map<String, dynamic> json) =>
+      _$RoutePairFromJson(json);
 
-    associationId = data['associationId'];
-    associationName = data['associationName'];
-    created = data['created'];
-    updated = data['updated'];
-  }
-
-  Map<String, dynamic> toJson() => <String, dynamic>{
-        'routeId1': routeId1,
-        'routeId2': routeId2,
-    'routePairId': routePairId,
-        'routeName1': routeName1,
-        'routeName2': routeName2,
-        'created': created,
-        'updated': updated,
-        'associationId': associationId,
-        'associationName': associationName,
-      };
+  Map<String, dynamic> toJson() => _$RoutePairToJson(this);
 }

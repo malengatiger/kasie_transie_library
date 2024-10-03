@@ -6,11 +6,9 @@ import 'dart:isolate';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/app_auth.dart';
 import 'package:kasie_transie_library/bloc/cache_manager.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
-import 'package:kasie_transie_library/utils/parsers.dart';
 
+import '../data/data_schemas.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
 import '../utils/kasie_exception.dart';
@@ -120,16 +118,10 @@ class DispatchIsolate {
     final start = DateTime.now();
     final s = await Isolate.run(() async => _heavyTaskForAmbassadorCount(bag));
     final mJson = jsonDecode(s);
-    final ambCount = buildAmbassadorPassengerCount(mJson);
+    final ambCount = AmbassadorPassengerCount.fromJson(mJson);
 
     pp('$xy _handleAmbassadorCount attempting to cache ${ambCount.vehicleReg} ambCount.... ');
 
-    listApiDog.realm.write(() {
-      listApiDog.realm.add<AmbassadorPassengerCount>(ambCount, update: true);
-    });
-    var end = DateTime.now();
-    pp('$xy should have cached ${ambCount.vehicleReg} AmbassadorPassengerCount in realm; elapsed time: '
-        '${end.difference(start).inSeconds} seconds');
     return ambCount;
   }
   Future<DispatchRecord> _handleDispatch(DispatchBag bag) async {
@@ -137,13 +129,10 @@ class DispatchIsolate {
     final start = DateTime.now();
     final s = await Isolate.run(() async => _heavyTaskForDispatch(bag));
     final mJson = jsonDecode(s);
-    final dispatch = buildDispatchRecord(mJson);
+    final dispatch = DispatchRecord.fromJson(mJson);
 
     pp('$xy _handleDispatches attempting to cache ${dispatch.vehicleReg} dispatch.... ');
 
-    listApiDog.realm.write(() {
-      listApiDog.realm.add<DispatchRecord>(dispatch, update: true);
-    });
     var end = DateTime.now();
     pp('$xy should have cached ${dispatch.vehicleReg} DispatchRecords in realm; elapsed time: '
         '${end.difference(start).inSeconds} seconds');

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/data/schemas.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 
 class PassengerCountCard extends StatelessWidget {
   const PassengerCountCard(
-      {Key? key, required this.passengerCount, required this.backgroundColor})
-      : super(key: key);
+      {super.key, required this.passengerCount, required this.backgroundColor});
 
   final AmbassadorPassengerCount passengerCount;
   final Color backgroundColor;

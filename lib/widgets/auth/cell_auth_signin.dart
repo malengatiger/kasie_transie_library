@@ -1,13 +1,15 @@
 import 'package:firebase_ui_auth/firebase_ui_auth.dart' as ui;
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/data/color_and_locale.dart';
 import 'package:kasie_transie_library/widgets/auth/sign_in_landing.dart';
 
-import '../../auth/phone_auth_signin.dart';
-import '../../data/schemas.dart' as lib;
+import '../../auth/email_auth_signin.dart';
+import '../../auth/sign_in_strings.dart';
+import '../../data/data_schemas.dart';
 import '../../l10n/translation_handler.dart';
 import '../../utils/functions.dart';
-import '../../utils/navigator_utils.dart';
+import '../../utils/navigator_utils_old.dart';
 import '../../utils/prefs.dart';
 import '../language_and_color_chooser.dart';
 import 'my_phone_input.dart';
@@ -22,7 +24,7 @@ class CustomPhoneVerification extends StatefulWidget {
       required this.onCancel,
       required this.onLanguageChosen});
 
-  final Function(lib.User) onUserAuthenticated;
+  final Function(User) onUserAuthenticated;
   final Function onError;
   final Function onCancel;
   final Function onLanguageChosen;
@@ -38,6 +40,7 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification> {
   String loading = 'Loading data';
   String waiting = 'Wait data', notRegistered = '';
   bool busy = false;
+  Prefs prefs = GetIt.instance<Prefs>();
 
   // lib.User? user;
   SignInStrings? signInStrings;
@@ -45,6 +48,7 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification> {
   String? phoneVerificationId;
   String changeLanguage = 'Change Language or Color';
   String signInWithPhone = 'Sign in with your phone';
+  String signInWithEmail = 'Sign in with your email';
   String firstTime = 'This is the first time here ...';
   String welcome = 'Welcome!';
 
@@ -55,12 +59,17 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification> {
   }
 
   void _control() async {
+    var countryCode = WidgetsBinding.instance.platformDispatcher.locale.countryCode;
+    var languageCode = WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+    var locale = WidgetsBinding.instance.platformDispatcher.locale.toString();
+
+    pp('$mm country: $countryCode language: $languageCode locale: $locale');
+
     await _setTexts();
   }
 
   Future _setTexts() async {
-    // signInStrings = await SignInStrings.getTranslated(sett);
-    final c = await prefs.getColorAndLocale();
+    final c = prefs.getColorAndLocale();
     loading = await translator.translate('loading', c.locale);
     waiting = await translator.translate('waiting', c.locale);
     notRegistered = await translator.translate('notRegistered', c.locale);
@@ -68,14 +77,24 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification> {
     changeLanguage = await translator.translate('changeLanguage', c.locale);
     welcome = await translator.translate('welcome', c.locale);
     signInWithPhone = await translator.translate('signInWithPhone', c.locale);
-
+    signInWithEmail = await translator.translate('signInWithEmail', c.locale);
+   // if (signInWithEmail == "") {
+   //    signInWithEmail = 'Sign in with your email';
+   //  }
     setState(() {});
   }
 
   Future<void> _navToPhoneInput() async {
-    lib.User? user = await navigateWithScale(
+    pp('$mm _navToPhoneInput .......');
+
+    User? user = await navigateWithScale(
         MyPhoneInput(
-          onPhoneNumber: (number) {},
+          onPhoneNumber: (number) {
+            pp('$mm onPhoneNumber from my PhoneInput: $number');
+
+          }, onError: (error ) {
+            pp('$mm onError from my PhoneInput: $error');
+        },
         ),
         context);
     pp('\n\n\n$mm .............................. back from MyPhoneInput  🍎 🍎 ');
@@ -92,6 +111,31 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification> {
         showSnackBar(
             message: 'Something went wrong, please try again',
             context: context);
+
+      }
+    }
+  }
+  Future<void> _navToEmail() async {
+    pp('$mm _navToEmail .......');
+
+    User? user = await navigateWithScale(
+        EmailAuthSignin(onGoodSignIn: (){}, onSignInError: (){}, ),
+        context);
+    pp('\n\n\n$mm .............................. back from EmailAuthSignin  🍎 🍎 ');
+
+    if (user != null) {
+      myPrettyJsonPrint(user.toJson());
+      if (mounted) {
+        pp('\n\n\n$mm .............................. '
+            'popping out from CustomPhoneVerification  🍎 🍎 with user: ${user.name} ');
+        Navigator.of(context).pop(user);
+      }
+    } else {
+      if (mounted) {
+        showSnackBar(
+            message: 'Something went wrong, please try again',
+            context: context);
+
       }
     }
   }
@@ -106,7 +150,7 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification> {
         widget.onLanguageChosen();
       },
     ), context);
-    colorAndLocale = await prefs.getColorAndLocale();
+    colorAndLocale = prefs.getColorAndLocale();
     await _setTexts();
   }
 
@@ -127,14 +171,17 @@ class CustomPhoneVerificationState extends State<CustomPhoneVerification> {
                   firstTime: firstTime,
                   changeLanguage: changeLanguage,
                   signInWithPhone: signInWithPhone,
-                  startEmailLinkSignin: '',
-                  onNavigateToEmailAuth: () {},
+                  startEmailLinkSignin: signInWithEmail,
+                  onNavigateToEmailAuth: () {
+                    _navToEmail();
+                  },
                   onNavigateToPhoneAuth: () {
                     _navToPhoneInput();
                   },
+
                   onNavigateToColor: () {
                     _navigateToColor();
-                  }),
+                  }, signInWithEmail: signInWithEmail,),
             ),
           ),
         ),

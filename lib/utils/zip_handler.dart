@@ -1,26 +1,26 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:archive/archive_io.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/app_auth.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
+import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/data/route_bag.dart';
-import 'package:kasie_transie_library/data/schemas.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
-import 'package:kasie_transie_library/utils/parsers.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:universal_io/io.dart';
 
-import 'emojis.dart';
+import '../data/data_schemas.dart';
 import 'functions.dart';
 import 'kasie_exception.dart';
 
-final ZipHandler zipHandler = ZipHandler();
+// final ZipHandler zipHandler = ZipHandler();
 
 class ZipHandler {
   static const xz = '🍐🍐🍐🍐 ZipHandler : ';
+  final AppAuth appAuth;
+  final SemCache semCache;
+
+  ZipHandler(this.appAuth, this.semCache);
 
   Future<String> getCars(String associationId, String token) async {
     pp('$xz getVehiclesZippedFile: 🔆🔆🔆 get zipped car data associationId: $associationId ...');
@@ -40,41 +40,22 @@ class ZipHandler {
     pp('$xz getCars: 🔆🔆🔆 get zipped data, response: ${response.contentLength} bytes ...');
 
     try {
-      Directory dir = await getApplicationDocumentsDirectory();
-      File zipFile = File(
-          '${dir.path}/zipFile${DateTime.now().millisecondsSinceEpoch}.zip');
-      zipFile.writeAsBytesSync(response.bodyBytes);
-      pp('$xz getCars: 🔆🔆🔆 handle file inside zip: ${await zipFile.length()} bytes');
-
-      //create zip archive
-      final inputStream = InputFileStream(zipFile.path);
-      final archive = ZipDecoder().decodeBuffer(inputStream);
+      final archive = ZipDecoder().decodeBytes(response.bodyBytes);
 
       pp('$xz getCars: 🔆🔆🔆 handle file inside zip archive: ${archive.files.length} files');
-
       for (var file in archive.files) {
         if (file.isFile) {
           final fileName = file.name;
           pp('$xz getCars: file from inside archive ... ${file.size} bytes 🔵 isCompressed: ${file.isCompressed} 🔵 zipped file name: ${file.name}');
-          var outFile = File('${dir.path}/$fileName');
-          outFile = await outFile.create(recursive: true);
-          await outFile.writeAsBytes(file.content);
-          pp('$xz getCars: file after decompress ... ${await outFile.length()} bytes  🍎 path: ${outFile.path} 🍎');
-
-          if (outFile.existsSync()) {
-            var m = outFile.readAsStringSync(encoding: utf8);
-            List mJson = json.decode(m);
-            //mjson has multiple cars
-            for (var v in mJson) {
-              cars.add(buildVehicle(v));
-            }
-            pp('$xz getCars 🍎🍎🍎🍎 list of ${cars.length} cars has been filled!');
-            var end = DateTime.now();
-            var ms = end.difference(start).inSeconds;
-            pp('$xz getCars 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎\n\n');
-          } else {
-            pp('$xz ERROR: could not find file. ${E.redDot}');
+          final content = utf8.decode(file.content as List<int>);
+          final mJson = json.decode(content);
+          for (var v in mJson) {
+            cars.add(Vehicle.fromJson(v));
           }
+          pp('$xz getCars 🍎🍎🍎🍎 list of ${cars.length} cars has been filled!');
+          var end = DateTime.now();
+          var ms = end.difference(start).inSeconds;
+          pp('$xz getCars 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎\n\n');
         }
       }
     } catch (e, stack) {
@@ -102,42 +83,23 @@ class ZipHandler {
     pp('$xz getOwnerCars: 🔆🔆🔆 get zipped data, response: ${response.contentLength} bytes ...');
 
     try {
-      Directory dir = await getApplicationDocumentsDirectory();
-      File zipFile = File(
-          '${dir.path}/zipFile${DateTime.now().millisecondsSinceEpoch}.zip');
-      zipFile.writeAsBytesSync(response.bodyBytes);
-      pp('$xz getCars: 🔆🔆🔆 handle file inside zip: ${await zipFile.length()} bytes');
-
-      //create zip archive
-      final inputStream = InputFileStream(zipFile.path);
-      final archive = ZipDecoder().decodeBuffer(inputStream);
-
-      pp('$xz getCars: 🔆🔆🔆 handle file inside zip archive: ${archive.files.length} files');
+      final archive = ZipDecoder().decodeBytes(response.bodyBytes);
+      pp('$xz getOwnerCars: 🔆🔆🔆 handle file inside zip archive: ${archive.files.length} files');
 
       for (var file in archive.files) {
         if (file.isFile) {
           final fileName = file.name;
-          pp('$xz getCars: file from inside archive ... ${file.size} bytes 🔵 isCompressed: ${file.isCompressed} 🔵 zipped file name: ${file.name}');
-          var outFile = File('${dir.path}/$fileName');
-          outFile = await outFile.create(recursive: true);
-          await outFile.writeAsBytes(file.content);
-          pp('$xz getCars: file after decompress ... ${await outFile.length()} bytes  🍎 path: ${outFile.path} 🍎');
-
-          if (outFile.existsSync()) {
-            var m = outFile.readAsStringSync(encoding: utf8);
-            List mJson = json.decode(m);
-            //mjson has multiple cars
-            for (var v in mJson) {
-              cars.add(buildVehicle(v));
-            }
-
-            pp('$xz getCars 🍎🍎🍎🍎 list of ${cars.length} cars has been filled!');
-            var end = DateTime.now();
-            var ms = end.difference(start).inSeconds;
-            pp('$xz getCars 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎\n\n');
-          } else {
-            pp('$xz ERROR: could not find file. ${E.redDot}');
+          pp('$xz getOwnerCars: file from inside archive ... ${file.size} bytes 🔵 isCompressed: ${file.isCompressed} 🔵 zipped file name: ${file.name}');
+          final content = utf8.decode(file.content as List<int>);
+          final mJson = json.decode(content);
+          for (var v in mJson) {
+            cars.add(Vehicle.fromJson(v));
           }
+
+          pp('$xz getOwnerCars 🍎🍎🍎🍎 list of ${cars.length} cars has been filled!');
+          var end = DateTime.now();
+          var ms = end.difference(start).inSeconds;
+          pp('$xz getOwnerCars 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎\n\n');
         }
       }
     } catch (e, stack) {
@@ -147,12 +109,39 @@ class ZipHandler {
     return jsonEncode(cars);
   }
 
+  int count = 0;
+  Future<List<City>> getCities(String countryId, bool refresh) async {
+    pp('$xz ....... getCities: refresh: $refresh');
+    List<City> mCities = [];
+    var token = await appAuth.getAuthToken();
+    if (token == null) {
+      throw Exception('No token');
+    }
+    if (refresh) {
+      var s = await getCitiesString(countryId, token);
+      List json = jsonDecode(s);
+      for (var value in json) {
+        mCities.add(City.fromJson(value));
+      }
+      await semCache.saveCities(mCities);
+      return mCities;
+    }
+    var cities = await semCache.getCities();
+    if (cities.isEmpty) {
+      if (count == 0) {
+        count++;
+        cities = await getCities(countryId,true);
+      }
+    }
+    count = 0;
+    return cities;
+  }
 
-  Future<String> getCities(String countryId, String token) async {
-    pp('$xz getCities: 🔆🔆🔆 get zipped city data countryId: $countryId ...');
+  Future<String> getCitiesString(String countryId, String token) async {
+    pp('$xz getCitiesString: 🔆🔆🔆 get zipped cities; countryId: $countryId ...');
 
     final mUrl =
-        '${KasieEnvironment.getUrl()}getCountryCitiesZippedFile?countryId=$countryId';
+        '${KasieEnvironment.getUrl()}country/getCountryCitiesZippedFile?countryId=$countryId';
     var start = DateTime.now();
     List<City> cities = [];
 
@@ -162,46 +151,25 @@ class ZipHandler {
     };
     headers['Authorization'] = 'Bearer $token';
 
-    http.Response response = await getUsingHttp(mUrl, token, headers);
-    pp('$xz getCities: 🔆🔆🔆 get zipped data, response: ${response.contentLength} bytes ...');
-
     try {
-      Directory dir = await getApplicationDocumentsDirectory();
-      File zipFile = File(
-          '${dir.path}/zipFile${DateTime.now().millisecondsSinceEpoch}.zip');
-      zipFile.writeAsBytesSync(response.bodyBytes);
-      pp('$xz getCities: 🔆🔆🔆 handle file inside zip: ${await zipFile.length()} bytes');
-
-      //create zip archive
-      final inputStream = InputFileStream(zipFile.path);
-      final archive = ZipDecoder().decodeBuffer(inputStream);
-
+      http.Response response = await getUsingHttp(mUrl, token, headers);
+      pp('$xz getCities: 🔆🔆🔆 get zipped data, response: ${response.contentLength} bytes ...');
+      final archive = ZipDecoder().decodeBytes(response.bodyBytes);
       pp('$xz getCities: 🔆🔆🔆 handle file inside zip archive: ${archive.files.length} files');
 
       for (var file in archive.files) {
         if (file.isFile) {
-          final fileName = file.name;
-          pp('$xz getCities: file from inside archive ... ${file.size} bytes 🔵 isCompressed: ${file.isCompressed} 🔵 zipped file name: ${file.name}');
-          var outFile = File('${dir.path}/$fileName');
-          outFile = await outFile.create(recursive: true);
-          await outFile.writeAsBytes(file.content);
-          pp('$xz getCities: file after decompress ... ${await outFile.length()} bytes  🍎 path: ${outFile.path} 🍎');
+          final content = utf8.decode(file.content as List<int>);
+          final mJson = json.decode(content);
 
-          if (outFile.existsSync()) {
-            var m = outFile.readAsStringSync(encoding: utf8);
-            List mJson = json.decode(m);
-            //mjson has multiple cities
-            for (var v in mJson) {
-              cities.add(buildCity(v));
-            }
-
-            pp('$xz getCities 🍎🍎🍎🍎 list of ${cities.length} cities has been filled!');
-            var end = DateTime.now();
-            var ms = end.difference(start).inSeconds;
-            pp('$xz getCities 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎\n\n');
-          } else {
-            pp('$xz ERROR: could not find file. ${E.redDot}');
+          for (var v in mJson) {
+            cities.add(City.fromJson(v));
           }
+
+          pp('$xz getCities 🍎🍎🍎🍎 list of ${cities.length} cities has been filled!');
+          var end = DateTime.now();
+          var ms = end.difference(start).inSeconds;
+          pp('$xz getCities 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎\n\n');
         }
       }
     } catch (e) {
@@ -211,13 +179,38 @@ class ZipHandler {
     return jsonEncode(cities);
   }
 
+  Future<List<Route>> getRoutes(
+      {required String associationId, required bool refresh}) async {
+    var token = await appAuth.getAuthToken();
+    if (token == null) {
+      throw Exception('No auth token');
+    }
+    pp('$xz ... getRoutes starting ... refresh: $refresh');
+    if (refresh) {
+      var string =
+          await getRouteDataString(associationId: associationId, token: token);
+      var mJson = jsonDecode(string);
+      var routeData = RouteData.fromJson(mJson);
+      return routeData.routes;
+    }
+    var routes = await semCache.getRoutes(associationId);
+    if (routes.isEmpty) {
+      pp('$xz ... getRoutes 😈😈routes not found in Mongo ... count: $count');
+      if (count == 0) {
+        count++;
+        routes = await getRoutes(associationId: associationId, refresh: true);
+      }
+    }
+    count = 0;
+    return routes;
+  }
 
-  Future<String> getRouteData(
+  Future<String> getRouteDataString(
       {required String associationId, required String token}) async {
-    pp('$xz _getRouteBag: 🔆🔆🔆 get zipped data; ... associationId: $associationId ...');
+    pp('$xz getRouteDataString: 🔆🔆🔆 get zipped route data; ... associationId: $associationId ...');
 
     final mUrl =
-        '${KasieEnvironment.getUrl()}getAssociationRouteZippedFile?associationId'
+        '${KasieEnvironment.getUrl()}routes/getAssociationRouteZippedFile?associationId'
         '=$associationId';
 
     var start = DateTime.now();
@@ -230,81 +223,69 @@ class ZipHandler {
     };
     headers['Authorization'] = 'Bearer $token';
 
-    http.Response response = await getUsingHttp(mUrl, token, headers);
-
-    pp('$xz getRouteData: 🔆🔆🔆 get zipped data, response: ${response.contentLength} bytes ...');
-
     try {
-      Directory dir = await getApplicationDocumentsDirectory();
-      File zipFile = File(
-          '${dir.path}/zipFile${DateTime.now().millisecondsSinceEpoch}.zip');
-      zipFile.writeAsBytesSync(response.bodyBytes);
-      pp('$xz getRouteData: 🔆🔆🔆 handle file inside zip: ${await zipFile.length()} bytes');
+      http.Response response = await getUsingHttp(mUrl, token, headers);
+      pp('$xz getRouteDataString: 🔆🔆🔆 get zipped data, response: ${response.contentLength} bytes ...');
 
-      //create zip archive
-      final inputStream = InputFileStream(zipFile.path);
-      final archive = ZipDecoder().decodeBuffer(inputStream);
-
-      pp('$xz _getRouteBag: 🔆🔆🔆 handle file inside zip archive: ${archive.files.length} files');
-
-      for (var file in archive.files) {
+      final archive = ZipDecoder().decodeBytes(response.bodyBytes);
+      List<Route> routes = [];
+      List<RoutePoint> routePoints = [];
+      List<RouteLandmark> landmarks = [];
+      List<RouteCity> cities = [];
+      for (final file in archive.files) {
         if (file.isFile) {
           final fileName = file.name;
           pp('$xz _getRouteBag: file from inside archive ... ${file.size} bytes 🔵 isCompressed: ${file.isCompressed} 🔵 zipped file name: ${file.name}');
-          var outFile = File('${dir.path}/$fileName');
-          outFile = await outFile.create(recursive: true);
-          await outFile.writeAsBytes(file.content);
-          pp('$xz _getRouteBag: file after decompress ... ${await outFile.length()} bytes  🍎 path: ${outFile.path} 🍎');
-          List<Route> routes = [];
-          List<RoutePoint> routePoints = [];
-          List<RouteLandmark> landmarks = [];
-          List<RouteCity> cities = [];
 
-          if (outFile.existsSync()) {
-            var m = outFile.readAsStringSync(encoding: utf8);
-            var mJson = json.decode(m);
+          final content = utf8.decode(file.content as List<int>);
+          final mJson = json.decode(content);
 
-            List dRoutes = mJson['routes'];
-            List dRoutePoints = mJson['points'];
-            List dLandmarks = mJson['landmarks'];
-            List dCities = mJson['cities'];
+          List dRoutes = mJson['routes'];
+          List dRoutePoints = mJson['points'];
+          List dLandmarks = mJson['landmarks'];
+          List dCities = mJson['cities'];
 
-            for (var json in dRoutes) {
-              routes.add(buildRoute(json));
-            }
-            pp('$xz _getRouteBag 🍎🍎 routes: ${routes.length}');
-            for (var marks in dLandmarks) {
-              marks.forEach((element) {
-                landmarks.add(buildRouteLandmark(element));
-              });
-            }
-            pp('$xz _getRouteBag 🍎🍎 landmarks: ${landmarks.length}');
-
-            for (var mPoints in dRoutePoints) {
-              mPoints.forEach((element) {
-                routePoints.add(buildRoutePoint(element));
-              });
-            }
-            pp('$xz _getRouteBag 🍎🍎 routePoints: ${routePoints.length}');
-            for (var mCities in dCities) {
-              mCities.forEach((element) {
-                cities.add(buildRouteCity(element));
-              });
-            }
-            pp('$xz _getRouteBag 🍎🍎 cities: ${cities.length}');
-
-            routeData = RouteData(
-                routes: routes,
-                routePoints: routePoints,
-                landmarks: landmarks,
-                cities: cities);
-
-            pp('$xz _getRouteBag 🍎🍎🍎🍎 route bag has been filled and cached!');
-            var end = DateTime.now();
-            var ms = end.difference(start).inSeconds;
-            pp('$xz _getRouteBag 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎 return string ...\n\n');
-            return jsonEncode(routeData.toJson());
+          for (var json in dRoutes) {
+            routes.add(Route.fromJson(json));
           }
+          pp('$xz getRouteDataString 🍎🍎 routes: ${routes.length}');
+          for (var marks in dLandmarks) {
+            marks.forEach((element) {
+              landmarks.add(RouteLandmark.fromJson(element));
+            });
+          }
+          pp('$xz getRouteDataString 🍎🍎 landmarks: ${landmarks.length}');
+
+          for (var mPoints in dRoutePoints) {
+            mPoints.forEach((element) {
+              routePoints.add(RoutePoint.fromJson(element));
+            });
+          }
+          pp('$xz getRouteDataString 🍎🍎 routePoints: ${routePoints.length}');
+          for (var mCities in dCities) {
+            mCities.forEach((element) {
+              cities.add(RouteCity.fromJson(element));
+            });
+          }
+          pp('$xz getRouteDataString 🍎🍎 cities: ${cities.length}');
+
+          routeData = RouteData(
+              routes: routes,
+              routePoints: routePoints,
+              landmarks: landmarks,
+              cities: cities);
+
+          //cache data locally
+          await semCache.saveRoutes(routes);
+          await semCache.saveRoutePoints(routePoints);
+          await semCache.saveRouteCities(cities);
+          await semCache.saveRouteLandmarks(landmarks);
+
+          pp('$xz getRouteDataString 🍎🍎🍎🍎 RouteData has been filled and cached!');
+          var end = DateTime.now();
+          var ms = end.difference(start).inSeconds;
+          pp('$xz getRouteDataString 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎 return string ...\n\n');
+          return jsonEncode(routeData.toJson());
         }
       }
     } catch (e, stackTrace) {
@@ -329,8 +310,7 @@ class ZipHandler {
     headers['Authorization'] = 'Bearer $token';
 
     http.Response response = await getUsingHttp(mUrl, token, headers);
-    final list =
-     await _getPointsFromArchive(response);
+    final list = await _getPointsFromArchive(response);
     return jsonEncode(list);
   }
 
@@ -359,38 +339,20 @@ class ZipHandler {
     var start = DateTime.now();
     List<RoutePoint> routePoints = [];
     try {
-      Directory dir = await getApplicationDocumentsDirectory();
-      File zipFile = File(
-          '${dir.path}/zipFile${DateTime.now().millisecondsSinceEpoch}.zip');
-      zipFile.writeAsBytesSync(response.bodyBytes);
-      pp('$xz _getPointsFromArchive: 🔆🔆🔆 handle file inside zip: ${await zipFile.length()} bytes');
-
-      //create zip archive
-      final inputStream = InputFileStream(zipFile.path);
-      final archive = ZipDecoder().decodeBuffer(inputStream);
-
-      pp('$xz 🔆🔆🔆 handle file inside zip archive: ${archive.files.length} files');
+      final archive = ZipDecoder().decodeBytes(response.bodyBytes);
+      pp('$xz getCities: 🔆🔆🔆 handle file inside zip archive: ${archive.files.length} files');
 
       for (var file in archive.files) {
         if (file.isFile) {
-          final fileName = file.name;
-          pp('$xz _getPointsFromArchive: file from inside archive ... ${file.size} bytes 🔵 isCompressed: ${file.isCompressed} 🔵 zipped file name: ${file.name}');
-          var outFile = File('${dir.path}/$fileName');
-          outFile = await outFile.create(recursive: true);
-          await outFile.writeAsBytes(file.content);
-          pp('$xz _getPointsFromArchive: file after decompress ... ${await outFile.length()} bytes  🍎 path: ${outFile.path} 🍎');
-
-          if (outFile.existsSync()) {
-            var m = outFile.readAsStringSync(encoding: utf8);
-            List mJson = json.decode(m);
-            for (var element in mJson) {
-              routePoints.add(buildRoutePoint(element));
-            }
-            pp('$xz _getPointsFromArchive 🍎🍎🍎🍎 ${routePoints.length} route points built!');
-            var end = DateTime.now();
-            var ms = end.difference(start).inSeconds;
-            pp('$xz _getPointsFromArchive 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎\n\n');
+          final content = utf8.decode(file.content as List<int>);
+          final mJson = json.decode(content);
+          for (var element in mJson) {
+            routePoints.add(RoutePoint.fromJson(element));
           }
+          pp('$xz _getPointsFromArchive 🍎🍎🍎🍎 ${routePoints.length} route points built!');
+          var end = DateTime.now();
+          var ms = end.difference(start).inSeconds;
+          pp('$xz _getPointsFromArchive 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎\n\n');
         }
       }
     } catch (e, stackTrace) {
@@ -421,36 +383,19 @@ class ZipHandler {
     pp('$xz refreshRoute: 🔆🔆🔆 get zipped data, response: ${response.contentLength} bytes ...');
     RouteBag? bag;
     try {
-      Directory dir = await getApplicationDocumentsDirectory();
-      File zipFile = File(
-          '${dir.path}/zipFile${DateTime.now().millisecondsSinceEpoch}.zip');
-      zipFile.writeAsBytesSync(response.bodyBytes);
-      pp('$xz refreshRoute: 🔆🔆🔆 handle file inside zip: ${await zipFile.length()} bytes');
-
-      //create zip archive
-      final inputStream = InputFileStream(zipFile.path);
-      final archive = ZipDecoder().decodeBuffer(inputStream);
-
-      pp('$xz refreshRoute: 🔆🔆🔆 handle file inside zip archive: ${archive.files.length} files');
+      final archive = ZipDecoder().decodeBytes(response.bodyBytes);
+      pp('$xz getCities: 🔆🔆🔆 handle file inside zip archive: ${archive.files.length} files');
 
       for (var file in archive.files) {
         if (file.isFile) {
-          final fileName = file.name;
-          pp('$xz refreshRoute: file from inside archive ... ${file.size} bytes 🔵 isCompressed: ${file.isCompressed} 🔵 zipped file name: ${file.name}');
-          var outFile = File('${dir.path}/$fileName');
-          outFile = await outFile.create(recursive: true);
-          await outFile.writeAsBytes(file.content);
-          pp('$xz refreshRoute: file after decompress ... ${await outFile.length()} bytes  🍎 path: ${outFile.path} 🍎');
-          if (outFile.existsSync()) {
-            var m = outFile.readAsStringSync(encoding: utf8);
-            var mJson = json.decode(m);
-            bag = RouteBag.fromJson(mJson);
-            pp('$xz refreshRoute 🍎🍎🍎🍎 route bag has been filled and cached!');
-            var end = DateTime.now();
-            var ms = end.difference(start).inSeconds;
-            pp('$xz refreshRoute 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎\n\n');
-            return bag;
-          }
+          final content = utf8.decode(file.content as List<int>);
+          final mJson = json.decode(content);
+          bag = RouteBag.fromJson(mJson);
+          pp('$xz refreshRoute 🍎🍎🍎🍎 route bag has been filled and cached!');
+          var end = DateTime.now();
+          var ms = end.difference(start).inSeconds;
+          pp('$xz refreshRoute 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎\n\n');
+          return bag;
         }
       }
     } catch (e, stackTrace) {
@@ -460,8 +405,6 @@ class ZipHandler {
     }
     return bag;
   }
-
-
 
   Future<http.Response> getUsingHttp(
       String mUrl, String token, Map<String, String> headers) async {

@@ -8,7 +8,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_sim_country_code/flutter_sim_country_code.dart';
+// import 'package:flutter_sim_country_code/flutter_sim_country_code.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -18,7 +18,7 @@ import 'package:intl/intl.dart' as intl;
 import 'package:path_provider/path_provider.dart';
 import 'package:pretty_json/pretty_json.dart';
 import 'package:video_thumbnail/video_thumbnail.dart' as vt;
-import 'package:intl_phone_field/countries.dart' as cc;
+import '../data/data_schemas.dart';
 import 'emojis.dart';
 
 pp(dynamic msg) {
@@ -253,7 +253,7 @@ String getDeviceType() {
 }
 
 String getThisDeviceType() {
-  final data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+  final data = MediaQueryData.fromView(WidgetsBinding.instance.window);
   return data.size.shortestSide < 600 ? 'phone' : 'tablet';
 }
 
@@ -710,33 +710,22 @@ String getPhoneFormat(String phoneNumber) {
   return phoneNumber.replaceAllMapped(RegExp(r'(\d{3})(\d{3})(\d+)'), (Match m) => "(${m[1]}) ${m[2]}-${m[3]}");
 
 }
-Future<cc.Country?> getDeviceCountry(String countryCode) async {
-  String? code;
-  cc.Country? country;
-  code = WidgetsBinding.instance.platformDispatcher.locale.countryCode;
 
-  try {
-    //code = await FlutterSimCountryCode.simCountryCode;
-    pp('....................... _countryCode: $code');
-    for (var value in cc.countries) {
-      if (value.code == code) {
-          country = value;
-      }
+Future<Country?> getDeviceCountry(List<Country> countries) async {
+  String? code;
+  Country? country;
+  code = WidgetsBinding.instance.platformDispatcher.locale.countryCode;
+  pp('🥦🥦🥦device locale country code: 🥦 $code');
+  //TODO - remove after resolution
+  if (code == 'GB' || code == 'US') {
+    code = 'ZA';
+  }
+  for (var c in countries) {
+    if (c.iso2 == code) {
+      return c;
     }
-  } on PlatformException {
-    return null;
   }
  return country;
-}
-Future<String?> getDeviceCountryCode() async {
-  String? code;
-  try {
-    code = await FlutterSimCountryCode.simCountryCode;
-    pp('....................... _countryCode: $code');
-  } on PlatformException {
-    return null;
-  }
-  return code;
 }
 
 void myPrettyJsonPrint(Map map) {
@@ -761,6 +750,7 @@ showSnackBar(
     duration: duration ?? const Duration(seconds: 5),
     backgroundColor: backgroundColor ?? Theme.of(context).primaryColor,
     showCloseIcon: true,
+
     elevation: elevation ?? 8,
     content: Padding(
       padding: EdgeInsets.all(padding ?? 8),
@@ -1177,16 +1167,7 @@ const lorem =
     'The multimedia information collected can also be used for training and review purposes, allowing for '
     'continuous improvement and optimization of field operations. Overall, building multimedia timelines '
     'can provide valuable insights and information for managers and executives to make informed decisions and improve '
-    'the overall efficiency of field operations.\n\nThere are many use cases for monitoring and managing initiatives '
-    'using mobile devices and cloud platforms. The combination of mobile devices and cloud-based solutions can greatly improve '
-    'the efficiency and effectiveness of various initiatives, including infrastructure building projects, events, conferences, '
-    'school facilities, and ongoing activities of all types. By using mobile devices, field workers can collect and share multimedia information in real-time, '
-    'allowing for better coordination and communication. The use of cloud platforms can also provide additional benefits, '
-    'such as field worker authentication, cloud push messaging systems, data storage, and databases. This can help in centralizing information, '
-    'reducing the reliance on manual processes and paperwork, and improving the ability to make informed decisions and respond to changes in real-time. '
-    'Overall, utilizing mobile devices and cloud platforms can provide a '
-    'powerful solution for monitoring and managing various initiatives in a more efficient and effective manner.';
-
+    'the overall efficiency of field operations.';
 class MyRGB {
   late int red, green, blue;
 

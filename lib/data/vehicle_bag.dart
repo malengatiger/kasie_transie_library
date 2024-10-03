@@ -1,5 +1,9 @@
-import 'package:kasie_transie_library/data/schemas.dart';
-import 'package:kasie_transie_library/utils/parsers.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+import 'data_schemas.dart';
+part 'vehicle_bag.g.dart';
+
+@JsonSerializable()
 
 class VehicleBag {
   String? vehicleId;
@@ -18,32 +22,10 @@ class VehicleBag {
       required this.dispatchRecords,
       required this.passengerCounts,
       required this.heartbeats});
+  factory VehicleBag.fromJson(Map<String, dynamic> json) =>
+      _$VehicleBagFromJson(json);
 
-  VehicleBag.fromJson(Map data) {
-    vehicleId = data['vehicleId'];
-    created = data['created'];
-    List va = data['arrivals'];
-    for (var value in va) {
-      arrivals.add(buildVehicleArrival(value));
-    }
-    List vd = data['departures'];
-    for (var value in vd) {
-      departures.add(buildVehicleDeparture(value));
-    }
-    List vh = data['heartbeats'];
-    for (var value in vh) {
-      heartbeats.add(buildVehicleHeartbeat(value));
-    }
-    List di = data['dispatchRecords'];
-    for (var value in di) {
-      dispatchRecords.add(buildDispatchRecord(value));
-    }
-
-    List pc = data['passengerCounts'];
-    for (var value in pc) {
-      passengerCounts.add(buildAmbassadorPassengerCount(value));
-    }
-  }
+  Map<String, dynamic> toJson() => _$VehicleBagToJson(this);
   bool isEmpty() {
     if(dispatchRecords.isEmpty
         && passengerCounts.isEmpty

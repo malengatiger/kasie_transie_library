@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 
 class MediaReminder extends StatelessWidget {
-  const MediaReminder({Key? key}) : super(key: key);
+  const MediaReminder({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/data/color_and_locale.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 
 class VehiclePhotoWidget extends StatefulWidget {
-  const VehiclePhotoWidget({Key? key, required this.vehiclePhoto})
-      : super(key: key);
+  const VehiclePhotoWidget({super.key, required this.vehiclePhoto});
 
   final lib.VehiclePhoto vehiclePhoto;
   @override
@@ -23,6 +22,8 @@ class VehiclePhotoWidgetState extends State<VehiclePhotoWidget>
   late ColorAndLocale colorAndLocale;
   late String date;
   bool ready = false;
+  Prefs prefs = GetIt.instance<Prefs>();
+
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
@@ -32,7 +33,7 @@ class VehiclePhotoWidgetState extends State<VehiclePhotoWidget>
 
   void _getLocale() async {
     pp('$mm ... _getLocale ...');
-    colorAndLocale = await prefs.getColorAndLocale();
+    colorAndLocale = prefs.getColorAndLocale();
     date = getFormattedDateLong(widget.vehiclePhoto.created!);
 
     setState(() {
@@ -48,7 +49,7 @@ class VehiclePhotoWidgetState extends State<VehiclePhotoWidget>
 
   String? vehiclePhotoText;
   Future _setTexts() async {
-    final c = await prefs.getColorAndLocale();
+    final c = prefs.getColorAndLocale();
     vehiclePhotoText = await translator.translate('vehiclePhoto', c.locale);
   }
 

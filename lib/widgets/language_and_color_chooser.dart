@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/data/color_and_locale.dart';
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:badges/badges.dart' as bd;
@@ -9,7 +10,7 @@ import '../utils/functions.dart';
 import '../utils/prefs.dart';
 
 class LanguageAndColorChooser extends StatefulWidget {
-  const LanguageAndColorChooser({Key? key, required this.onLanguageChosen}) : super(key: key);
+  const LanguageAndColorChooser({super.key, required this.onLanguageChosen});
 
   final Function onLanguageChosen;
   @override
@@ -17,9 +18,11 @@ class LanguageAndColorChooser extends StatefulWidget {
 }
 
 class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   late AnimationController _controller;
   static const mm = '🌸🌸🌸🌸🌸🌸 LanguageAndColorChooser 🌸🌸';
+  Prefs prefs = GetIt.instance<Prefs>();
+
   List<ColorFromTheme> colors = [];
   List<LangBag> languageBags = [];
   bool busy = false;
@@ -34,7 +37,7 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
   }
 
   void _setTexts() async {
-    final c = await prefs.getColorAndLocale();
+    final c = prefs.getColorAndLocale();
     final loc = c.locale;
     languageColor = await translator.translate('languageColor', loc);
    setState(() {
@@ -55,7 +58,7 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
     });
     try {
       colors = SchemeUtil.getDarkThemeColors();
-      colorAndLocale = await prefs.getColorAndLocale();
+      colorAndLocale = prefs.getColorAndLocale();
       colorFromTheme = SchemeUtil.getColorFromTheme(colorAndLocale);
       langBag = LangBag(
         language: await translator.translate(colorAndLocale.locale, locale),
@@ -171,7 +174,7 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
   }
 
   ColorFromTheme? colorFromTheme;
-
+  ThemeBloc themeBloc = GetIt.instance<ThemeBloc>();
   void onColorChosen(ColorFromTheme colorFromTheme) async {
     pp('$mm onColorChosen, index: ${colorFromTheme.themeIndex}');
     colorAndLocale.themeIndex = colorFromTheme.themeIndex;
@@ -378,12 +381,14 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class LanguageList extends StatelessWidget {
   const LanguageList(
-      {Key? key, required this.languageBags, required this.onLanguageChosen})
-      : super(key: key);
+      {super.key, required this.languageBags, required this.onLanguageChosen});
   final List<LangBag> languageBags;
   final Function(LangBag) onLanguageChosen;
 
@@ -429,8 +434,7 @@ class LanguageList extends StatelessWidget {
 }
 
 class ColorGrid extends StatelessWidget {
-  const ColorGrid({Key? key, required this.colors, required this.onColorChosen, required this.crossAxisCount})
-      : super(key: key);
+  const ColorGrid({super.key, required this.colors, required this.onColorChosen, required this.crossAxisCount});
 
   final List<ColorFromTheme> colors;
   final Function(ColorFromTheme) onColorChosen;

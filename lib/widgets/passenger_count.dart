@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../data/schemas.dart' as lib;
+import '../data/data_schemas.dart' as lib;
 import '../utils/functions.dart';
 import 'package:badges/badges.dart' as bd;
 
 class DispatchCarPlate extends StatelessWidget {
-  const DispatchCarPlate({Key? key, required this.dispatchRecord})
-      : super(key: key);
+  const DispatchCarPlate({super.key, required this.dispatchRecord});
   final lib.DispatchRecord dispatchRecord;
 
   @override
@@ -65,8 +64,7 @@ class DispatchCarPlate extends StatelessWidget {
 }
 
 class PassengerCount extends StatelessWidget {
-  const PassengerCount({Key? key, required this.onCountPicked})
-      : super(key: key);
+  const PassengerCount({super.key, required this.onCountPicked});
   final Function(int) onCountPicked;
 
   @override

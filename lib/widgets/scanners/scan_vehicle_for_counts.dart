@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:get_it/get_it.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
-import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/local_finder.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
-import 'package:kasie_transie_library/utils/parsers.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:kasie_transie_library/widgets/qr_scanner.dart';
 import 'package:kasie_transie_library/widgets/route_list_minimum.dart';
 import 'package:kasie_transie_library/widgets/scanners/qr_scanner_mobile.dart';
 import 'package:kasie_transie_library/widgets/vehicle_passenger_count.dart';
+import 'package:page_transition/page_transition.dart';
 
+import '../../bloc/list_api_dog.dart';
 import '../../utils/emojis.dart';
 
 class ScanVehicleForCounts extends StatefulWidget {
-  const ScanVehicleForCounts({Key? key}) : super(key: key);
+  const ScanVehicleForCounts({super.key});
 
   @override
   ScanVehicleForCountsState createState() => ScanVehicleForCountsState();
@@ -25,6 +24,8 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   final mm = '☕️☕️☕️☕️☕️☕️☕️☕️☕️ ScanVehicleForCounts: 🍎🍎';
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
 
   lib.Vehicle? vehicle;
   List<lib.Route> routes = [];
@@ -42,7 +43,7 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
   }
 
   void _getAssociation() async {
-    association = await prefs.getAssociation();
+    association = prefs.getAssociation();
     setState(() {});
   }
 
@@ -89,15 +90,14 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
     //
     pp('$mm ........ navigate to VehicleMediaHandler ... ${E.redDot} for car: ${vehicle!.vehicleReg}');
 
-    // Navigator.of(context).pop();
-
-    navigateWithScale(
-        VehiclePassengerCount(
+    NavigationUtils.navigateTo(
+        context: context,
+        widget: VehiclePassengerCount(
           vehicle: vehicle!,
           route: selectedRoute!,
         ),
-        context);
-    //
+        transitionType: PageTransitionType.leftToRight);
+
     setState(() {
       showStartButton = false;
       //vehicle = null;
@@ -125,7 +125,7 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
 
   void _setTexts() async {
     pp('$mm ... _setTexts ...');
-    final c = await prefs.getColorAndLocale();
+    final c = prefs.getColorAndLocale();
     passengerCounts = await translator.translate('passengerCount', c.locale);
     scanVehicle = await translator.translate('scanVehicle', c.locale);
     scanTheVehicle = await translator.translate('scanTheVehicle', c.locale);
@@ -167,8 +167,9 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
   }
 
   void _navigateToScan() async {
-    final mCar = await navigateWithScale(
-        QRScannerMobile(
+    final mCar = await NavigationUtils.navigateTo(
+        context: context,
+        widget: QRScannerMobile(
           onCarScanned: (car) {
             pp('$mm ... on car scanned: ${car.vehicleReg}');
             showToast(
@@ -195,9 +196,9 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
           },
           quitAfterScan: false,
         ),
-        context);
+        transitionType: PageTransitionType.leftToRight);
     if (mCar != null) {
-      vehicle = buildVehicle(mCar);
+      vehicle = lib.Vehicle.fromJson(mCar);
       pp('$mm ... back from on car scanned: ${vehicle!.vehicleReg}');
       setState(() {});
     }
@@ -222,20 +223,22 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
                       gapH16,
                       selectedRoute == null
                           ? gapW16
-                          : SizedBox(height: 80,
-                            child: Column(
-                              children: [
-                                const Text('Taxi Route Name'),
-                                gapH16,
-                                Text(
-                        '${selectedRoute!.name}',
-                        style: myTextStyleMediumLargeWithColor(
-                                  context, Theme.of(context).primaryColor, 18),
-                      ),
-                              ],
+                          : SizedBox(
+                              height: 80,
+                              child: Column(
+                                children: [
+                                  const Text('Taxi Route Name'),
+                                  gapH16,
+                                  Text(
+                                    '${selectedRoute!.name}',
+                                    style: myTextStyleMediumLargeWithColor(
+                                        context,
+                                        Theme.of(context).primaryColor,
+                                        18),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-
                       gapH32,
                       gapH32,
                       GestureDetector(
@@ -286,7 +289,7 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
                   child: association == null
                       ? gapW16
                       : RouteListMinimum(
-                    isMappable: false,
+                          isMappable: false,
                           onRoutePicked: (route) {
                             setState(() {
                               selectedRoute = route;
@@ -299,7 +302,6 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
                   child: Column(
                     children: [
                       gapH8,
-
                       vehicle != null
                           ? Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -320,12 +322,11 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
                                 const SizedBox(
                                   height: 16,
                                 ),
-
                                 showStartButton
                                     ? ElevatedButton(
                                         style: const ButtonStyle(
                                             elevation:
-                                                MaterialStatePropertyAll(8.0)),
+                                                WidgetStatePropertyAll(8.0)),
                                         onPressed: () {
                                           navigateToPassengerCount();
                                         },

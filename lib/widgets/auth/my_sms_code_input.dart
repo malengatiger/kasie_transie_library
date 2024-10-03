@@ -1,20 +1,17 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:kasie_transie_library/utils/navigator_utils.dart';
+import 'package:get_it/get_it.dart';
 import 'package:numeric_keyboard/numeric_keyboard.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 import '../../l10n/translation_handler.dart';
 import '../../utils/functions.dart';
-import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:pinput/pinput.dart' as pin;
+import '../../utils/prefs.dart';
 
-import 'my_phone_input.dart';
 
 class MySmsCodeInput extends StatefulWidget {
-  const MySmsCodeInput({Key? key,}) : super(key: key);
+  const MySmsCodeInput({super.key,});
 
   @override
   State<MySmsCodeInput> createState() => _MySmsCodeInputState();
@@ -22,6 +19,7 @@ class MySmsCodeInput extends StatefulWidget {
 
 class _MySmsCodeInputState extends State<MySmsCodeInput> {
   final mm = '🥬🥬🥬🥬🥬🥬😡 MySmsCodeInput: 😡';
+  Prefs prefs = GetIt.instance<Prefs>();
 
   final sb = StringBuffer();
   String enterCode = 'Enter SMS Code';
@@ -32,7 +30,7 @@ class _MySmsCodeInputState extends State<MySmsCodeInput> {
   }
 
   void _setTexts() async {
-    final c = await prefs.getColorAndLocale();
+    final c =  prefs.getColorAndLocale();
     enterCode = await translator.translate('enterCode', c.locale);
     setState(() {});
   }

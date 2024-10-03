@@ -4,12 +4,11 @@ import '../utils/functions.dart';
 
 class DistanceDropDown extends StatelessWidget {
   const DistanceDropDown(
-      {Key? key,
+      {super.key,
       required this.onDistancePicked,
       required this.color,
       required this.count,
-      required this.fontSize, required this.multiplier})
-      : super(key: key);
+      required this.fontSize, required this.multiplier});
 
   final Function(int) onDistancePicked;
   final Color color;
@@ -43,12 +42,11 @@ class DistanceDropDown extends StatelessWidget {
 
 class NumberDropDown extends StatelessWidget {
   const NumberDropDown(
-      {Key? key,
+      {super.key,
       required this.onNumberPicked,
       required this.color,
       required this.count,
-      required this.fontSize})
-      : super(key: key);
+      required this.fontSize});
 
   final Function(int) onNumberPicked;
   final Color color;

@@ -1,10 +1,14 @@
 
-import 'package:kasie_transie_library/data/schemas.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/parsers.dart';
+
+import '../data/data_schemas.dart';
+
+part 'distance.g.dart';
+@JsonSerializable()
 
 class RouteDistanceEstimation {
-  String? _id, routeId, routeName, nearestLandmarkName, nearestLandmarkId;
+  String?  routeId, routeName, nearestLandmarkName, nearestLandmarkId;
   List<DynamicDistance>? dynamicDistances;
   double? distanceToNearestLandmark;
   String? created;
@@ -18,51 +22,12 @@ class RouteDistanceEstimation {
       this.nearestLandmarkName,
       this.created,
       this.vehicle,
-      this.distanceToNearestLandmark}) {}
+      this.distanceToNearestLandmark});
 
-  RouteDistanceEstimation.fromJson(Map data) {
-    _id = data['_id'];
-    routeId = data['routeId'];
-    routeName = data['routeName'];
-    created = data['created'];
-    nearestLandmarkName = data['nearestLandmarkName'];
-    nearestLandmarkId = data['nearestLandmarkId'];
-    distanceToNearestLandmark = data['distanceToNearestLandmark'];
-    if (data['vehicle'] != null) {
-      vehicle = buildVehicle(data['vehicle']);
-    }
-    dynamicDistances = [];
-    if (data['dynamicDistances'] != null) {
-      List mx = data['dynamicDistances'];
-      for (var dd in mx) {
-        dynamicDistances!.add(DynamicDistance.fromJson(dd));
-      }
-    }
-  }
+  factory RouteDistanceEstimation.fromJson(Map<String, dynamic> json) =>
+      _$RouteDistanceEstimationFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> map = Map();
-    map['_id'] = _id;
-    map['routeId'] = routeId;
-    map['routeName'] = routeName;
-    map['nearestLandmarkName'] = nearestLandmarkName;
-    map['nearestLandmarkId'] = nearestLandmarkId;
-    map['distanceToNearestLandmark'] = distanceToNearestLandmark;
-    List mList = [];
-    if (dynamicDistances != null) {
-      for (var dd in dynamicDistances!) {
-        mList.add(dd.toJson());
-      }
-    }
-    if (vehicle != null) {
-      map['vehicle'] = vehicle!.toJson();
-    }
-    map['dynamicDistances'] = mList;
-    map['created'] = created;
-
-    return map;
-  }
-
+  Map<String, dynamic> toJson() => _$RouteDistanceEstimationToJson(this);
   printString() {
     var sb = StringBuffer();
     sb.write(
@@ -73,12 +38,14 @@ class RouteDistanceEstimation {
           '\n🌼🌼 The vehicle or user is at the end of the route: 🌼 $nearestLandmarkName');
     }
     pp(sb.toString());
-    dynamicDistances!.forEach((dd) {
+    for (var dd in dynamicDistances!) {
       dd.printString();
-    });
+    }
 //    print('🌼 🌼 🌼 🌼 🌼 🌼  End of Estimation\n');
   }
 }
+
+@JsonSerializable()
 
 class DynamicDistance {
   double? distanceInMetres, distanceInKM;
@@ -98,24 +65,8 @@ class DynamicDistance {
     pp(sb.toString());
   }
 
-  DynamicDistance.fromJson(Map data) {
-    distanceInMetres = data['distanceInMetres'];
-    distanceInKM = data['distanceInKM'];
-    date = data['date'];
-    landmarkName = data['landmarkName'];
-    landmarkId = data['landmarkId'];
-    routeName = data['routeName'];
-  }
+  factory DynamicDistance.fromJson(Map<String, dynamic> json) =>
+      _$DynamicDistanceFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> map = Map();
-    map['distanceInMetres'] = distanceInMetres;
-    map['distanceInKM'] = distanceInKM;
-    map['landmarkName'] = landmarkName;
-    map['landmarkId'] = landmarkId;
-    map['date'] = date;
-    map['routeName'] = routeName;
-
-    return map;
-  }
+  Map<String, dynamic> toJson() => _$DynamicDistanceToJson(this);
 }

@@ -1,22 +1,24 @@
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/auth/phone_auth_signin.dart';
+import 'package:get_it/get_it.dart';
+import 'package:kasie_transie_library/auth/sign_in_strings.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/initialiazer_cover.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
+import 'package:page_transition/page_transition.dart';
 
 import '../bloc/list_api_dog.dart';
-import '../data/schemas.dart' as lib;
+import '../data/data_schemas.dart';
 import '../utils/emojis.dart';
 import '../utils/prefs.dart';
 
 class EmailAuthSignin extends StatefulWidget {
   const EmailAuthSignin(
-      {Key? key, required this.onGoodSignIn, required this.onSignInError})
-      : super(key: key);
+      {super.key, required this.onGoodSignIn, required this.onSignInError});
 
   final Function onGoodSignIn;
   final Function onSignInError;
+
   @override
   EmailAuthSigninState createState() => EmailAuthSigninState();
 }
@@ -26,14 +28,16 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
   final mm = '💦💦💦💦💦💦 EmailAuthSignin 🔷🔷';
   late AnimationController _controller;
   TextEditingController emailController =
-      TextEditingController(text: "stvincent@theawesome.com");
+      TextEditingController(text: "admin4@sowertech.com");
   TextEditingController pswdController = TextEditingController(text: "pass123");
 
   var formKey = GlobalKey<FormState>();
   bool busy = false;
   bool initializing = false;
-  lib.User? user;
+  User? user;
   SignInStrings? signInStrings;
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
 
   @override
   void initState() {
@@ -57,55 +61,41 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
               email: emailController.value.text,
               password: pswdController.value.text);
 
-      pp('\n\n$mm ... Firebase user creds after signin: ${userCred.user} - ${E.leaf}');
+      pp('\n\n$mm ... Firebase user creds after sign in: ${userCred.user} - ${E.leaf}');
+      pp('\n\n\n$mm ... about to initialize KasieTransie data ..... ');
 
       if (userCred.user != null) {
         user = await listApiDog.getUserById(userCred.user!.uid);
         if (user != null) {
           pp('$mm KasieTransie user found on database:  🍎 ${user!.toJson()} 🍎');
-          await prefs.saveUser(user!);
-
-          final association =
-              await listApiDog.getAssociationById(user!.associationId!);
-          final users =
-              await listApiDog.getAssociationUsers(user!.associationId!, true);
+          user!.password = pswdController.text;
+          prefs.saveUser(user!);
+          pp('$mm KasieTransie user cached:  🍎 ${user!.toJson()} 🍎');
+          Association? association;
+          if (user!.associationId != null) {
+            if (user!.associationId != 'ADMIN') {
+              association =
+                  await listApiDog.getAssociationById(user!.associationId!);
+              if (association != null) {
+                prefs.saveAssociation(association);
+                pp('$mm KasieTransie association found on database:  🍎 ${association.toJson()} 🍎');
+                final users = await listApiDog.getAssociationUsers(
+                    user!.associationId!, true);
+                pp('$mm users in association: ${users.length}');
+              }
+            }
+          }
           final countries = await listApiDog.getCountries();
-          lib.Country? myCountry;
           for (var country in countries) {
-            if (country.countryId == association.countryId!) {
-              myCountry = country;
-              await prefs.saveCountry(myCountry);
-              pp('$mm KasieTransie user country: ${myCountry.name}');
+            if (country.countryId == user?.countryId!) {
+              prefs.saveCountry(country);
+              pp('$mm KasieTransie user country: 🍎 ${country.name} 🍎');
               break;
             }
           }
-          pp('$mm KasieTransie users found on database:  🍎 ${users.length} 🍎');
-          pp('$mm KasieTransie my country:  🍎 ${myCountry!.name!} 🍎');
-
-          await prefs.saveUser(user!);
-          pp('\n\n\n$mm ... about to initialize KasieTransie data ..... ');
 
           if (mounted) {
-            showSnackBar(
-                duration: const Duration(seconds: 2),
-                padding: 20,
-                backgroundColor: Theme.of(context).primaryColor,
-                textStyle: myTextStyleMedium(context),
-                message: 'You have been signed in OK. Welcome!',
-                context: context);
-
-            navigateWithScale(
-                InitializerCover(
-                  onInitializationComplete: () {
-                    pp('$mm initialization should be complete! ');
-                    widget.onGoodSignIn();
-                  },
-                  onError: () {
-                    pp('$mm initialization is fucked! ');
-                    widget.onSignInError();
-                  },
-                ),
-                context);
+            finishUp();
           }
         }
       } else {
@@ -118,6 +108,28 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
     setState(() {
       busy = false;
     });
+  }
+
+  void finishUp() {
+    showSnackBar(
+        duration: const Duration(seconds: 5),
+        padding: 20,
+        backgroundColor: Theme.of(context).primaryColor,
+        textStyle: myTextStyleMedium(context),
+        message: 'You have been signed in OK. Welcome!',
+        context: context);
+
+    NavigationUtils.navigateTo(context: context, widget:  InitializerCover(
+      onInitializationComplete: () {
+        pp('$mm initialization should be complete! ');
+        widget.onGoodSignIn();
+      },
+      onError: () {
+        pp('$mm initialization is fucked! ');
+        widget.onSignInError();
+      },
+    ), transitionType: PageTransitionType.leftToRight);
+
   }
 
   Future<void> _doSettings() async {
@@ -249,8 +261,9 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
                                       height: 60,
                                       child: ElevatedButton(
                                           style: const ButtonStyle(
-                                            elevation: MaterialStatePropertyAll<
-                                                double>(8.0),
+                                            elevation:
+                                                WidgetStatePropertyAll<double>(
+                                                    8.0),
                                           ),
                                           onPressed: () {
                                             _signIn();
@@ -267,17 +280,20 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
                 ),
               ),
             ),
-            initializing? Positioned(child: InitializerCover(onInitializationComplete: (){
-              pp('$mm ................................'
-                  '... onInitializationComplete .... ');
-              Navigator.of(context).pop();
-              widget.onGoodSignIn();
-            }, onError: (){
-              pp('$mm ................................'
-                  '... onError .... ');
-              Navigator.of(context).pop();
-              widget.onSignInError();
-            })):const SizedBox(),
+            initializing
+                ? Positioned(
+                    child: InitializerCover(onInitializationComplete: () {
+                    pp('$mm ................................'
+                        '... onInitializationComplete .... ');
+                    Navigator.of(context).pop();
+                    widget.onGoodSignIn();
+                  }, onError: () {
+                    pp('$mm ................................'
+                        '... onError .... ');
+                    Navigator.of(context).pop();
+                    widget.onSignInError();
+                  }))
+                : const SizedBox(),
           ],
         ),
       ),

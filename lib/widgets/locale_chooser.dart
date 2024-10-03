@@ -1,7 +1,8 @@
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
-import '../data/schemas.dart' as lib;
+import '../data/data_schemas.dart' as lib;
 import '../l10n/translation_handler.dart';
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
@@ -9,11 +10,10 @@ import '../utils/prefs.dart';
 ///select supported locale
 class LocaleChooser extends StatefulWidget {
   const LocaleChooser(
-      {Key? key,
+      {super.key,
         required this.onSelected,
         required this.hint,
-        required this.color})
-      : super(key: key);
+        required this.color});
 
   final Function(Locale, String) onSelected;
   final String hint;
@@ -41,6 +41,7 @@ class LocaleChooserState extends State<LocaleChooser> {
       chinese;
 
   lib.SettingsModel? settingsModel;
+  Prefs prefs = GetIt.instance<Prefs>();
 
   @override
   void initState() {
@@ -49,7 +50,7 @@ class LocaleChooserState extends State<LocaleChooser> {
   }
 
   Future setTexts() async {
-    settingsModel = await prefs.getSettings();
+    settingsModel = prefs.getSettings();
     if (settingsModel?.locale != null) {
       final locale = settingsModel!.locale!;
       english = await translator.translate('en', locale);
@@ -150,10 +151,10 @@ class LocaleChooserState extends State<LocaleChooser> {
   void onChanged(Locale? locale) async {
     pp('LocaleChooser 🌀🌀🌀🌀:onChanged: selected locale: '
         '${locale.toString()}');
-    settingsModel = await prefs.getSettings();
+    settingsModel =  prefs.getSettings();
     settingsModel!.locale = locale!.languageCode;
 
-    await prefs.saveSettings(settingsModel!);
+     prefs.saveSettings(settingsModel!);
     await setTexts();
 
     var language = 'English';

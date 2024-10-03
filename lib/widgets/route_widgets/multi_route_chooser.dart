@@ -1,15 +1,14 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:get_it/get_it.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:badges/badges.dart' as bd;
 import '../../l10n/translation_handler.dart';
 
 class MultiRouteChooser extends StatefulWidget {
-  const MultiRouteChooser({Key? key, required this.onRoutesPicked, required this.routes, required this.quitOnDone, required this.hideAppBar})
-      : super(key: key);
+  const MultiRouteChooser({super.key, required this.onRoutesPicked, required this.routes, required this.quitOnDone, required this.hideAppBar});
 
   final List<lib.Route> routes;
   final Function(List<lib.Route>) onRoutesPicked;
@@ -25,6 +24,7 @@ class MultiRouteChooserState extends State<MultiRouteChooser> {
 
   var list = <lib.Route>[];
   String selectRoutes = 'Select Routes';
+  Prefs prefs = GetIt.instance<Prefs>();
 
   @override
   void initState() {
@@ -39,12 +39,12 @@ class MultiRouteChooserState extends State<MultiRouteChooser> {
     });
   }
   void _setCheckList() {
-    widget.routes.forEach((element) {
+    for (var element in widget.routes) {
       checkList.add(false);
-    });
+    }
   }
   Future _setTexts() async {
-    final c = await prefs.getColorAndLocale();
+    final c =  prefs.getColorAndLocale();
     final loc = c.locale;
     selectRoutes = await translator.translate('selectRoutes', loc);
     selectedRoutes = await translator.translate('selectedRoutes', loc);

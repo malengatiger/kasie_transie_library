@@ -1,12 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/navigator_utils.dart';
+import 'package:kasie_transie_library/utils/navigator_utils_old.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/photo_handler.dart';
 import 'package:kasie_transie_library/widgets/vehicle_photo_widget.dart';
@@ -14,8 +15,7 @@ import 'package:kasie_transie_library/widgets/video_recorder.dart';
 import 'package:badges/badges.dart' as bd;
 
 class VehicleMediaHandler extends StatefulWidget {
-  const VehicleMediaHandler({Key? key, required this.vehicle})
-      : super(key: key);
+  const VehicleMediaHandler({super.key, required this.vehicle});
 
   final lib.Vehicle vehicle;
 
@@ -26,7 +26,8 @@ class VehicleMediaHandler extends StatefulWidget {
 class VehicleMediaHandlerState extends State<VehicleMediaHandler>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
   static const mm = ' 🔷🔷🔷🔷🔷🔷 VehicleMediaHandler 🔷';
   var vehiclePhotos = <lib.VehiclePhoto>[];
   final videoFiles = <File>[];
@@ -40,7 +41,7 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
       takePhotos,
       makeVideos;
   Future _setTexts() async {
-    final c = await prefs.getColorAndLocale();
+    final c = prefs.getColorAndLocale();
     final loc = c.locale;
     vehicleMedia = await translator.translate('vehicleMedia', loc);
     allPhotosVideos = await translator.translate('allPhotosVideos', loc);
@@ -316,12 +317,11 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
 
 class MediaChooser extends StatelessWidget {
   const MediaChooser(
-      {Key? key,
+      {super.key,
       required this.onPhoto,
       required this.onVideo,
       required this.takePhotoText,
-      required this.makeVideoText})
-      : super(key: key);
+      required this.makeVideoText});
   final Function onPhoto;
   final Function onVideo;
   final String takePhotoText, makeVideoText;

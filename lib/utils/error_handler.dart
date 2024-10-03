@@ -1,19 +1,19 @@
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:kasie_transie_library/bloc/data_api_dog.dart';
-import 'package:kasie_transie_library/utils/kasie_exception.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:realm/realm.dart';
 
 import '../bloc/cache_manager.dart';
-import '../data/schemas.dart';
+import '../bloc/data_api_dog.dart';
+import '../data/data_schemas.dart';
 import 'device_location_bloc.dart';
 import 'emojis.dart';
 import 'functions.dart';
-import 'dart:io';
-final ErrorHandler errorHandler = ErrorHandler(locationBloc, prefs);
+import 'kasie_exception.dart';
 
 class ErrorHandler {
   static const mm = '👿👿👿👿👿👿👿ErrorHandler: 👿👿';
@@ -30,6 +30,8 @@ class ErrorHandler {
     final m = await cacheManager.getAppErrors();
     pp('${E.leaf2}${E.leaf2}${E.leaf2}${E.leaf2} '
         'ErrorHandler: sendErrors: AppErrors in cache; ${m.length} errors, sending ...');
+    DataApiDog   dataApiDog = GetIt.instance<DataApiDog>();
+
     if (m.isNotEmpty) {
       final errors = AppErrors(m);
       await dataApiDog.addAppErrors(errors);
@@ -83,11 +85,10 @@ class ErrorHandler {
         }
       }
       pp('$mm ...... setting up AppError: ${exception.toString()}}');
-      final user = await prefs.getUser();
-      final car = await prefs.getCar();
+      final user = prefs.getUser();
+      final car = prefs.getCar();
       final ae = AppError(
-        ObjectId(),
-        appErrorId: Uuid.v4().toString(),
+        appErrorId: DateTime.now().toIso8601String(),
         errorMessage: exception.toString(),
         model: deviceData['model'],
         created: DateTime.now().toUtc().toIso8601String(),
@@ -197,14 +198,6 @@ class ErrorHandler {
       'type': build.type,
       'isPhysicalDevice': build.isPhysicalDevice,
       'systemFeatures': build.systemFeatures,
-      'displaySizeInches':
-          ((build.displayMetrics.sizeInches * 10).roundToDouble() / 10),
-      'displayWidthPixels': build.displayMetrics.widthPx,
-      'displayWidthInches': build.displayMetrics.widthInches,
-      'displayHeightPixels': build.displayMetrics.heightPx,
-      'displayHeightInches': build.displayMetrics.heightInches,
-      'displayXDpi': build.displayMetrics.xDpi,
-      'displayYDpi': build.displayMetrics.yDpi,
       'serialNumber': build.serialNumber,
     };
   }
@@ -229,6 +222,7 @@ class ErrorHandler {
 
 class AppErrors {
   List<AppError> appErrorList = [];
+
   AppErrors(this.appErrorList);
 
   Map<String, dynamic> toJson() {

@@ -2,24 +2,23 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart' as fb;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
-import 'package:kasie_transie_library/bloc/data_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'package:kasie_transie_library/messaging/local_notif.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
-import 'package:kasie_transie_library/utils/parsers.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:realm/realm.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../bloc/data_api_dog.dart';
 import '../bloc/list_api_dog.dart';
 import '../data/constants.dart';
+import '../data/data_schemas.dart';
 import '../utils/error_handler.dart';
 import '../utils/functions.dart';
 import '../utils/kasie_exception.dart';
@@ -40,11 +39,16 @@ class FCMBloc {
   lib.Vehicle? car;
   lib.Association? ass;
   bool demoFlag = false;
+  //
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
+  DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
+  ErrorHandler errorHandler = GetIt.instance<ErrorHandler>();
 
   Future initialize() async {
     pp('\n\n$mm ... FirebaseMessaging initialize starting ... ');
-    user = await prefs.getUser();
-    car = await prefs.getCar();
+    user = prefs.getUser();
+    car = prefs.getCar();
     fb.NotificationSettings notificationSettings =
         await firebaseMessaging.requestPermission(
       alert: true,
@@ -102,6 +106,15 @@ class FCMBloc {
   static const red = '🍎🍎';
   var newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMBloc: 🌀🌀🌀🌀';
 
+  Future subscribeWebApp() async {
+    // These registration tokens come from the client FCM SDKs.
+    const registrationTokens = [
+      'YOUR_REGISTRATION_TOKEN_1',
+      // ...
+      'YOUR_REGISTRATION_TOKEN_n'
+    ];
+
+  }
   Future<void> subscribeForBackendMonitor(String app) async {
     appName = app;
     if (!newMM.contains(app)) {
@@ -118,8 +131,8 @@ class FCMBloc {
     String? associationId;
     appName = app;
     newMM = '$newMM$app 🔷🔷';
-    ass = await prefs.getAssociation();
-    demoFlag = await prefs.getDemoFlag();
+    ass = prefs.getAssociation();
+    demoFlag = prefs.getDemoFlag();
     if (ass != null) {
       associationId = ass!.associationId!;
     } else {
@@ -158,8 +171,8 @@ class FCMBloc {
     String? associationId;
     appName = app;
     newMM = '$newMM$app 🔷🔷';
-    car = await prefs.getCar();
-    demoFlag = await prefs.getDemoFlag();
+    car = prefs.getCar();
+    demoFlag = prefs.getDemoFlag();
     if (car != null) {
       associationId = car!.associationId!;
     } else {
@@ -210,8 +223,8 @@ class FCMBloc {
     String? associationId;
     appName = app;
     newMM = '$newMM$app 🔷🔷';
-    user = await prefs.getUser();
-    demoFlag = await prefs.getDemoFlag();
+    user = prefs.getUser();
+    demoFlag = prefs.getDemoFlag();
     if (user != null) {
       associationId = user!.associationId!;
     } else {
@@ -266,12 +279,12 @@ class FCMBloc {
     String? associationId;
     appName = app;
     newMM = '$newMM$app 🔷🔷';
-    user = await prefs.getUser();
-    final association = await prefs.getAssociation();
+    user = prefs.getUser();
+    final association = prefs.getAssociation();
     if (association != null) {
       associationId = association.associationId!;
     }
-    demoFlag = await prefs.getDemoFlag();
+    demoFlag = prefs.getDemoFlag();
     if (user != null) {
       associationId = user!.associationId!;
     }
@@ -293,9 +306,9 @@ class FCMBloc {
   Future<void> subscribeToTopics(String app) async {
     appName = app;
     newMM = '$newMM$app 🔷🔷';
-    user = await prefs.getUser();
-    car = await prefs.getCar();
-    demoFlag = await prefs.getDemoFlag();
+    user = prefs.getUser();
+    car = prefs.getCar();
+    demoFlag = prefs.getDemoFlag();
 
     String? associationId;
     if (user != null) {
@@ -394,54 +407,54 @@ class FCMBloc {
         break;
 
       case Constants.vehicleArrival:
-        _processVehicleArrival(buildVehicleArrival(data));
+        _processVehicleArrival(VehicleArrival.fromJson(data));
         break;
 
       case Constants.vehicleDeparture:
-        _processVehicleDeparture(buildVehicleDeparture(data));
+        _processVehicleDeparture(VehicleDeparture.fromJson(data));
         break;
 
       case Constants.dispatchRecord:
-        final kk = buildDispatchRecord(data);
+        final kk = DispatchRecord.fromJson(data);
         _processDispatchRecord(kk);
         break;
 
       case Constants.passengerCount:
-        final kk = buildAmbassadorPassengerCount(data);
+        final kk = AmbassadorPassengerCount.fromJson(data);
         _processPassengerCount(kk);
         break;
 
       case Constants.heartbeat:
-        final kk = buildVehicleHeartbeat(data);
+        final kk = VehicleHeartbeat.fromJson(data);
         _processHeartbeat(kk);
         break;
 
       case Constants.commuterRequest:
-        final kk = buildCommuterRequest(data);
+        final kk = CommuterRequest.fromJson(data);
         _processCommuterRequest(kk);
         break;
 
       case Constants.locationRequest:
-        final locReq = buildLocationRequest(data);
+        final locReq = LocationRequest.fromJson(data);
         _processLocationRequest(locReq);
         break;
 
       case Constants.locationResponse:
-        final resp = buildLocationResponse(data);
+        final resp = LocationResponse.fromJson(data);
         _processLocationResponse(resp);
         break;
 
       case Constants.userGeofenceEvent:
-        _userGeofenceStreamController.sink.add(buildUserGeofenceEvent(data));
+        _userGeofenceStreamController.sink.add(UserGeofenceEvent.fromJson(data));
         break;
 
       case Constants.vehicleMediaRequest:
-        final req = buildVehicleMediaRequest(data);
+        final req = VehicleMediaRequest.fromJson(data);
         _processMediaRequest(req);
         break;
 
       case Constants.routeUpdateRequest:
-        final req = buildRouteUpdateRequest(data);
+        final req = RouteUpdateRequest.fromJson(data);
         _processRouteUpdate(req);
         break;
       case Constants.appError:
@@ -520,7 +533,7 @@ class FCMBloc {
 
   void _processRouteUpdate(lib.RouteUpdateRequest req) async {
     pp('$newMM _processRouteUpdate ... ${req.routeName}');
-
+    var routesIsolate = GetIt.instance<RoutesIsolate>();
     await routesIsolate.refreshRoute(req.routeId!);
     _routeUpdateRequestStreamController.sink.add(req);
   }
@@ -628,7 +641,7 @@ class FCMBloc {
 
   void _processLocationRequest(lib.LocationRequest request) async {
     pp('$newMM checking if vehicle location request is for me ...');
-    final car = await prefs.getCar();
+    final car = prefs.getCar();
     if (car == null) {
       pp('$newMM location request is NOT for me. ${E.redDot}${E.redDot}${E.redDot} ');
       return;
@@ -637,7 +650,7 @@ class FCMBloc {
       pp('$newMM location request is for me! ... must respond!!');
       final loc = await locationBloc.getLocation();
       final resp = lib.LocationResponse(
-        ObjectId(),
+
         associationId: car.associationId,
         created: DateTime.now().toUtc().toIso8601String(),
         userId: request.userId,
@@ -645,7 +658,7 @@ class FCMBloc {
         vehicleId: car.vehicleId,
         vehicleReg: car.vehicleReg,
         position: lib.Position(
-          type: point,
+          type: 'Point',
           coordinates: [loc.longitude, loc.latitude],
           latitude: loc.latitude,
           longitude: loc.longitude,
@@ -788,7 +801,7 @@ Future kasieFirebaseMessagingBackgroundHandler(
   try {
     switch (type) {
       case Constants.locationRequest:
-        final locReq = buildLocationRequest(data);
+        final locReq = LocationRequest.fromJson(data);
         handleLocationRequest(locReq);
         break;
       // case Constants.locationResponse:
@@ -981,7 +994,7 @@ Future<lib.User?> getUserInBackground() async {
     return null;
   }
   var jx = json.decode(string);
-  user = buildUser(jx);
+  user = User.fromJson(jx);
   pp('$mxx ... this user is responding while in background');
   //myPrettyJsonPrint(user.toJson());
 
@@ -998,7 +1011,7 @@ Future<lib.Vehicle?> getCarInBackground() async {
     return null;
   }
   var jx = json.decode(string);
-  car = buildVehicle(jx);
+  car = Vehicle.fromJson(jx);
   pp('$mxx ... this car is responding while in background');
   //myPrettyJsonPrint(car.toJson());
 
@@ -1026,7 +1039,6 @@ void respondToLocationRequest(
   final loc = await locationBloc.getLocation();
   pp('$mxx .. location in background: $loc');
   final resp = lib.LocationResponse(
-    ObjectId(),
     associationId: car.associationId,
     created: DateTime.now().toUtc().toIso8601String(),
     userId: request.userId,
@@ -1034,7 +1046,7 @@ void respondToLocationRequest(
     vehicleId: car.vehicleId,
     vehicleReg: car.vehicleReg,
     position: lib.Position(
-      type: point,
+      type: 'Point',
       coordinates: [loc.longitude, loc.latitude],
       latitude: loc.latitude,
       longitude: loc.longitude,
@@ -1058,7 +1070,7 @@ Future _sendLocationResponse(lib.LocationResponse resp, String fcmToken) async {
   final urlPrefix = KasieEnvironment.getUrl();
   final mUrl = '${urlPrefix}addLocationResponse';
   pp('$mxx _sendLocationResponse: 🔆🔆🔆 ...... calling : 💙 $mUrl  💙');
-
+  ErrorHandler errorHandler = GetIt.instance<ErrorHandler>();
   String? mBag;
   mBag = json.encode(resp.toJson());
 
@@ -1100,6 +1112,7 @@ Future _sendLocationResponse(lib.LocationResponse resp, String fcmToken) async {
         url: mUrl,
         translationKey: 'serverProblem',
         errorType: KasieException.socketException);
+
     errorHandler.handleError(exception: gex);
     throw gex;
   } on HttpException {

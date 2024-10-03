@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class DaysDropDown extends StatelessWidget {
-  const DaysDropDown({Key? key, required this.onDaysPicked, required this.hint}) : super(key: key);
+  const DaysDropDown({super.key, required this.onDaysPicked, required this.hint});
 
   final Function(int) onDaysPicked;
   final String hint;

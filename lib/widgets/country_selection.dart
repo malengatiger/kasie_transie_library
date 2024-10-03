@@ -1,20 +1,20 @@
+import 'package:badges/badges.dart' as bd;
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:badges/badges.dart' as bd;
+
 import '../../../l10n/translation_handler.dart';
-import '../data/schemas.dart' as lib;
+import '../data/data_schemas.dart' as lib;
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
 
-
 class CountryChooser extends StatefulWidget {
   const CountryChooser(
-      {Key? key,
-        required this.onSelected,
-        required this.hint,
-        required this.refreshCountries})
-      : super(key: key);
+      {super.key,
+      required this.onSelected,
+      required this.hint,
+      required this.refreshCountries});
 
   final Function(lib.Country) onSelected;
   final String hint;
@@ -29,6 +29,8 @@ class CountryChooserState extends State<CountryChooser> {
   bool loading = false;
   lib.SettingsModel? settings;
   final mm = '😡 😡 😡 😡 CountryChooser 🍎';
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
 
   @override
   void initState() {
@@ -40,7 +42,7 @@ class CountryChooserState extends State<CountryChooser> {
     setState(() {
       loading = true;
     });
-    settings = await prefs.getSettings();
+    settings = prefs.getSettings();
     if (countries.isEmpty) {
       pp('$mm getting countries from realm ................');
       countries = await listApiDog.getCountries();
@@ -54,11 +56,12 @@ class CountryChooserState extends State<CountryChooser> {
   }
 
   var list = <DropdownMenuItem>[];
+
   Future _buildDropDown() async {
     var style = myTextStyleSmall(context);
     for (var entry in countries) {
       var translated =
-      await translator.translate('${entry.name}', settings!.locale!);
+          await translator.translate('${entry.name}', settings!.locale!);
       var m = translated.replaceAll('UNAVAILABLE KEY:', '');
       if (mounted) {
         list.add(DropdownMenuItem<lib.Country>(
@@ -75,22 +78,26 @@ class CountryChooserState extends State<CountryChooser> {
   @override
   Widget build(BuildContext context) {
     return loading
-        ? const SizedBox(
-      height: 20,
-      width: 20,
-      child: CircularProgressIndicator(
-        strokeWidth: 4,
-        backgroundColor: Colors.pink,
-      ),
-    )
+        ? Row(mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(
+                height: 14,
+                width: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 4,
+                  backgroundColor: Colors.pink,
+                ),
+              ),
+          ],
+        )
         : DropdownButton(
-        elevation: 4,
-        hint: Text(
-          widget.hint,
-          style: myTextStyleSmall(context),
-        ),
-        items: list,
-        onChanged: onChanged);
+            elevation: 4,
+            hint: Text(
+              widget.hint,
+              style: myTextStyleSmall(context),
+            ),
+            items: list,
+            onChanged: onChanged);
   }
 
   void onChanged(value) {
@@ -99,19 +106,21 @@ class CountryChooserState extends State<CountryChooser> {
 }
 
 class CountrySearch extends StatefulWidget {
-  const CountrySearch({Key? key, required this.onCountrySelected})
-      : super(key: key);
+  const CountrySearch({super.key, required this.onCountrySelected});
 
   final Function(lib.Country) onCountrySelected;
+
   @override
   State<CountrySearch> createState() => _CountrySearchState();
 }
 
-class _CountrySearchState extends State<CountrySearch> {
+class _CountrySearchState extends State<CountrySearch>
+    with AutomaticKeepAliveClientMixin {
   final mm = '🌀🌀🌀🌀CountrySearch: ';
   var _countries = <lib.Country>[];
   final _countriesToDisplay = <lib.Country>[];
   final _countryNames = <String>[];
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
 
   void _runFilter(String text) {
     pp('$mm .... _runFilter: text: $text ......');
@@ -148,8 +157,8 @@ class _CountrySearchState extends State<CountrySearch> {
     }
     return null;
   }
-  void _close(lib.Country country) {
 
+  void _close(lib.Country country) {
     pp('$mm country selected: ${country.name}, popping out');
     widget.onCountrySelected(country);
     Navigator.of(context).pop(country);
@@ -160,7 +169,9 @@ class _CountrySearchState extends State<CountrySearch> {
     super.initState();
     _getData();
   }
+
   bool busy = false;
+
   _getData() async {
     setState(() {
       busy = true;
@@ -184,6 +195,7 @@ class _CountrySearchState extends State<CountrySearch> {
 
   String? countriesText, search, searchCountries;
   final _textEditingController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     var color = getTextColorForBackground(Theme.of(context).primaryColor);
@@ -292,4 +304,8 @@ class _CountrySearchState extends State<CountrySearch> {
       },
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

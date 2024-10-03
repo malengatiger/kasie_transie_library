@@ -5,16 +5,15 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/cloud_storage_bloc.dart';
 import 'package:kasie_transie_library/widgets/video_controls.dart';
 
 import 'package:path_provider/path_provider.dart';
-import 'package:realm/realm.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
-import '../data/schemas.dart' as lib;
+import '../data/data_schemas.dart' as lib;
 import '../l10n/translation_handler.dart';
-import '../utils/device_location_bloc.dart';
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
 
@@ -22,9 +21,9 @@ List<CameraDescription> cameras = [];
 
 class VideoRecorder extends StatefulWidget {
   const VideoRecorder({
-    Key? key,
+    super.key,
     required this.vehicle, required this.onVideoMade,
-  }) : super(key: key);
+  });
 
   final lib.Vehicle vehicle;
   final Function(File, File) onVideoMade;
@@ -38,6 +37,8 @@ class VideoRecorderState extends State<VideoRecorder>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _controller;
   static const mm = '🍏🍏🍏🍏🍏🍏 VideoRecorder: ';
+  CloudStorageBloc cloudStorageBloc = GetIt.instance<CloudStorageBloc>();
+  Prefs prefs = GetIt.instance<Prefs>();
 
   final resolutionPresets = ResolutionPreset.values;
   ResolutionPreset currentResolutionPreset = ResolutionPreset.high;
@@ -80,8 +81,8 @@ class VideoRecorderState extends State<VideoRecorder>
   }
 
   Future _setTexts() async {
-    final c = await prefs.getColorAndLocale();
-    final loc = c.locale!;
+    final c = prefs.getColorAndLocale();
+    final loc = c.locale;
     limitInSeconds = 2 * 60;
     recordingComplete = await translator.translate('recordingComplete', loc);
     elapsedTime = await translator.translate('elapsedTime', loc);
@@ -109,7 +110,7 @@ class VideoRecorderState extends State<VideoRecorder>
 
   lib.User? user;
   void _getUser() async {
-    user = await prefs.getUser();
+    user = prefs.getUser();
   }
 
   int maxSeconds = 10;
@@ -119,7 +120,7 @@ class VideoRecorderState extends State<VideoRecorder>
       busy = true;
     });
     try {
-      user = await prefs.getUser();
+      user = prefs.getUser();
       cameras = await availableCameras();
 
       pp('$mm video recording limit: $maxSeconds seconds');
@@ -203,7 +204,7 @@ class VideoRecorderState extends State<VideoRecorder>
     // Update the Boolean
     if (mounted) {
       setState(() {
-        _isCameraInitialized = _cameraController!.value.isInitialized;
+        _isCameraInitialized = _cameraController.value.isInitialized;
       });
     }
   }
@@ -255,12 +256,12 @@ class VideoRecorderState extends State<VideoRecorder>
   Future<XFile?> stopVideoRecording() async {
     pp('$mm stopVideoRecording ... 🔴');
 
-    if (!_cameraController!.value.isRecordingVideo) {
+    if (!_cameraController.value.isRecordingVideo) {
       // Recording is already is stopped state
       return null;
     }
     try {
-      file = await _cameraController!.stopVideoRecording();
+      file = await _cameraController.stopVideoRecording();
       timer!.cancel();
       fileSize = getFileSizeString(bytes: await file!.length(), decimals: 2);
       pp('$mm Error stopping video recording, file size: '
@@ -683,11 +684,10 @@ class VideoRecorderState extends State<VideoRecorder>
 
 class VideoRecorderControls extends StatelessWidget {
   const VideoRecorderControls(
-      {Key? key,
+      {super.key,
       required this.onUpload,
       required this.onPlay,
-      required this.onCancel})
-      : super(key: key);
+      required this.onCancel});
 
   final Function onUpload;
   final Function onPlay;

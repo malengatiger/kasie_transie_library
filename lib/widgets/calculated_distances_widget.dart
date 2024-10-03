@@ -1,10 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 import 'package:badges/badges.dart' as bd;
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import 'package:kasie_transie_library/widgets/tiny_bloc.dart';
@@ -14,8 +15,7 @@ import '../utils/prefs.dart';
 import '../utils/route_distance_calculator.dart';
 
 class CalculatedDistancesWidget extends StatefulWidget {
-  const CalculatedDistancesWidget({Key? key, required this.routeId})
-      : super(key: key);
+  const CalculatedDistancesWidget({super.key, required this.routeId});
 
   final String routeId;
   @override
@@ -24,16 +24,19 @@ class CalculatedDistancesWidget extends StatefulWidget {
 }
 
 class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   late AnimationController _controller;
   late StreamSubscription<String> sub;
   final mm = '😎😎😎😎😎😎😎😎 CalculatedDistancesWidget: 🍎🍎🍎';
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
 
   var calculatedDistances = <lib.CalculatedDistance>[];
   bool busy = false;
   lib.Route? route;
   String distanceFromStart = '', routeLength = '';
 
+  RouteDistanceCalculator routeDistanceCalculator = GetIt.instance<RouteDistanceCalculator>();
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
@@ -44,7 +47,7 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
   }
 
   void _setTexts() async {
-    final c = await prefs.getColorAndLocale();
+    final c = prefs.getColorAndLocale();
     final loc = c.locale;
     distanceFromStart = await translator.translate('distanceFromStart', loc);
     routeLength = await translator.translate('routeLength', loc);
@@ -200,4 +203,7 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
               ],
             ));
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

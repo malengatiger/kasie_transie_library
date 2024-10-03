@@ -3,26 +3,25 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get_it/get_it.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:native_device_orientation/native_device_orientation.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:realm/realm.dart';
 
 import '../bloc/cloud_storage_bloc.dart';
 import '../l10n/translation_handler.dart';
-import '../utils/device_location_bloc.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
 
 class PhotoHandler extends StatefulWidget {
   const PhotoHandler({
-    Key? key,
+    super.key,
     required this.vehicle,
     required this.onPhotoTaken,
-  }) : super(key: key);
+  });
 
   final lib.Vehicle vehicle;
   final Function(File, File) onPhotoTaken;
@@ -35,6 +34,10 @@ class PhotoHandlerState extends State<PhotoHandler>
     with SingleTickerProviderStateMixin {
   final mm =
       '${E.blueDot}${E.blueDot}${E.blueDot}${E.blueDot} PhotoHandler: 🌿';
+
+  Prefs prefs = GetIt.instance<Prefs>();
+  CloudStorageBloc cloudStorageBloc = GetIt.instance<CloudStorageBloc>();
+
 
   late AnimationController _controller;
   final ImagePicker _picker = ImagePicker();
@@ -60,11 +63,11 @@ class PhotoHandlerState extends State<PhotoHandler>
   }
 
   Future _setTexts() async {
-    user = await prefs.getUser();
-    final c = await prefs.getColorAndLocale();
+    user = prefs.getUser();
+    final c = prefs.getColorAndLocale();
     fileSavedWillUpload =
-        await translator.translate('fileSavedWillUpload', c.locale!);
-    takePicture = await translator.translate('takePicture', c.locale!);
+        await translator.translate('fileSavedWillUpload', c.locale);
+    takePicture = await translator.translate('takePicture', c.locale);
   }
 
   Future<void> _observeOrientation() async {
@@ -80,7 +83,7 @@ class PhotoHandlerState extends State<PhotoHandler>
 
   void _startPhoto() async {
     pp('$mm photo taking started ....');
-    var settings = await prefs.getSettings();
+    var settings = prefs.getSettings();
     var height = 640.0, width = 480.0;
 
     final XFile? file = await _picker.pickImage(

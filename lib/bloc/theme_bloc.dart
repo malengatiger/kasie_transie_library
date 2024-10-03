@@ -7,15 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kasie_transie_library/data/color_and_locale.dart';
 
-import '../data/schemas.dart';
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
 
-final ThemeBloc themeBloc = ThemeBloc();
 
 class ThemeBloc {
   final mm = '🍎🍎🍎ThemeBloc 🍎🍎🍎: ';
-  ThemeBloc() {
+  final Prefs prefs;
+
+  ThemeBloc(this.prefs) {
     pp('$mm ... ThemeBloc initializing ....');
     _initialize();
   }
@@ -29,7 +29,7 @@ class ThemeBloc {
   ColorAndLocale? colorAndLocale;
 
   _initialize() async {
-    colorAndLocale = await prefs.getColorAndLocale();
+    colorAndLocale = prefs.getColorAndLocale();
     colorAndLocale ??= ColorAndLocale(themeIndex: 0, locale: 'en');
     pp('\n$mm initialize: theme index: ${colorAndLocale!.themeIndex}');
     pp('$mm initialize: locale = ${colorAndLocale!.locale} ... '
@@ -306,11 +306,9 @@ class KhayaTheme {
     onError: Color(0xff140c0d),
     errorContainer: Color(0xffb1384e),
     onErrorContainer: Color(0xfffbe8ec),
-    background: Color(0xff191b1f),
-    onBackground: Color(0xffeceded),
     surface: Color(0xff191b1f),
     onSurface: Color(0xffeceded),
-    surfaceVariant: Color(0xff21262d),
+    surfaceContainerHighest: Color(0xff21262d),
     onSurfaceVariant: Color(0xffdcdcde),
     outline: Color(0xff9da3a3),
     shadow: Color(0xff000000),

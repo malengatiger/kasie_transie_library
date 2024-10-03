@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/utils/functions.dart';
 
-import '../data/big_bag.dart';
 import 'number_widget.dart';
 
 class CountsGridWidget extends StatelessWidget {
   const CountsGridWidget({
-    Key? key,
+    super.key,
     required this.arrivalsText,
     required this.departuresText,
     required this.dispatchesText,
@@ -17,7 +15,7 @@ class CountsGridWidget extends StatelessWidget {
     required this.dispatches,
     required this.passengerCountsText,
     required this.passengerCounts,
-  }) : super(key: key);
+  });
 
   final String arrivalsText,
       departuresText,

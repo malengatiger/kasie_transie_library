@@ -2,27 +2,26 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/data/counter_bag.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/maps/location_response_map.dart';
 import 'package:kasie_transie_library/maps/vehicle_monitor_map.dart';
 import 'package:kasie_transie_library/messaging/fcm_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/counts_widget.dart';
-import 'package:realm/realm.dart';
 
 import '../../bloc/data_api_dog.dart';
+import '../../bloc/list_api_dog.dart';
 import '../../l10n/translation_handler.dart';
 import '../../utils/emojis.dart';
-import '../../utils/navigator_utils.dart';
+import '../../utils/navigator_utils_old.dart';
 import '../../utils/prefs.dart';
 import '../days_drop_down.dart';
 
 class CarDetails extends StatefulWidget {
   const CarDetails(
-      {Key? key, required this.vehicle, this.width, required this.onClose})
-      : super(key: key);
+      {super.key, required this.vehicle, this.width, required this.onClose});
 
   final lib.Vehicle vehicle;
   final double? width;
@@ -63,6 +62,8 @@ class CarDetailsState extends State<CarDetails>
   late StreamSubscription<lib.VehicleArrival> arrivalStreamSub;
   late StreamSubscription<lib.VehicleDeparture> departureStreamSub;
   late StreamSubscription<lib.VehicleHeartbeat> heartbeatStreamSub;
+
+  Prefs prefs = GetIt.instance<Prefs>();
 
   @override
   void dispose() {
@@ -174,7 +175,7 @@ class CarDetailsState extends State<CarDetails>
   }
 
   void _setTexts() async {
-    var c = await prefs.getColorAndLocale();
+    var c = prefs.getColorAndLocale();
     numberOfCars = await translator.translate('numberOfCars', c.locale);
     arrivalsText = await translator.translate('arrivals', c.locale);
     departuresText = await translator.translate('departures', c.locale);
@@ -197,7 +198,8 @@ class CarDetailsState extends State<CarDetails>
   }
 
   var paCounts = <lib.AmbassadorPassengerCount>[];
-
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
   void _getData(bool refresh) async {
     pp('$mm .............................. getData ...');
     setState(() {
@@ -267,9 +269,9 @@ class CarDetailsState extends State<CarDetails>
       busy = true;
     });
 
-    final user = await prefs.getUser();
+    final user = prefs.getUser();
     final lr = lib.LocationRequest(
-      ObjectId(),
+
       vehicleId: widget.vehicle.vehicleId,
       userId: user!.userId,
       userName: user.name,
@@ -300,9 +302,9 @@ class CarDetailsState extends State<CarDetails>
 
   void _sendMediaRequest() async {
     pp('$mm r_sendMediaRequest ...........');
-    final user = await prefs.getUser();
+    final user = prefs.getUser();
     final m = lib.VehicleMediaRequest(
-      ObjectId(),
+
       vehicleReg: widget.vehicle.vehicleReg,
       vehicleId: widget.vehicle.vehicleId,
       userId: user!.userId,

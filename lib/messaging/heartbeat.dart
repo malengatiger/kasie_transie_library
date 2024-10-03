@@ -1,18 +1,15 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:kasie_transie_library/bloc/data_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart';
+import 'package:get_it/get_it.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart';
 import 'package:kasie_transie_library/messaging/fcm_bloc.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
-import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:realm/realm.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../bloc/data_api_dog.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
-import '../utils/parsers.dart';
+import '../utils/prefs.dart';
 
 final HeartbeatManager heartbeatManager = HeartbeatManager();
 
@@ -20,10 +17,12 @@ class HeartbeatManager {
   final mm = '🔴🔴🔴🔴🔴🔴 HeartbeatManager: 🔴🔴🔴🔴🔴🔴';
 
   late Timer timer;
+  Prefs prefs = GetIt.instance<Prefs>();
+  DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
 
   void startHeartbeat() async {
     pp('\n\n$mm start Heartbeat ................... are we falling here? .........................');
-    final sett = await prefs.getSettings();
+    final sett = prefs.getSettings();
     int seconds = 600; //3 minutes
     if (sett != null) {
       seconds = sett.heartbeatIntervalSeconds!;
@@ -43,7 +42,7 @@ class HeartbeatManager {
   }
 
   Future addHeartbeat() async {
-    var car = await prefs.getCar();
+    var car = prefs.getCar();
 
     if (car == null) {
       try {
@@ -74,7 +73,7 @@ class HeartbeatManager {
   static VehicleHeartbeat getHeartbeat({required Vehicle car,
     required double latitude, required double longitude}) {
 
-    final heartbeat = VehicleHeartbeat(ObjectId(),
+    final heartbeat = VehicleHeartbeat(
         ownerName: car.ownerName,
         ownerId: car.ownerId,
         associationId: car.associationId,
@@ -84,9 +83,9 @@ class HeartbeatManager {
         make: car.make,
         created: DateTime.now().toUtc().toIso8601String(),
         longDate: DateTime.now().toUtc().millisecondsSinceEpoch,
-        vehicleHeartbeatId: Uuid.v4().toString(),
+        vehicleHeartbeatId:DateTime.now().toIso8601String(),
         position: Position(
-          type: point,
+          type: 'Point',
           coordinates: [longitude, latitude],
           latitude: latitude,
           longitude: longitude,

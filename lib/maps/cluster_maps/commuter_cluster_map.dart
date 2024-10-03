@@ -1,24 +1,22 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:typed_data';
-import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
+import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart' as cl;
 import 'package:kasie_transie_library/maps/cluster_maps/toggle.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 
 import '../../bloc/list_api_dog.dart';
+import '../../utils/prefs.dart';
 import 'cluster_covers.dart';
 
 class CommuterClusterMap extends StatefulWidget {
   const CommuterClusterMap(
-      {Key? key, required this.commuterRequestCovers, required this.date})
-      : super(key: key);
+      {super.key, required this.commuterRequestCovers, required this.date});
   final String date;
   final List<CommuterRequestCover> commuterRequestCovers;
   @override
@@ -30,10 +28,12 @@ class CommuterClusterMapState extends State<CommuterClusterMap>
   late AnimationController _controller;
   final Completer<GoogleMapController> _googleMapController = Completer();
   final mm = '🍐🍐🍐🍐CommuterClusterMap 🍐🍐';
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
 
   var routes = <lib.Route>[];
   Set<Marker> markers = {};
-  late ClusterManager clusterManager;
+  late cl.ClusterManager clusterManager;
   final CameraPosition _parisCameraPosition =
       const CameraPosition(target: LatLng(-27.856613, 25.352222), zoom: 14.0);
 
@@ -58,9 +58,9 @@ class CommuterClusterMapState extends State<CommuterClusterMap>
     setState(() {});
   }
 
-  ClusterManager<ClusterItem> _initClusterManager() {
+  cl.ClusterManager<cl.ClusterItem> _initClusterManager() {
     pp('$mm ......... _initClusterManager, ${E.appleRed} items: ${widget.commuterRequestCovers.length}');
-    clusterManager = ClusterManager<CommuterRequestCover>(
+    clusterManager = cl.ClusterManager<CommuterRequestCover>(
         widget.commuterRequestCovers, _updateMarkers,
         markerBuilder: _markerBuilder);
 
@@ -74,27 +74,26 @@ class CommuterClusterMapState extends State<CommuterClusterMap>
     });
   }
 
-  Future<Marker> Function(Cluster<CommuterRequestCover>) get _markerBuilder =>
-      (cluster) async {
+  Future<Marker> Function(dynamic) get _markerBuilder =>
+          (cluster) async {
         var size = cluster.isMultiple ? 125.0 : 75.0;
         var text = cluster.isMultiple ? cluster.count.toString() : "1";
         final ic = await getMarkerBitmap(
           size.toInt(),
           text: text,
-          color: 'pink',
+          color: 'indigo',
           borderColor: Colors.white,
           fontWeight: FontWeight.normal,
           fontSize: size / 3,
         );
         return Marker(
           markerId: MarkerId(cluster.getId()),
-          position: cluster.location,
+          position: cluster.location, // Use cluster.location instead of cluster.items[0].latLng
           onTap: () {
             pp('$mm ---- cluster? ${E.redDot} $cluster');
             for (var p in cluster.items) {
-              pp('$mm ... CommuterRequestCover - cluster item: ${E.appleRed} '
-                  '${p.request.routeLandmarkName}'
-                  '\n${E.leaf} route: ${p.request.routeName} ');
+              pp('$mm ... VehicleArrivalCover - cluster item: ${E.appleRed} '
+                  '${p.arrival.vehicleReg} - ${p.arrival.landmarkName} - ${p.arrival.created}');
             }
           },
           icon: ic,

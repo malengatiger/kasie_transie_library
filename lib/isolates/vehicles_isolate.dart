@@ -2,19 +2,19 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/app_auth.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart';
-import 'package:kasie_transie_library/utils/parsers.dart';
 
+import '../bloc/sem_cache.dart';
+import '../data/data_schemas.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
 import '../utils/zip_handler.dart';
 import 'heartbeat_isolate.dart';
 
-final VehicleIsolate vehicleIsolate = VehicleIsolate();
 const xy2 = '☕️☕️🍎🍎🍎🍎 VehicleIsolate HeavyTaskForCars: 🍎🍎';
 
 class VehicleIsolate {
@@ -25,17 +25,7 @@ class VehicleIsolate {
     try {
       final cars = await _handleOwnerVehicles(userId);
       pp('$xy2 _handleOwnerVehicles attempting to cache ${cars.length} cars.... ');
-      try {
-        final mList = listApiDog.realm.query<Vehicle>('ownerId == \$0', [userId]);
-        listApiDog.realm.write(() {
-          if (mList.isNotEmpty) {
-            listApiDog.realm.deleteMany(mList);
-          }
-          listApiDog.realm.addAll<Vehicle>(cars, update: true);
-        });
-      } catch (e, stack) {
-        pp('$xy2 $e - $stack');
-      }
+     //todo - cache here
       pp('\n\n\n$xy2 ..... ${E.nice}${E.nice} done getting owner cars ....${E.leaf} '
           'returning ${cars.length} cars');
       final end = DateTime.now();
@@ -82,7 +72,7 @@ class VehicleIsolate {
           () async => _heavyTaskForZippedOwnerCars(userId, token, rootToken));
       List json = jsonDecode(s);
       for (var value in json) {
-        list.add(buildVehicle(value));
+        list.add(Vehicle.fromJson(value));
       }
     }
     var end = DateTime.now();
@@ -103,29 +93,11 @@ Future<List<Vehicle>> _handleVehicles(String associationId) async {
         () async => _heavyTaskForZippedCars(associationId, token, rootToken));
     List json = jsonDecode(s);
     for (var value in json) {
-      list.add(buildVehicle(value));
+      list.add(Vehicle.fromJson(value));
     }
   }
   pp('$xy2 _handleVehicles attempting to cache ${list.length} cars.... ');
-
-  try {
-    final old = listApiDog.realm.query<Vehicle>('associationId == \$0', [associationId]);
-    if (old.isNotEmpty) {
-      listApiDog.realm.write(() {
-        listApiDog.realm.deleteMany(old);
-      });
-    }
-    listApiDog.realm.write(() {
-      listApiDog.realm.addAll<Vehicle>(list, update: true);
-    });
-  } catch (e, stack) {
-    pp('$xy2 $e - $stack');
-  }
-
-  var end = DateTime.now();
-  final res = listApiDog.realm.query<Vehicle>('associationId == \$0', [associationId]);
-  pp('$xy2 should have cached ${list.length} cars in realm; elapsed time: '
-      '${end.difference(start).inSeconds} seconds. Cars in cache: ${res.length}');
+  //todo - cache here
 
   return list;
 }
@@ -140,7 +112,9 @@ Future<String> _heavyTaskForZippedCars(
       '... calling zipHandler.getCars() ...');
   BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
   Firebase.initializeApp();
-
+  final AppAuth appAuth = AppAuth(FirebaseAuth.instance);
+  final SemCache semCache = GetIt.instance<SemCache>();
+  final ZipHandler zipHandler = ZipHandler(appAuth, semCache);
   return await zipHandler.getCars(associationId, token);
 
 }
@@ -152,7 +126,9 @@ Future<String> _heavyTaskForZippedOwnerCars(
       '... calling zipHandler.getOwnerCars() ...');
   BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
   Firebase.initializeApp();
-
+  final AppAuth appAuth = AppAuth(FirebaseAuth.instance);
+  final SemCache semCache = GetIt.instance<SemCache>();
+  final ZipHandler zipHandler = ZipHandler(appAuth, semCache);
   return await zipHandler.getOwnerCars(userId, token);
 }
 

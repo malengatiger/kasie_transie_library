@@ -3,35 +3,41 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/app_auth.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
-import 'package:kasie_transie_library/utils/parsers.dart';
 import 'package:kasie_transie_library/utils/zip_handler.dart';
+import 'package:sembast_web/sembast_web.dart';
 
+import '../bloc/list_api_dog.dart';
+import '../bloc/sem_cache.dart';
+import '../data/data_schemas.dart';
 import '../data/route_bag.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
 import '../utils/kasie_exception.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 
-final RoutesIsolate routesIsolate = RoutesIsolate();
 
 class RoutesIsolate {
   final xy = '☕️☕️☕️☕️☕️ Routes Isolate Functions: 🍎🍎';
 
+
   Future<int> countRoutePoints(String routeId) async {
-    final res = listApiDog.realm.query<RoutePoint>('routeId == \$0', [routeId]);
-    return res.length;
+    // final res = listApiDog.realm.query<RoutePoint>('routeId == \$0', [routeId]);
+    // return res.length;
+    return 0;
   }
 
   Future<int> countRouteLandmarks(String routeId) async {
-    final res =
-        listApiDog.realm.query<RouteLandmark>('routeId == \$0', [routeId]);
-    return res.length;
+    // final res =
+    //     listApiDog.realm.query<RouteLandmark>('routeId == \$0', [routeId]);
+    // return res.length;
+    return 0;
   }
 
   Future<List<RoutePoint>> getRoutePoints(String routeId, bool refresh) async {
@@ -39,6 +45,7 @@ class RoutesIsolate {
     if (token == null) {
       throw Exception('Auth token not found');
     }
+    ListApiDog listApiDog = GetIt.instance<ListApiDog>();
     var mList = listApiDog.getPointsFromRealm(routeId);
     if (refresh || mList.isEmpty) {
       mList = await _handlePoints(routeId, token);
@@ -70,27 +77,16 @@ class RoutesIsolate {
 
       List mJson = jsonDecode(aString);
       for (var p in mJson) {
-        mList.add(buildRoutePoint(p));
+        mList.add(RoutePoint.fromJson(p));
       }
-      _cachePoints(mList);
+      // _cachePoints(mList);
     } catch (e, stack) {
       pp('$xy _handlePoints ... FUCKUP! $e - $stack');
     }
     return mList;
   }
 
-  void _cachePoints(List<RoutePoint> mList) {
-    final routePoints = listApiDog.realm
-        .query<RoutePoint>('routeId == \$0', [mList.first.routeId]);
-    List<RoutePoint> old = routePoints.toList();
-    listApiDog.realm.write(() {
-      listApiDog.realm.deleteMany<RoutePoint>(old);
-      listApiDog.realm.addAll(mList);
-    });
-    final routePoints2 = listApiDog.realm
-        .query<RoutePoint>('routeId == \$0', [mList.first.routeId]);
-    pp('$xy newly cached routePoints: ${routePoints2.length}');
-  }
+
 
   Future<List<RoutePoint>> _handlePoints(String routeId, String token) async {
     List<RoutePoint> mList = [];
@@ -100,11 +96,9 @@ class RoutesIsolate {
           () => _heavyTaskForZippedRoutePoints(routeId, token, rootToken));
       List mJson = jsonDecode(aString);
       for (var p in mJson) {
-        mList.add(buildRoutePoint(p));
+        mList.add(RoutePoint.fromJson(p));
       }
-      if (mList.isNotEmpty) {
-        _cachePoints(mList);
-      }
+
     } catch (e, stack) {
       pp('$xy _handlePoints ... FUCKUP! $e - $stack');
     }
@@ -113,30 +107,32 @@ class RoutesIsolate {
 
   Future<List<RouteLandmark>> getRouteLandmarksCached(String routeId) async {
     pp('$xy get getRouteLandmarks for $routeId  ...');
-    var mList = <RouteLandmark>[];
+    // var mList = <RouteLandmark>[];
+    //
+    // final res =
+    //     listApiDog.realm.query<RouteLandmark>('routeId == \$0', [routeId]);
+    // mList = res.toList();
+    // pp('$xy get getRouteLandmarks found ${mList.length}  ... ');
+    //
+    // mList.sort((a, b) => a.index!.compareTo(b.index!));
+    // pp('$xy RouteLandmarks for $routeId  == ${mList.length} ... ');
 
-    final res =
-        listApiDog.realm.query<RouteLandmark>('routeId == \$0', [routeId]);
-    mList = res.toList();
-    pp('$xy get getRouteLandmarks found ${mList.length}  ... ');
-
-    mList.sort((a, b) => a.index!.compareTo(b.index!));
-    pp('$xy RouteLandmarks for $routeId  == ${mList.length} ... ');
-
-    return res.toList();
+    //return res.toList();
+    return [];
   }
 
   Future<List<RouteLandmark>> getAllRouteLandmarksCached() async {
     pp('$xy get getRouteLandmarks all routes  ...');
-    var mList = <RouteLandmark>[];
+    // var mList = <RouteLandmark>[];
+    //
+    // final res = listApiDog.realm.all<RouteLandmark>();
+    // mList = res.toList();
+    // pp('$xy get getRouteLandmarks found ${mList.length}  ... ');
+    //
+    // mList.sort((a, b) => a.index!.compareTo(b.index!));
 
-    final res = listApiDog.realm.all<RouteLandmark>();
-    mList = res.toList();
-    pp('$xy get getRouteLandmarks found ${mList.length}  ... ');
-
-    mList.sort((a, b) => a.index!.compareTo(b.index!));
-
-    return res.toList();
+    // return res.toList();
+    return [];
   }
 
   Future refreshRoute(String routeId) async {
@@ -152,13 +148,7 @@ class RoutesIsolate {
       final routeBag = RouteBag.fromJson(mJson);
       pp('$xy back from isolate ... writing the bag to realm  ${routeBag.route!.name}  ... ');
 
-      listApiDog.realm.write(() {
-        listApiDog.realm.add<Route>(routeBag.route!, update: true);
-        listApiDog.realm
-            .addAll<RouteLandmark>(routeBag.routeLandmarks, update: true);
-        listApiDog.realm.addAll<RouteCity>(routeBag.routeCities, update: true);
-        listApiDog.realm.addAll<RoutePoint>(routeBag.routePoints, update: true);
-      });
+
       pp('\n\n\n$xy ..... done getting route ....${E.leaf} '
           'returning ${routeBag.route!.name} ${E.leaf2} fresh and new!\n\n');
       return routeBag.route!;
@@ -180,7 +170,7 @@ class RoutesIsolate {
   }
 
   Future<List<Route>> getRoutes(String associationId, bool refresh) async {
-    final mRoutes = listApiDog.realm.all<Route>();
+    final mRoutes = []; //istApiDog.realm.all<Route>();
     pp('\n$xy getRoutes: ... routes already in cache: ${mRoutes.length}');
     if (refresh || mRoutes.isEmpty) {
       pp('\n$xy getRoutes: ... getting routes from backend ....');
@@ -203,16 +193,16 @@ class RoutesIsolate {
         final cities = <RouteCity>[];
 
         for (var value in routesJson) {
-          routes.add(buildRoute(value));
+          routes.add(Route.fromJson(value));
         }
         for (var map in routePointsJson) {
-          routePoints.add(buildRoutePoint(map));
+          routePoints.add(RoutePoint.fromJson(map));
         }
         for (var map in landmarksJson) {
-          landmarks.add(buildRouteLandmark(map));
+          landmarks.add(RouteLandmark.fromJson(map));
         }
         for (var map in citiesJson) {
-          cities.add(buildRouteCity(map));
+          cities.add(RouteCity.fromJson(map));
         }
         await cacheBag(
             routes: routes,
@@ -224,7 +214,7 @@ class RoutesIsolate {
       }
     }
 
-    return mRoutes.toList();
+    return [];
   }
 
   Future cacheBag(
@@ -235,19 +225,14 @@ class RoutesIsolate {
     pp('$xy ... cacheBag - cache all the data for ${routes.length} routes ......... ');
     //
 
-    listApiDog.realm.write(() {
-      listApiDog.realm.addAll<RouteLandmark>(landmarks, update: true);
-      listApiDog.realm.addAll<RoutePoint>(routePoints, update: true);
-      listApiDog.realm.addAll<RouteCity>(cities, update: true);
-      listApiDog.realm.addAll<Route>(routes, update: true);
-    });
+
     //
     pp('$xy ... 🌼🌼 ..... Routes, points, landmarks & cities cached: ${routes.length}');
   }
 
   Future<List<City>> getCities(String countryId, bool refresh) async {
     pp('\n\n\n$xy ............................ getting routes using isolate ....');
-    final mRoutes = listApiDog.realm.all<City>();
+    final mRoutes = <City>[]; //todo - fix!
     if (refresh || mRoutes.isEmpty) {
       final token = await appAuth.getAuthToken();
       if (token != null) {
@@ -257,7 +242,7 @@ class RoutesIsolate {
         List<City> mCities = [];
         List json = jsonDecode(s);
         for (var value in json) {
-          mCities.add(buildCity(value));
+          mCities.add(City.fromJson(value));
         }
         return mCities;
       }
@@ -266,18 +251,18 @@ class RoutesIsolate {
     return mRoutes.toList();
   }
 
-  Future<List<User>> getUsers(String associationId, bool refresh) async {
+  Future<List<lib.User>> getUsers(String associationId, bool refresh) async {
     pp('\n\n\n$xy ............................ getting users using isolate ....');
-    final mRoutes = listApiDog.realm.all<User>();
+    final mRoutes =  <lib.User>[]; //listApiDog.realm.all<User>();
     if (refresh || mRoutes.isEmpty) {
       final token = await appAuth.getAuthToken();
       if (token != null) {
         final s = await Isolate.run(() async =>
             _heavyTaskForUsers(associationId: associationId, token: token));
-        List<User> mCities = [];
+        List<lib.User> mCities = [];
         List json = jsonDecode(s);
         for (var value in json) {
-          mCities.add(buildUser(value));
+          mCities.add(lib.User.fromJson(value));
         }
         return mCities;
       }
@@ -288,7 +273,7 @@ class RoutesIsolate {
 
   Future<List<Country>> getCountries(bool refresh) async {
     pp('\n\n\n$xy ............................ getting countries using isolate ....');
-    final list = listApiDog.realm.all<Country>();
+    final list =  <Country>[]; //listApiDog.realm.all<Country>();
     if (refresh || list.isEmpty) {
       final token = await appAuth.getAuthToken();
       if (token != null) {
@@ -297,7 +282,7 @@ class RoutesIsolate {
         List<Country> mCountries = [];
         List json = jsonDecode(s);
         for (var value in json) {
-          mCountries.add(buildCountry(value));
+          mCountries.add(Country.fromJson(value));
         }
         return mCountries;
       }
@@ -325,7 +310,9 @@ Future<String> _heavyTaskForDeletingRoutePoints(
       '... calling zipHandler.deleteRoutePoints() ...');
   BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
   Firebase.initializeApp();
-
+  final AppAuth appAuth = AppAuth(FirebaseAuth.instance);
+  final SemCache semCache = GetIt.instance<SemCache>();
+  final ZipHandler zipHandler = ZipHandler(appAuth, semCache);
   return await zipHandler.deleteRoutePoints(
       routeId: routeId, token: token, latitude: latitude, longitude: longitude);
 }
@@ -348,9 +335,12 @@ Future<String> _heavyTaskForZippedRoutes(
       '... calling zipHandler.getRouteBags() ...');
   BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
   Firebase.initializeApp();
+  final AppAuth appAuth = AppAuth(FirebaseAuth.instance);
+  final SemCache semCache = GetIt.instance<SemCache>();
 
+  final ZipHandler zipHandler = ZipHandler(appAuth, semCache);
   final res =
-      await zipHandler.getRouteData(associationId: associationId, token: token);
+      await zipHandler.getRouteDataString(associationId: associationId, token: token);
   pp('🅿️ 🅿️ 🅿️ 🅿️ 🅿️ 🅿️ .... do we get here, Jack? 🅿️ 🅿️ 🅿️ ${res.length} bytes in string');
   return res;
 }
@@ -362,8 +352,10 @@ Future<String> _heavyTaskForZippedCities(
       '... calling zipHandler.getCities() ...');
   BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
   Firebase.initializeApp();
-
-  return await zipHandler.getCities(userId, token);
+  final AppAuth appAuth = AppAuth(FirebaseAuth.instance);
+  final SemCache semCache = GetIt.instance<SemCache>();
+  final ZipHandler zipHandler = ZipHandler(appAuth, semCache);
+  return await zipHandler.getCitiesString(userId, token);
 }
 
 @pragma('vm:entry-point')
@@ -375,10 +367,10 @@ Future<String> _heavyTaskForUsers({
   final cmd =
       '${KasieEnvironment.getUrl()}getAssociationUsers?associationId=$associationId';
 
-  final users = <User>[];
+  final users = <lib.User>[];
   List resp = await _httpGet(cmd, token);
   for (var map in resp) {
-    users.add(buildUser(map));
+    users.add(lib.User.fromJson(map));
   }
   pp('$xyz2  Users found: ${users.length}');
   final s = jsonEncode(users);
@@ -393,7 +385,9 @@ Future<String> _heavyTaskForZippedRoutePoints(
       '... calling zipHandler.getRoutePoints() ...');
   BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
   Firebase.initializeApp();
-
+  final AppAuth appAuth = AppAuth(FirebaseAuth.instance);
+  final SemCache semCache = GetIt.instance<SemCache>();
+  final ZipHandler zipHandler = ZipHandler(appAuth, semCache);
   return await zipHandler.getRoutePoints(routeId: routeId, token: token);
 }
 
@@ -407,7 +401,7 @@ Future<String> _heavyTaskCountries({
   final countries = <Country>[];
   List resp = await _httpGet(cmd, token);
   for (var map in resp) {
-    countries.add(buildCountry(map));
+    countries.add(Country.fromJson(map));
   }
   pp('$xyz2  Countries found: ${countries.length}');
   final s = jsonEncode(countries);
@@ -496,7 +490,10 @@ Future<String> _heavyTaskForSingleRoute(
   final start = DateTime.now();
   BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
   Firebase.initializeApp();
+  final AppAuth appAuth = AppAuth(FirebaseAuth.instance);
+  final SemCache semCache = GetIt.instance<SemCache>();
 
+  final ZipHandler zipHandler = ZipHandler(appAuth, semCache);
   RouteBag? routeBag =
       await zipHandler.refreshRoute(routeId: routeId, token: token);
   pp('$xyz Route refreshed ${E.nice} for ${routeBag!.route!.name} '

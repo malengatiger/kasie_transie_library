@@ -7,12 +7,11 @@ import 'package:flutter_analog_clock/flutter_analog_clock.dart';
 //todo - listen for progress on long downloads ...
 class TimerWidget extends StatefulWidget {
   const TimerWidget(
-      {Key? key,
+      {super.key,
       required this.title,
       this.subTitle,
       required this.isSmallSize,
-      this.listenForProgress})
-      : super(key: key);
+      this.listenForProgress});
 
   final String title;
   final String? subTitle;

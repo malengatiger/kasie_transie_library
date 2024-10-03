@@ -4,8 +4,7 @@ import 'package:intl/intl.dart';
 import '../utils/functions.dart';
 
 class NumberWidget extends StatelessWidget {
-  const NumberWidget({Key? key, required this.title, required this.number, required this.height, required this.width, required this.elevation, required this.fontSize})
-      : super(key: key);
+  const NumberWidget({super.key, required this.title, required this.number, required this.height, required this.width, required this.elevation, required this.fontSize});
 
   final String title;
   final int number;

@@ -1,42 +1,45 @@
 import 'package:account_picker/account_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart' as fbui;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart' as dot;
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/app_auth.dart';
-import 'package:kasie_transie_library/bloc/data_api_dog.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
 import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/navigator_utils.dart';
-import 'package:kasie_transie_library/utils/prefs.dart';
+import 'package:kasie_transie_library/utils/navigator_utils_old.dart';
 import 'package:kasie_transie_library/widgets/language_and_color_chooser.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import 'package:open_mail_app/open_mail_app.dart' as mail;
 
+import '../../bloc/data_api_dog.dart';
+import '../../bloc/list_api_dog.dart';
+import '../../data/data_schemas.dart';
 import '../../isolates/vehicles_isolate.dart';
+import '../../utils/prefs.dart';
 
-late EmailLinkAuthProvider emailLinkAuthProvider;
+late fbui.EmailLinkAuthProvider emailLinkAuthProvider;
 const mex = '🔷🔷🔷🔷EmailLinkAuthProvider 🔷🔷🔷🔷';
 
-Future<void> initializeEmailLinkProvider(ActionCodeSettings action) async {
-  emailLinkAuthProvider = EmailLinkAuthProvider(
+Future<void> initializeEmailLinkProvider(fb_auth.ActionCodeSettings action) async {
+  emailLinkAuthProvider = fbui.EmailLinkAuthProvider(
     actionCodeSettings: action,
   );
-  emailLinkAuthProvider.auth = FirebaseAuth.instance;
+  emailLinkAuthProvider.auth = fb_auth.FirebaseAuth.instance;
 
-  FirebaseUIAuth.configureProviders([
+  fbui.FirebaseUIAuth.configureProviders([
     emailLinkAuthProvider,
     // ... other providers
   ]);
   pp('$mex  EmailLinkAuthProvider has been initialized! ${E.leaf}');
   myPrettyJsonPrint(action.asMap());
   // check if email
-  final email = await prefs.getEmail();
+  Prefs prefs = GetIt.instance<Prefs>();
+
+  final email =  prefs.getEmail();
   if (email != null) {
     pp('$mex .... yea! email is $email}');
   } else {
@@ -66,7 +69,7 @@ Future<void> initializeEmailLinkProvider(ActionCodeSettings action) async {
 }
 
 class DamnEmailLink extends StatefulWidget {
-  const DamnEmailLink({Key? key, required this.onLanguageChosen}) : super(key: key);
+  const DamnEmailLink({super.key, required this.onLanguageChosen});
 
   final Function onLanguageChosen;
 
@@ -76,12 +79,12 @@ class DamnEmailLink extends StatefulWidget {
 
 class DamnEmailLinkState extends State<DamnEmailLink>
     with SingleTickerProviderStateMixin
-    implements EmailLinkAuthListener {
+    implements fbui.EmailLinkAuthListener {
   late AnimationController _controller;
   static const mm = '😡😡😡😡😡😡😡 DamnEmailLink: 💪 ';
   var emailController = TextEditingController();
 
-  final actionCodeSettings = ActionCodeSettings(
+  final actionCodeSettings = fb_auth.ActionCodeSettings(
     url: 'https://kasietransie2023.page.link/1gGs',
     handleCodeInApp: true,
     androidInstallApp: true,
@@ -110,6 +113,7 @@ class DamnEmailLinkState extends State<DamnEmailLink>
   String pleaseCheckEmail = "Check email";
   bool busy = false;
   late String adminEmail, adminPassword;
+  Prefs prefs = GetIt.instance<Prefs>();
 
   @override
   void initState() {
@@ -124,7 +128,7 @@ class DamnEmailLinkState extends State<DamnEmailLink>
 
     await _setTexts();
 
-    if (FirebaseAuth.instance.currentUser != null) {
+    if (fb_auth.FirebaseAuth.instance.currentUser != null) {
       if (mounted) {
         Navigator.of(context).pop(true);
       }
@@ -141,7 +145,7 @@ class DamnEmailLinkState extends State<DamnEmailLink>
   }
 
   Future _setTexts() async {
-    final c = await prefs.getColorAndLocale();
+    final c = prefs.getColorAndLocale();
     emailAuthTitle = await translator.translate('emailAuthTitle', c.locale);
     desc = await translator.translate('desc', c.locale);
     pleaseEnterEmail = await translator.translate('pleaseEnterEmail', c.locale);
@@ -175,6 +179,9 @@ class DamnEmailLinkState extends State<DamnEmailLink>
     _setTexts();
   }
 
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
+
   void _sendEmail() async {
     pp('\n\n$mm ... _sendEmail checking if email is known ....');
 
@@ -195,7 +202,7 @@ class DamnEmailLinkState extends State<DamnEmailLink>
       });
     }
     //use admin user to get the basics set up
-    final adminCreds = await FirebaseAuth.instance
+    final adminCreds = await fb_auth.FirebaseAuth.instance
         .signInWithEmailAndPassword(email: adminEmail, password: adminPassword);
     final tok = await appAuth.getAuthToken();
     pp(tok);
@@ -208,18 +215,20 @@ class DamnEmailLinkState extends State<DamnEmailLink>
           userFromRemote.password = 'pass123';
           final mUser = await dataApiDog.updateUser(userFromRemote);
           //sign out the admin userFromRemote ... then sign in new userFromRemote
-          await FirebaseAuth.instance.signOut();
+          await fb_auth.FirebaseAuth.instance.signOut();
           pp('\n$mm ...................................'
               ' ${E.redDot} admin user logged out!');
           //sign in the device updated user
-          final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          final cred = await fb_auth.FirebaseAuth.instance.signInWithEmailAndPassword(
               email: mUser.email!, password: mUser.password!);
 
           if (cred.user != null) {
             pp('$mm ... signInWithEmailAndPassword: ${E.leaf2} USER IS SIGNED IN!!! will send email with link, '
                 'but will start routesIsolate and vehicleIsolate ....');
-            await prefs.saveEmail(email);
-            await prefs.saveUser(userFromRemote);
+             prefs.saveEmail(email);
+             prefs.saveUser(userFromRemote);
+            var routesIsolate = GetIt.instance<RoutesIsolate>();
+            var vehicleIsolate = GetIt.instance<VehicleIsolate>();
             await vehicleIsolate.getVehicles(mUser.associationId!);
             await routesIsolate.getRoutes(mUser.associationId!, true);
 
@@ -251,10 +260,10 @@ class DamnEmailLinkState extends State<DamnEmailLink>
   }
 
   Future<void> _signInWitheReceivedEmailLink(
-      PendingDynamicLinkData dynamicLinkData, lib.User mUser) async {
+      PendingDynamicLinkData dynamicLinkData, User mUser) async {
     final Uri deepLink = dynamicLinkData.link;
     bool isEmailLink =
-        FirebaseAuth.instance.isSignInWithEmailLink(deepLink.toString());
+        fb_auth. FirebaseAuth.instance.isSignInWithEmailLink(deepLink.toString());
     pp('\n\n$mm ...... Yebo! ${E.leaf} ${E.leaf}${E.leaf}${E.leaf}'
         ' deepLink is email link? $isEmailLink ${E.appleGreen}');
     myPrettyJsonPrint(dynamicLinkData.asMap());
@@ -268,8 +277,8 @@ class DamnEmailLinkState extends State<DamnEmailLink>
           duration: const Duration(seconds: 10),
           context: context);
 
-      if (FirebaseAuth.instance.currentUser == null) {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
+      if (fb_auth.FirebaseAuth.instance.currentUser == null) {
+        await fb_auth.FirebaseAuth.instance.signInWithEmailAndPassword(
             email: mUser.email!, password: mUser.password!);
       }
       if (mounted) {
@@ -400,7 +409,7 @@ class DamnEmailLinkState extends State<DamnEmailLink>
   }
 
   @override
-  FirebaseAuth get auth => FirebaseAuth.instance;
+  fb_auth.FirebaseAuth get auth => fb_auth.FirebaseAuth.instance;
 
   @override
   void onBeforeLinkSent(String email) {
@@ -423,18 +432,18 @@ class DamnEmailLinkState extends State<DamnEmailLink>
   }
 
   @override
-  void onCredentialLinked(AuthCredential credential) {
+  void onCredentialLinked(fb_auth.AuthCredential credential) {
     pp('$mm ... onCredentialLinked: cred: $credential');
   }
 
   @override
-  void onCredentialReceived(AuthCredential credential) {
+  void onCredentialReceived(fb_auth.AuthCredential credential) {
     pp('$mm ... onCredentialReceived: $credential');
   }
 
   @override
   void onDifferentProvidersFound(
-      String email, List<String> providers, AuthCredential? credential) {
+      String email, List<String> providers, fb_auth.AuthCredential? credential) {
     pp('$mm ... onDifferentProvidersFound: ${providers.length} cred: $credential');
   }
 
@@ -492,16 +501,16 @@ class DamnEmailLinkState extends State<DamnEmailLink>
   }
 
   @override
-  void onMFARequired(MultiFactorResolver resolver) {
+  void onMFARequired(fb_auth.MultiFactorResolver resolver) {
     pp('$mm ... onMFARequired');
   }
 
   @override
-  void onSignedIn(UserCredential credential) {
+  void onSignedIn(fb_auth.UserCredential credential) {
     pp('$mm ... onSignedIn cred: $credential');
   }
 
   @override
-  AuthProvider<AuthListener, AuthCredential> get provider =>
+  fbui.AuthProvider<fbui.AuthListener, fb_auth.AuthCredential> get provider =>
       throw UnimplementedError();
 }

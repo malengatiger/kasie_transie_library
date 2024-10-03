@@ -7,8 +7,7 @@ import 'package:kasie_transie_library/utils/initializer.dart';
 
 class InitializerCover extends StatefulWidget {
   const InitializerCover(
-      {Key? key, required this.onInitializationComplete, required this.onError})
-      : super(key: key);
+      {super.key, required this.onInitializationComplete, required this.onError});
 
   final Function onInitializationComplete;
   final Function onError;

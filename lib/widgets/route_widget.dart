@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:badges/badges.dart' as bd;
 
 class RouteWidget extends StatelessWidget {
-  const RouteWidget({Key? key, required this.route}) : super(key: key);
+  const RouteWidget({super.key, required this.route});
 
   final lib.Route route;
 
@@ -24,10 +24,9 @@ class RouteWidget extends StatelessWidget {
   }
 }
 
-class RouteWidgetList extends StatelessWidget {
+class RouteWidgetList extends StatelessWidget  {
   const RouteWidgetList(
-      {Key? key, required this.routes, required this.onRouteSelected})
-      : super(key: key);
+      {super.key, required this.routes, required this.onRouteSelected});
   final List<lib.Route> routes;
   final Function(lib.Route) onRouteSelected;
 

@@ -1,54 +1,39 @@
-
-
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 
-void navigateWithFade(Widget widget, BuildContext context) {
-  Navigator.push(
-    context,
-    PageRouteBuilder(
-      pageBuilder: (_, __, ___) => widget,
-      transitionsBuilder: (_, animation, __, child) {
-        return FadeTransition(
-          opacity: animation,
-          child: child,
-        );
-      },
-    ),
-  );
+class NavigationUtils {
+  static Future navigateToPage({
+    required BuildContext context,
+    required Widget widget,
+    PageTransitionType transitionType = PageTransitionType.scale,
+    Duration transitionDuration = const Duration(milliseconds: 1000)
+  }) async {
+    var result = await Navigator.push(
+      context,
+      PageTransition(
+        type: transitionType,
+        duration: transitionDuration,
+        alignment: Alignment.bottomLeft,
+        child: widget,
+      ),
+    );
+    return result;
+  }
+  static Future navigateTo({
+    required BuildContext context,
+    required Widget widget,
+    required PageTransitionType transitionType,
+    Duration transitionDuration = const Duration(milliseconds: 1000)
+  }) async {
+    var result = await Navigator.push(
+      context,
+      PageTransition(
+        type: transitionType,
+        duration: transitionDuration,
+        alignment: Alignment.bottomLeft,
+        child: widget,
+      ),
+    );
+    return result;
+  }
 }
-Future navigateWithScale(Widget widget, BuildContext context) async {
-  var res = await Navigator.push(
-    context,
-    PageRouteBuilder(
-      pageBuilder: (_, __, ___) => widget,
-      transitionsBuilder: (_, animation, __, child) {
-        return ScaleTransition(
-          scale: animation,
-          child: child,
-        );
-      },
-    ),
-  );
-  return res;
-}
-void navigateWithSlide(Widget widget, BuildContext context) {
-  Navigator.push(
-    context,
-    PageRouteBuilder(
-      pageBuilder: (_, __, ___) => widget,
-      transitionsBuilder: (_, animation, __, child) {
-        const begin = Offset(0.0, 1.0);
-        const end = Offset.zero;
-        const curve = Curves.ease;
-
-        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-        return SlideTransition(
-          position: animation.drive(tween),
-          child: child,
-        );
-      },
-    ),
-  );
-}
-
-

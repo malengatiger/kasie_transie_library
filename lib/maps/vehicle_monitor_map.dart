@@ -2,22 +2,23 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/data/vehicle_bag.dart';
 import 'package:kasie_transie_library/maps/passenger_count_card.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/vehicle_dispatches.dart';
 
+import '../bloc/list_api_dog.dart';
 import '../isolates/routes_isolate.dart';
 import '../messaging/fcm_bloc.dart';
 import '../utils/emojis.dart';
 import '../widgets/counts_widget.dart';
 
 class VehicleMonitorMap extends StatefulWidget {
-  const VehicleMonitorMap({Key? key, required this.vehicle}) : super(key: key);
+  const VehicleMonitorMap({super.key, required this.vehicle});
 
   final lib.Vehicle vehicle;
 
@@ -28,7 +29,7 @@ class VehicleMonitorMap extends StatefulWidget {
 class VehicleMonitorMapState extends State<VehicleMonitorMap>
     with SingleTickerProviderStateMixin {
   final mm = '🍐🍐🍐🍐VehicleMonitorMap 🍐🍐';
-
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
   late AnimationController _controller;
   final Completer<GoogleMapController> _googleMapCompleter = Completer();
   late GoogleMapController googleMapController;
@@ -182,13 +183,8 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
 
   Future<void> _getRoutes() async {
     try {
-      // pp('$mm ..... getRoutesFilteredByAssignments ..');
-      // routes = await listApiDog.getRoutesFilteredByAssignments(
-      //   associationId: widget.vehicle.associationId!,
-      //   vehicleId: widget.vehicle.vehicleId!,
-      // );
-      // if (routes.isEmpty) {
-        pp('$mm ..... getRoutes ..');
+      var routesIsolate = GetIt.instance<RoutesIsolate>();
+      pp('$mm ..... getRoutes ..');
         routes =
             await routesIsolate.getRoutesMappable(widget.vehicle.associationId!, false);
       // }
@@ -213,7 +209,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
 
   Future _putRoutesOnMap(bool zoomTo) async {
     pp('\n\n$mm ... _putRoutesOnMap: number of routes: ${E.blueDot} ${routes.length}');
-
+    var routesIsolate = GetIt.instance<RoutesIsolate>();
     final hash = HashMap<String, List<lib.RoutePoint>>();
     _routeMarkers.clear();
     _polyLines.clear();

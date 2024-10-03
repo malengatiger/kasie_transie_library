@@ -1,23 +1,24 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/bloc/data_api_dog.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
-import 'package:kasie_transie_library/isolates/routes_isolate.dart';
+import 'package:get_it/get_it.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/maps/route_map.dart';
-import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/navigator_utils.dart';
+import 'package:kasie_transie_library/utils/navigator_utils_old.dart';
 import 'package:kasie_transie_library/widgets/drop_down_widgets.dart';
 import 'package:kasie_transie_library/widgets/route_widgets/live_widget.dart';
 import 'package:kasie_transie_library/maps/cluster_maps/live_cluster_map.dart';
 import 'package:kasie_transie_library/widgets/route_widgets/route_activity.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
+import '../../bloc/data_api_dog.dart';
+import '../../bloc/list_api_dog.dart';
 import '../../data/generation_request.dart';
+import '../../isolates/routes_isolate.dart';
+import '../../utils/prefs.dart';
 
 class RouteManager extends StatefulWidget {
   const RouteManager({
@@ -32,7 +33,9 @@ class RouteManager extends StatefulWidget {
 
 class _RouteManagerState extends State<RouteManager> {
   static const mm = '🔵🔵🔵🔵 RouteManager 🔵🔵';
-
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
+  DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
   bool busy = false;
   var routes = <lib.Route>[];
   lib.Route? route;
@@ -79,6 +82,7 @@ class _RouteManagerState extends State<RouteManager> {
   }
 
   Future<void> _filter(List<lib.Route> mRoutes) async {
+    var routesIsolate = GetIt.instance<RoutesIsolate>();
     for (var route in mRoutes) {
       final marks = await routesIsolate.countRouteLandmarks(route.routeId!);
       if (marks > 1) {

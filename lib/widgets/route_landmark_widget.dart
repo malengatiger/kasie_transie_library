@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
-import 'package:kasie_transie_library/providers/kasie_providers.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/navigator_utils.dart';
-import 'package:kasie_transie_library/utils/prefs.dart';
 
 class RouteLandmarkWidget extends StatelessWidget {
-  const RouteLandmarkWidget({Key? key, required this.routeLandmark}) : super(key: key);
+  const RouteLandmarkWidget({super.key, required this.routeLandmark});
 
   final lib.RouteLandmark routeLandmark;
   @override
@@ -23,8 +20,8 @@ class RouteLandmarkWidget extends StatelessWidget {
   }
 }
 
-class RouteLandmarkWidgetList extends StatelessWidget {
-  const RouteLandmarkWidgetList({Key? key, required this.routeLandmarks, required this.onLandmarkSelected}) : super(key: key);
+class RouteLandmarkWidgetList extends StatelessWidget  {
+  const RouteLandmarkWidgetList({super.key, required this.routeLandmarks, required this.onLandmarkSelected});
   final List<lib.RouteLandmark> routeLandmarks;
   final Function(lib.RouteLandmark) onLandmarkSelected;
 

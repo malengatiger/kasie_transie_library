@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/qr_scanner.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/widgets/vehicle_media_handler.dart';
 
+import '../../bloc/list_api_dog.dart';
+
 class ScanVehicleForMedia extends StatefulWidget {
-  const ScanVehicleForMedia({Key? key}) : super(key: key);
+  const ScanVehicleForMedia({super.key});
 
   @override
   ScanVehicleForMediaState createState() => ScanVehicleForMediaState();
@@ -17,6 +20,8 @@ class ScanVehicleForMediaState extends State<ScanVehicleForMedia>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   final mm = '☕️☕️☕️☕️☕️☕️☕️☕️☕️ ScanVehicleForMedia: 🍎🍎';
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
 
   lib.Vehicle? vehicle;
   @override
@@ -53,7 +58,7 @@ class ScanVehicleForMediaState extends State<ScanVehicleForMedia>
 
   void _setTexts() async {
     pp('$mm ... _setTexts ...');
-    final c = await prefs.getColorAndLocale();
+    final c = prefs.getColorAndLocale();
     vehicleMedia = await translator.translate('vehicleMedia', c.locale);
     scanVehicle = await translator.translate('scanVehicle', c.locale);
     scanTheVehicle = await translator.translate('scanTheVehicle', c.locale);
@@ -146,7 +151,7 @@ class ScanVehicleForMediaState extends State<ScanVehicleForMedia>
                           ),
                           ElevatedButton(
                             style: const ButtonStyle(
-                              elevation: MaterialStatePropertyAll(8.0)
+                              elevation: WidgetStatePropertyAll(8.0)
                             ),
                               onPressed: () {
                                 navigateToMediaHandler();

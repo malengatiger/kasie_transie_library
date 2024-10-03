@@ -2,22 +2,26 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lm;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lm;
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/initializer.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+
+import '../data/data_schemas.dart';
 
 
 class QRScanner extends StatefulWidget {
   const QRScanner(
-      {Key? key,
+      {super.key,
       required this.onCarScanned,
       required this.onUserScanned,
-      required this.onError, required this.quitAfterScan, required this.onClear})
-      : super(key: key);
+      required this.onError,
+      required this.quitAfterScan,
+      required this.onClear});
 
   final Function(lm.Vehicle) onCarScanned;
   final Function(lm.User) onUserScanned;
@@ -34,9 +38,11 @@ class QRScannerState extends State<QRScanner>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   final mm = '🌀🌀🌀🌀🌀🌀🌀🌀QRScanner 🍟🍟';
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
 
   Barcode? result;
-  QRViewController? qrViewController;
+
+  // QRViewController? qrViewController;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
 
   lm.Vehicle? vehicle;
@@ -64,41 +70,42 @@ class QRScannerState extends State<QRScanner>
     pp('$mm ......... requesting camera permissionStatus!.isGranted: ${permissionStatus!.isGranted} ...');
     if (permissionStatus!.isGranted) {
       pp('$mm ......... we cool ...');
-
     } else {
       pp('$mm ......... we NOT cool, will request permission  ${E.redDot}...');
       permissionStatus = await Permission.camera.request();
-
     }
     setState(() {});
   }
 
-  void _returnScannedData(dynamic map) async {
+  void _returnScannedData(BarcodeCapture map) async {
     pp('$mm _returnScannedData : ${E.leaf2}${E.leaf2}${E.leaf2}');
 
-
-    qrViewController!.resumeCamera();
+    Vehicle? vehicle;
+    if (map.barcodes.isNotEmpty) {
+      var barcode = map.barcodes[0].rawValue;
+      if (barcode != null) {
+        var json = jsonDecode(barcode);
+        vehicle = Vehicle.fromJson(json);
+      }
+    }
 
     try {
-      final vehicleId = map['vehicleId'];
-      if (vehicleId != null) {
-        final vehicle = await listApiDog.getVehicle(vehicleId);
+      if (vehicle != null) {
+         vehicle = await listApiDog.getVehicle(vehicle.vehicleId!.toString());
         pp('$mm scanned vehicle retrieved from Realm : ${E.redDot}${E.redDot}${E.redDot}');
         myPrettyJsonPrint(vehicle!.toJson());
         widget.onCarScanned(vehicle);
-        if (widget.quitAfterScan) {
-          qrViewController!.pauseCamera();
-        }
+        if (widget.quitAfterScan) {}
 
         return;
       }
-      final userId = map['userId'];
-      if (userId != null) {
-        // vehicle = await listApiDog.getVehicle(vehicleId);
-        // pp('$mm scanned vehicle retrieved from Realm : ${E.redDot}${E.redDot}${E.redDot}');
-        // myPrettyJsonPrint(vehicle!.toJson());
-        return;
-      }
+      // final userId = map['userId'];
+      // if (userId != null) {
+      //   // vehicle = await listApiDog.getVehicle(vehicleId);
+      //   // pp('$mm scanned vehicle retrieved from Realm : ${E.redDot}${E.redDot}${E.redDot}');
+      //   // myPrettyJsonPrint(vehicle!.toJson());
+      //   return;
+      // }
     } catch (e) {
       pp(e);
     }
@@ -106,72 +113,14 @@ class QRScannerState extends State<QRScanner>
     widget.onError();
   }
 
-  Widget _buildQrView(BuildContext context) {
-    pp('$mm _buildQrView ... get qr widget');
-
-    return  GestureDetector(
-      onTap: (){
-        pp('$mm ............ scanner tapped!');
-        widget.onClear();
-        qrViewController?.resumeCamera();
-      },
-      child: Container(color: Colors.black,
-              width: 300,
-              height: 300,
-              child: QRView(
-                key: qrKey,
-                onQRViewCreated: _onQRViewCreated,
-                overlay: QrScannerOverlayShape(
-                    borderColor: Theme.of(context).primaryColor,
-                    borderRadius: 16,
-                    borderLength: 30,
-                    borderWidth: 16,
-                    cutOutSize: 300),
-                onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
-              ),
-            ),
-    );
-
-  }
-
-  void _onQRViewCreated(QRViewController controller) {
-    pp('$mm _onQRViewCreated ..............');
-    setState(() {
-      qrViewController = controller;
-    });
-    pp('$mm scannedDataStream.listen ...............');
-    controller.scannedDataStream.listen((scanData) {
-      pp('$mm scannedDataStream delivered scanned data ${scanData.code}');
-      if (scanData.code != null) {
-        try {
-          var m = jsonDecode(scanData.code!);
-          controller.pauseCamera();
-          _returnScannedData(m);
-        } catch (e) {
-          pp(e);
-        }
-      }
-      setState(() {
-        result = scanData;
-      });
-    });
-  }
-
-  void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
-    pp('$mm _onPermissionSet ................ $p ');
-    if (!p) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('no Permission')),
-      );
-    }
-  }
-
   @override
   void dispose() {
     _controller.dispose();
-    qrViewController?.dispose();
     super.dispose();
   }
+
+  final MobileScannerController mobileScannerController =
+      MobileScannerController();
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +132,20 @@ class QRScannerState extends State<QRScanner>
     return SizedBox(
       width: 300,
       height: 300,
-      child: _buildQrView(context),
+      child: MobileScanner(
+        controller: mobileScannerController,
+        onDetect: (barcodeCapture) {
+          pp('barcodeCapture ${barcodeCapture.toString()}');
+          _returnScannedData(barcodeCapture);
+        },
+        errorBuilder: (context, exception, widget) {
+          pp('we fell down, Boss! ...');
+          return const Text('Fuck!');
+        },
+        overlayBuilder: (context, constraints) {
+          return const Text('What is Overlay??');
+        },
+      ),
     );
   }
 }

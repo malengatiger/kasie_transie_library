@@ -4,7 +4,7 @@ import '../../utils/functions.dart';
 
 class SignInLanding extends StatelessWidget {
   const SignInLanding(
-      {Key? key,
+      {super.key,
       required this.welcome,
       required this.firstTime,
       required this.changeLanguage,
@@ -12,14 +12,16 @@ class SignInLanding extends StatelessWidget {
       required this.startEmailLinkSignin,
       required this.onNavigateToEmailAuth,
       required this.onNavigateToPhoneAuth,
-      required this.onNavigateToColor})
-      : super(key: key);
+      required this.onNavigateToColor,
+      required this.signInWithEmail});
 
   final String welcome,
       firstTime,
       changeLanguage,
       signInWithPhone,
+      signInWithEmail,
       startEmailLinkSignin;
+
   final Function onNavigateToEmailAuth,
       onNavigateToPhoneAuth,
       onNavigateToColor;
@@ -29,10 +31,10 @@ class SignInLanding extends StatelessWidget {
     return Column(
       children: [
         SizedBox(
-            width: 64,
-            height: 64,
+            width: 340,
+            height: 300,
             child: Image.asset(
-              'assets/gio.png',
+              'assets/ktlogo_red.png',
             )),
         const SizedBox(
           height: 64,
@@ -40,7 +42,7 @@ class SignInLanding extends StatelessWidget {
         Text(
           welcome,
           style: myTextStyleMediumLargeWithColor(
-              context, Theme.of(context).primaryColorLight, 40),
+              context, Theme.of(context).primaryColorLight, 48),
         ),
         const SizedBox(
           height: 16,
@@ -59,9 +61,9 @@ class SignInLanding extends StatelessWidget {
           width: 240,
           child: ElevatedButton(
             style: ButtonStyle(
-              elevation: const MaterialStatePropertyAll(4.0),
+              elevation: const WidgetStatePropertyAll(4.0),
               backgroundColor:
-                  MaterialStatePropertyAll(Theme.of(context).primaryColorLight),
+                  WidgetStatePropertyAll(Theme.of(context).primaryColorLight),
             ),
             onPressed: () {
               onNavigateToColor();
@@ -84,9 +86,9 @@ class SignInLanding extends StatelessWidget {
                 onNavigateToPhoneAuth();
               },
               style: ButtonStyle(
-                elevation: const MaterialStatePropertyAll(8.0),
+                elevation: const WidgetStatePropertyAll(8.0),
                 backgroundColor:
-                    MaterialStatePropertyAll(Theme.of(context).primaryColor),
+                    WidgetStatePropertyAll(Theme.of(context).primaryColor),
               ),
               label: Padding(
                 padding: const EdgeInsets.all(24.0),
@@ -99,6 +101,26 @@ class SignInLanding extends StatelessWidget {
         ),
         const SizedBox(
           height: 32,
+        ),
+        SizedBox(
+          width: 320,
+          child: ElevatedButton.icon(
+              onPressed: () {
+                onNavigateToEmailAuth();
+              },
+              style: ButtonStyle(
+                elevation: const WidgetStatePropertyAll(8.0),
+                backgroundColor:
+                    WidgetStatePropertyAll(Theme.of(context).primaryColor),
+              ),
+              label: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Text(
+                  'Sign In With Your Email',
+                  style: myTextStyleSmallBlack(context),
+                ),
+              ),
+              icon: const Icon(Icons.email)),
         ),
         Container(
           color: Theme.of(context).primaryColorLight,

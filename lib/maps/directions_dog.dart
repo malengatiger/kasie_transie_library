@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart' as dot;
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import '../bloc/app_auth.dart';
 import '../utils/emojis.dart';
@@ -19,6 +20,7 @@ class DirectionsDog {
   final urlPrefix = 'https://maps.googleapis.com/maps/api/directions/json?';
   final mm = ' 😡😡😡 DirectionsDog 😡😡😡';
   final http.Client client = http.Client();
+  ErrorHandler errorHandler = GetIt.instance<ErrorHandler>();
 
   Future getDirections({required double originLat, required double originLng,
     required double destinationLat, required double destinationLng}) async {

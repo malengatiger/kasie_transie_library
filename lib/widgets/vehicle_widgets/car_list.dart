@@ -1,20 +1,22 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lm;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lm;
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:badges/badges.dart' as bd;
-import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/car_details.dart';
 import 'package:kasie_transie_library/widgets/scanners/scan_vehicle_for_owner.dart';
+import 'package:page_transition/page_transition.dart';
 
 import '../../l10n/translation_handler.dart';
+import '../../utils/navigator_utils.dart';
 import '../../utils/prefs.dart';
 
 class CarList extends StatefulWidget {
-  const CarList({Key? key, this.associationId, this.ownerId}) : super(key: key);
+  const CarList({super.key, this.associationId, this.ownerId});
 
   final String? associationId, ownerId;
 
@@ -22,9 +24,11 @@ class CarList extends StatefulWidget {
   CarListState createState() => CarListState();
 }
 
-class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
+class CarListState extends State<CarList>
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   late AnimationController _controller;
   final mm = '🌎🌎🌎🌎🌎🌎CarList 🍐🍐';
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
 
   bool busy = false;
   var cars = <lm.Vehicle>[];
@@ -141,16 +145,20 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
   }
 
   String? search, searchVehicles, vehicles;
+  Prefs prefs = GetIt.instance<Prefs>();
+
   Future _setTexts() async {
-    final col = await prefs.getColorAndLocale();
+    final col = prefs.getColorAndLocale();
     search = await translator.translate("search", col.locale);
     searchVehicles = await translator.translate("search", col.locale);
     vehicles = await translator.translate("vehicles", col.locale);
   }
 
   void _navigateToScanner() async {
-
-    navigateWithSlide(const ScanVehicleForOwner(), context);
+    NavigationUtils.navigateTo(
+        context: context,
+        widget: const ScanVehicleForOwner(),
+        transitionType: PageTransitionType.leftToRight);
   }
 
   @override
@@ -179,15 +187,21 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
                     onPressed: () {
                       _getVehicles(true);
                     },
-                    icon:  Icon(Icons.refresh, color: Theme.of(context).primaryColor,)),
+                    icon: Icon(
+                      Icons.refresh,
+                      color: Theme.of(context).primaryColor,
+                    )),
                 IconButton(
                     onPressed: () {
                       _navigateToScanner();
                     },
-                    icon:  Icon(Icons.airport_shuttle, color: Theme.of(context).primaryColor,))
-
+                    icon: Icon(
+                      Icons.airport_shuttle,
+                      color: Theme.of(context).primaryColor,
+                    ))
               ],
-              bottom: const PreferredSize(preferredSize: Size.fromHeight(48), child: Column()),
+              bottom: const PreferredSize(
+                  preferredSize: Size.fromHeight(48), child: Column()),
             ),
             body: Stack(
               children: [
@@ -203,84 +217,94 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
                         ),
                       )
                     : Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            height: _showSearch ? 100 : 8,
-                          ),
-                          cars.isEmpty
-                              ? Center(
-                                  child: SizedBox(height: 120,
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          'No cars found',
-                                          style: myTextStyleMediumLargeWithColor(
-                                              context,
-                                              Theme.of(context).primaryColorLight,
-                                              24),
-                                        ),
-                                        const SizedBox(height: 32,),
-                                        SizedBox(width: 320,
-                                          child: ElevatedButton.icon(onPressed: (){
-                                            _navigateToScanner();
-                                          }, icon: const Icon(Icons.airport_shuttle),
-                                              label: const Padding(
-                                                padding: EdgeInsets.all(16.0),
-                                                child: Text('Scan Vehicle'),
-                                              )),
-                                        ),
-                                      ],
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              height: _showSearch ? 100 : 8,
+                            ),
+                            cars.isEmpty
+                                ? Center(
+                                    child: SizedBox(
+                                      height: 120,
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            'No cars found',
+                                            style:
+                                                myTextStyleMediumLargeWithColor(
+                                                    context,
+                                                    Theme.of(context)
+                                                        .primaryColorLight,
+                                                    24),
+                                          ),
+                                          const SizedBox(
+                                            height: 32,
+                                          ),
+                                          SizedBox(
+                                            width: 320,
+                                            child: ElevatedButton.icon(
+                                                onPressed: () {
+                                                  _navigateToScanner();
+                                                },
+                                                icon: const Icon(
+                                                    Icons.airport_shuttle),
+                                                label: const Padding(
+                                                  padding: EdgeInsets.all(16.0),
+                                                  child: Text('Scan Vehicle'),
+                                                )),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                )
-                              : Expanded(
-                                  child: bd.Badge(
-                                    badgeContent: Text('${cars.length}'),
-                                    badgeStyle: bd.BadgeStyle(
-                                        badgeColor: Colors.green[900]!,
-                                        padding: const EdgeInsets.all(12)),
-                                    child: ListView.builder(
-                                        itemCount: carsToDisplay.length,
-                                        itemBuilder: (ctx, index) {
-                                          final car = carsToDisplay
-                                              .elementAt(index);
-                                          return GestureDetector(
-                                            onTap: () {
-                                              _onCarSelected(car);
-                                            },
-                                            child: Card(
-                                              shape: getRoundedBorder(
-                                                  radius: 16),
-                                              elevation: 4,
-                                              child: ListTile(
-                                                title: Text(
-                                                  '${car.vehicleReg}',
-                                                  style:
-                                                      myTextStyleMediumBold(
-                                                          context),
-                                                ),
-                                                subtitle: Text(
-                                                  '${car.make} ${car.model} - ${car.year}',
-                                                  style: myTextStyleSmall(
-                                                      context),
-                                                ),
-                                                leading: Icon(
-                                                  Icons.airport_shuttle,
-                                                  color: Theme.of(context)
-                                                      .primaryColor,
+                                  )
+                                : Expanded(
+                                    child: bd.Badge(
+                                      badgeContent: Text('${cars.length}'),
+                                      badgeStyle: bd.BadgeStyle(
+                                          badgeColor: Colors.green[900]!,
+                                          padding: const EdgeInsets.all(12)),
+                                      child: ListView.builder(
+                                          itemCount: carsToDisplay.length,
+                                          itemBuilder: (ctx, index) {
+                                            final car =
+                                                carsToDisplay.elementAt(index);
+                                            return GestureDetector(
+                                              onTap: () {
+                                                _onCarSelected(car);
+                                              },
+                                              child: Card(
+                                                shape: getRoundedBorder(
+                                                    radius: 16),
+                                                elevation: 4,
+                                                child: ListTile(
+                                                  title: Text(
+                                                    '${car.vehicleReg}',
+                                                    style:
+                                                        myTextStyleMediumBold(
+                                                            context),
+                                                  ),
+                                                  subtitle: Text(
+                                                    '${car.make} ${car.model} - ${car.year}',
+                                                    style: myTextStyleSmall(
+                                                        context),
+                                                  ),
+                                                  leading: Icon(
+                                                    Icons.airport_shuttle,
+                                                    color: Theme.of(context)
+                                                        .primaryColor,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          );
-                                        }),
-                                  ),
-                                )
-                        ],
+                                            );
+                                          }),
+                                    ),
+                                  )
+                          ],
+                        ),
                       ),
-                    ),
                 showCarDetails
                     ? Positioned(
                         top: -48,
@@ -355,20 +379,28 @@ class CarListState extends State<CarList> with SingleTickerProviderStateMixin {
               ],
             )));
   }
+
   void _navigateToCarDetails() {
     if (car == null) {
       return;
     }
-    navigateWithScale(CarDetails(
-      vehicle: car!,
-      onClose: () {
-        setState(() {
-          showCarDetails = false;
-          if (cars.length > 19) {
-            _showSearch = true;
-          }
-        });
-      },
-    ), context);
+    NavigationUtils.navigateTo(
+        context: context,
+        widget: CarDetails(
+          vehicle: car!,
+          onClose: () {
+            setState(() {
+              showCarDetails = false;
+              if (cars.length > 19) {
+                _showSearch = true;
+              }
+            });
+          },
+        ),
+        transitionType: PageTransitionType.leftToRight);
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

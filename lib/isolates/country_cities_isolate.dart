@@ -5,11 +5,9 @@ import 'dart:isolate';
 
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/app_auth.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
-import 'package:kasie_transie_library/utils/parsers.dart';
 
+import '../data/data_schemas.dart';
 import '../utils/functions.dart';
 import '../utils/kasie_exception.dart';
 
@@ -30,13 +28,10 @@ class CountryCitiesIsolate {
       final list = jsonDecode(jsonList);
       var mCities = <City>[];
       for (var value in list) {
-        mCities.add(buildCity(value));
+        mCities.add(City.fromJson(value));
       }
       pp('$xy before caching to realm, cities from backend : 💙 ${mCities.length}  💙');
 
-      listApiDog.realm.write(() {
-        listApiDog.realm.addAll<City>(mCities, update: true);
-      });
 
       final end = DateTime.now();
       pp('\n\n$xy should have cached ${mCities.length} cities in Realm; elapsed time: '

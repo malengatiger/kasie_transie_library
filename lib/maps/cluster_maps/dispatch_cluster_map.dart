@@ -1,28 +1,26 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/isolates/routes_isolate.dart';
+import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart' as cl;
 import 'package:kasie_transie_library/maps/cluster_maps/toggle.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 
+import '../../bloc/list_api_dog.dart';
+import '../../isolates/routes_isolate.dart';
 import '../../messaging/fcm_bloc.dart';
 import 'cluster_covers.dart';
 
 class DispatchClusterMap extends StatefulWidget {
   const DispatchClusterMap(
-      {Key? key,
+      {super.key,
       required this.dispatchRecordCovers,
       required this.date,
-      required this.commuterRequestCovers})
-      : super(key: key);
+      required this.commuterRequestCovers});
 
   final List<DispatchRecordCover> dispatchRecordCovers;
   final List<CommuterRequestCover> commuterRequestCovers;
@@ -39,6 +37,7 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
   late AnimationController _controller;
   final Completer<GoogleMapController> _googleMapController = Completer();
   final mm = '🍐🍐🍐🍐DispatchClusterMap 🍐🍐';
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
 
   var dispatches = <lib.DispatchRecord>[];
   var requests = <lib.CommuterRequest>[];
@@ -58,8 +57,8 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
   Set<Marker> markers = {};
   Set<Marker> markers2 = {};
 
-  late ClusterManager clusterManager;
-  late ClusterManager clusterManager2;
+  late cl.ClusterManager clusterManager;
+  late cl.ClusterManager clusterManager2;
 
   final CameraPosition _parisCameraPosition =
       const CameraPosition(target: LatLng(-27.856613, 25.352222), zoom: 14.0);
@@ -165,18 +164,18 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
     setState(() {});
   }
 
-  ClusterManager<ClusterItem> _initClusterManager() {
+  cl.ClusterManager<cl.ClusterItem> _initClusterManager() {
     pp('$mm ......... _initClusterManager, ${E.appleRed} items: ${widget.dispatchRecordCovers.length}');
-    clusterManager = ClusterManager<DispatchRecordCover>(
+    clusterManager = cl.ClusterManager<DispatchRecordCover>(
         widget.dispatchRecordCovers, _updateMarkers,
         markerBuilder: _markerBuilder);
 
     return clusterManager;
   }
 
-  ClusterManager<ClusterItem> _initClusterManager2() {
+  cl.ClusterManager<cl.ClusterItem> _initClusterManager2() {
     pp('$mm ......... _initClusterManager2, ${E.appleRed} items: ${widget.commuterRequestCovers.length}');
-    clusterManager2 = ClusterManager<CommuterRequestCover>(
+    clusterManager2 = cl.ClusterManager<CommuterRequestCover>(
         widget.commuterRequestCovers, _updateMarkers2,
         markerBuilder: _markerBuilder2);
 
@@ -199,75 +198,59 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
     setState(() {});
   }
 
-  Future<Marker> Function(Cluster<DispatchRecordCover>) get _markerBuilder =>
-      (cluster) async {
-
-        var mSize = 100;
-        mSize = _getRequestSize(cluster, mSize);
+  Future<Marker> Function(dynamic) get _markerBuilder =>
+          (cluster) async {
         var size = cluster.isMultiple ? 125.0 : 75.0;
         var text = cluster.isMultiple ? cluster.count.toString() : "1";
         final ic = await getMarkerBitmap(
-          mSize.toInt(),
+          size.toInt(),
           text: text,
-          color: 'teal',
+          color: 'indigo',
           borderColor: Colors.white,
           fontWeight: FontWeight.normal,
-          fontSize: mSize / 3,
+          fontSize: size / 3,
         );
         return Marker(
           markerId: MarkerId(cluster.getId()),
-          position: cluster.location,
+          position: cluster.location, // Use cluster.location instead of cluster.items[0].latLng
           onTap: () {
             pp('$mm ---- cluster? ${E.redDot} $cluster');
-            final list = <lib.DispatchRecord>[];
             for (var p in cluster.items) {
-              list.add(p.dispatchRecord);
-            }
-            list.sort((a, b) => a.vehicleReg!.compareTo(b.vehicleReg!));
-            for (var p in list) {
-              pp('$mm ... DispatchRecordCover - cluster item: ${E.appleRed} '
-                  '${p.vehicleReg} ${p.landmarkName}'
-                  '${E.leaf} route: ${p.routeName} date: ${getFormattedDateLong(p.created!)}');
+              pp('$mm ... VehicleArrivalCover - cluster item: ${E.appleRed} '
+                  '${p.arrival.vehicleReg} - ${p.arrival.landmarkName} - ${p.arrival.created}');
             }
           },
           icon: ic,
         );
       };
 
-  Future<Marker> Function(Cluster<CommuterRequestCover>) get _markerBuilder2 =>
-      (cluster) async {
-        var mSize = 100;
-        mSize = _getSize(cluster, mSize);
-        // var size = cluster.isMultiple ? 125.0 : 75.0;
+  Future<Marker> Function(dynamic) get _markerBuilder2 =>
+          (cluster) async {
+        var size = cluster.isMultiple ? 125.0 : 75.0;
         var text = cluster.isMultiple ? cluster.count.toString() : "1";
         final ic = await getMarkerBitmap(
-          mSize.toInt(),
+          size.toInt(),
           text: text,
-          color: 'pink',
+          color: 'indigo',
           borderColor: Colors.white,
           fontWeight: FontWeight.normal,
-          fontSize: mSize / 3,
+          fontSize: size / 3,
         );
         return Marker(
           markerId: MarkerId(cluster.getId()),
-          position: cluster.location,
+          position: cluster.location, // Use cluster.location instead of cluster.items[0].latLng
           onTap: () {
             pp('$mm ---- cluster? ${E.redDot} $cluster');
-            final list = <lib.CommuterRequest>[];
             for (var p in cluster.items) {
-              list.add(p.request);
-            }
-            for (var p in list) {
-              pp('$mm ... CommuterRequest - cluster item: ${E.appleRed} '
-                  '${getFormattedDateLong(p.dateRequested!)} roue: ${p.routeName}'
-                  '${E.leaf} ');
+              pp('$mm ... VehicleArrivalCover - cluster item: ${E.appleRed} '
+                  '${p.arrival.vehicleReg} - ${p.arrival.landmarkName} - ${p.arrival.created}');
             }
           },
           icon: ic,
         );
       };
 
-  int _getSize(Cluster<CommuterRequestCover> cluster, int mSize) {
+  int _getSize(cl.Cluster<CommuterRequestCover> cluster, int mSize) {
     if (cluster.items.length > 100) {
       mSize = 128;
     } else if (cluster.items.length > 50) {
@@ -277,7 +260,7 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
     }
     return mSize;
   }
-  int _getRequestSize(Cluster<DispatchRecordCover> cluster, int mSize) {
+  int _getRequestSize(cl.Cluster<DispatchRecordCover> cluster, int mSize) {
     if (cluster.items.length > 100) {
       mSize = 128;
     } else if (cluster.items.length > 50) {
@@ -300,6 +283,8 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
   }
 
   Future<void> _buildRoutes() async {
+    var routesIsolate = GetIt.instance<RoutesIsolate>();
+
     for (var r in routes) {
       final latLngs = <LatLng>[];
       final rps = await routesIsolate.getRoutePoints(r.routeId!, false);
@@ -332,6 +317,8 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
 
   Future<Set<Marker>> _buildRouteLandmarks() async {
     Set<Marker> mMarkers = {};
+    var routesIsolate = GetIt.instance<RoutesIsolate>();
+
     for (var r in routes) {
       final rps = await routesIsolate.getRouteLandmarksCached(r.routeId!);
       int index = 0;

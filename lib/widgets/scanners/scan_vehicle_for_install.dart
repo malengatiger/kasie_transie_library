@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/bloc/data_api_dog.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/qr_scanner.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
-import 'package:kasie_transie_library/widgets/vehicle_media_handler.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 
-import '../../utils/emojis.dart';
+import '../../bloc/list_api_dog.dart';
+
 
 class ScanVehicleForInstall extends StatefulWidget {
-  const ScanVehicleForInstall({Key? key}) : super(key: key);
+  const ScanVehicleForInstall({super.key});
 
   @override
   ScanVehicleForInstallState createState() => ScanVehicleForInstallState();
@@ -21,6 +20,8 @@ class ScanVehicleForInstallState extends State<ScanVehicleForInstall>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   final mm = '☕️☕️☕️☕️☕️☕️☕️ ScanVehicleForInstall: 🍎🍎';
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
 
   lib.Vehicle? vehicle;
   bool busy = false;
@@ -56,7 +57,7 @@ class ScanVehicleForInstallState extends State<ScanVehicleForInstall>
   void onError() {}
   void _setTexts() async {
     pp('$mm ... _setTexts ...');
-    final c = await prefs.getColorAndLocale();
+    final c = prefs.getColorAndLocale();
     vehicleMedia = await translator.translate('vehicleMedia', c.locale);
     scanVehicle = await translator.translate('scanVehicle', c.locale);
     scanTheVehicle = await translator.translate('scanTheVehicle', c.locale);

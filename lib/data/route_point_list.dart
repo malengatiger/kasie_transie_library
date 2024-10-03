@@ -1,17 +1,17 @@
-import 'package:kasie_transie_library/data/schemas.dart';
+
+import 'package:json_annotation/json_annotation.dart';
+
+import 'data_schemas.dart';
+part 'route_point_list.g.dart';
+
+@JsonSerializable()
 
 class RoutePointList {
   List<RoutePoint> routePoints = [];
 
   RoutePointList(this.routePoints);
-  Map<String,dynamic> toJson() {
-    List mList = [];
-    for (var rp in routePoints) {
-      mList.add(rp.toJson());
-    }
-    Map<String, dynamic> map = {
-      'routePoints': mList,
-    };
-    return map;
-  }
+  factory RoutePointList.fromJson(Map<String, dynamic> json) =>
+      _$RoutePointListFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RoutePointListToJson(this);
 }

@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/maps/cluster_maps/arrivals_cluster_map.dart';
 import 'package:kasie_transie_library/maps/cluster_maps/cluster_covers.dart';
 import 'package:kasie_transie_library/maps/cluster_maps/commuter_cluster_map.dart';
 import 'package:kasie_transie_library/maps/cluster_maps/dispatch_cluster_map.dart';
 import 'package:kasie_transie_library/maps/cluster_maps/passenger_count_cluster_map.dart';
-import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/navigator_utils.dart';
-import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:kasie_transie_library/widgets/vehicle_passenger_count.dart';
+import 'package:kasie_transie_library/utils/navigator_utils_old.dart';
 
 import 'package:badges/badges.dart' as bd;
 
+import '../../bloc/list_api_dog.dart';
 import '../../isolates/routes_isolate.dart';
+import '../../utils/prefs.dart';
 import '../../widgets/drop_down_widgets.dart';
 
 class ClusterMapController extends StatefulWidget {
@@ -25,7 +24,7 @@ class ClusterMapController extends StatefulWidget {
   State<ClusterMapController> createState() => ClusterMapControllerState();
 }
 
-class ClusterMapControllerState extends State<ClusterMapController> {
+class ClusterMapControllerState extends State<ClusterMapController> with AutomaticKeepAliveClientMixin{
   final mm = '🍐🍐🍐🍐ClusterMapController 🍐🍐';
 
   var routes = <lib.Route>[];
@@ -49,6 +48,9 @@ class ClusterMapControllerState extends State<ClusterMapController> {
   bool busy = false;
   lib.Association? association;
   String? date;
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
+
 
   @override
   void initState() {
@@ -56,6 +58,7 @@ class ClusterMapControllerState extends State<ClusterMapController> {
     _getAssociationRouteData(true);
   }
   Future<void> _filter(List<lib.Route> mRoutes) async {
+    var routesIsolate = GetIt.instance<RoutesIsolate>();
     for (var route in mRoutes) {
       final marks = await routesIsolate.countRouteLandmarks(route.routeId!);
       if (marks > 1) {
@@ -68,7 +71,7 @@ class ClusterMapControllerState extends State<ClusterMapController> {
   void _getAssociationRouteData(bool refresh) async {
     pp('$mm ... _getAssociationRouteData; refresh: $refresh');
 
-    association = await prefs.getAssociation();
+    association = prefs.getAssociation();
     date = DateTime.now()
         .toUtc()
         .subtract(Duration(hours: hours))
@@ -404,7 +407,7 @@ class ClusterMapControllerState extends State<ClusterMapController> {
                           width:  type == 'phone'?280:320,
                           child: ElevatedButton.icon(
                               style: const ButtonStyle(
-                                elevation: MaterialStatePropertyAll(12.0),
+                                elevation: WidgetStatePropertyAll(12.0),
                               ),
                               onPressed: () {
                                 _navigateToAssociationMap();
@@ -690,4 +693,7 @@ class ClusterMapControllerState extends State<ClusterMapController> {
       ),
     ));
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

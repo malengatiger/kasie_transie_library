@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:get_it/get_it.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
@@ -13,12 +14,11 @@ import 'color_pad.dart';
 
 class RouteInfoWidget extends StatefulWidget {
   const RouteInfoWidget(
-      {Key? key,
+      {super.key,
       required this.routeId,
       required this.onClose,
       required this.onNavigateToMapViewer,
-      required this.onColorChanged})
-      : super(key: key);
+      required this.onColorChanged});
   final String? routeId;
   final Function onClose;
   final Function onNavigateToMapViewer;
@@ -34,6 +34,8 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
   var numberOfPoints = 0;
   var numberOfLandmarks = 0;
   late StreamSubscription<String> sub;
+  Prefs prefs = GetIt.instance<Prefs>();
+
   bool busy = true;
   String routePointsMapped = '',
       routeLandmarks = '',
@@ -52,7 +54,7 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
   }
 
   void _setTexts() async {
-    final c = await prefs.getColorAndLocale();
+    final c = prefs.getColorAndLocale();
     final loc = c.locale;
     routePointsMapped = await translator.translate('routePointsMapped', loc);
     routeLandmarks = await translator.translate('routeLandmarks', loc);
@@ -236,13 +238,12 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
 
 class Header extends StatelessWidget {
   const Header(
-      {Key? key,
+      {super.key,
       required this.onClose,
       required this.routeName,
       required this.fontSize,
       required this.routeDetails,
-      required this.onNavigateToMapViewer})
-      : super(key: key);
+      required this.onNavigateToMapViewer});
 
   final Function onClose;
   final Function onNavigateToMapViewer;
@@ -310,7 +311,7 @@ class Header extends StatelessWidget {
 
 class DetailsWidget extends StatelessWidget {
   const DetailsWidget(
-      {Key? key,
+      {super.key,
       required this.route,
       required this.numberOfLandmarks,
       required this.numberOfPoints,
@@ -321,8 +322,7 @@ class DetailsWidget extends StatelessWidget {
       required this.routePointsMapped,
       required this.routeDetails,
       required this.onNavigateToMapViewer,
-      required this.onColorChanged})
-      : super(key: key);
+      required this.onColorChanged});
 
   final lib.Route route;
   final int numberOfLandmarks, numberOfPoints;
@@ -360,7 +360,7 @@ class DetailsWidget extends StatelessWidget {
             onNavigateToMapViewer();
           },
         ),
-        Text(getFormattedDateLong(route!.created!)),
+        Text(getFormattedDateLong(route.created!)),
         const SizedBox(
           height: 8,
         ),

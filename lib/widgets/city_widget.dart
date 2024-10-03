@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/functions.dart';
 
 class CityWidget extends StatelessWidget {
-  const CityWidget({Key? key, this.city, required this.title})
-      : super(key: key);
+  const CityWidget({super.key, this.city, required this.title});
   final lib.City? city;
   final String title;
 

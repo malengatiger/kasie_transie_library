@@ -5,7 +5,7 @@ import '../utils/functions.dart';
 
 class VideoControls extends StatelessWidget {
   const VideoControls(
-      {Key? key,
+      {super.key,
         required this.onRecord,
         required this.onPlay,
         required this.onPause,
@@ -14,8 +14,7 @@ class VideoControls extends StatelessWidget {
         required this.isPaused,
         required this.isStopped,
         required this.isRecording,
-        required this.onClose})
-      : super(key: key);
+        required this.onClose});
   final Function onPlay;
   final Function onPause;
   final Function onStop;

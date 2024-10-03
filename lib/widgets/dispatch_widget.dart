@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:badges/badges.dart' as bd;
 
 class DispatchWidget extends StatelessWidget {
-  const DispatchWidget({Key? key, required this.dispatchRecord})
-      : super(key: key);
+  const DispatchWidget({super.key, required this.dispatchRecord});
 
   final lib.DispatchRecord dispatchRecord;
 
@@ -30,10 +29,9 @@ class DispatchWidget extends StatelessWidget {
 
 class DispatchWidgetList extends StatelessWidget {
   const DispatchWidgetList(
-      {Key? key,
+      {super.key,
       required this.dispatchRecords,
-      required this.onDispatchRecordSelected})
-      : super(key: key);
+      required this.onDispatchRecordSelected});
   final List<lib.DispatchRecord> dispatchRecords;
   final Function(lib.DispatchRecord) onDispatchRecordSelected;
 

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/navigator_utils.dart';
+import 'package:kasie_transie_library/utils/navigator_utils_old.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/qr_scanner.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
-import 'package:kasie_transie_library/widgets/scanners/qr_scanner_mobile.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/widgets/vehicle_media_handler.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../utils/emojis.dart';
 
 class ScanVehicleForOwner extends StatefulWidget {
-  const ScanVehicleForOwner({Key? key}) : super(key: key);
+  const ScanVehicleForOwner({super.key});
 
   @override
   ScanVehicleForOwnerState createState() => ScanVehicleForOwnerState();
@@ -24,6 +24,9 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   final mm = '☕️☕️☕️☕️☕️☕️☕️☕️☕️ ScanVehicleForOwner: 🍎🍎';
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
+  DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
 
   lib.Vehicle? vehicle;
   bool busy = false;
@@ -73,10 +76,9 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
       busy = true;
     });
     try {
-      final user = await prefs.getUser();
+      final user = prefs.getUser();
       if (user != null && vehicle != null) {
         final updatedVehicle = lib.Vehicle(
-          vehicle!.id,
           vehicleId: vehicle!.vehicleId,
           vehicleReg: vehicle!.vehicleReg,
           associationId: vehicle!.associationId,
@@ -95,7 +97,7 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
         pp('$mm updated owner vehicle ${E.redDot}');
         myPrettyJsonPrint(updatedVehicle.toJson());
         vehicle = await dataApiDog.updateVehicle(updatedVehicle);
-        listApiDog.getOwnerVehicles(user!.userId!, true);
+        listApiDog.getOwnerVehicles(user.userId!, true);
         pp('$mm ... updatedCar ... vehicle: ${vehicle!.vehicleReg!}');
       }
       if (mounted) {
@@ -133,7 +135,7 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
 
   void _setTexts() async {
     pp('$mm ... _setTexts ...');
-    final c = await prefs.getColorAndLocale();
+    final c = prefs.getColorAndLocale();
     vehicleMedia = await translator.translate('vehicleMedia', c.locale);
     scanVehicle = await translator.translate('scanVehicle', c.locale);
     scanTheVehicle = await translator.translate('scanTheVehicle', c.locale);
@@ -252,7 +254,7 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
                                 : ElevatedButton(
                                     style: const ButtonStyle(
                                         elevation:
-                                            MaterialStatePropertyAll(8.0)),
+                                            WidgetStatePropertyAll(8.0)),
                                     onPressed: () {
                                       updateCar();
                                     },
@@ -267,7 +269,7 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
                             ),
                             ElevatedButton(
                                 style: const ButtonStyle(
-                                    elevation: MaterialStatePropertyAll(8.0)),
+                                    elevation: WidgetStatePropertyAll(8.0)),
                                 onPressed: () {
                                   navigateToMedia();
                                 },

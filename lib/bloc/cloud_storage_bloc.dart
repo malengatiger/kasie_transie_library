@@ -4,17 +4,15 @@ import 'dart:math';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:kasie_transie_library/bloc/data_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:realm/realm.dart';
-
+import 'package:uuid/uuid.dart';
 import '../utils/device_location_bloc.dart';
 import '../utils/functions.dart';
+import 'data_api_dog.dart';
 
-final CloudStorageBloc cloudStorageBloc = CloudStorageBloc();
 const photoStorageName = 'kasieTransiePhotos';
 const videoStorageName = 'kasieTransieVideos';
 
@@ -22,6 +20,12 @@ class CloudStorageBloc {
   final FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
   Random rand = Random(DateTime.now().millisecondsSinceEpoch);
   static const mm = '☕️☕️☕️☕️☕️☕️ CloudStorageBloc: 💚💚 ';
+
+ final DataApiDog dataApiDog;
+ final Prefs prefs;
+
+
+  CloudStorageBloc(this.dataApiDog, this.prefs);
 
   final StreamController<lib.VehiclePhoto> _photoStreamController =
       StreamController.broadcast();
@@ -45,7 +49,7 @@ class CloudStorageBloc {
     pp('\n$mm adding photo data to the database ...o');
     try {
       pp('$mm adding photo ..... 😡😡 😡😡');
-      final user = await prefs.getUser();
+      final user = prefs.getUser();
 
       final urls = await _doTheUpload(
           file: file,
@@ -54,22 +58,21 @@ class CloudStorageBloc {
           isVideo: false);
       final loc = await locationBloc.getLocation();
       final position = lib.Position(
-          type: 'Point',
+         type: 'Point',
           coordinates: [loc.longitude, loc.latitude],
           latitude: loc.latitude,
-          longitude: loc.longitude);
+          longitude: loc.longitude, geoHash: null);
 
       var vehiclePhoto = lib.VehiclePhoto(
-        ObjectId(),
-        vehiclePhotoId: Uuid.v4().toString(),
-        vehicleId: car.vehicleId,
+        vehiclePhotoId:  const Uuid().v4().toString(),
+       vehicleId:  car.vehicleId,
         vehicleReg: car.vehicleReg,
         userName: user!.name,
         userId: user.name,
         url: urls.$1,
         thumbNailUrl: urls.$2,
         created: DateTime.now().toUtc().toIso8601String(),
-        associationId: user!.associationId,
+        associationId: user.associationId,
         position: position,
       );
 
@@ -90,7 +93,7 @@ class CloudStorageBloc {
     pp('\n$mm adding video data to the database ...o');
     try {
       pp('$mm adding video ..... 😡😡 😡😡');
-      final user = await prefs.getUser();
+      final user = prefs.getUser();
 
       final urls = await _doTheUpload(
           file: file,
@@ -105,8 +108,7 @@ class CloudStorageBloc {
           longitude: loc.longitude);
 
       var vehicleVideo = lib.VehicleVideo(
-        ObjectId(),
-        vehicleVideoId: Uuid.v4().toString(),
+        vehicleVideoId: const Uuid().v4().toString(),
         vehicleId: car.vehicleId,
         vehicleReg: car.vehicleReg,
         userName: user!.name,
@@ -288,9 +290,6 @@ class CloudStorageBloc {
     return 0;
   }
 
-  CloudStorageBloc() {
-    pp('🍇 🍇 🍇 🍇 🍇 StorageBloc constructor 🍇 🍇 🍇 🍇 🍇');
-  }
 }
 
 const uploadBusy = 201;

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:badges/badges.dart' as bd;
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/functions.dart';
 
 import '../../messaging/fcm_bloc.dart';

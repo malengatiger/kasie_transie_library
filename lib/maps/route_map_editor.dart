@@ -4,13 +4,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/functions.dart';
 
 class RouteMapEditor extends StatefulWidget {
   const RouteMapEditor(
-      {Key? key, required this.route, required this.listApiDog})
-      : super(key: key);
+      {super.key, required this.route, required this.listApiDog});
 
   final lib.Route route;
   final ListApiDog listApiDog;

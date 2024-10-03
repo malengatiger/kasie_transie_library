@@ -3,18 +3,17 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart' as geo;
+import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:kasie_transie_library/bloc/data_api_dog.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/isolates/landmark_isolate.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:realm/realm.dart';
 
+import '../bloc/list_api_dog.dart';
 import '../isolates/routes_isolate.dart';
+import '../utils/prefs.dart';
 import '../widgets/timer_widget.dart';
 import '../widgets/tiny_bloc.dart';
 
@@ -22,9 +21,9 @@ class LandmarkCreatorMap extends StatefulWidget {
   final lib.Route route;
 
   const LandmarkCreatorMap({
-    Key? key,
+    super.key,
     required this.route,
-  }) : super(key: key);
+  });
 
   @override
   LandmarkCreatorMapState createState() => LandmarkCreatorMapState();
@@ -33,6 +32,8 @@ class LandmarkCreatorMap extends StatefulWidget {
 class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   static const defaultZoom = 16.0;
   final Completer<GoogleMapController> _mapController = Completer();
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
 
   CameraPosition? _myCurrentCameraPosition;
   static const mm = '🍐🍐🍐🍐🍐🍐🍐🍐 LandmarkCreatorMap: 💪 ';
@@ -84,7 +85,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   }
 
   Future _getSettings() async {
-    settingsModel = await prefs.getSettings();
+    settingsModel = prefs.getSettings();
     if (settingsModel != null) {
       radius = settingsModel!.vehicleGeoQueryRadius!;
       if (radius > 5) {
@@ -174,8 +175,10 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
 
   Future _getRoutePoints(bool refresh) async {
     try {
-      _user = await prefs.getUser();
+      _user = prefs.getUser();
       pp('$mm ...... getting existing RoutePoints .......');
+      var routesIsolate = GetIt.instance<RoutesIsolate>();
+
       existingRoutePoints =
           await routesIsolate.getRoutePoints(widget.route.routeId!, refresh);
 
@@ -250,7 +253,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   }
 
   Future _getUser() async {
-    _user = await prefs.getUser();
+    _user = prefs.getUser();
   }
 
   Future _getCurrentLocation() async {
@@ -404,7 +407,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   String? landmarkName;
 
   Future<void> _processNewLandmark() async {
-    final routeLandmark = lib.RouteLandmark(ObjectId(),
+    final routeLandmark = lib.RouteLandmark(
         position: lib.Position(type: 'Point', coordinates: [
           routePointForLandmark!.position!.coordinates.first,
           routePointForLandmark!.position!.coordinates.last
@@ -413,7 +416,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
         landmarkName: landmarkName!,
         index: landmarkIndex,
         created: DateTime.now().toUtc().toIso8601String(),
-        landmarkId: Uuid.v4().toString(),
+        landmarkId: DateTime.now().toIso8601String(),
         routePointId: routePointForLandmark!.routePointId!,
         routePointIndex: routePointForLandmark!.index!,
         associationId: widget.route.associationId!,

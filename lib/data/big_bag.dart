@@ -1,6 +1,10 @@
-import 'package:kasie_transie_library/data/schemas.dart';
-import 'package:kasie_transie_library/utils/parsers.dart';
 
+import 'package:json_annotation/json_annotation.dart';
+
+import 'data_schemas.dart';
+part 'big_bag.g.dart';
+
+@JsonSerializable()
 class BigBag {
   List<VehicleArrival> vehicleArrivals = [];
   List<DispatchRecord> dispatchRecords = [];
@@ -15,27 +19,9 @@ class BigBag {
     required this.passengerCounts,
     required this.vehicleHeartbeats});
 
-  BigBag.fromJson(Map data) {
-    print(data);
-    List va = data['vehicleArrivals'];
-    for (var value in va) {
-      vehicleArrivals.add(buildVehicleArrival(value));
-    }
-    List vd = data['vehicleDepartures'];
-    for (var value in vd) {
-      vehicleDepartures.add(buildVehicleDeparture(value));
-    }
-    List vh = data['vehicleHeartbeats'];
-    for (var value in vh) {
-      vehicleHeartbeats.add(buildVehicleHeartbeat(value));
-    }
-    List di = data['dispatchRecords'];
-    for (var value in di) {
-      dispatchRecords.add(buildDispatchRecord(value));
-    }
-    List pc = data['passengerCounts'];
-    for (var value in pc) {
-      passengerCounts.add(buildAmbassadorPassengerCount(value));
-    }
-  }
+  factory BigBag.fromJson(Map<String, dynamic> json) =>
+      _$BigBagFromJson(json);
+
+  Map<String, dynamic> toJson() => _$BigBagToJson(this);
 }
+

@@ -1,4 +1,4 @@
-import '../data/schemas.dart';
+import '../data/data_schemas.dart';
 import '../l10n/translation_handler.dart';
 
 class SignInStrings {
@@ -57,7 +57,7 @@ class SignInStrings {
     required this.emailAddress});
 
   static Future<SignInStrings> getTranslated(SettingsModel sett) async {
-    var signIn = await translator.translate('signIn', sett!.locale!);
+    var signIn = await translator.translate('signIn', sett.locale!);
     var memberNotExist =
     await translator.translate('memberNotExist', sett.locale!);
     var memberSignedIn =

@@ -2,31 +2,33 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart' as geo;
+import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:kasie_transie_library/bloc/data_api_dog.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
-import 'package:kasie_transie_library/isolates/routes_isolate.dart';
+import 'package:kasie_transie_library/bloc/sem_cache.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
+import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/maps/route_creator_map2.dart';
-import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
-import 'package:kasie_transie_library/utils/prefs.dart';
+import 'package:page_transition/page_transition.dart';
 
+import '../bloc/data_api_dog.dart';
+import '../bloc/list_api_dog.dart';
+import '../data/data_schemas.dart';
+import '../utils/prefs.dart';
 import '../widgets/color_pad.dart';
 import '../widgets/timer_widget.dart';
 import '../widgets/tiny_bloc.dart';
-import 'package:kasie_transie_library/l10n/translation_handler.dart';
 
 class RouteMapViewer extends StatefulWidget {
   final String routeId;
   final Function onRouteUpdated;
+
   const RouteMapViewer({
-    Key? key,
+    super.key,
     required this.onRouteUpdated,
     required this.routeId,
-  }) : super(key: key);
+  });
 
   @override
   RouteMapViewerState createState() => RouteMapViewerState();
@@ -38,11 +40,14 @@ class RouteMapViewerState extends State<RouteMapViewer> {
   late GoogleMapController googleMapController;
   CameraPosition? _myCurrentCameraPosition;
   static const mm = '😡😡😡😡😡😡😡 RouteMapViewer: 💪 ';
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
+  DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
   final _key = GlobalKey<ScaffoldState>();
   bool busy = false;
   bool isHybrid = true;
   lib.User? _user;
-  geo.Position? _currentPosition;
+  Position? _currentPosition;
   final Set<Marker> _markers = HashSet();
   final Set<Circle> _circles = HashSet();
   final Set<Polyline> _polyLines = {};
@@ -62,12 +67,12 @@ class RouteMapViewerState extends State<RouteMapViewer> {
   void initState() {
     super.initState();
     _setTexts();
-    _getCurrentLocation();
+    _getCurrentRouteLocation();
     _getUser();
   }
 
   Future _setTexts() async {
-    final c = await prefs.getColorAndLocale();
+    final c = prefs.getColorAndLocale();
     routeMapViewer = await translator.translate('routeMapViewer', c.locale);
     changeColor = await translator.translate('changeColor', c.locale);
 
@@ -79,9 +84,9 @@ class RouteMapViewerState extends State<RouteMapViewer> {
       busy = true;
     });
     try {
-      route = await listApiDog.getRoute(widget.routeId);
+      route = await semCache.getRoute(widget.routeId);
       if (route == null) {
-        throw Exception('Route not afraid');
+        throw Exception('Route not found! 😈😈😈😈 WTF!!');
       }
       color = getColor(route!.color!);
       _zoomToStartCity();
@@ -98,15 +103,15 @@ class RouteMapViewerState extends State<RouteMapViewer> {
     super.dispose();
   }
 
-  void changeRouteColorOnBackend() async {
+  void _changeRouteColor() async {
     pp('$mm ... updateRouteColor ...color: $stringColor');
     color = newColor;
     _addPolyLine();
     setState(() {});
     try {
       final m = await dataApiDog.updateRouteColor(
-          routeId: widget.routeId!, color: stringColor!);
-      pp('$mm ... color has been updated ... result: $m ; 0 is good!');
+          routeId: widget.routeId, color: stringColor!);
+      pp('\n\n$mm ... color has been updated ... result route: ${m.toJson()} ');
       tinyBloc.setRouteId(widget.routeId);
       _getRouteLandmarks();
     } catch (e) {
@@ -115,66 +120,14 @@ class RouteMapViewerState extends State<RouteMapViewer> {
     //
   }
 
-  void _showModalSheet() {
-    showModalBottomSheet(
-        context: context,
-        builder: (ctx) {
-          return Card(
-            shape: getDefaultRoundedBorder(),
-            elevation: 8,
-            child: Column(
-              children: [
-                const SizedBox(
-                  height: 16,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      changeColor,
-                      style: myTextStyleMediumLargeWithColor(
-                          context, Theme.of(context).primaryColorLight, 24),
-                    ),
-                    const SizedBox(
-                      width: 28,
-                    ),
-                    Container(
-                      height: 32,
-                      width: 32,
-                      color: newColor,
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                SizedBox(
-                  height: 220,
-                  child: ColorPad(
-                    onColorPicked: (mColor, string) {
-                      pp('$mm ....... 🍎🍎🍎🍎🍎🍎 onColorPicked picked ... $stringColor');
-                      setState(() {
-                        newColor = mColor;
-                        stringColor = string;
-                      });
-                      Navigator.pop(context);
-                      _updateRouteColor();
-                    },
-                  ),
-                ),
-              ],
-            ),
-          );
-        });
-  }
-
-  void _updateRouteColor() {
-    pp('$mm ....... 🍎🍎🍎🍎🍎🍎 onColorPicked start update ... $stringColor');
-    changeRouteColorOnBackend();
+  void _showColorChoices() {
+    setState(() {
+      showColors = !showColors;
+    });
   }
 
   Future _getRouteLandmarks() async {
-    routeLandmarks = await listApiDog.getRouteLandmarks(widget.routeId, false);
+    routeLandmarks = await semCache.getRouteLandmarks(widget.routeId);
     pp('$mm _getRouteLandmarks ...  route: ${widget.routeId}; found: ${routeLandmarks.length} ');
 
     landmarkIndex = 0;
@@ -184,8 +137,8 @@ class RouteMapViewerState extends State<RouteMapViewer> {
 
       final icon = await getMarkerBitmap(72,
           text: '${landmarkIndex + 1}',
-          color: route!.color!,
-          fontSize: 28,
+          color: route!.color ?? 'black',
+          fontSize: 14,
           fontWeight: FontWeight.w900);
 
       _markers.add(Marker(
@@ -236,7 +189,10 @@ class RouteMapViewerState extends State<RouteMapViewer> {
               TextButton(
                   onPressed: () {
                     _popOut();
-                    navigateWithScale(RouteCreatorMap2(route: route!), context);
+                    NavigationUtils.navigateTo(
+                        context: context,
+                        widget: RouteCreatorMap2(route: route!),
+                        transitionType: PageTransitionType.leftToRight);
                   },
                   child: const Text('Yes')),
             ],
@@ -249,15 +205,18 @@ class RouteMapViewerState extends State<RouteMapViewer> {
     Navigator.of(context).pop();
   }
 
+  SemCache semCache = GetIt.instance<SemCache>();
+
   Future _getRoutePoints(bool refresh) async {
     setState(() {
       busy = true;
     });
     try {
-      _user = await prefs.getUser();
+      _user = prefs.getUser();
       pp('$mm getting existing RoutePoints .......');
       existingRoutePoints =
-          await routesIsolate.getRoutePoints(widget.routeId, refresh);
+          // await routesIsolate.getRoutePoints(widget.routeId, refresh);
+          await semCache.getRoutePoints(widget.routeId);
 
       pp('$mm .......... existingRoutePoints ....  🍎 found: '
           '${existingRoutePoints.length} points');
@@ -289,18 +248,25 @@ class RouteMapViewerState extends State<RouteMapViewer> {
   }
 
   Future _getUser() async {
-    _user = await prefs.getUser();
+    _user = prefs.getUser();
   }
 
-  Future _getCurrentLocation() async {
-    pp('$mm .......... get current location ....');
-    _currentPosition = await locationBloc.getLocation();
+  Future _getCurrentRouteLocation() async {
+    pp('$mm .......... get current route ....');
 
-    pp('$mm .......... get current location ....  🍎 found: ${_currentPosition!.toJson()}');
-    _myCurrentCameraPosition = CameraPosition(
-      target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-      zoom: defaultZoom,
-    );
+    route = await semCache.getRoute(widget.routeId);
+    if (route != null) {
+      _myCurrentCameraPosition = CameraPosition(
+        target: LatLng(route!.routeStartEnd!.startCityPosition!.coordinates[1],
+            route!.routeStartEnd!.startCityPosition!.coordinates[0]),
+        zoom: defaultZoom,
+      );
+    } else {
+      _myCurrentCameraPosition = CameraPosition(
+        target: LatLng(-24.0, 26.0),
+        zoom: defaultZoom,
+      );
+    }
     setState(() {});
   }
 
@@ -347,6 +313,8 @@ class RouteMapViewerState extends State<RouteMapViewer> {
   }
 
   String waitingForGPS = 'waitingForGPS';
+  bool showColors = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -471,7 +439,7 @@ class RouteMapViewerState extends State<RouteMapViewer> {
                           ),
                           IconButton(
                               onPressed: () {
-                                _showModalSheet();
+                                _showColorChoices();
                               },
                               icon: Icon(
                                 Icons.color_lens,
@@ -496,6 +464,32 @@ class RouteMapViewerState extends State<RouteMapViewer> {
                         ),
                       )
                     : const SizedBox(),
+                showColors
+                    ? Positioned(
+                        top: 24,
+                        right: 24,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 24),
+                          child: Card(
+                              elevation: 16,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 48, horizontal: 48),
+                                child: ColorPad(
+                                  onColorPicked: (c, s) {
+                                    pp('$mm ColorPad(onColorPicked: picked: ${c.toString()} - $s');
+                                    setState(() {
+                                      stringColor = s;
+                                      newColor = c;
+                                    });
+                                    _changeRouteColor();
+                                  },
+                                ),
+                              )),
+                        ),
+                      )
+                    : SizedBox(),
               ]));
   }
 }

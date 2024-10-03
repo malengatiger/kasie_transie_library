@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:badges/badges.dart' as bd;
 import '../../messaging/fcm_bloc.dart';
 import '../../utils/functions.dart';
 
 class RouteActivity extends StatefulWidget {
-  const RouteActivity({Key? key, required this.route}) : super(key: key);
+  const RouteActivity({super.key, required this.route});
 
   final lib.Route route;
 

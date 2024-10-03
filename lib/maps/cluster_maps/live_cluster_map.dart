@@ -2,21 +2,22 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
+import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart' as cl;
 import 'package:kasie_transie_library/maps/cluster_maps/toggle.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 
+import '../../bloc/list_api_dog.dart';
 import '../../messaging/fcm_bloc.dart';
 import 'cluster_covers.dart';
 
 class LiveClusterMap extends StatefulWidget {
   const LiveClusterMap({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   LiveClusterMapState createState() => LiveClusterMapState();
@@ -29,8 +30,8 @@ class LiveClusterMapState extends State<LiveClusterMap>
   final mm = '🍐🍐🍐🍐LiveClusterMap 🍐🍐';
 
   var routes = <lib.Route>[];
-  late ClusterManager dispatchClusterManager;
-  late ClusterManager requestsClusterManager;
+  late cl.ClusterManager dispatchClusterManager;
+  late cl.ClusterManager requestsClusterManager;
 
   List<DispatchRecordCover> dispatchRecordCovers = [];
   List<CommuterRequestCover> commuterRequestCovers = [];
@@ -46,6 +47,7 @@ class LiveClusterMapState extends State<LiveClusterMap>
 
   final CameraPosition _parisCameraPosition =
       const CameraPosition(target: LatLng(-27.856613, 25.352222), zoom: 14.0);
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
 
   @override
   void initState() {
@@ -110,7 +112,7 @@ class LiveClusterMapState extends State<LiveClusterMap>
     }
   }
 
-  ClusterManager<ClusterItem> _initDispatchClusterManager() {
+  cl.ClusterManager<cl.ClusterItem> _initDispatchClusterManager() {
     pp('$mm ......... _initDispatchClusterManager, ${E.appleRed} items: ${liveDispatchRecords.length}');
     for (var element in liveDispatchRecords) {
       dispatchRecordCovers.add(DispatchRecordCover(
@@ -120,14 +122,14 @@ class LiveClusterMapState extends State<LiveClusterMap>
       ));
     }
     //
-    dispatchClusterManager = ClusterManager<DispatchRecordCover>(
+    dispatchClusterManager = cl.ClusterManager<DispatchRecordCover>(
         dispatchRecordCovers, _updateDispatchMarkers,
         markerBuilder: _dispatchMarkerBuilder);
 
     return dispatchClusterManager;
   }
 
-  ClusterManager<ClusterItem> _initRequestClusterManager() {
+  cl.ClusterManager<cl.ClusterItem> _initRequestClusterManager() {
     pp('$mm ......... _initRequestClusterManager, ${E.appleRed} items: ${liveCommuterRequests.length}');
     for (var element in liveCommuterRequests) {
       commuterRequestCovers.add(CommuterRequestCover(
@@ -136,7 +138,7 @@ class LiveClusterMapState extends State<LiveClusterMap>
             element.currentPosition!.coordinates[0]),
       ));
     }
-    requestsClusterManager = ClusterManager<CommuterRequestCover>(
+    requestsClusterManager = cl.ClusterManager<CommuterRequestCover>(
         commuterRequestCovers, _updateRequestMarkers,
         markerBuilder: _requestMarkerBuilder);
 
@@ -155,76 +157,59 @@ class LiveClusterMapState extends State<LiveClusterMap>
     });
   }
 
-  Future<Marker> Function(Cluster<DispatchRecordCover>)
-      get _dispatchMarkerBuilder => (cluster) async {
-            var size = cluster.isMultiple ? 125.0 : 75.0;
-            var text = cluster.isMultiple ? cluster.count.toString() : "1";
+  Future<Marker> Function(dynamic) get _dispatchMarkerBuilder =>
+          (cluster) async {
+        var size = cluster.isMultiple ? 125.0 : 75.0;
+        var text = cluster.isMultiple ? cluster.count.toString() : "1";
+        final ic = await getMarkerBitmap(
+          size.toInt(),
+          text: text,
+          color: 'indigo',
+          borderColor: Colors.white,
+          fontWeight: FontWeight.normal,
+          fontSize: size / 3,
+        );
+        return Marker(
+          markerId: MarkerId(cluster.getId()),
+          position: cluster.location, // Use cluster.location instead of cluster.items[0].latLng
+          onTap: () {
+            pp('$mm ---- cluster? ${E.redDot} $cluster');
+            for (var p in cluster.items) {
+              pp('$mm ... VehicleArrivalCover - cluster item: ${E.appleRed} '
+                  '${p.arrival.vehicleReg} - ${p.arrival.landmarkName} - ${p.arrival.created}');
+            }
+          },
+          icon: ic,
+        );
+      };
 
-            // final ic = await getMarkerBitmap(
-            //   size.toInt(),
-            //   text: text,
-            //   color: 'teal',
-            //   borderColor: Colors.white,
-            //   fontWeight: FontWeight.normal,
-            //   fontSize: size / 3,
-            // );
-            final ic2 = await getTaxiMapIcon(iconSize: 240, text: text, style: const TextStyle(
-              fontSize: 48, color: Colors.white, fontWeight: FontWeight.w900,
-            ), path: 'assets/car1.png');
 
-            return Marker(
-              markerId: MarkerId(cluster.getId()),
-              position: cluster.location,
-              onTap: () {
-                pp('$mm ---- DispatchRecord cluster? ${E.redDot} $cluster');
-                final list = <lib.DispatchRecord>[];
-                for (var p in cluster.items) {
-                  list.add(p.dispatchRecord);
-                }
-                list.sort((a, b) => a.vehicleReg!.compareTo(b.vehicleReg!));
-                for (var p in list) {
-                  pp('$mm ... DispatchRecord - cluster item: ${E.appleRed} '
-                      '${p.vehicleReg} ${p.landmarkName}'
-                      '${E.leaf} route: ${p.routeName} date: ${getFormattedDateLong(p.created!)}');
-                }
-              },
-              icon: ic2,
-            );
-          };
+  Future<Marker> Function(dynamic) get _requestMarkerBuilder =>
+          (cluster) async {
+        var size = cluster.isMultiple ? 125.0 : 75.0;
+        var text = cluster.isMultiple ? cluster.count.toString() : "1";
+        final ic = await getMarkerBitmap(
+          size.toInt(),
+          text: text,
+          color: 'indigo',
+          borderColor: Colors.white,
+          fontWeight: FontWeight.normal,
+          fontSize: size / 3,
+        );
+        return Marker(
+          markerId: MarkerId(cluster.getId()),
+          position: cluster.location, // Use cluster.location instead of cluster.items[0].latLng
+          onTap: () {
+            pp('$mm ---- cluster? ${E.redDot} $cluster');
+            for (var p in cluster.items) {
+              pp('$mm ... VehicleArrivalCover - cluster item: ${E.appleRed} '
+                  '${p.arrival.vehicleReg} - ${p.arrival.landmarkName} - ${p.arrival.created}');
+            }
+          },
+          icon: ic,
+        );
+      };
 
-  Future<Marker> Function(Cluster<CommuterRequestCover>)
-      get _requestMarkerBuilder => (cluster) async {
-            var size = cluster.isMultiple ? 125.0 : 75.0;
-            var text = cluster.isMultiple ? cluster.count.toString() : "1";
-
-            final ic = await getMarkerBitmap(
-              size.toInt(),
-              text: text,
-              color: 'pink',
-              borderColor: Colors.white,
-              fontWeight: FontWeight.normal,
-              fontSize: size / 3,
-            );
-
-            return Marker(
-              markerId: MarkerId(cluster.getId()),
-              position: cluster.location,
-              onTap: () {
-                pp('$mm ---- CommuterRequest cluster? ${E.redDot} $cluster');
-                final list = <lib.CommuterRequest>[];
-                for (var p in cluster.items) {
-                  list.add(p.request);
-                }
-                list.sort(
-                    (a, b) => a.dateRequested!.compareTo(b.dateRequested!));
-                for (var p in list) {
-                  pp('$mm ... CommuterRequest - cluster item: ${E.appleRed} '
-                      '${E.leaf} route: ${p.routeName} date: ${getFormattedDateLong(p.dateRequested!)}');
-                }
-              },
-              icon: ic,
-            );
-          };
 
   bool hybrid = true;
   @override

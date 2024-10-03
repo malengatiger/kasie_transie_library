@@ -1,10 +1,8 @@
 import 'dart:convert';
 
-import 'package:kasie_transie_library/utils/parsers.dart';
-import 'package:realm/realm.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../data/schemas.dart';
+import '../data/data_schemas.dart';
 import '../utils/functions.dart';
 
 final CacheManager cacheManager = CacheManager();
@@ -125,7 +123,6 @@ class CacheManager {
 
   Future deleteAmbassadorCounts() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    ;
     await prefs.remove('counts');
     pp(' 🔷🔷 deleteAmbassadorCounts happened ....');
   }
@@ -150,21 +147,7 @@ class AppErrorList {
   AppErrorList.fromJson(Map data) {
     List list = data['appErrors'];
     for (var value in list) {
-      final m = AppError(
-        ObjectId.fromHexString(value['_id'] as String),
-        created: value['created'],
-        userId: value['userId'],
-        associationId: value['associationId'],
-        userUrl: value['userUrl'],
-        manufacturer: value['manufacturer'],
-        errorMessage: value['errorMessage'],
-        userName: value['userName'],
-        brand: value['brand'],
-        model: value['model'],
-        deviceType: value['created'],
-        baseOS: value['baseOS'],
-        uploadedDate: value['uploadedDate'],
-      );
+      final m = AppError.fromJson(value);
       appErrors.add(m);
     }
   }
@@ -189,7 +172,7 @@ class DispatchRecordList {
   DispatchRecordList.fromJson(Map data) {
     List list = data['dispatchRecords'];
     for (var value in list) {
-      final m = buildDispatchRecord(value);
+      final m = DispatchRecord.fromJson(value);
       dispatchRecords.add(m);
     }
   }
@@ -213,7 +196,7 @@ class AmbassadorPassengerCountList {
   AmbassadorPassengerCountList.fromJson(Map data) {
     List list = data['counts'];
     for (var value in list) {
-      final m = buildAmbassadorPassengerCount(value);
+      final m = AmbassadorPassengerCount.fromJson(value);
       counts.add(m);
     }
   }
@@ -236,7 +219,7 @@ class RouteList {
   RouteList.fromJson(Map data) {
     List list = data['routes'];
     for (var value in list) {
-      final m = buildRoute(value);
+      final m = Route.fromJson(value);
       routes.add(m);
     }
   }

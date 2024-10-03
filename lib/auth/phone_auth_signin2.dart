@@ -2,17 +2,17 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:kasie_transie_library/auth/phone_auth_signin.dart';
+import 'package:kasie_transie_library/auth/sign_in_strings.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/isolates/country_cities_isolate.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import 'package:pinput/pinput.dart' as pin;
 
-import '../data/schemas.dart' as lib;
+import '../data/data_schemas.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
 import '../utils/initialiazer_cover.dart';
@@ -20,11 +20,11 @@ import 'package:intl_phone_field/countries.dart' as cnt;
 
 class PhoneAuthSignin extends StatefulWidget {
   const PhoneAuthSignin({
-    Key? key,
+    super.key,
     required this.dataApiDog,
     required this.onGoodSignIn,
     required this.onSignInError,
-  }) : super(key: key);
+  });
 
   final Function onGoodSignIn;
   final Function onSignInError;
@@ -52,8 +52,11 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
   bool verificationCompleted = false;
   bool busy = false;
   bool initializing = false;
-  lib.User? user;
+  User? user;
   SignInStrings? signInStrings;
+  Prefs prefs = GetIt.instance<Prefs>();
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+
 
   @override
   void initState() {
@@ -62,7 +65,7 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
   }
 
   Future _setTexts() async {
-    final sett = await prefs.getSettings();
+    final sett = prefs.getSettings();
     if (sett == null) {
       return;
     }
@@ -102,16 +105,16 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
 
       if (user != null) {
         pp('$mm KasieTransie user found on database:  🍎 ${user!.toJson()} 🍎');
-        await prefs.saveUser(user!);
+         prefs.saveUser(user!);
         final ass = await listApiDog.getAssociationById(user!.associationId!);
         final users =
             await listApiDog.getAssociationUsers(user!.associationId!, true);
         final countries = await listApiDog.getCountries();
-        lib.Country? myCountry;
+        Country? myCountry;
         for (var country in countries) {
-          if (country.countryId == ass.countryId!) {
+          if (country.countryId == ass?.countryId!) {
             myCountry = country;
-            await prefs.saveCountry(myCountry);
+             prefs.saveCountry(myCountry);
             break;
           }
         }
@@ -197,7 +200,7 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
               busy = false;
             });
             showSnackBar(
-                backgroundColor: Theme.of(context).colorScheme.background,
+                backgroundColor: Theme.of(context).colorScheme.surface,
                 textStyle: myTextStyleMedium(context),
                 message: signInStrings == null
                     ? 'Verification completed. Thank you!'
@@ -271,7 +274,7 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
                   child: Column(
                     children: [
                       busy
-                          ?  const TimerWidget(title: "Signing in ...", isSmallSize: false,)
+                          ?  const CircularProgressIndicator()
                           : const SizedBox(
                               height: 12,
                             ),
@@ -408,7 +411,7 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
                                                     onPressed: _processSignIn,
                                                     style: ButtonStyle(
                                                       elevation:
-                                                          MaterialStateProperty
+                                                          WidgetStateProperty
                                                               .all<double>(8.0),
                                                     ),
                                                     child: Padding(

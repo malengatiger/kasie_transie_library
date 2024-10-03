@@ -1,11 +1,8 @@
 import 'dart:async';
-import 'dart:typed_data';
-import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
+import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart' as clus;
 import 'package:kasie_transie_library/maps/cluster_maps/toggle.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
@@ -14,8 +11,7 @@ import 'cluster_covers.dart';
 
 class ArrivalsClusterMap extends StatefulWidget {
   const ArrivalsClusterMap(
-      {Key? key, required this.vehicleArrivalsCovers, required this.date})
-      : super(key: key);
+      {super.key, required this.vehicleArrivalsCovers, required this.date});
 
   final List<VehicleArrivalCover> vehicleArrivalsCovers;
   final String date;
@@ -31,7 +27,7 @@ class CommuterClusterMapState extends State<ArrivalsClusterMap>
   final mm = '🍐🍐🍐🍐ArrivalsClusterMap 🍐🍐';
 
   Set<Marker> markers = {};
-  late ClusterManager clusterManager;
+  late clus.ClusterManager clusterManager;
   final CameraPosition _parisCameraPosition =
       const CameraPosition(target: LatLng(-27.856613, 25.352222), zoom: 14.0);
 
@@ -42,9 +38,9 @@ class CommuterClusterMapState extends State<ArrivalsClusterMap>
     super.initState();
   }
 
-  ClusterManager<ClusterItem> _initClusterManager() {
+  clus.ClusterManager<clus.ClusterItem> _initClusterManager() {
     pp('$mm ......... _initClusterManager, ${E.appleRed} items: ${widget.vehicleArrivalsCovers.length}');
-    clusterManager = ClusterManager<VehicleArrivalCover>(
+    clusterManager = clus.ClusterManager<VehicleArrivalCover>(
         widget.vehicleArrivalsCovers, _updateMarkers,
         markerBuilder: _markerBuilder);
 
@@ -58,8 +54,8 @@ class CommuterClusterMapState extends State<ArrivalsClusterMap>
     });
   }
 
-  Future<Marker> Function(Cluster<VehicleArrivalCover>) get _markerBuilder =>
-      (cluster) async {
+  Future<Marker> Function(dynamic) get _markerBuilder =>
+          (cluster) async {
         var size = cluster.isMultiple ? 125.0 : 75.0;
         var text = cluster.isMultiple ? cluster.count.toString() : "1";
         final ic = await getMarkerBitmap(
@@ -72,7 +68,7 @@ class CommuterClusterMapState extends State<ArrivalsClusterMap>
         );
         return Marker(
           markerId: MarkerId(cluster.getId()),
-          position: cluster.location,
+          position: cluster.location, // Use cluster.location instead of cluster.items[0].latLng
           onTap: () {
             pp('$mm ---- cluster? ${E.redDot} $cluster');
             for (var p in cluster.items) {

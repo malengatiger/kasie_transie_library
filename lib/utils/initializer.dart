@@ -1,20 +1,23 @@
 import 'dart:async';
 
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:kasie_transie_library/isolates/routes_isolate.dart';
+import '../bloc/data_api_dog.dart';
+import '../bloc/list_api_dog.dart';
+import '../data/data_schemas.dart';
+import '../isolates/routes_isolate.dart';
 import 'functions.dart';
 
 final Initializer initializer = Initializer();
 
 class Initializer {
-  final mm = '😡😡😡😡😡😡😡 Initializer 😡😡 ';
-
+  final mm = '🌍🌍🌍🌍🌍 Initializer 🌍🌍 ';
   Vehicle? car;
   User? user;
-
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
+  DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
   final StreamController<bool> _streamController = StreamController.broadcast();
 
   Stream<bool> get completionStream => _streamController.stream;
@@ -22,8 +25,8 @@ class Initializer {
   Future<String> initialize() async {
     pp('\n\n\n$mm ... initialize starting; all association data to be downloaded ....');
 
-    car = await prefs.getCar();
-    user = await prefs.getUser();
+    car = prefs.getCar();
+    user = prefs.getUser();
     if (car == null && user == null) {
       final msg = 'No Car, No User, initialize cannot continue ${E.redDot}';
       throw Exception(msg);
@@ -40,11 +43,11 @@ class Initializer {
       // pp('$mm ... starting to get cars ... 1');
       // await _getVehicles();
 
-      pp('$mm ... starting to get users ... 2');
-      await _getUsers();
+      pp('$mm ... starting to get users ...');
+      // await _getUsers();
 
       pp('$mm ... starting to get routes ... will use isolate ... 3');
-      await _getRoutes();
+      // await _getRoutes();
 
       pp('$mm sending completion flag to stream .... ${E.nice} ... 4');
       _streamController.sink.add(true);
@@ -71,54 +74,6 @@ class Initializer {
     return 'We are done, Boss!';
   }
 
-  Future<List<Vehicle>> _getVehicles() async {
-    if (user != null) {
-      pp('$mm ... getting association cars ............ ');
-      var list =
-          await listApiDog.getAssociationVehicles(user!.associationId!, false);
-      pp('$mm ... cached: ${list.length} taxis');
-      return list;
-    }
-    if (car != null) {
-      pp('$mm ... getting association cars ............ ');
-      var list =
-          await listApiDog.getAssociationVehicles(car!.associationId!, false);
-      pp('$mm ... cached: ${list.length} taxis');
-      return list;
-    }
-    throw Exception('Cars crashed and burned!');
-  }
 
-  Future<List<User>> _getUsers() async {
-    if (car != null) {
-      pp('$mm ... getting association users ............ ');
-      var list = await listApiDog.getAssociationUsers(car!.associationId!, true);
-      pp('$mm ... cached: ${list.length} users');
-      return list;
-    }
-    if (user != null) {
-      pp('$mm ... getting association users ............ ');
-      var list = await listApiDog.getAssociationUsers(user!.associationId!, true);
-      pp('$mm ... cached: ${list.length} users');
-      return list;
-    }
-    throw Exception('Users not here, Joe!');
-  }
 
-  Future _getRoutes() async {
-    if (car != null) {
-      pp('\n\n\n$mm ... getting association routes in isolate ............ car: ${car!.vehicleReg} ');
-      await routesIsolate.getRoutes(car!.associationId!, false);
-      return;
-    }
-
-    if (user != null) {
-      pp('\n\n$mm ... getting association routes in isolate ............ user: ${user!.name} ');
-      await routesIsolate.getRoutes(user!.associationId!, false);
-      return;
-    }
-    //
-    pp('$mm routesIsolate just fucked up in _getRoutes! ${E.redDot} No car, No user! ${E.redDot}${E.redDot}${E.redDot}');
-    throw Exception('routesIsolate just fucked up in _getRoutes !');
-  }
 }

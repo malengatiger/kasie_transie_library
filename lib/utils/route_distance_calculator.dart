@@ -2,31 +2,35 @@ import 'dart:core';
 import 'dart:core' as prefix0;
 
 import 'package:geolocator/geolocator.dart' as geo;
-import 'package:kasie_transie_library/bloc/data_api_dog.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/data/calculated_distance_list.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
-import 'package:kasie_transie_library/providers/kasie_providers.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:realm/realm.dart';
 
+import '../bloc/data_api_dog.dart';
+import '../bloc/list_api_dog.dart';
+import '../data/data_schemas.dart';
 import '../isolates/routes_isolate.dart';
 import 'distance.dart';
 
-final RouteDistanceCalculator routeDistanceCalculator =
-    RouteDistanceCalculator();
+
 
 class RouteDistanceCalculator {
   static const mm = '🌸🌸🌸🌸 RouteDistanceCalculator: 🌸🌸🌸';
 
+  final Prefs prefs;
+  final ListApiDog listApiDog;
+  final DataApiDog dataApiDog;
+
+  RouteDistanceCalculator(this.prefs, this.listApiDog, this.dataApiDog);
+
   Future calculateAssociationRouteDistances() async {
     pp('... starting ... calculateAssociationRouteDistances ...');
-    final user = await prefs.getUser();
+    final user = prefs.getUser();
     final routes = await listApiDog
         .getRoutes(user!.associationId!, false);
-    final distances = <lib.CalculatedDistance>[];
+    final distances = <CalculatedDistance>[];
     for (var value in routes) {
       final list =
           (await calculateRouteDistances(value.routeId!, user.associationId!));
@@ -43,9 +47,10 @@ class RouteDistanceCalculator {
     }
   }
 
-  Future<List<lib.CalculatedDistance>> calculateRouteDistances(
+  Future<List<CalculatedDistance>> calculateRouteDistances(
       String routeId, String associationId) async {
     pp('$mm ... starting calculateRouteDistances for $routeId');
+    var routesIsolate = GetIt.instance<RoutesIsolate>();
 
     final routeLandmarks = await listApiDog.getRouteLandmarks(routeId, false);
     if (routeLandmarks.isEmpty) {
@@ -66,8 +71,8 @@ class RouteDistanceCalculator {
 
     //
     routePoints.sort((a, b) => a.index!.compareTo(b.index!));
-    final distances = <lib.CalculatedDistance>[];
-    lib.RouteLandmark? prevRouteLandmark;
+    final distances = <CalculatedDistance>[];
+    RouteLandmark? prevRouteLandmark;
     int index = 0;
     int mDistance = 0;
     //
@@ -83,8 +88,7 @@ class RouteDistanceCalculator {
 
         mDistance += dist.toInt();
 
-        final m = lib.CalculatedDistance(
-          ObjectId(),
+        final m = CalculatedDistance(
           distanceInMetres: dist.toInt(),
           routeId: routeId,
           index: index - 1,
@@ -123,7 +127,7 @@ class RouteDistanceCalculator {
   Future<double> calculateTotalRouteDistanceInMetres(
       String routeId) async {
     pp('$mm ... starting calculateTotalRouteDistance for $routeId');
-
+    var routesIsolate = GetIt.instance<RoutesIsolate>();
     final routePoints = await routesIsolate.getRoutePoints(routeId, false);
     if (routePoints.isEmpty) {
       pp('$mm ... 2. stopping calculateRouteDistances for $routeId, routePoints');
@@ -135,7 +139,7 @@ class RouteDistanceCalculator {
 
     int index = 0;
     double mDistance = 0;
-    lib.RoutePoint? previousRoutePoint;
+    RoutePoint? previousRoutePoint;
     for (var rp in routePoints) {
       if (index > 0) {
         var dist = geo.Geolocator.distanceBetween(
@@ -153,13 +157,13 @@ class RouteDistanceCalculator {
   }
 
   Future<double> _calculateDistanceBetween(
-      {required lib.RouteLandmark fromLandmark,
-      required lib.RouteLandmark toLandmark,
-      required List<lib.RoutePoint> routePoints}) async {
+      {required RouteLandmark fromLandmark,
+      required RouteLandmark toLandmark,
+      required List<RoutePoint> routePoints}) async {
     pp('$mm ... _calculateDistanceBetween ${fromLandmark.landmarkName} ${E.heartBlue} index: ${fromLandmark.routePointIndex} '
         'and ${toLandmark.landmarkName}  ${E.heartBlue} index: ${toLandmark.routePointIndex}');
 
-    Iterable<lib.RoutePoint> range = [];
+    Iterable<RoutePoint> range = [];
     try {
       range = routePoints.getRange(
           fromLandmark.routePointIndex!, toLandmark.routePointIndex!);
@@ -170,7 +174,7 @@ class RouteDistanceCalculator {
       pp(e);
     }
 
-    lib.RoutePoint? prevPoint;
+    RoutePoint? prevPoint;
     double mDistance = 0.0;
     for (var pointBetween in range) {
       if (prevPoint == null) {
@@ -194,8 +198,9 @@ class RouteDistanceCalculator {
   Future<List<RoutePointDistance>> calculateFromLocation(
       {required double latitude,
       required double longitude,
-      required lib.Route route}) async {
+      required Route route}) async {
     pp('🥬🥬🥬🥬🥬🥬🥬 calculateFromLocation starting: 💛 ${DateTime.now().toIso8601String()}');
+    var routesIsolate = GetIt.instance<RoutesIsolate>();
     final routePoints =
         await routesIsolate.getRoutePoints(route.routeId!, false);
 
@@ -229,13 +234,13 @@ class RouteDistanceCalculator {
   }
 
   Future<List<DynamicDistance>> _traversePoints(
-      {required List<lib.RoutePoint> points, required int startIndex}) async {
+      {required List<RoutePoint> points, required int startIndex}) async {
     pp('_traversePoints :  🔆  🔆  🔆  🔆 calculating distances between points from  🔆 index: $startIndex ...');
     // var geoLocator = Geolocator();
     List<DynamicDistance> list = [];
     List<RoutePointDistance> rpList = [];
     var cnt = 0;
-    lib.RoutePoint? prevPoint;
+    RoutePoint? prevPoint;
     for (var i = startIndex; i < points.length; i++) {
       if (prevPoint == null) {
         prevPoint = points.elementAt(i);
@@ -271,6 +276,7 @@ class RouteDistanceCalculator {
   }
 
   Future<double> calculateRouteLengthInKM(String routeId) async {
+    var routesIsolate = GetIt.instance<RoutesIsolate>();
     final routePoints = await routesIsolate.getRoutePoints(routeId, false);
     if (routePoints.isEmpty) {
       pp('$mm ... 2. stopping calculateRouteLengthInKM for $routeId, routePoints');
@@ -279,7 +285,7 @@ class RouteDistanceCalculator {
     //
     pp('$mm ... calculateRouteLengthInKM for ${routePoints.length} points');
     routePoints.sort((a, b) => a.index!.compareTo(b.index!));
-    lib.RoutePoint? prevRoutePoint;
+    RoutePoint? prevRoutePoint;
     int index = 0;
     double totalDistance = 0;
     //
@@ -310,7 +316,7 @@ class RouteDistanceCalculator {
 
 class RoutePointDistance {
   int index;
-  lib.RoutePoint routePoint;
+  RoutePoint routePoint;
   double distance;
 
   RoutePointDistance(

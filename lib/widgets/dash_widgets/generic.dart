@@ -6,13 +6,12 @@ import '../../utils/functions.dart';
 
 class TotalWidget extends StatelessWidget {
   const TotalWidget(
-      {Key? key,
+      {super.key,
         required this.caption,
         required this.number,
         required this.onTapped,
         required this.color,
-        required this.fontSize})
-      : super(key: key);
+        required this.fontSize});
   final String caption;
   final int number;
   final Function onTapped;
@@ -49,12 +48,11 @@ class TotalWidget extends StatelessWidget {
 
 class NumberAndCaption extends StatelessWidget {
   const NumberAndCaption(
-      {Key? key,
+      {super.key,
         required this.caption,
         required this.number,
         required this.color,
-        required this.fontSize})
-      : super(key: key);
+        required this.fontSize});
   final String caption;
   final int number;
   final Color color;

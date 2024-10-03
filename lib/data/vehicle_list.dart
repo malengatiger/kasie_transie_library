@@ -1,5 +1,10 @@
-import 'package:kasie_transie_library/data/schemas.dart';
-import 'package:kasie_transie_library/utils/parsers.dart';
+
+import 'package:json_annotation/json_annotation.dart';
+
+import 'data_schemas.dart';
+
+part 'vehicle_list.g.dart';
+@JsonSerializable()
 
 class VehicleList {
   String? routeId;
@@ -13,26 +18,8 @@ class VehicleList {
       required this.intervalInSeconds,
       required this.vehicles});
 
-  VehicleList.fromJson(Map data) {
-    routeId = data['routeId'];
-    created = data['created'];
-    intervalInSeconds = data['intervalInSeconds'];
+  factory VehicleList.fromJson(Map<String, dynamic> json) =>
+      _$VehicleListFromJson(json);
 
-    List va = data['vehicles'];
-    for (var value in va) {
-      vehicles.add(buildVehicle(value));
-    }
-  }
-  Map<String, dynamic> toJson() {
-    List cars = [];
-    for (var value in vehicles) {
-      cars.add(value.toJson());
-    }
-    final map = {
-      'routeId': routeId,
-      'created': created,
-      'vehicles': cars,
-    };
-    return map;
-  }
+  Map<String, dynamic> toJson() => _$VehicleListToJson(this);
 }

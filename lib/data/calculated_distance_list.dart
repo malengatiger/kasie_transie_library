@@ -1,19 +1,17 @@
-import 'package:kasie_transie_library/data/schemas.dart';
 
+import 'package:json_annotation/json_annotation.dart';
+
+import 'data_schemas.dart';
+part 'calculated_distance_list.g.dart';
+
+@JsonSerializable()
 class CalculatedDistanceList {
   List<CalculatedDistance> calculatedDistances = [];
 
   CalculatedDistanceList(this.calculatedDistances);
 
-  Map<String,dynamic> toJson() {
-    List mList = [];
-    for (var rp in calculatedDistances) {
-      mList.add(rp.toJson());
-    }
+  factory CalculatedDistanceList.fromJson(Map<String, dynamic> json) =>
+      _$CalculatedDistanceListFromJson(json);
 
-    Map<String, dynamic> map = {
-      'calculatedDistances': mList,
-    };
-    return map;
-  }
+  Map<String, dynamic> toJson() => _$CalculatedDistanceListToJson(this);
 }

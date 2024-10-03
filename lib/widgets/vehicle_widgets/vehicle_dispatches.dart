@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 
 import '../../utils/functions.dart';
 
 class VehicleDispatches extends StatelessWidget {
-  const VehicleDispatches({Key? key, required this.dispatchRecords, required this.onClose})
-      : super(key: key);
+  const VehicleDispatches({super.key, required this.dispatchRecords, required this.onClose});
 
   final List<lib.DispatchRecord> dispatchRecords;
  final Function onClose;

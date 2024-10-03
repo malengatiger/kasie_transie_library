@@ -1,7 +1,4 @@
-import 'dart:convert';
 
-import 'package:kasie_transie_library/data/schemas.dart';
-import 'package:kasie_transie_library/utils/parsers.dart';
 
 class GenerationRequest {
   String? routeId;

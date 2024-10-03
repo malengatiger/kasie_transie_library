@@ -1,24 +1,21 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:typed_data';
-import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
+import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart' as cl;
 import 'package:kasie_transie_library/maps/cluster_maps/toggle.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 
 import '../../bloc/list_api_dog.dart';
 import 'cluster_covers.dart';
 
 class PassengerCountClusterMap extends StatefulWidget {
   const PassengerCountClusterMap(
-      {Key? key, required this.passengerCountCovers, required this.date})
-      : super(key: key);
+      {super.key, required this.passengerCountCovers, required this.date});
 
   final List<PassengerCountCover> passengerCountCovers;
   final String date;
@@ -32,10 +29,11 @@ class PassengerCountClusterMapState extends State<PassengerCountClusterMap>
   late AnimationController _controller;
   final Completer<GoogleMapController> _googleMapController = Completer();
   final mm = '🍐🍐🍐🍐PassengerCountClusterMap 🍐🍐';
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
 
   var routes = <lib.Route>[];
   Set<Marker> markers = {};
-  late ClusterManager clusterManager;
+  late cl.ClusterManager clusterManager;
   final CameraPosition _parisCameraPosition =
       const CameraPosition(target: LatLng(48.856613, 2.352222), zoom: 12.0);
 
@@ -60,9 +58,9 @@ class PassengerCountClusterMapState extends State<PassengerCountClusterMap>
     setState(() {});
   }
 
-  ClusterManager<ClusterItem> _initClusterManager() {
+  cl.ClusterManager<cl.ClusterItem> _initClusterManager() {
     pp('$mm ......... _initClusterManager, ${E.appleRed} items: ${widget.passengerCountCovers.length}');
-    clusterManager = ClusterManager<PassengerCountCover>(
+    clusterManager = cl.ClusterManager<PassengerCountCover>(
         widget.passengerCountCovers, _updateMarkers,
         markerBuilder: _markerBuilder);
 
@@ -76,29 +74,26 @@ class PassengerCountClusterMapState extends State<PassengerCountClusterMap>
     });
   }
 
-  Future<Marker> Function(Cluster<PassengerCountCover>) get _markerBuilder =>
-      (cluster) async {
+  Future<Marker> Function(dynamic) get _markerBuilder =>
+          (cluster) async {
         var size = cluster.isMultiple ? 125.0 : 75.0;
         var text = cluster.isMultiple ? cluster.count.toString() : "1";
         final ic = await getMarkerBitmap(
           size.toInt(),
           text: text,
-          color: 'red',
+          color: 'indigo',
           borderColor: Colors.white,
           fontWeight: FontWeight.normal,
           fontSize: size / 3,
         );
-
         return Marker(
           markerId: MarkerId(cluster.getId()),
-          position: cluster.location,
+          position: cluster.location, // Use cluster.location instead of cluster.items[0].latLng
           onTap: () {
             pp('$mm ---- cluster? ${E.redDot} $cluster');
             for (var p in cluster.items) {
-              pp('$mm ... PassengerCountCover - cluster item: ${E.appleRed} ${p.passengerCount.vehicleReg}'
-                  '\n${E.leaf} passengersIn: ${p.passengerCount.passengersIn} '
-                  '\n${E.leaf} passengersOut: ${p.passengerCount.passengersOut} '
-                  '\n${E.leaf} currentPassengers: ${p.passengerCount.currentPassengers}');
+              pp('$mm ... VehicleArrivalCover - cluster item: ${E.appleRed} '
+                  '${p.arrival.vehicleReg} - ${p.arrival.landmarkName} - ${p.arrival.created}');
             }
           },
           icon: ic,

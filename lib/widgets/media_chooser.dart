@@ -4,12 +4,11 @@ import '../utils/functions.dart';
 
 class MediaChooser extends StatelessWidget {
   const MediaChooser(
-      {Key? key,
+      {super.key,
         required this.onPhoto,
         required this.onVideo,
         required this.takePhotoText,
-        required this.makeVideoText})
-      : super(key: key);
+        required this.makeVideoText});
   final Function onPhoto;
   final Function onVideo;
   final String takePhotoText, makeVideoText;

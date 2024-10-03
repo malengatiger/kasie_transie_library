@@ -4,25 +4,23 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart' as geo;
+import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:kasie_transie_library/bloc/data_api_dog.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
-import 'package:kasie_transie_library/data/schemas.dart';
-import 'package:kasie_transie_library/providers/kasie_providers.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/parsers.dart';
-import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:realm/realm.dart';
 
+import '../bloc/data_api_dog.dart';
+import '../bloc/list_api_dog.dart';
+import '../isolates/local_finder.dart';
 import '../l10n/translation_handler.dart';
+import '../utils/prefs.dart';
 import '../widgets/searching_cities_busy.dart';
 
 class CityCreatorMap extends ConsumerStatefulWidget {
   const CityCreatorMap({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   ConsumerState createState() => CityCreatorMapState();
@@ -31,6 +29,10 @@ class CityCreatorMap extends ConsumerStatefulWidget {
 class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
   static const defaultZoom = 16.0;
   final Completer<GoogleMapController> _mapController = Completer();
+  Prefs prefs = GetIt.instance<Prefs>();
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
+
 
   CameraPosition? _myCurrentCameraPosition;
   final _key = GlobalKey<ScaffoldState>();
@@ -69,8 +71,10 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
   String searchingCities = 'searching';
   bool _showCityForm = false;
 
-  lib.City? city; void _setTexts() async {
-    final c = await prefs.getColorAndLocale();
+  lib.City? city;
+
+  void _setTexts() async {
+    final c = prefs.getColorAndLocale();
     final loc = c.locale;
     searchingCities = await translator.translate('searchingCities', loc);
   }
@@ -82,10 +86,7 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
     super.initState();
     _setTexts();
     _setup();
-
   }
-
-
 
   void _setup() async {
     setState(() {
@@ -103,15 +104,12 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
       busy = false;
     });
   }
+
   // 👌the hill is being climbed!
   lib.Country? country;
+
   Future _getStates() async {
-    country = await prefs.getCountry();
-    final m = ref.watch(statesProvider(country!.countryId!));
-    if (m.hasValue) {
-      //states = m.value!;
-      setState(() {});
-    }
+    country = prefs.getCountry();
   }
 
   Future _getCurrentLocation() async {
@@ -126,7 +124,7 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
   }
 
   Future _getSettings() async {
-    settingsModel = await prefs.getSettings();
+    settingsModel = prefs.getSettings();
     if (settingsModel != null) {
       radius = settingsModel!.vehicleGeoQueryRadius!;
       if (radius == 0) {
@@ -150,10 +148,10 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
   }
 
   Future _getUser() async {
-    _user = await prefs.getUser();
+    _user = prefs.getUser();
   }
 
-  Future<void> _zoomToCity(City city) async {
+  Future<void> _zoomToCity(lib.City city) async {
     final latLng = LatLng(
         city.position!.coordinates.last, city.position!.coordinates.first);
     var cameraPos = CameraPosition(target: latLng, zoom: 13.0);
@@ -163,6 +161,7 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
   }
 
   lib.StateProvince? state;
+
   void _onMapTapped(LatLng latLng) {
     setState(() {
       this.latLng = latLng;
@@ -173,8 +172,8 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
   void _addNewCity() async {
     pp('$mm ... adding new city marker: $cityName ');
 
-    final icon = await getMarkerBitmap(200, text: 'OK',
-        color: 'black', fontSize: 40, fontWeight: FontWeight.w800);
+    final icon = await getMarkerBitmap(200,
+        text: 'OK', color: 'black', fontSize: 40, fontWeight: FontWeight.w800);
 
     _markers.add(Marker(
         markerId: MarkerId(DateTime.now().toIso8601String()),
@@ -199,35 +198,38 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
     controller.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
     _addCityToDatabase();
   }
-  void _addCityToDatabase() async {
 
+  void _addCityToDatabase() async {
     setState(() {
       busy = true;
     });
     try {
-      var cities = await listApiDog.findCitiesByLocation(LocationFinderParameter(
-          latitude: latLng!.latitude, limit: 2, longitude: latLng!.longitude, radiusInKM: 50));
+      var cities = await listApiDog.findCitiesByLocation(
+          LocationFinderParameter(
+              latitude: latLng!.latitude,
+              limit: 2,
+              longitude: latLng!.longitude,
+              radiusInKM: 50,
+              associationId: ''));
       String? stateId;
       String? stateName;
       if (cities.isNotEmpty) {
         stateId = cities.first.stateId;
         stateName = cities.first.stateName;
       }
-      final city = City(
-          ObjectId(),
-          cityId: Uuid.v4().toString(),
+      final city = lib.City(
+          cityId: DateTime.now().toIso8601String(),
           name: cityName,
           countryId: country!.countryId,
           countryName: country!.name,
           stateName: stateName,
           stateId: stateId,
           position: lib.Position(
-            type: point,
+            type: 'Point',
             coordinates: [latLng!.longitude, latLng!.latitude],
             latitude: latLng!.latitude,
             longitude: latLng!.longitude,
-          )
-      );
+          ));
       pp('$mm adding city to the database now!! ${city.name}');
       var mCity = await dataApiDog.addCity(city);
       pp('$mm city should be in the database now!! ${mCity.name}');
@@ -238,6 +240,7 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
       busy = false;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -249,7 +252,9 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
         ),
         key: _key,
         body: _currentPosition == null
-            ? SearchingCitiesBusy(searchingCities: searchingCities,)
+            ? SearchingCitiesBusy(
+                searchingCities: searchingCities,
+              )
             : Stack(children: [
                 GoogleMap(
                   mapType: isHybrid ? MapType.hybrid : MapType.normal,
@@ -284,7 +289,6 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
                             )),
                       ),
                     )),
-
                 _showCityForm
                     ? Positioned(
                         bottom: 80,
@@ -337,7 +341,6 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
                                   const SizedBox(
                                     height: 48,
                                   ),
-
                                   ElevatedButton(
                                       onPressed: () {
                                         if (nameEditController

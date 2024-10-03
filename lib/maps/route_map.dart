@@ -3,23 +3,24 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart' as geo;
+import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/local_finder.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 
+import '../bloc/data_api_dog.dart';
 import '../isolates/routes_isolate.dart';
 import '../utils/emojis.dart';
 
 class RouteMap extends StatefulWidget {
   const RouteMap({
-    Key? key,
+    super.key,
     required this.route,
-  }) : super(key: key);
+  });
 
   final lib.Route route;
   @override
@@ -29,7 +30,9 @@ class RouteMap extends StatefulWidget {
 class RouteMapState extends State<RouteMap> {
   static const defaultZoom = 14.0;
   final Completer<GoogleMapController> _mapController = Completer();
-
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
+  DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
   //Latitude: -25.7605348, Longitude: 27.8525771
   CameraPosition? _myCurrentCameraPosition = const CameraPosition(
     target: LatLng(-25.7805348, 27.8225771),
@@ -67,7 +70,7 @@ class RouteMapState extends State<RouteMap> {
   String? waitingForGPS, youAreHere, currentLocation;
 
   void _setTexts() async {
-    final c = await prefs.getColorAndLocale();
+    final c = prefs.getColorAndLocale();
     waitingForGPS = await translator.translate('errorCount', c.locale);
     youAreHere = await translator.translate('youAreHere', c.locale);
     currentLocation = await translator.translate('currentLocation', c.locale);
@@ -134,7 +137,9 @@ class RouteMapState extends State<RouteMap> {
       busy = true;
     });
     try {
-      _user = await prefs.getUser();
+      var routesIsolate = GetIt.instance<RoutesIsolate>();
+
+      _user = prefs.getUser();
       pp('$mm getting existing RoutePoints .......');
       existingRoutePoints =
           await routesIsolate.getRoutePoints(route.routeId!, refresh);
@@ -195,7 +200,7 @@ class RouteMapState extends State<RouteMap> {
   }
 
   Future _getUser() async {
-    _user = await prefs.getUser();
+    _user = prefs.getUser();
     _makeDotMarker();
   }
 
@@ -350,8 +355,7 @@ class RouteMapState extends State<RouteMap> {
 
 class RouteDropDown extends StatelessWidget {
   const RouteDropDown(
-      {Key? key, required this.routes, required this.onRoutePicked})
-      : super(key: key);
+      {super.key, required this.routes, required this.onRoutePicked});
   final List<lib.Route> routes;
   final Function(lib.Route) onRoutePicked;
 

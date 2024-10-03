@@ -4,28 +4,27 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart' as geo;
+import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
-import 'package:kasie_transie_library/providers/kasie_providers.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/local_finder.dart';
-import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/route_widgets/multi_route_chooser.dart';
 
+import '../bloc/list_api_dog.dart';
+import '../isolates/local_finder.dart';
 import '../isolates/routes_isolate.dart';
 import '../utils/emojis.dart';
-import '../widgets/drop_down_widgets.dart';
+import '../utils/prefs.dart';
 import '../widgets/timer_widget.dart';
 
 class AssociationRouteMaps extends StatefulWidget {
   const AssociationRouteMaps({
-    Key? key,
+    super.key,
     this.latitude,
     this.longitude,
     this.radiusInMetres,
-  }) : super(key: key);
+  });
 
   final double? latitude, longitude, radiusInMetres;
 
@@ -53,6 +52,8 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
 
   final List<lib.RoutePoint> rpList = [];
   List<lib.RoutePoint> existingRoutePoints = [];
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
 
   List<LatLng>? polylinePoints;
   Color color = Colors.black;
@@ -76,7 +77,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
       busy = true;
     });
     try {
-      _user = await prefs.getUser();
+      _user = prefs.getUser();
       var mRoutes = <lib.Route>[];
       if (widget.latitude != null && widget.longitude != null) {
         pp('\n\n$mm .......... find Association Routes by location ...');
@@ -138,6 +139,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   Future<void> _filter(List<lib.Route> mRoutes) async {
     routes.clear();
     for (var route in mRoutes) {
+      var routesIsolate = GetIt.instance<RoutesIsolate>();
       final marks = await routesIsolate.countRoutePoints(route.routeId!);
       if (marks > 0) {
         routes.add(route);
@@ -182,7 +184,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   String? stringColor;
 
   Future _getUser() async {
-    _user = await prefs.getUser();
+    _user = prefs.getUser();
   }
 
   Future _getCurrentLocation() async {
@@ -324,7 +326,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
                     children: [
                       ElevatedButton(
                           style: const ButtonStyle(
-                            elevation: MaterialStatePropertyAll(8.0),
+                            elevation: WidgetStatePropertyAll(8.0),
                           ),
                           onPressed: () {
                             _showBottomSheet();
@@ -405,8 +407,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
 
 class RouteDropDown extends StatelessWidget {
   const RouteDropDown(
-      {Key? key, required this.routes, required this.onRoutePicked})
-      : super(key: key);
+      {super.key, required this.routes, required this.onRoutePicked});
   final List<lib.Route> routes;
   final Function(lib.Route) onRoutePicked;
 

@@ -1,29 +1,30 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart' as ui;
-
-// import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intl_phone_field/countries.dart' as country;
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'package:kasie_transie_library/isolates/vehicles_isolate.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
-import 'package:kasie_transie_library/utils/zip_handler.dart';
-import 'package:kasie_transie_library/widgets/auth/country_list.dart';
 import 'package:kasie_transie_library/widgets/auth/my_sms_code_input.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import 'package:numeric_keyboard/numeric_keyboard.dart';
+import 'package:page_transition/page_transition.dart';
 
 import '../../bloc/list_api_dog.dart';
-import '../../data/schemas.dart' as lib;
+import '../../data/data_schemas.dart' as lib;
+import '../../data/data_schemas.dart';
 import '../../utils/emojis.dart';
 import '../../utils/functions.dart';
 import '../../utils/prefs.dart';
+import 'country_ui.dart';
 
 class MyPhoneInput extends StatefulWidget {
-  const MyPhoneInput({super.key, required this.onPhoneNumber});
+  const MyPhoneInput(
+      {super.key, required this.onPhoneNumber, required this.onError});
 
   final Function(String) onPhoneNumber;
+  final Function(String) onError;
 
   @override
   State<MyPhoneInput> createState() => _MyPhoneInputState();
@@ -34,13 +35,12 @@ class _MyPhoneInputState extends State<MyPhoneInput>
   final mm = '🥬🥬 MyPhoneInput: 😡';
   @override
   final auth = fb.FirebaseAuth.instance;
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
 
   @override
   late ui.PhoneAuthProvider provider;
 
-  // @override
-  // // TODO: implement provider
-  // ui.AuthProvider<ui.AuthListener, ui.AuthCredential> get provider => this;
   String? verificationId;
   fb.ConfirmationResult? confirmationResult;
 
@@ -50,10 +50,10 @@ class _MyPhoneInputState extends State<MyPhoneInput>
   final firebaseAuth = fb.FirebaseAuth.instance;
   String enteredText = '';
   String mText = '';
-  country.Country? countrySelected;
-
+  Country? countrySelected;
+  bool busy = false;
   bool initializing = false;
-
+  List<Country> countries = [];
   @override
   void initState() {
     provider = ui.PhoneAuthProvider();
@@ -64,21 +64,40 @@ class _MyPhoneInputState extends State<MyPhoneInput>
   }
 
   void _getCountry() async {
-    pp('$mm ... get country ...');
-    var code = await getDeviceCountryCode();
-    if (code != null) {
-      countrySelected = await getDeviceCountry(code);
-      if (mounted) {
-        setState(() {});
+    pp('$mm ... get countries and set device country  ...');
+    try {
+      setState(() {
+        busy = true;
+      });
+      countries = await listApiDog.getCountries();
+      countrySelected = await getDeviceCountry(countries);
+      if (countrySelected != null) {
+        if (mounted) {
+          setState(() {});
+          return;
+        }
+      } else {
+        for (var c in countries) {
+          if (c.name == 'South Africa') {
+            countrySelected = c;
+          }
+        }
       }
-    } else {
-      countrySelected = await getDeviceCountry('ZA');
+    } catch (e) {
+      if (mounted) {
+        showErrorSnackBar(message: '$e', context: context);
+      }
     }
+    setState(() {
+      busy = false;
+    });
   }
 
   void _navigateToCountryList() async {
-    final c = await navigateWithScale(const CountryList(), context);
-    if (c is country.Country) {
+    final c = await NavigationUtils.navigateTo(context: context, widget: const CountryUi(), transitionType: PageTransitionType.leftToRight);
+
+    if (c is Country) {
+      pp('$mm .... CountryUi returned country:: ${c.toJson()} ');
       setState(() {
         countrySelected = c;
       });
@@ -122,6 +141,7 @@ class _MyPhoneInputState extends State<MyPhoneInput>
   Future _initializeData() async {
     pp('$mm ...................... ${E.redDot} _initializeData; '
         '\n ${E.blueDot} verificationId: $verificationId ${E.blueDot} smsCode: $smsCode');
+    var routesIsolate = GetIt.instance<RoutesIsolate>();
     if (smsCode.isEmpty) {
       pp('$mm ...................... ${E.redDot} _initializeData; quitting, sms-code is null');
       showSnackBar(
@@ -169,7 +189,8 @@ class _MyPhoneInputState extends State<MyPhoneInput>
                 duration: const Duration(seconds: 12),
                 message: 'Error input: $e',
                 context: context);
-            Navigator.of(context).pop();
+            // Navigator.of(context).pop();
+            widget.onError(e.toString());
           } else {
             pp('... Widget not mounted ... ');
           }
@@ -180,9 +201,9 @@ class _MyPhoneInputState extends State<MyPhoneInput>
       if (mUser != null) {
         pp('$mm KasieTransie user found on database: 🍎 ${mUser.name} 🍎 will initialize ...');
         myPrettyJsonPrint(mUser.toJson());
-        await prefs.saveUser(mUser);
+        prefs.saveUser(mUser);
         final ass = await listApiDog.getAssociationById(mUser.associationId!);
-        await prefs.saveAssociation(ass);
+        prefs.saveAssociation(ass!);
 
         try {
           final countries = await routesIsolate.getCountries(true);
@@ -191,7 +212,7 @@ class _MyPhoneInputState extends State<MyPhoneInput>
           for (var country in countries) {
             if (country.countryId == ass.countryId!) {
               myCountry = country;
-              await prefs.saveCountry(myCountry);
+              prefs.saveCountry(myCountry);
               pp('$mm KasieTransie country:  🍎 ${country.toJson()} 🍎');
               break;
             }
@@ -199,12 +220,13 @@ class _MyPhoneInputState extends State<MyPhoneInput>
           //
 
           try {
-            final users = await routesIsolate.getUsers(mUser.associationId!, true);
+            final users =
+                await routesIsolate.getUsers(mUser.associationId!, true);
             pp('$mm KasieTransie users found on database:  🍎 ${users.length} 🍎');
+            var vehicleIsolate = GetIt.instance<VehicleIsolate>();
             await vehicleIsolate.getVehicles(mUser.associationId!);
             await routesIsolate.getCities(myCountry!.countryId!, true);
             await routesIsolate.getRoutes(mUser.associationId!, true);
-
           } catch (e, stackTrace) {
             pp('$mm SOMETHING REALLY WRONG!, Bubba! : $e $stackTrace');
           }
@@ -229,15 +251,16 @@ class _MyPhoneInputState extends State<MyPhoneInput>
               initializing = false;
               enteredText = '';
             });
-            Navigator.of(context).pop(mUser);
+            // Navigator.of(context).pop(mUser);
+            widget.onError(e.toString());
           }
         }
       } else {
         if (mounted) {
-          showSnackBar(
-              message: 'User unknown, please check with your Admin',
-              context: context);
-          Navigator.of(context).pop();
+          const msg = 'User unknown, please check with your Admin';
+          showSnackBar(message: msg, context: context);
+          // Navigator.of(context).pop();
+          widget.onError(msg);
           return;
         }
       }
@@ -245,6 +268,8 @@ class _MyPhoneInputState extends State<MyPhoneInput>
       pp(e);
       if (mounted) {
         showSnackBar(message: '$e', context: context);
+        // Navigator.of(context).pop();
+        widget.onError(e.toString());
       }
     }
     return 0;
@@ -272,9 +297,17 @@ class _MyPhoneInputState extends State<MyPhoneInput>
   @override
   void onError(Object error) {
     pp('$mm ......... show snack but do nothing ... ??????  ${E.redDot}${E.redDot} onError, credential: $error');
-    // if (mounted) {
-    //   showSnackBar(message: 'Error: $error', context: context);
-    // }
+    if (mounted) {
+      showSnackBar(
+          duration: const Duration(seconds: 10),
+          padding: 16.0,
+          elevation: 16.0,
+          message: 'Error: $error',
+          context: context);
+
+      Navigator.of(context).pop();
+      widget.onError(error.toString());
+    }
   }
 
   @override
@@ -288,7 +321,8 @@ class _MyPhoneInputState extends State<MyPhoneInput>
     setState(() {
       initializing = false;
     });
-    smsCode = await navigateWithScale(const MySmsCodeInput(), context);
+    smsCode = await NavigationUtils.navigateTo(context: context, widget: const MySmsCodeInput(), transitionType: PageTransitionType.leftToRight);
+
 
     pp('\n\n$mm ... ${E.redDot} back from sms code input: ${E.appleRed} smsCode : $smsCode');
     _initializeData();
@@ -320,7 +354,7 @@ class _MyPhoneInputState extends State<MyPhoneInput>
     return SafeArea(
         child: Scaffold(
       appBar: AppBar(
-        title: const Text('Cellphone Authentication'),
+        title: const Text('Phone Authentication', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -361,10 +395,10 @@ class _MyPhoneInputState extends State<MyPhoneInput>
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('+${countrySelected!.dialCode}'),
+                      Text('+${countrySelected!.phoneCode}'),
                       gapW16,
                       Text(
-                        countrySelected!.name,
+                        countrySelected!.name!,
                         style: myTextStyleMediumLargeWithColor(
                             context, Theme.of(context).primaryColorLight, 18),
                       ),
@@ -385,7 +419,7 @@ class _MyPhoneInputState extends State<MyPhoneInput>
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Text(
-                            '+${countrySelected!.dialCode}$enteredText',
+                            '+${countrySelected!.phoneCode}$enteredText',
                             style: myTextStyleMediumLargeWithColor(
                                 context, Theme.of(context).primaryColor, 32),
                           ),
@@ -421,7 +455,7 @@ class _MyPhoneInputState extends State<MyPhoneInput>
                         ignoreTap = true;
 
                         provider.sendVerificationCode(
-                            phoneNumber: '+${countrySelected!.dialCode}$m');
+                            phoneNumber: '+${countrySelected!.phoneCode}$m');
                       },
                       onKeyboardTap: (text) {
                         if (!ignoreTap) {

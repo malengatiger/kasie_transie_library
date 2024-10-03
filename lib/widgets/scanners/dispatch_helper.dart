@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:kasie_transie_library/data/schemas.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart';
 final DispatchHelper dispatchHelper = DispatchHelper();
 
 class DispatchHelper {

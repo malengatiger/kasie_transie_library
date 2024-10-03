@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lm;
+import 'package:get_it/get_it.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart' as lm;
 import 'package:kasie_transie_library/widgets/tiny_bloc.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -11,6 +11,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../bloc/list_api_dog.dart';
 import '../../utils/emojis.dart';
 import '../../utils/functions.dart';
+import '../../utils/prefs.dart';
 
 class QRScannerMobile extends StatefulWidget {
   const QRScannerMobile({super.key, required this.onCarScanned, required this.onUserScanned, required this.onError, required this.quitAfterScan});
@@ -27,6 +28,9 @@ class _QRScannerMobileState extends State<QRScannerMobile> {
   MobileScannerController cameraController = MobileScannerController();
   PermissionStatus? permissionStatus;
   final mm = '🌀🌀🌀🌀🌀🌀🌀🌀QRScannerMobile 🍟🍟';
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
+
   @override
   void initState() {
     super.initState();
@@ -52,33 +56,13 @@ class _QRScannerMobileState extends State<QRScannerMobile> {
         actions: [
           IconButton(
             color: Colors.white,
-            icon: ValueListenableBuilder(
-              valueListenable: cameraController.torchState,
-              builder: (context, state, child) {
-                switch (state) {
-                  case TorchState.off:
-                    return const Icon(Icons.flash_off, color: Colors.grey);
-                  case TorchState.on:
-                    return const Icon(Icons.flash_on, color: Colors.yellow);
-                }
-              },
-            ),
+            icon: const Icon(Icons.camera_rear),
             iconSize: 32.0,
             onPressed: () => cameraController.toggleTorch(),
           ),
           IconButton(
             color: Colors.white,
-            icon: ValueListenableBuilder(
-              valueListenable: cameraController.cameraFacingState,
-              builder: (context, state, child) {
-                switch (state) {
-                  case CameraFacing.front:
-                    return const Icon(Icons.camera_front);
-                  case CameraFacing.back:
-                    return const Icon(Icons.camera_rear);
-                }
-              },
-            ),
+            icon: const Icon(Icons.camera_rear),
             iconSize: 32.0,
             onPressed: () => cameraController.switchCamera(),
           ),

@@ -1,24 +1,22 @@
 import 'package:badges/badges.dart' as bd;
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/providers/kasie_providers.dart';
-import 'package:responsive_builder/responsive_builder.dart' as responsive;
+import 'package:page_transition/page_transition.dart';
 
 import '../../../l10n/translation_handler.dart';
-import '../data/schemas.dart' as lib;
+import '../data/data_schemas.dart' as lib;
 import '../maps/city_creator_map.dart';
-import '../utils/device_location_bloc.dart';
 import '../utils/functions.dart';
 import '../utils/navigator_utils.dart';
 import '../utils/prefs.dart';
 
 class CityChooser extends StatefulWidget {
   const CityChooser(
-      {Key? key,
+      {super.key,
       required this.onSelected,
       required this.hint,
-      required this.refreshCountries})
-      : super(key: key);
+      required this.refreshCountries});
 
   final Function(lib.Country) onSelected;
   final String hint;
@@ -28,11 +26,13 @@ class CityChooser extends StatefulWidget {
   State<CityChooser> createState() => CityChooserState();
 }
 
-class CityChooserState extends State<CityChooser> {
+class CityChooserState extends State<CityChooser>  with AutomaticKeepAliveClientMixin{
   List<lib.Country> countries = <lib.Country>[];
   bool loading = false;
   lib.SettingsModel? settings;
   final mm = '😡 😡 😡 😡 CityChooser 🍎';
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
 
   @override
   void initState() {
@@ -44,7 +44,7 @@ class CityChooserState extends State<CityChooser> {
     setState(() {
       loading = true;
     });
-    settings = await prefs.getSettings();
+    settings = prefs.getSettings();
     if (countries.isEmpty) {
       pp('$mm getting countries from realm ................');
       countries = await listApiDog.getCountries();
@@ -101,16 +101,20 @@ class CityChooserState extends State<CityChooser> {
   void onChanged(value) {
     widget.onSelected(value);
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => throw UnimplementedError();
 }
 
 class CitySearch extends StatefulWidget {
   const CitySearch({
-    Key? key,
+    super.key,
     required this.showScaffold,
     required this.onCitySelected,
     required this.cities,
     required this.title,
-  }) : super(key: key);
+  });
 
   final bool showScaffold;
   final List<lib.City> cities;
@@ -252,7 +256,7 @@ class _CitySearchState extends State<CitySearch> {
                 ),
                 const SizedBox(width: 4,),
                 IconButton(onPressed: (){
-                  navigateWithSlide(const CityCreatorMap(), context);
+                  NavigationUtils.navigateTo(context: context, widget: const CityCreatorMap(), transitionType: PageTransitionType.leftToRight);
                 }, icon: Icon(Icons.add, color: Theme.of(context).primaryColor,))
               ],
             ),

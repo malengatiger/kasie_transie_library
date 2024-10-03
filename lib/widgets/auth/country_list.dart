@@ -6,7 +6,7 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class CountryList extends StatefulWidget {
-  const CountryList({Key? key}) : super(key: key);
+  const CountryList({super.key});
 
   @override
   State<CountryList> createState() => _CountryListState();

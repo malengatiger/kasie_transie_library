@@ -1,15 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
-import 'package:kasie_transie_library/isolates/routes_isolate.dart';
-import 'package:kasie_transie_library/providers/kasie_providers.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:badges/badges.dart' as bd;
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
 
+import '../isolates/routes_isolate.dart';
 import '../l10n/translation_handler.dart';
 
 class RouteListMinimum extends StatefulWidget {
@@ -17,19 +17,20 @@ class RouteListMinimum extends StatefulWidget {
   final lib.Association association;
   final bool isMappable;
   const RouteListMinimum({
-    Key? key,
+    super.key,
     required this.onRoutePicked, required this.association, required this.isMappable,
-  }) : super(key: key);
+  });
 
   @override
   RouteListMinimumState createState() => RouteListMinimumState();
 }
 
 class RouteListMinimumState extends State<RouteListMinimum>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin{
   late AnimationController _controller;
   static const mm = '🔷🔷🔷🔷😡😡😡 RouteListMinimum: 🔷🔷';
-
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
   var routes = <lib.Route>[];
   bool busy = false;
   late StreamSubscription<List<lib.Route>> _sub;
@@ -46,7 +47,7 @@ class RouteListMinimumState extends State<RouteListMinimum>
   }
 
   void _setTexts() async {
-    final c = await prefs.getColorAndLocale();
+    final c = prefs.getColorAndLocale();
     final loc = c.locale;
     routesList = await translator.translate('routesList', loc);
   }
@@ -66,9 +67,11 @@ class RouteListMinimumState extends State<RouteListMinimum>
       setState(() {
         busy = true;
       });
-      user = await prefs.getUser();
+      user = prefs.getUser();
+      var routesIsolate = GetIt.instance<RoutesIsolate>();
+
       if (refresh) {
-        routes = await routesIsolate.getRoutes(widget.association.associationId!, true);
+        var list = await routesIsolate.getRoutes(widget.association.associationId!, true);
       } else {
         if (widget.isMappable) {
           routes = await routesIsolate.getRoutesMappable(
@@ -156,4 +159,7 @@ class RouteListMinimumState extends State<RouteListMinimum>
       )
     ));
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

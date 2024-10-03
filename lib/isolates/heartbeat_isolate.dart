@@ -4,21 +4,18 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/app_auth.dart';
-import 'package:kasie_transie_library/bloc/cache_manager.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
-import 'package:kasie_transie_library/utils/parsers.dart';
-import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:realm/realm.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/data_schemas.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
 import '../utils/kasie_exception.dart';
+import '../utils/prefs.dart';
 
 final HeartbeatIsolate heartbeatIsolate = HeartbeatIsolate();
 
@@ -30,9 +27,9 @@ class HeartbeatIsolate {
     try {
       var res = await Firebase.initializeApp();
       pp('\n\n$xy Firebase.initializeApp .. seems ok! ... app: ${res.name}');
-
+      Prefs prefs = GetIt.instance<Prefs>();
       final token = await appAuth.getAuthToken();
-      var car = await prefs.getCar();
+      var car =  prefs.getCar();
       final loc = await locationBloc.getLocation();
       if (car == null) {
         try {
@@ -45,7 +42,7 @@ class HeartbeatIsolate {
             return;
           } else {
             final json = jsonDecode(string);
-            car = buildVehicle(json);
+            car = Vehicle.fromJson(json);
           }
         } catch (e) {
           pp('$xy  addHeartbeat fell down and cried like a baby! ${E.redDot}');
@@ -77,13 +74,10 @@ class HeartbeatIsolate {
     final start = DateTime.now();
     final s = await Isolate.run(() async => _heavyTaskForHeartbeat(bag));
     final mJson = jsonDecode(s);
-    final heartbeat = buildVehicleHeartbeat(mJson);
+    final heartbeat = VehicleHeartbeat.fromJson(mJson);
 
     pp('$xy _handleHeartbeat attempting to cache ${heartbeat.vehicleReg} heartbeat.... ');
 
-    listApiDog.realm.write(() {
-      listApiDog.realm.add<VehicleHeartbeat>(heartbeat, update: true);
-    });
     var end = DateTime.now();
     pp('$xy should have cached ${heartbeat.vehicleReg} Heartbeat in realm; elapsed time: '
         '${end.difference(start).inSeconds} seconds');
@@ -100,8 +94,8 @@ Future<String> _heavyTaskForHeartbeat(HeartbeatBag hb) async {
 
   await Firebase.initializeApp();
   final m = jsonDecode(hb.carJson);
-  final car = buildVehicle(m);
-  final heartbeat = VehicleHeartbeat(ObjectId(),
+  final car = Vehicle.fromJson(m);
+  final heartbeat = VehicleHeartbeat(
       ownerName: car.ownerName,
       ownerId: car.ownerId,
       associationId: car.associationId,
@@ -111,9 +105,9 @@ Future<String> _heavyTaskForHeartbeat(HeartbeatBag hb) async {
       make: car.make,
       created: DateTime.now().toUtc().toIso8601String(),
       longDate: DateTime.now().toUtc().millisecondsSinceEpoch,
-      vehicleHeartbeatId: Uuid.v4().toString(),
+      vehicleHeartbeatId: DateTime.now().toIso8601String(),
       position: Position(
-        type: point,
+        type: 'Point',
         coordinates: [hb.longitude, hb.latitude],
         latitude: hb.latitude,
         longitude: hb.longitude,

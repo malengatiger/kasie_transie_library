@@ -1,19 +1,17 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:get_it/get_it.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:badges/badges.dart' as bd;
 import 'package:kasie_transie_library/widgets/vehicle_widgets/vehicle_search.dart';
-import '../../bloc/list_api_dog.dart';
 import '../../l10n/translation_handler.dart';
 import '../../utils/emojis.dart';
 
 class MultiVehicleChooser extends StatefulWidget {
   const MultiVehicleChooser(
-      {Key? key, required this.onVehiclePicked, required this.vehicles, required this.vehiclesToHighlight})
-      : super(key: key);
+      {super.key, required this.onVehiclePicked, required this.vehicles, required this.vehiclesToHighlight});
 
   final List<lib.Vehicle> vehicles;
   final List<lib.Vehicle> vehiclesToHighlight;
@@ -24,7 +22,7 @@ class MultiVehicleChooser extends StatefulWidget {
   MultiVehicleChooserState createState() => MultiVehicleChooserState();
 }
 
-class MultiVehicleChooserState extends State<MultiVehicleChooser> {
+class MultiVehicleChooserState extends State<MultiVehicleChooser> with AutomaticKeepAliveClientMixin{
   final mm = '🔷🔷🔷 MultiVehicleChooser: ${E.appleRed}';
 
   var list = <lib.Vehicle>[];
@@ -52,8 +50,10 @@ class MultiVehicleChooserState extends State<MultiVehicleChooser> {
     });
   }
 
+  Prefs prefs = GetIt.instance<Prefs>();
+
   Future _setTexts() async {
-    final c = await prefs.getColorAndLocale();
+    final c =  prefs.getColorAndLocale();
     final loc = c.locale;
     selectCars = await translator.translate('selectCars', loc);
     selectedCars = await translator.translate('selectedCars', loc);
@@ -129,5 +129,9 @@ class MultiVehicleChooserState extends State<MultiVehicleChooser> {
       ],
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
 

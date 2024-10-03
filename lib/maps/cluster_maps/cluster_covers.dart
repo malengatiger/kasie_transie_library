@@ -1,7 +1,7 @@
 
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:kasie_transie_library/data/schemas.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart';
 
 class PassengerCountCover with ClusterItem {
   final LatLng latLng;

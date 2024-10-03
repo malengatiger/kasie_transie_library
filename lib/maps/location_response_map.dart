@@ -2,23 +2,19 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
-import 'package:kasie_transie_library/utils/device_location_bloc.dart';
-import 'package:kasie_transie_library/utils/local_finder.dart';
-import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 
+import '../bloc/list_api_dog.dart';
 import '../isolates/routes_isolate.dart';
 import '../l10n/translation_handler.dart';
-import '../providers/kasie_providers.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
+import '../utils/prefs.dart';
 
 class LocationResponseMap extends StatefulWidget {
-  const LocationResponseMap({Key? key, required this.locationResponse})
-      : super(key: key);
+  const LocationResponseMap({super.key, required this.locationResponse});
 
   final lib.LocationResponse locationResponse;
 
@@ -29,6 +25,10 @@ class LocationResponseMap extends StatefulWidget {
 class LocationResponseMapState extends State<LocationResponseMap> {
   static const mm = '😡😡😡😡😡😡😡 LocationResponseMap: 💪 ';
   final _key = GlobalKey<ScaffoldState>();
+
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
+
   bool busy = false;
   bool hybrid = true;
   final initialCameraPosition =
@@ -88,6 +88,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
     final hash = HashMap<String, List<lib.RoutePoint>>();
     _markers.clear();
     _polyLines.clear();
+    var routesIsolate = GetIt.instance<RoutesIsolate>();
     for (var route in routes) {
       final points = await routesIsolate.getRoutePoints(route.routeId!, false);
       final marks = await listApiDog.getRouteLandmarks(route.routeId!, false);
@@ -213,7 +214,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
   }
 
   void _setTexts() async {
-    final c = await prefs.getColorAndLocale();
+    final c = prefs.getColorAndLocale();
     final locale = c.locale;
     locationResponseText =
         await translator.translate('locationResponse', locale);

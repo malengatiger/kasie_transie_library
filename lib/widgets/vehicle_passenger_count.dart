@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
-import 'package:kasie_transie_library/bloc/dispatch_helper.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/navigator_utils.dart';
+import 'package:kasie_transie_library/utils/navigator_utils_old.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/photo_handler.dart';
-import 'package:realm/realm.dart';
+import 'package:kasie_transie_library/widgets/scanners/dispatch_helper.dart';
 
 import '../maps/route_map.dart';
-import '../utils/parsers.dart';
 import 'drop_down_widgets.dart';
 
 class VehiclePassengerCount extends StatefulWidget {
   const VehiclePassengerCount(
-      {Key? key, required this.vehicle, required this.route})
-      : super(key: key);
+      {super.key, required this.vehicle, required this.route});
 
   final lib.Vehicle vehicle;
   final lib.Route route;
@@ -32,7 +30,9 @@ class VehiclePassengerCount extends StatefulWidget {
 class VehiclePassengerCountState extends State<VehiclePassengerCount>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  Prefs prefs = GetIt.instance<Prefs>();
+  DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
   static const mm = ' 🔷🔷🔷🔷🔷🔷 VehiclePassengerCount 🔷';
   var passengerCounts = <lib.AmbassadorPassengerCount>[];
 
@@ -51,7 +51,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
       saveCounts;
 
   Future _setTexts() async {
-    final c = await prefs.getColorAndLocale();
+    final c = prefs.getColorAndLocale();
     passengersInText = await translator.translate('passengersIn', c.locale);
     passengersOutText = await translator.translate('passengersOut', c.locale);
     currentPassengersText =
@@ -92,7 +92,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
       setState(() {
         busy = true;
       });
-      user = await prefs.getUser();
+      user = prefs.getUser();
       final startDate = DateTime.now()
           .toUtc()
           .subtract(const Duration(hours: 8))
@@ -124,7 +124,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
     try {
       final loc = await locationBloc.getLocation();
       final passengerCount = lib.AmbassadorPassengerCount(
-        ObjectId(),
+
         associationId: user!.associationId,
         created: DateTime.now().toUtc().toIso8601String(),
         userId: user!.userId,
@@ -137,7 +137,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
         ownerId: widget.vehicle.ownerId,
         ownerName: widget.vehicle.ownerName,
         position: lib.Position(
-          type: point,
+          type: 'Point',
           coordinates: [loc.longitude, loc.latitude],
           latitude: loc.latitude,
           longitude: loc.latitude,
@@ -445,7 +445,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                         width: 300,
                         child: ElevatedButton(
                             style: const ButtonStyle(
-                              elevation: MaterialStatePropertyAll(8.0),
+                              elevation: WidgetStatePropertyAll(8.0),
                             ),
                             onPressed: () {
                               _submitCounts();

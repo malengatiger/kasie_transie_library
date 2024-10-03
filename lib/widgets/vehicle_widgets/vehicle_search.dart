@@ -1,13 +1,8 @@
 
-import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/data/schemas.dart' as lib;
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:badges/badges.dart' as bd;
-import '../../bloc/list_api_dog.dart';
-import '../../l10n/translation_handler.dart';
 import '../../utils/emojis.dart';
 
 class VehicleSearch extends StatefulWidget {
