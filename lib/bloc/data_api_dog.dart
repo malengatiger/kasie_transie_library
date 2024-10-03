@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
+import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/data/vehicle_list.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
@@ -166,7 +168,9 @@ class DataApiDog {
     pp('$mm ... adding routePoints to database ...${routePointList.routePoints.length}');
     final cmd = '${url}routes/addRoutePoints';
     var res = await _callPost(cmd, routePointList.toJson());
-    pp('$mm routePoints added to database: $res');
+    pp('$mm routePoints added to MongoDB Atlas database: $res');
+    SemCache semCache = GetIt.instance<SemCache>();
+    await semCache.saveRoutePoints(routePointList.routePoints);
     return res as int;
   }
 
@@ -366,6 +370,20 @@ class DataApiDog {
     final cmd = '${url}deleteLandmark?landmarkId=$landmarkId';
     final res = await _sendHttpGET(cmd);
     pp('$mm deleteLandmark happened ...');
+
+    try {
+      //listApiDog.removeRoutePoint(routePointId);
+      pp('$mm deleteRoutePoint for Realm happened ...');
+    } catch (e) {
+      pp(e);
+    }
+
+    return res;
+  }
+  Future deleteRouteLandmark(String routeLandmarkId) async {
+    final cmd = '${url}routes/deleteRouteLandmark?routeLandmarkId=$routeLandmarkId';
+    final res = await _sendHttpGET(cmd);
+    pp('$mm deleteRouteLandmark happened ...');
 
     try {
       //listApiDog.removeRoutePoint(routePointId);

@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart' as cl;
+import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/maps/cluster_maps/toggle.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 
 import '../../bloc/list_api_dog.dart';
-import '../../isolates/routes_isolate.dart';
 import '../../messaging/fcm_bloc.dart';
 import 'cluster_covers.dart';
 
@@ -283,11 +283,11 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
   }
 
   Future<void> _buildRoutes() async {
-    var routesIsolate = GetIt.instance<RoutesIsolate>();
+    var semCache = GetIt.instance<SemCache>();
 
     for (var r in routes) {
       final latLngs = <LatLng>[];
-      final rps = await routesIsolate.getRoutePoints(r.routeId!, false);
+      final rps = await semCache.getRoutePoints(r.routeId!);
       for (var rp in rps) {
         latLngs.add(LatLng(
             rp.position!.coordinates.last, rp.position!.coordinates.first));
@@ -317,10 +317,10 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
 
   Future<Set<Marker>> _buildRouteLandmarks() async {
     Set<Marker> mMarkers = {};
-    var routesIsolate = GetIt.instance<RoutesIsolate>();
+    var routesIsolate = GetIt.instance<SemCache>();
 
     for (var r in routes) {
-      final rps = await routesIsolate.getRouteLandmarksCached(r.routeId!);
+      final rps = await routesIsolate.getRouteLandmarks(r.routeId!);
       int index = 0;
       for (var mark in rps) {
         final latLng = LatLng(

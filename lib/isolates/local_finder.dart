@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:get_it/get_it.dart';
-import 'package:kasie_transie_library/isolates/routes_isolate.dart';
+import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 
 import '../bloc/list_api_dog.dart';
@@ -131,8 +131,8 @@ final   Prefs prefs = GetIt.instance<Prefs>();
     } else {
       final user = prefs.getUser();
       if (user != null) {
-        var routesIsolate = GetIt.instance<RoutesIsolate>();
-        routesIsolate.getRoutes(user.associationId!, false);
+        var routesIsolate = GetIt.instance<SemCache>();
+        routesIsolate.getRoutes(user.associationId!);
       }
     }
 
@@ -168,8 +168,8 @@ final   Prefs prefs = GetIt.instance<Prefs>();
     } else {
       final user = prefs.getUser();
       if (user != null) {
-        var routesIsolate = GetIt.instance<RoutesIsolate>();
-        rList = await routesIsolate.getRoutes(user.associationId!, true);
+        var routesIsolate = GetIt.instance<SemCache>();
+        rList = await routesIsolate.getRoutes(user.associationId!);
       }
       final comm = prefs.getCommuter();
       if (comm != null) {

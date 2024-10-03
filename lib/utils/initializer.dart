@@ -6,7 +6,6 @@ import 'package:kasie_transie_library/utils/prefs.dart';
 import '../bloc/data_api_dog.dart';
 import '../bloc/list_api_dog.dart';
 import '../data/data_schemas.dart';
-import '../isolates/routes_isolate.dart';
 import 'functions.dart';
 
 final Initializer initializer = Initializer();

@@ -8,7 +8,6 @@ import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:kasie_transie_library/auth/sign_in_strings.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/isolates/country_cities_isolate.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:pinput/pinput.dart' as pin;
 
@@ -120,7 +119,7 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
         }
         pp('$mm KasieTransie users found on database:  🍎 ${users.length} 🍎');
         pp('$mm KasieTransie my country:  🍎 ${myCountry!.name!} 🍎');
-        countryCitiesIsolate.getCountryCities(myCountry.countryId!);
+        //countryCitiesIsolate.getCountryCities(myCountry.countryId!);
         setState(() {
           initializing = true;
         });

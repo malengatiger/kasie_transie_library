@@ -13,7 +13,7 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 
 import '../bloc/data_api_dog.dart';
-import '../isolates/routes_isolate.dart';
+import '../bloc/sem_cache.dart';
 import '../utils/emojis.dart';
 
 class RouteMap extends StatefulWidget {
@@ -137,12 +137,12 @@ class RouteMapState extends State<RouteMap> {
       busy = true;
     });
     try {
-      var routesIsolate = GetIt.instance<RoutesIsolate>();
+      var semCache = GetIt.instance<SemCache>();
 
       _user = prefs.getUser();
       pp('$mm getting existing RoutePoints .......');
       existingRoutePoints =
-          await routesIsolate.getRoutePoints(route.routeId!, refresh);
+          await semCache.getRoutePoints(route.routeId!);
     } catch (e) {
       pp(e);
     }

@@ -7,11 +7,11 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
-import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'package:kasie_transie_library/messaging/local_notif.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
+import 'package:kasie_transie_library/utils/zip_handler.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -533,8 +533,8 @@ class FCMBloc {
 
   void _processRouteUpdate(lib.RouteUpdateRequest req) async {
     pp('$newMM _processRouteUpdate ... ${req.routeName}');
-    var routesIsolate = GetIt.instance<RoutesIsolate>();
-    await routesIsolate.refreshRoute(req.routeId!);
+    var routesIsolate = GetIt.instance<ZipHandler>();
+    await routesIsolate.refreshRoute(routeId: req.routeId!);
     _routeUpdateRequestStreamController.sink.add(req);
   }
 

@@ -189,6 +189,7 @@ class SemCache {
 
   Future saveAssociations(List<Association> associations) async {
     var store = intMapStoreFactory.store('associations');
+    store.delete(db);
     for (var ass in associations) {
       store.record(dateToInt(ass.dateRegistered!)).put(db, ass.toJson());
       pp('$mm 🖐🏾🖐🏾🖐🏾 ${ass.associationName}');

@@ -5,13 +5,11 @@ import 'package:kasie_transie_library/bloc/cloud_storage_bloc.dart';
 import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/bloc/the_great_geofencer.dart';
 import 'package:kasie_transie_library/bloc/theme_bloc.dart';
-import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/zip_handler.dart';
 import 'package:sembast_web/sembast_web.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../isolates/vehicles_isolate.dart';
 import '../utils/error_handler.dart';
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
@@ -43,11 +41,6 @@ class RegisterServices {
     final listApi =
         ListApiDog(client, appAuth, cacheManager, prefs, errorHandler, zipHandler, semCache);
     //
-    GetIt.instance.registerLazySingleton<RoutesIsolate>(
-            () => RoutesIsolate());
-
-    GetIt.instance.registerLazySingleton<VehicleIsolate>(
-            () => VehicleIsolate());
 
     GetIt.instance.registerLazySingleton<SemCache>(
             () => semCache);

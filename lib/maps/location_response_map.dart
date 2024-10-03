@@ -4,10 +4,10 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 
 import '../bloc/list_api_dog.dart';
-import '../isolates/routes_isolate.dart';
 import '../l10n/translation_handler.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
@@ -52,6 +52,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
     pp('$mm at least I get to initState ... ${E.heartRed} ${widget.locationResponse.vehicleReg}');
     _setTexts();
   }
+  SemCache semCache = GetIt.instance<SemCache>();
 
   Future<void> _getRoutes() async {
     pp('$mm ... getting routes ....');
@@ -73,7 +74,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
         }
       }
     } else {
-      routes = await listApiDog.getRoutes(widget.locationResponse.associationId!, false);
+      routes = await semCache.getRoutes(widget.locationResponse.associationId!);
     }
     pp('$mm ... ${routes.length} routes to be put on map ...');
 
@@ -88,10 +89,10 @@ class LocationResponseMapState extends State<LocationResponseMap> {
     final hash = HashMap<String, List<lib.RoutePoint>>();
     _markers.clear();
     _polyLines.clear();
-    var routesIsolate = GetIt.instance<RoutesIsolate>();
+    var semCache = GetIt.instance<SemCache>();
     for (var route in routes) {
-      final points = await routesIsolate.getRoutePoints(route.routeId!, false);
-      final marks = await listApiDog.getRouteLandmarks(route.routeId!, false);
+      final points = await semCache.getRoutePoints(route.routeId!);
+      final marks = await semCache.getRouteLandmarks(route.routeId!);
       hash[route.routeId!] = points;
       //add polyline
       final List<LatLng> latLngs = [];

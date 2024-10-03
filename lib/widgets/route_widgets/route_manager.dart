@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/maps/route_map.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
@@ -17,7 +18,6 @@ import 'package:responsive_builder/responsive_builder.dart';
 import '../../bloc/data_api_dog.dart';
 import '../../bloc/list_api_dog.dart';
 import '../../data/generation_request.dart';
-import '../../isolates/routes_isolate.dart';
 import '../../utils/prefs.dart';
 
 class RouteManager extends StatefulWidget {
@@ -39,6 +39,7 @@ class _RouteManagerState extends State<RouteManager> {
   bool busy = false;
   var routes = <lib.Route>[];
   lib.Route? route;
+  SemCache semCache = GetIt.instance<SemCache>();
 
   @override
   void initState() {
@@ -53,8 +54,8 @@ class _RouteManagerState extends State<RouteManager> {
     try {
       final loc = await locationBloc.getLocation();
       pp('$mm ... location found: ${E.redDot} $loc');
-      var mRoutes = await listApiDog.getRoutes(
-          widget.association.associationId!, false);
+      var mRoutes = await semCache.getRoutes(
+          widget.association.associationId!);
       await _filter(mRoutes);
     } catch (e) {
       pp(e);
@@ -82,7 +83,7 @@ class _RouteManagerState extends State<RouteManager> {
   }
 
   Future<void> _filter(List<lib.Route> mRoutes) async {
-    var routesIsolate = GetIt.instance<RoutesIsolate>();
+    var routesIsolate = GetIt.instance<SemCache>();
     for (var route in mRoutes) {
       final marks = await routesIsolate.countRouteLandmarks(route.routeId!);
       if (marks > 1) {
@@ -98,16 +99,16 @@ class _RouteManagerState extends State<RouteManager> {
       busy = true;
     });
     try {
-      final vehicleIds = <String>[];
-      final cars = await listApiDog.getAssociationVehicles(route!.associationId!, false);
-      for (var i = 0; i < numberOfCars; i++) {
-        vehicleIds.add(cars.elementAt(i).vehicleId!);
-      }
-
-      final startDate = DateTime.now().toUtc().subtract(const Duration(minutes: 60)).toIso8601String();
-      final gen = GenerationRequest(route!.routeId!, startDate, vehicleIds, 300);
-      await dataApiDog.generateRouteDispatchRecords(gen);
-      _showSuccess('Dispatch record generation requests sent. Watch for action ...');
+      // final vehicleIds = <String>[];
+      // final cars = await listApiDog.getAssociationVehicles(route!.associationId!, false);
+      // for (var i = 0; i < numberOfCars; i++) {
+      //   vehicleIds.add(cars.elementAt(i).vehicleId!);
+      // }
+      //
+      // final startDate = DateTime.now().toUtc().subtract(const Duration(minutes: 60)).toIso8601String();
+      // final gen = GenerationRequest(route!.routeId!, startDate, vehicleIds, 300);
+      // await dataApiDog.generateRouteDispatchRecords(gen);
+      // _showSuccess('Dispatch record generation requests sent. Watch for action ...');
 
     } catch (e) {
       pp(e);

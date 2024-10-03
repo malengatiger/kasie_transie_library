@@ -17,8 +17,6 @@ import '../data/big_bag.dart';
 import '../data/data_schemas.dart';
 import '../data/route_bag.dart';
 import '../isolates/local_finder.dart';
-import '../isolates/routes_isolate.dart';
-import '../isolates/vehicles_isolate.dart';
 import '../utils/emojis.dart';
 import '../utils/error_handler.dart';
 import '../utils/functions.dart';
@@ -55,7 +53,9 @@ class ListApiDog {
     this.appAuth,
     this.cacheManager,
     this.prefs,
-    this.errorHandler, this.zipHandler, this.semCache,
+    this.errorHandler,
+    this.zipHandler,
+    this.semCache,
   ) {
     url = KasieEnvironment.getUrl();
     databaseString = KasieEnvironment.getUrl();
@@ -187,20 +187,7 @@ class ListApiDog {
     return null;
   }
 
-  Future<List<Vehicle>> getAssociationVehicles(
-      String associationId, bool refresh) async {
-    final list = <Vehicle>[];
-    final token = await appAuth.getAuthToken();
-    var vehicleIsolate = GetIt.instance<VehicleIsolate>();
 
-    if (refresh) {
-      if (token != null) {
-        return await vehicleIsolate.getVehicles(associationId);
-      }
-    }
-
-    return list;
-  }
 
   final StreamController<List<Vehicle>> _vehiclesStreamController =
       StreamController.broadcast();
@@ -209,12 +196,12 @@ class ListApiDog {
 
   Future<List<Vehicle>> getOwnerVehicles(String userId, bool refresh) async {
     final list = <Vehicle>[];
-    if (refresh) {
-      var vehicleIsolate = GetIt.instance<VehicleIsolate>();
-      final nList = await vehicleIsolate.getOwnerVehicles(userId);
-      _vehiclesStreamController.sink.add(nList);
-      return nList;
-    }
+    // if (refresh) {
+    //   var vehicleIsolate = GetIt.instance<SemCache>();
+    //   final nList = await vehicleIsolate.get(userId);
+    //   _vehiclesStreamController.sink.add(nList);
+    //   return nList;
+    // }
 
     return list;
   }
@@ -308,7 +295,8 @@ class ListApiDog {
   }
 
   Future<List<Vehicle>> getCarsFromBackend(String associationId) async {
-    final cmd = '${url}association/getAssociationVehicles?associationId=$associationId';
+    final cmd =
+        '${url}association/getAssociationVehicles?associationId=$associationId';
     List resp = await _sendHttpGET(cmd);
     var list = <Vehicle>[];
     for (var vehicleJson in resp) {
@@ -319,7 +307,7 @@ class ListApiDog {
   }
 
   Future<List<Vehicle>> getOwnerCarsFromBackend(String userId) async {
-    final cmd = '${url}getOwnerVehicles?userId=$userId';
+    final cmd = '${url}vehicle/getOwnerVehicles?userId=$userId';
 
     List resp = await _sendHttpGET(cmd);
     var list = <Vehicle>[];
@@ -332,7 +320,7 @@ class ListApiDog {
 
   Future<List<RouteAssignment>> getVehicleRouteAssignmentsFromBackend(
       String vehicleId) async {
-    final cmd = '${url}getVehicleRouteAssignments?vehicleId=$vehicleId';
+    final cmd = '${url}vehicle/getVehicleRouteAssignments?vehicleId=$vehicleId';
 
     List resp = await _sendHttpGET(cmd);
     var list = <RouteAssignment>[];
@@ -372,14 +360,15 @@ class ListApiDog {
   }
 
   Future<List<Association>> getAssociations(bool refresh) async {
-    final list = <Association>[];
-
-    final cmd = '${url}association/getAssociations';
-    List resp = await _sendHttpGET(cmd);
-    for (var m in resp) {
-      list.add(Association.fromJson(m));
+    final list = await semCache.getAssociations();
+    if (list.isEmpty || refresh) {
+      final cmd = '${url}association/getAssociations';
+      List resp = await _sendHttpGET(cmd);
+      for (var m in resp) {
+        list.add(Association.fromJson(m));
+      }
+      await semCache.saveAssociations(list);
     }
-    await semCache.saveAssociations(list);
     pp('$mm cached associations: ${list.length}');
     return list;
   }
@@ -428,7 +417,7 @@ class ListApiDog {
         final token = await appAuth.getAuthToken();
         if (token != null) {
           final s =
-              await zipHandler.getRoutePoints(routeId: routeId, token: token);
+              await zipHandler.getRoutePoints(routeId: routeId);
           localList = jsonDecode(s);
           pp('$mm RoutePoints from backend via zip: ${localList.length}');
         }
@@ -911,14 +900,14 @@ class ListApiDog {
     return routes;
   }
 
-  Future<List<Route>> getRoutes(String associationId, bool refresh) async {
-    var routesIsolate = GetIt.instance<RoutesIsolate>();
-    final remoteList = await routesIsolate.getRoutes(associationId, refresh);
-    pp('$mm ... Routes from backend:: ${remoteList.length}');
-
-    _routeController.sink.add(remoteList);
-    return remoteList;
-  }
+  // Future<List<Route>> getRoutes(String associationId, bool refresh) async {
+  //   var routesIsolate = GetIt.instance<RoutesIsolate>();
+  //   final remoteList = await routesIsolate.getRoutes(associationId, refresh);
+  //   pp('$mm ... Routes from backend:: ${remoteList.length}');
+  //
+  //   _routeController.sink.add(remoteList);
+  //   return remoteList;
+  // }
 
   Future<List<Landmark>> findLandmarksByLocation(
       {required double latitude,
@@ -968,7 +957,6 @@ class ListApiDog {
     pp('$mm Route Landmarks found: ${list.length}');
     return list;
   }
-
 
   Future<List<Route>> findRoutesByLocation(LocationFinderParameter p) async {
     var list = <Route>[];
@@ -1055,11 +1043,10 @@ class ListApiDog {
     return list;
   }
 
-  Future<int> countCountryCities(String countryId, bool refresh) async {
-    final list = <City>[];
-    var routesIsolate = GetIt.instance<RoutesIsolate>();
-    final gList = await routesIsolate.getCities(countryId, refresh);
-    return gList.length;
+  Future<int> countCountryCities(String countryId) async {
+    var semCache = GetIt.instance<SemCache>();
+    final list = await semCache.getCities();
+    return list.length;
   }
 
   Future removeRoutePoint(String routePointId) async {
@@ -1165,7 +1152,6 @@ class ListApiDog {
             errorType: KasieException.socketException);
         errorHandler.handleError(exception: gex);
         throw Exception('The status is BAD, Boss!');
-
       }
       // pp("$xz ........ response body: ${resp.body}");
       var mJson = json.decode(resp.body);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/maps/cluster_maps/arrivals_cluster_map.dart';
 import 'package:kasie_transie_library/maps/cluster_maps/cluster_covers.dart';
@@ -13,7 +14,6 @@ import 'package:kasie_transie_library/utils/navigator_utils_old.dart';
 import 'package:badges/badges.dart' as bd;
 
 import '../../bloc/list_api_dog.dart';
-import '../../isolates/routes_isolate.dart';
 import '../../utils/prefs.dart';
 import '../../widgets/drop_down_widgets.dart';
 
@@ -58,7 +58,7 @@ class ClusterMapControllerState extends State<ClusterMapController> with Automat
     _getAssociationRouteData(true);
   }
   Future<void> _filter(List<lib.Route> mRoutes) async {
-    var routesIsolate = GetIt.instance<RoutesIsolate>();
+    var routesIsolate = GetIt.instance<SemCache>();
     for (var route in mRoutes) {
       final marks = await routesIsolate.countRouteLandmarks(route.routeId!);
       if (marks > 1) {
@@ -70,7 +70,7 @@ class ClusterMapControllerState extends State<ClusterMapController> with Automat
 
   void _getAssociationRouteData(bool refresh) async {
     pp('$mm ... _getAssociationRouteData; refresh: $refresh');
-
+    SemCache semCache = GetIt.instance<SemCache>();
     association = prefs.getAssociation();
     date = DateTime.now()
         .toUtc()
@@ -80,8 +80,8 @@ class ClusterMapControllerState extends State<ClusterMapController> with Automat
       busy = true;
     });
     try {
-      final mRoutes = await listApiDog.getRoutes(
-          association!.associationId!, refresh);
+      final mRoutes = await semCache.getRoutes(
+          association!.associationId!);
       _filter(mRoutes);
       dispatches = await listApiDog.getAssociationDispatchRecords(
           associationId: association!.associationId!,

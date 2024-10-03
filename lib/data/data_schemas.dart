@@ -916,7 +916,7 @@ class LocationResponse {
 
 class RouteLandmark {
 
-  String? routeId;
+  String? routeId, routeLandmarkId;
   String? routeName;
   String? landmarkId;
   String? landmarkName;
@@ -936,7 +936,7 @@ class RouteLandmark {
       this.associationId,
       this.routePointId,
       this.routePointIndex,
-      this.index,
+      this.index, this.routeLandmarkId,
       this.position});
   factory RouteLandmark.fromJson(Map<String, dynamic> json) =>
       _$RouteLandmarkFromJson(json);

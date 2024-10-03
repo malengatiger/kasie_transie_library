@@ -14,9 +14,9 @@ import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import '../bloc/data_api_dog.dart';
 import '../bloc/list_api_dog.dart';
 import '../bloc/sem_cache.dart';
-import '../isolates/routes_isolate.dart';
 import '../l10n/translation_handler.dart';
 import '../utils/prefs.dart';
+import '../utils/zip_handler.dart';
 import '../widgets/color_pad.dart';
 import '../widgets/tiny_bloc.dart';
 
@@ -39,6 +39,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
   ListApiDog listApiDog = GetIt.instance<ListApiDog>();
   Prefs prefs = GetIt.instance<Prefs>();
   DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
+  SemCache semCache = GetIt.instance<SemCache>();
 
   final CameraPosition _myCurrentCameraPosition =
       const CameraPosition(target: LatLng(-26.5, 27.6), zoom: 14.6);
@@ -66,7 +67,6 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
   var routeLandmarks = <lib.RouteLandmark>[];
   var landmarkIndex = 0;
   var routeMapping = 'routeMapping';
-  SemCache semCache = GetIt.instance<SemCache>();
 
   @override
   void initState() {
@@ -275,28 +275,28 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
 
   void _removeRoutePoints(LatLng latLng) async {
     pp('$mm _removeRoutePoints: ...  routesIsolate.deleteRoutePoints, point : $latLng');
-    var routesIsolate = GetIt.instance<RoutesIsolate>();
-
-    try {
-      existingRoutePoints = await routesIsolate.deleteRoutePoints(
-          routeId: widget.route.routeId!,
-          latitude: latLng.latitude,
-          longitude: latLng.longitude);
-      routePointIndex = existingRoutePoints.length;
-      pp('$mm ...  existingRoutePoints remaining : ${existingRoutePoints.length}');
-      _addPolyLine();
-      if (mounted) {
-        showOKToast(message: 'Route points removed', context: context);
-      }
-      return;
-    } catch (e, stack) {
-      pp('$mm $e - $stack');
-      if (mounted) {
-        showErrorSnackBar(
-            message: "Route point removal failed, please try again",
-            context: context);
-      }
-    }
+    // var zipHandler = GetIt.instance<ZipHandler>();
+    // try {
+    //   existingRoutePoints = await zipHandler.deleteRoutePoints(
+    //       routeId: widget.route.routeId!,
+    //       latitude: latLng.latitude,
+    //       longitude: latLng.longitude);
+    //
+    //   routePointIndex = existingRoutePoints.length;
+    //   pp('$mm ...  existingRoutePoints remaining : ${existingRoutePoints.length}');
+    //   _addPolyLine();
+    //   if (mounted) {
+    //     showOKToast(message: 'Route points removed', context: context);
+    //   }
+    //   return;
+    // } catch (e, stack) {
+    //   pp('$mm $e - $stack');
+    //   if (mounted) {
+    //     showErrorSnackBar(
+    //         message: "Route point removal failed, please try again",
+    //         context: context);
+    //   }
+    // }
   }
 
   String deleteRoutePoints = 'Do you want to delete all '
@@ -436,7 +436,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
         actions: [
           TextButton(onPressed: (){
             Navigator.of(context).pop();
-          }, child: Text('Cancel')),
+          }, child: const Text('Cancel')),
           TextButton(onPressed: (){
             Navigator.of(context).pop();
             changeRouteColorOnBackend();
@@ -504,6 +504,8 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
     try {
       final m = await dataApiDog.updateRouteColor(
           routeId: widget.route.routeId!, color: stringColor);
+      final SemCache semCache = GetIt.instance<SemCache>();
+      semCache.saveRoutes([m]);
       pp('$mm ... color has been updated ... result: $m ; 0 is good!');
       tinyBloc.setRouteId(widget.route.routeId!);
     } catch (e) {

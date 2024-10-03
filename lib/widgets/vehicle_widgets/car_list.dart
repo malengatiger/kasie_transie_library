@@ -11,6 +11,7 @@ import 'package:kasie_transie_library/widgets/vehicle_widgets/car_details.dart';
 import 'package:kasie_transie_library/widgets/scanners/scan_vehicle_for_owner.dart';
 import 'package:page_transition/page_transition.dart';
 
+import '../../bloc/sem_cache.dart';
 import '../../l10n/translation_handler.dart';
 import '../../utils/navigator_utils.dart';
 import '../../utils/prefs.dart';
@@ -35,6 +36,7 @@ class CarListState extends State<CarList>
   var carsToDisplay = <lm.Vehicle>[];
   bool showCarDetails = false;
   bool _showSearch = false;
+  SemCache semCache = GetIt.instance<SemCache>();
 
   // late StreamSubscription<bool> compSubscription;
   lm.Vehicle? car;
@@ -55,8 +57,7 @@ class CarListState extends State<CarList>
     });
     try {
       if (widget.associationId != null) {
-        cars = await listApiDog.getAssociationVehicles(
-            widget.associationId!, refresh);
+        cars = await semCache.getVehicles();
       }
       if (widget.ownerId != null) {
         cars = await listApiDog.getOwnerVehicles(widget.ownerId!, refresh);

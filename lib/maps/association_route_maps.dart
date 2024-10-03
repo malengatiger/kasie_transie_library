@@ -12,8 +12,8 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/route_widgets/multi_route_chooser.dart';
 
 import '../bloc/list_api_dog.dart';
+import '../bloc/sem_cache.dart';
 import '../isolates/local_finder.dart';
-import '../isolates/routes_isolate.dart';
 import '../utils/emojis.dart';
 import '../utils/prefs.dart';
 import '../widgets/timer_widget.dart';
@@ -76,6 +76,8 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     setState(() {
       busy = true;
     });
+    SemCache semCache = GetIt.instance<SemCache>();
+
     try {
       _user = prefs.getUser();
       var mRoutes = <lib.Route>[];
@@ -88,14 +90,14 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
                 ? distanceInKM * 1000
                 : widget.radiusInMetres!);
         if (mRoutes.isEmpty) {
-          mRoutes = await listApiDog
-              .getRoutes(_user!.associationId!, refresh);
+          mRoutes = await semCache
+              .getRoutes(_user!.associationId!);
         }
         await _filter(mRoutes);
       } else {
         pp('\n\n$mm .......... get all Association Routes ... refresh: $refresh');
-        final mRoutes = await listApiDog
-            .getRoutes(_user!.associationId!, refresh);
+        final mRoutes = await semCache
+            .getRoutes(_user!.associationId!);
         _printy();
         await _filter(mRoutes);
         if (mounted) {
@@ -139,7 +141,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   Future<void> _filter(List<lib.Route> mRoutes) async {
     routes.clear();
     for (var route in mRoutes) {
-      var routesIsolate = GetIt.instance<RoutesIsolate>();
+      var routesIsolate = GetIt.instance<SemCache>();
       final marks = await routesIsolate.countRoutePoints(route.routeId!);
       if (marks > 0) {
         routes.add(route);

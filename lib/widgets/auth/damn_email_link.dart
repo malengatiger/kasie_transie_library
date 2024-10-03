@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart' as dot;
 import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/app_auth.dart';
-import 'package:kasie_transie_library/isolates/routes_isolate.dart';
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
@@ -18,8 +17,8 @@ import 'package:open_mail_app/open_mail_app.dart' as mail;
 import '../../bloc/data_api_dog.dart';
 import '../../bloc/list_api_dog.dart';
 import '../../data/data_schemas.dart';
-import '../../isolates/vehicles_isolate.dart';
 import '../../utils/prefs.dart';
+import '../../utils/zip_handler.dart';
 
 late fbui.EmailLinkAuthProvider emailLinkAuthProvider;
 const mex = '🔷🔷🔷🔷EmailLinkAuthProvider 🔷🔷🔷🔷';
@@ -224,13 +223,13 @@ class DamnEmailLinkState extends State<DamnEmailLink>
 
           if (cred.user != null) {
             pp('$mm ... signInWithEmailAndPassword: ${E.leaf2} USER IS SIGNED IN!!! will send email with link, '
-                'but will start routesIsolate and vehicleIsolate ....');
+                'but will start zipHandler and vehicleIsolate ....');
              prefs.saveEmail(email);
              prefs.saveUser(userFromRemote);
-            var routesIsolate = GetIt.instance<RoutesIsolate>();
-            var vehicleIsolate = GetIt.instance<VehicleIsolate>();
-            await vehicleIsolate.getVehicles(mUser.associationId!);
-            await routesIsolate.getRoutes(mUser.associationId!, true);
+            var zipHandler = GetIt.instance<ZipHandler>();
+            // var vehicleIsolate = GetIt.instance<VehicleIsolate>();
+            //await vehicleIsolate.getVehicles(mUser.associationId!);
+            await zipHandler.getRoutes(associationId: mUser.associationId!, refresh: true);
 
             try {
               pp('$mm emailLinkAuthProvider: ${emailLinkAuthProvider.providerId} '

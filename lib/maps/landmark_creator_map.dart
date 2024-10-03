@@ -6,13 +6,13 @@ import 'package:geolocator/geolocator.dart' as geo;
 import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
-import 'package:kasie_transie_library/isolates/landmark_isolate.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 
+import '../bloc/data_api_dog.dart';
 import '../bloc/list_api_dog.dart';
-import '../isolates/routes_isolate.dart';
+import '../bloc/sem_cache.dart';
 import '../utils/prefs.dart';
 import '../widgets/timer_widget.dart';
 import '../widgets/tiny_bloc.dart';
@@ -34,6 +34,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   final Completer<GoogleMapController> _mapController = Completer();
   ListApiDog listApiDog = GetIt.instance<ListApiDog>();
   Prefs prefs = GetIt.instance<Prefs>();
+  SemCache semCache = GetIt.instance<SemCache>();
 
   CameraPosition? _myCurrentCameraPosition;
   static const mm = '🍐🍐🍐🍐🍐🍐🍐🍐 LandmarkCreatorMap: 💪 ';
@@ -95,16 +96,16 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   }
 
   void _listen() async {
-    completionSub =
-        landmarkIsolate.completionStream.listen((resultRouteLandmarks) {
-      pp('\n\n$mm landmarkIsolate.completionStream delivered ...  '
-          '${E.appleRed} routeLandmarks: ${routeLandmarks.length}  ');
-      routeLandmarks = resultRouteLandmarks;
-      pendingCount = 0;
-      if (mounted) {
-        _putLandmarksOnMap();
-      }
-    });
+    // completionSub =
+    //     landmarkIsolate.completionStream.listen((resultRouteLandmarks) {
+    //   pp('\n\n$mm landmarkIsolate.completionStream delivered ...  '
+    //       '${E.appleRed} routeLandmarks: ${routeLandmarks.length}  ');
+    //   routeLandmarks = resultRouteLandmarks;
+    //   pendingCount = 0;
+    //   if (mounted) {
+    //     _putLandmarksOnMap();
+    //   }
+    // });
   }
 
   void _controlReads(bool refresh) async {
@@ -177,10 +178,10 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     try {
       _user = prefs.getUser();
       pp('$mm ...... getting existing RoutePoints .......');
-      var routesIsolate = GetIt.instance<RoutesIsolate>();
+      var semCache = GetIt.instance<SemCache>();
 
       existingRoutePoints =
-          await routesIsolate.getRoutePoints(widget.route.routeId!, refresh);
+          await semCache.getRoutePoints(widget.route.routeId!);
 
       pp('$mm .......... existingRoutePoints ....  🍎 found: '
           '${existingRoutePoints.length} points');
@@ -405,7 +406,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   }
 
   String? landmarkName;
-
+  DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
   Future<void> _processNewLandmark() async {
     final routeLandmark = lib.RouteLandmark(
         position: lib.Position(type: 'Point', coordinates: [
@@ -413,6 +414,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
           routePointForLandmark!.position!.coordinates.last
         ]),
         routeId: widget.route.routeId!,
+        routeLandmarkId: '${DateTime.now().toUtc().millisecondsSinceEpoch}',
         landmarkName: landmarkName!,
         index: landmarkIndex,
         created: DateTime.now().toUtc().toIso8601String(),
@@ -422,7 +424,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
         associationId: widget.route.associationId!,
         routeName: widget.route.name!);
 
-    landmarkIsolate.addRouteLandmark(routeLandmark);
+    dataApiDog.addRouteLandmark(routeLandmark);
     pp('$mm landmark isolate started! ... 😎😎😎 Good Fucking Luck!!');
   }
 
@@ -438,7 +440,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
 
       pp('$mm ........................................... start delete ...');
       routeLandmarks =
-          await landmarkIsolate.deleteRouteLandmark(landmark.landmarkId!);
+          await dataApiDog.deleteRouteLandmark(landmark.landmarkId!);
       pp('$mm ... removed landmark from database: ${routeLandmarks.length} total remaining; ${E.nice}');
       landmarkIndex = 0;
       _controlReads(true);

@@ -36,7 +36,7 @@ class ZipHandler {
     };
     headers['Authorization'] = 'Bearer $token';
 
-    http.Response response = await getUsingHttp(mUrl, token, headers);
+    http.Response response = await getUsingHttp(mUrl, headers);
     pp('$xz getCars: 🔆🔆🔆 get zipped data, response: ${response.contentLength} bytes ...');
 
     try {
@@ -65,7 +65,7 @@ class ZipHandler {
     return jsonEncode(cars);
   }
 
-  Future<String> getOwnerCars(String userId, String token) async {
+  Future<String> getOwnerCars(String userId) async {
     pp('$xz getOwnerCars: 🔆🔆🔆 get zipped owner car data userId: $userId ...');
 
     final mUrl =
@@ -74,12 +74,10 @@ class ZipHandler {
     List<Vehicle> cars = [];
 
     Map<String, String> headers = {
-      'Authorization': 'Bearer $token',
       'Accept': '*/*',
     };
-    headers['Authorization'] = 'Bearer $token';
 
-    http.Response response = await getUsingHttp(mUrl, token, headers);
+    http.Response response = await getUsingHttp(mUrl, headers);
     pp('$xz getOwnerCars: 🔆🔆🔆 get zipped data, response: ${response.contentLength} bytes ...');
 
     try {
@@ -112,32 +110,21 @@ class ZipHandler {
   int count = 0;
   Future<List<City>> getCities(String countryId, bool refresh) async {
     pp('$xz ....... getCities: refresh: $refresh');
-    List<City> mCities = [];
-    var token = await appAuth.getAuthToken();
-    if (token == null) {
-      throw Exception('No token');
-    }
-    if (refresh) {
-      var s = await getCitiesString(countryId, token);
+    List<City> mCities = await semCache.getCities();
+
+    if (refresh || mCities.isEmpty) {
+      var s = await getCitiesString(countryId);
       List json = jsonDecode(s);
       for (var value in json) {
         mCities.add(City.fromJson(value));
       }
       await semCache.saveCities(mCities);
-      return mCities;
     }
-    var cities = await semCache.getCities();
-    if (cities.isEmpty) {
-      if (count == 0) {
-        count++;
-        cities = await getCities(countryId,true);
-      }
-    }
-    count = 0;
-    return cities;
+
+    return mCities;
   }
 
-  Future<String> getCitiesString(String countryId, String token) async {
+  Future<String> getCitiesString(String countryId) async {
     pp('$xz getCitiesString: 🔆🔆🔆 get zipped cities; countryId: $countryId ...');
 
     final mUrl =
@@ -146,13 +133,11 @@ class ZipHandler {
     List<City> cities = [];
 
     Map<String, String> headers = {
-      'Authorization': 'Bearer $token',
       'Accept': '*/*',
     };
-    headers['Authorization'] = 'Bearer $token';
 
     try {
-      http.Response response = await getUsingHttp(mUrl, token, headers);
+      http.Response response = await getUsingHttp(mUrl, headers);
       pp('$xz getCities: 🔆🔆🔆 get zipped data, response: ${response.contentLength} bytes ...');
       final archive = ZipDecoder().decodeBytes(response.bodyBytes);
       pp('$xz getCities: 🔆🔆🔆 handle file inside zip archive: ${archive.files.length} files');
@@ -181,14 +166,11 @@ class ZipHandler {
 
   Future<List<Route>> getRoutes(
       {required String associationId, required bool refresh}) async {
-    var token = await appAuth.getAuthToken();
-    if (token == null) {
-      throw Exception('No auth token');
-    }
+
     pp('$xz ... getRoutes starting ... refresh: $refresh');
     if (refresh) {
       var string =
-          await getRouteDataString(associationId: associationId, token: token);
+          await getRouteDataString(associationId: associationId);
       var mJson = jsonDecode(string);
       var routeData = RouteData.fromJson(mJson);
       return routeData.routes;
@@ -206,7 +188,7 @@ class ZipHandler {
   }
 
   Future<String> getRouteDataString(
-      {required String associationId, required String token}) async {
+      {required String associationId}) async {
     pp('$xz getRouteDataString: 🔆🔆🔆 get zipped route data; ... associationId: $associationId ...');
 
     final mUrl =
@@ -218,13 +200,11 @@ class ZipHandler {
         RouteData(routes: [], routePoints: [], landmarks: [], cities: []);
 
     Map<String, String> headers = {
-      'Authorization': 'Bearer $token',
       'Accept': '*/*',
     };
-    headers['Authorization'] = 'Bearer $token';
 
     try {
-      http.Response response = await getUsingHttp(mUrl, token, headers);
+      http.Response response = await getUsingHttp(mUrl, headers);
       pp('$xz getRouteDataString: 🔆🔆🔆 get zipped data, response: ${response.contentLength} bytes ...');
 
       final archive = ZipDecoder().decodeBytes(response.bodyBytes);
@@ -297,19 +277,17 @@ class ZipHandler {
   }
 
   Future<String> getRoutePoints(
-      {required String routeId, required String token}) async {
+      {required String routeId}) async {
     pp('$xz getRoutePoints: 🔆🔆🔆 get zipped data; ... routeId: $routeId ...');
 
     final mUrl = '${KasieEnvironment.getUrl()}getRoutePointsZipped?routeId'
         '=$routeId';
 
     Map<String, String> headers = {
-      'Authorization': 'Bearer $token',
       'Accept': '*/*',
     };
-    headers['Authorization'] = 'Bearer $token';
 
-    http.Response response = await getUsingHttp(mUrl, token, headers);
+    http.Response response = await getUsingHttp(mUrl, headers);
     final list = await _getPointsFromArchive(response);
     return jsonEncode(list);
   }
@@ -317,18 +295,16 @@ class ZipHandler {
   Future<String> deleteRoutePoints(
       {required String routeId,
       required double latitude,
-      required double longitude,
-      required String token}) async {
+      required double longitude}) async {
     pp('$xz deleteRoutePoints: 🔆🔆🔆 response is zipped data; ... routeId: $routeId ...');
 
     final mUrl = '${KasieEnvironment.getUrl()}deleteRoutePoints?routeId'
         '=$routeId&latitude=$latitude&longitude=$longitude';
 
     Map<String, String> headers = {
-      'Authorization': 'Bearer $token',
       'Accept': '*/*',
     };
-    http.Response response = await getUsingHttp(mUrl, token, headers);
+    http.Response response = await getUsingHttp(mUrl, headers);
     final points = await _getPointsFromArchive(response);
     return jsonEncode(points);
   }
@@ -364,7 +340,7 @@ class ZipHandler {
   }
 
   Future<RouteBag?> refreshRoute(
-      {required String routeId, required String token}) async {
+      {required String routeId}) async {
     pp('$xz refreshRoute: 🔆🔆🔆 get zipped data; ... routeId: $routeId ...');
 
     final mUrl = '${KasieEnvironment.getUrl()}refreshRoute?routeId'
@@ -373,12 +349,10 @@ class ZipHandler {
     var start = DateTime.now();
 
     Map<String, String> headers = {
-      'Authorization': 'Bearer $token',
       'Accept': '*/*',
     };
-    headers['Authorization'] = 'Bearer $token';
 
-    http.Response response = await getUsingHttp(mUrl, token, headers);
+    http.Response response = await getUsingHttp(mUrl, headers);
 
     pp('$xz refreshRoute: 🔆🔆🔆 get zipped data, response: ${response.contentLength} bytes ...');
     RouteBag? bag;
@@ -407,10 +381,13 @@ class ZipHandler {
   }
 
   Future<http.Response> getUsingHttp(
-      String mUrl, String token, Map<String, String> headers) async {
+      String mUrl, Map<String, String> headers) async {
     pp('$xz httpGet: 🔆 🔆 🔆 calling : 💙 $mUrl  💙');
     var start = DateTime.now();
-
+    var tkn = await appAuth.getAuthToken();
+    if (tkn != null) {
+      headers['Authorization'] = tkn;
+    }
     try {
       final http.Client client = http.Client();
       var resp = await client

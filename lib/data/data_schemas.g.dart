@@ -910,6 +910,7 @@ RouteLandmark _$RouteLandmarkFromJson(Map<String, dynamic> json) =>
       routePointId: json['routePointId'] as String?,
       routePointIndex: (json['routePointIndex'] as num?)?.toInt(),
       index: (json['index'] as num?)?.toInt(),
+      routeLandmarkId: json['routeLandmarkId'] as String?,
       position: json['position'] == null
           ? null
           : Position.fromJson(json['position'] as Map<String, dynamic>),
@@ -918,6 +919,7 @@ RouteLandmark _$RouteLandmarkFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$RouteLandmarkToJson(RouteLandmark instance) =>
     <String, dynamic>{
       'routeId': instance.routeId,
+      'routeLandmarkId': instance.routeLandmarkId,
       'routeName': instance.routeName,
       'landmarkId': instance.landmarkId,
       'landmarkName': instance.landmarkName,

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'package:get_it/get_it.dart';
+import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:geolocator/geolocator.dart' as geo;
 
@@ -9,7 +10,6 @@ import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 
-import '../isolates/routes_isolate.dart';
 
 final TinyBloc tinyBloc = TinyBloc();
 
@@ -74,8 +74,8 @@ class TinyBloc {
 
   Future<int> getNumberOfPoints(String routeId) async {
     pp('$mm ... getNumberOfPoints cached ...');
-    var routesIsolate = GetIt.instance<RoutesIsolate>();
-    final res = await routesIsolate.getRoutePoints(routeId, false);
+    var semCache = GetIt.instance<SemCache>();
+    final res = await semCache.getRoutePoints(routeId);
     final m = res.length;
     return m;
   }

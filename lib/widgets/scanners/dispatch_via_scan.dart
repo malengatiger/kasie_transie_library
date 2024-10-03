@@ -3,7 +3,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
-import 'package:kasie_transie_library/isolates/dispatch_isolate.dart';
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
@@ -320,7 +319,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
       dispatches.insert(0, m);
       dispatchHelper.sendDispatch(m);
       _clearFields();
-      dispatchIsolate.addDispatchRecord(m);
+      //dispatchIsolate.addDispatchRecord(m);
       //Navigator.of(context).pop();
       if (mounted) {
         showToast(

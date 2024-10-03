@@ -3,6 +3,7 @@ import 'dart:core' as prefix0;
 
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:get_it/get_it.dart';
+import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/data/calculated_distance_list.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
@@ -11,7 +12,6 @@ import 'package:kasie_transie_library/utils/prefs.dart';
 import '../bloc/data_api_dog.dart';
 import '../bloc/list_api_dog.dart';
 import '../data/data_schemas.dart';
-import '../isolates/routes_isolate.dart';
 import 'distance.dart';
 
 
@@ -22,14 +22,15 @@ class RouteDistanceCalculator {
   final Prefs prefs;
   final ListApiDog listApiDog;
   final DataApiDog dataApiDog;
+  SemCache semCache = GetIt.instance<SemCache>();
 
   RouteDistanceCalculator(this.prefs, this.listApiDog, this.dataApiDog);
 
   Future calculateAssociationRouteDistances() async {
     pp('... starting ... calculateAssociationRouteDistances ...');
     final user = prefs.getUser();
-    final routes = await listApiDog
-        .getRoutes(user!.associationId!, false);
+    final routes = await semCache
+        .getRoutes(user!.associationId!);
     final distances = <CalculatedDistance>[];
     for (var value in routes) {
       final list =
@@ -50,16 +51,16 @@ class RouteDistanceCalculator {
   Future<List<CalculatedDistance>> calculateRouteDistances(
       String routeId, String associationId) async {
     pp('$mm ... starting calculateRouteDistances for $routeId');
-    var routesIsolate = GetIt.instance<RoutesIsolate>();
+    var routesIsolate = GetIt.instance<SemCache>();
 
-    final routeLandmarks = await listApiDog.getRouteLandmarks(routeId, false);
+    final routeLandmarks = await routesIsolate.getRouteLandmarks(routeId);
     if (routeLandmarks.isEmpty) {
       pp('$mm ... 1. stopping calculateRouteDistances for $routeId, no routeLandmarks');
       return [];
     }
 
     routeLandmarks.sort((a, b) => a.index!.compareTo(b.index!));
-    final routePoints = await routesIsolate.getRoutePoints(routeId, false);
+    final routePoints = await routesIsolate.getRoutePoints(routeId);
     if (routePoints.isEmpty) {
       pp('$mm ... 2. stopping calculateRouteDistances for $routeId, routePoints');
       return [];
@@ -127,8 +128,8 @@ class RouteDistanceCalculator {
   Future<double> calculateTotalRouteDistanceInMetres(
       String routeId) async {
     pp('$mm ... starting calculateTotalRouteDistance for $routeId');
-    var routesIsolate = GetIt.instance<RoutesIsolate>();
-    final routePoints = await routesIsolate.getRoutePoints(routeId, false);
+    var semCache = GetIt.instance<SemCache>();
+    final routePoints = await semCache.getRoutePoints(routeId);
     if (routePoints.isEmpty) {
       pp('$mm ... 2. stopping calculateRouteDistances for $routeId, routePoints');
       return 0.0;
@@ -200,9 +201,9 @@ class RouteDistanceCalculator {
       required double longitude,
       required Route route}) async {
     pp('🥬🥬🥬🥬🥬🥬🥬 calculateFromLocation starting: 💛 ${DateTime.now().toIso8601String()}');
-    var routesIsolate = GetIt.instance<RoutesIsolate>();
+    var semCache = GetIt.instance<SemCache>();
     final routePoints =
-        await routesIsolate.getRoutePoints(route.routeId!, false);
+        await semCache.getRoutePoints(route.routeId!);
 
     pp('🥬🥬🥬🥬🥬🥬🥬  ${route.name} points: ${routePoints.length}');
     List<RoutePointDistance> rpdList = [];
@@ -276,8 +277,8 @@ class RouteDistanceCalculator {
   }
 
   Future<double> calculateRouteLengthInKM(String routeId) async {
-    var routesIsolate = GetIt.instance<RoutesIsolate>();
-    final routePoints = await routesIsolate.getRoutePoints(routeId, false);
+    var semCache = GetIt.instance<SemCache>();
+    final routePoints = await semCache.getRoutePoints(routeId);
     if (routePoints.isEmpty) {
       pp('$mm ... 2. stopping calculateRouteLengthInKM for $routeId, routePoints');
       return 0.0;

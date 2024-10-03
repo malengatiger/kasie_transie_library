@@ -262,7 +262,7 @@ class RouteMapViewerState extends State<RouteMapViewer> {
         zoom: defaultZoom,
       );
     } else {
-      _myCurrentCameraPosition = CameraPosition(
+      _myCurrentCameraPosition = const CameraPosition(
         target: LatLng(-24.0, 26.0),
         zoom: defaultZoom,
       );
@@ -469,12 +469,12 @@ class RouteMapViewerState extends State<RouteMapViewer> {
                         top: 24,
                         right: 24,
                         child: Padding(
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               vertical: 16, horizontal: 24),
                           child: Card(
                               elevation: 16,
                               child: Padding(
-                                padding: EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                     vertical: 48, horizontal: 48),
                                 child: ColorPad(
                                   onColorPicked: (c, s) {
@@ -489,7 +489,7 @@ class RouteMapViewerState extends State<RouteMapViewer> {
                               )),
                         ),
                       )
-                    : SizedBox(),
+                    : const SizedBox(),
               ]));
   }
 }

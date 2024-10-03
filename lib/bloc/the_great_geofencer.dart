@@ -4,7 +4,7 @@ import 'dart:collection';
 import 'package:geofence_service/geofence_service.dart' as geo;
 import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
-import 'package:kasie_transie_library/isolates/routes_isolate.dart';
+import 'package:kasie_transie_library/bloc/sem_cache.dart';
 
 import '../data/data_schemas.dart';
 import '../utils/emojis.dart';
@@ -67,7 +67,7 @@ class TheGreatGeofencer {
 
     var landmarks = await _getLandmarksFromAssignments(_vehicle!.vehicleId!);
     if (landmarks.isEmpty) {
-      landmarks = await _getLandmarks();
+      // landmarks = await _getLandmarks();
     }
 
     int cnt = 0;
@@ -145,28 +145,28 @@ class TheGreatGeofencer {
 
       return map2.values.toList();
   }
-  Future<List<RouteLandmark>> _getLandmarks() async {
-    var routesIsolate = GetIt.instance<RoutesIsolate>();
-    final marks2 = await routesIsolate.getAllRouteLandmarksCached();
-
-    pp('$xx _getLandmarks .... routeLandmarks, unfiltered: ${marks2.length} ');
-
-    final map = HashMap<String, RouteLandmark>();
-    for (var value in marks2) {
-      map[value.landmarkId!] = value;
-    }
-
-    final filteredLandmarks = map.values.toList();
-    pp('$xx _getLandmarks .... filteredLandmarks: ${filteredLandmarks.length} ');
-    final map2 = HashMap<String, RouteLandmark>();
-
-    for (var value in filteredLandmarks) {
-      map2[value.landmarkName!] = value;
-    }
-    pp('$xx _getLandmarks .... found: ${map2.length} ');
-
-    return map2.values.toList();
-  }
+  // Future<List<RouteLandmark>> _getLandmarks() async {
+  //   var routesIsolate = GetIt.instance<SemCache>();
+  //   final marks2 = await routesIsolate.getAllRout();
+  //
+  //   pp('$xx _getLandmarks .... routeLandmarks, unfiltered: ${marks2.length} ');
+  //
+  //   final map = HashMap<String, RouteLandmark>();
+  //   for (var value in marks2) {
+  //     map[value.landmarkId!] = value;
+  //   }
+  //
+  //   final filteredLandmarks = map.values.toList();
+  //   pp('$xx _getLandmarks .... filteredLandmarks: ${filteredLandmarks.length} ');
+  //   final map2 = HashMap<String, RouteLandmark>();
+  //
+  //   for (var value in filteredLandmarks) {
+  //     map2[value.landmarkName!] = value;
+  //   }
+  //   pp('$xx _getLandmarks .... found: ${map2.length} ');
+  //
+  //   return map2.values.toList();
+  // }
   Future addGeofence(
       {required String landmarkName,
       required String landmarkId,

@@ -34,7 +34,7 @@ class _CountryUiState extends State<CountryUi> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Select Country'),
+        title: const Text('Select Country'),
       ),
       body: Container(
         child: cc.CountryPickerWidget(

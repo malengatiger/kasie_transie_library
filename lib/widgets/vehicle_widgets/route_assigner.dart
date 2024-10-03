@@ -11,6 +11,7 @@ import 'package:kasie_transie_library/widgets/vehicle_widgets/multi_vehicle_choo
 import 'package:page_transition/page_transition.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:badges/badges.dart' as bd;
+import '../../bloc/sem_cache.dart';
 import '../../data/data_schemas.dart' as lib;
 import '../../utils/prefs.dart';
 
@@ -40,6 +41,7 @@ class _RouteAssignerState extends State<RouteAssigner>
   List<lib.Vehicle> carsPicked = [];
   var routesPicked = <lib.Route>[];
   bool busy = false;
+  SemCache semCache = GetIt.instance<SemCache>();
 
   @override
   void initState() {
@@ -68,7 +70,7 @@ class _RouteAssignerState extends State<RouteAssigner>
   Future _getRoutes() async {
     pp('$mm ................................... _getRoutes ......');
     final user = prefs.getUser();
-    routes = await listApiDog.getRoutes(user!.associationId!, false);
+    routes = await semCache.getRoutes(user!.associationId!);
     pp('$mm ... _getRoutes ...... ${routes.length} routes found');
   }
 
@@ -77,7 +79,7 @@ class _RouteAssignerState extends State<RouteAssigner>
     final user = prefs.getUser();
     if (widget.associationId != null) {
       cars =
-          await listApiDog.getAssociationVehicles(user!.associationId!, false);
+          await semCache.getVehicles();
     } else {
       cars = await listApiDog.getOwnerVehicles(user!.userId!, false);
     }

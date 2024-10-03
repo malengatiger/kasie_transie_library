@@ -78,9 +78,9 @@ class CountryChooserState extends State<CountryChooser> {
   @override
   Widget build(BuildContext context) {
     return loading
-        ? Row(mainAxisAlignment: MainAxisAlignment.center,
+        ? const Row(mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(
+            SizedBox(
                 height: 14,
                 width: 14,
                 child: CircularProgressIndicator(

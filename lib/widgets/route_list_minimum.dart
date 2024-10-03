@@ -9,7 +9,7 @@ import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:badges/badges.dart' as bd;
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
 
-import '../isolates/routes_isolate.dart';
+import '../bloc/sem_cache.dart';
 import '../l10n/translation_handler.dart';
 
 class RouteListMinimum extends StatefulWidget {
@@ -36,6 +36,7 @@ class RouteListMinimumState extends State<RouteListMinimum>
   late StreamSubscription<List<lib.Route>> _sub;
   lib.User? user;
   String routesList = '';
+  SemCache semCache = GetIt.instance<SemCache>();
 
   @override
   void initState() {
@@ -68,19 +69,19 @@ class RouteListMinimumState extends State<RouteListMinimum>
         busy = true;
       });
       user = prefs.getUser();
-      var routesIsolate = GetIt.instance<RoutesIsolate>();
 
-      if (refresh) {
-        var list = await routesIsolate.getRoutes(widget.association.associationId!, true);
-      } else {
-        if (widget.isMappable) {
-          routes = await routesIsolate.getRoutesMappable(
-              widget.association.associationId!, refresh);
-        } else {
-        routes = await listApiDog
-            .getRoutes(widget.association.associationId!, refresh);
-        }
-      }
+      //TODO - fix ...
+      // if (refresh) {
+      //   var list = await semCache.getRoutes(widget.association.associationId!, true);
+      // } else {
+      //   if (widget.isMappable) {
+      //     routes = await semCache.getRoutes(
+      //         widget.association.associationId!);
+      //   } else {
+      //   routes = await listApiDog
+      //       .getRoutes(widget.association.associationId!, refresh);
+      //   }
+      // }
       routes.sort((a,b) => a.name!.compareTo(b.name!));
       pp('$mm ... found ${routes.length}');
     } catch (e) {

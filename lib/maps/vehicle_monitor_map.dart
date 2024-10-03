@@ -12,7 +12,7 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/vehicle_dispatches.dart';
 
 import '../bloc/list_api_dog.dart';
-import '../isolates/routes_isolate.dart';
+import '../bloc/sem_cache.dart';
 import '../messaging/fcm_bloc.dart';
 import '../utils/emojis.dart';
 import '../widgets/counts_widget.dart';
@@ -142,6 +142,8 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
   }
 
   lib.VehicleHeartbeat? lastHeartbeat;
+  SemCache semCache = GetIt.instance<SemCache>();
+
   Future _getVehicleBag() async {
     pp('$mm ... getVehicleBag that shows the last ${E.blueDot} $hours hours .... ');
 
@@ -183,10 +185,9 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
 
   Future<void> _getRoutes() async {
     try {
-      var routesIsolate = GetIt.instance<RoutesIsolate>();
       pp('$mm ..... getRoutes ..');
         routes =
-            await routesIsolate.getRoutesMappable(widget.vehicle.associationId!, false);
+            await semCache.getRoutes(widget.vehicle.associationId!);
       // }
       _printRoutes();
       if (routes.isNotEmpty) {
@@ -209,14 +210,14 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
 
   Future _putRoutesOnMap(bool zoomTo) async {
     pp('\n\n$mm ... _putRoutesOnMap: number of routes: ${E.blueDot} ${routes.length}');
-    var routesIsolate = GetIt.instance<RoutesIsolate>();
+    var semCache = GetIt.instance<SemCache>();
     final hash = HashMap<String, List<lib.RoutePoint>>();
     _routeMarkers.clear();
     _polyLines.clear();
     lib.RouteLandmark? mLandmark;
     for (var route in routes) {
-      final points = await routesIsolate.getRoutePoints(route.routeId!, false);
-      final marks = await listApiDog.getRouteLandmarks(route.routeId!, false);
+      final points = await semCache.getRoutePoints(route.routeId!);
+      final marks = await semCache.getRouteLandmarks(route.routeId!);
       hash[route.routeId!] = points;
       //add polyline
       final List<LatLng> latLngs = [];

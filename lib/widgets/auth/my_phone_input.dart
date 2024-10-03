@@ -3,8 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart' as ui;
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:kasie_transie_library/isolates/routes_isolate.dart';
-import 'package:kasie_transie_library/isolates/vehicles_isolate.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/widgets/auth/my_sms_code_input.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
@@ -12,7 +10,6 @@ import 'package:numeric_keyboard/numeric_keyboard.dart';
 import 'package:page_transition/page_transition.dart';
 
 import '../../bloc/list_api_dog.dart';
-import '../../data/data_schemas.dart' as lib;
 import '../../data/data_schemas.dart';
 import '../../utils/emojis.dart';
 import '../../utils/functions.dart';
@@ -141,138 +138,139 @@ class _MyPhoneInputState extends State<MyPhoneInput>
   Future _initializeData() async {
     pp('$mm ...................... ${E.redDot} _initializeData; '
         '\n ${E.blueDot} verificationId: $verificationId ${E.blueDot} smsCode: $smsCode');
-    var routesIsolate = GetIt.instance<RoutesIsolate>();
-    if (smsCode.isEmpty) {
-      pp('$mm ...................... ${E.redDot} _initializeData; quitting, sms-code is null');
-      showSnackBar(
-          backgroundColor: Colors.red,
-          textStyle: myTextStyleMediumWithColor(context, Colors.white),
-          message: 'SMS Verification failed, please try again',
-          context: context);
-      return;
-    }
-
-    pp('$mm ..................... sms code: $smsCode ${E.appleRed} will start Firebase authentication ...');
-
-    setState(() {
-      initializing = true;
-    });
-
-    fb.UserCredential? userCred;
-
-    final start = DateTime.now();
-    try {
-      fb.PhoneAuthCredential authCredential = fb.PhoneAuthProvider.credential(
-          verificationId: verificationId!, smsCode: smsCode);
-      userCred =
-          await fb.FirebaseAuth.instance.signInWithCredential(authCredential);
-      pp('\n$mm user signed in to firebase? userCred: $userCred');
-      //
-      lib.User? mUser;
-      pp('$mm seeking to acquire this user from the Kasie database by their id: 🌀🌀🌀${userCred.user?.uid}');
-      if (userCred.user != null) {
-        try {
-          mUser = await listApiDog.getUserById(userCred.user!.uid);
-        } catch (e) {
-          pp('Error getting user: $e');
-          if (restartCount == 0) {
-            restartCount++;
-            _initializeData();
-            return;
-          }
-          if (mounted) {
-            setState(() {
-              initializing = false;
-              enteredText = '';
-            });
-            showSnackBar(
-                duration: const Duration(seconds: 12),
-                message: 'Error input: $e',
-                context: context);
-            // Navigator.of(context).pop();
-            widget.onError(e.toString());
-          } else {
-            pp('... Widget not mounted ... ');
-          }
-          return;
-        }
-      }
-
-      if (mUser != null) {
-        pp('$mm KasieTransie user found on database: 🍎 ${mUser.name} 🍎 will initialize ...');
-        myPrettyJsonPrint(mUser.toJson());
-        prefs.saveUser(mUser);
-        final ass = await listApiDog.getAssociationById(mUser.associationId!);
-        prefs.saveAssociation(ass!);
-
-        try {
-          final countries = await routesIsolate.getCountries(true);
-          pp('$mm KasieTransie countries found on database:  🍎 ${countries.length} 🍎');
-          lib.Country? myCountry;
-          for (var country in countries) {
-            if (country.countryId == ass.countryId!) {
-              myCountry = country;
-              prefs.saveCountry(myCountry);
-              pp('$mm KasieTransie country:  🍎 ${country.toJson()} 🍎');
-              break;
-            }
-          }
-          //
-
-          try {
-            final users =
-                await routesIsolate.getUsers(mUser.associationId!, true);
-            pp('$mm KasieTransie users found on database:  🍎 ${users.length} 🍎');
-            var vehicleIsolate = GetIt.instance<VehicleIsolate>();
-            await vehicleIsolate.getVehicles(mUser.associationId!);
-            await routesIsolate.getCities(myCountry!.countryId!, true);
-            await routesIsolate.getRoutes(mUser.associationId!, true);
-          } catch (e, stackTrace) {
-            pp('$mm SOMETHING REALLY WRONG!, Bubba! : $e $stackTrace');
-          }
-          //
-          final elapsed = DateTime.now().difference(start).inSeconds;
-
-          pp('\n\n$mm ... ${E.leaf}${E.leaf} we should be good! .... '
-              'elapsed time: $elapsed seconds} ${E.leaf}'
-              '${E.leaf}${E.leaf}${E.leaf}');
-          //
-          if (mounted) {
-            pp('$mm KasieTransie initialization completed  🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎 should pop');
-            Navigator.of(context).pop(mUser);
-            return;
-          } else {
-            pp('$mm ... ${E.redDot}${E.redDot}${E.redDot} NOT MOUNTED, wtf??  cannot poop!!!');
-          }
-        } catch (e) {
-          pp(e);
-          if (mounted) {
-            setState(() {
-              initializing = false;
-              enteredText = '';
-            });
-            // Navigator.of(context).pop(mUser);
-            widget.onError(e.toString());
-          }
-        }
-      } else {
-        if (mounted) {
-          const msg = 'User unknown, please check with your Admin';
-          showSnackBar(message: msg, context: context);
-          // Navigator.of(context).pop();
-          widget.onError(msg);
-          return;
-        }
-      }
-    } catch (e) {
-      pp(e);
-      if (mounted) {
-        showSnackBar(message: '$e', context: context);
-        // Navigator.of(context).pop();
-        widget.onError(e.toString());
-      }
-    }
-    return 0;
+    // var routesIsolate = GetIt.instance<SemCache>();
+    // if (smsCode.isEmpty) {
+    //   pp('$mm ...................... ${E.redDot} _initializeData; quitting, sms-code is null');
+    //   showSnackBar(
+    //       backgroundColor: Colors.red,
+    //       textStyle: myTextStyleMediumWithColor(context, Colors.white),
+    //       message: 'SMS Verification failed, please try again',
+    //       context: context);
+    //   return;
+    // }
+    //
+    // pp('$mm ..................... sms code: $smsCode ${E.appleRed} will start Firebase authentication ...');
+    //
+    // setState(() {
+    //   initializing = true;
+    // });
+    //
+    // fb.UserCredential? userCred;
+    //
+    // final start = DateTime.now();
+    // try {
+    //   fb.PhoneAuthCredential authCredential = fb.PhoneAuthProvider.credential(
+    //       verificationId: verificationId!, smsCode: smsCode);
+    //   userCred =
+    //       await fb.FirebaseAuth.instance.signInWithCredential(authCredential);
+    //   pp('\n$mm user signed in to firebase? userCred: $userCred');
+    //   //
+    //   lib.User? mUser;
+    //   pp('$mm seeking to acquire this user from the Kasie database by their id: 🌀🌀🌀${userCred.user?.uid}');
+    //   if (userCred.user != null) {
+    //     try {
+    //       mUser = await listApiDog.getUserById(userCred.user!.uid);
+    //     } catch (e) {
+    //       pp('Error getting user: $e');
+    //       if (restartCount == 0) {
+    //         restartCount++;
+    //         _initializeData();
+    //         return;
+    //       }
+    //       if (mounted) {
+    //         setState(() {
+    //           initializing = false;
+    //           enteredText = '';
+    //         });
+    //         showSnackBar(
+    //             duration: const Duration(seconds: 12),
+    //             message: 'Error input: $e',
+    //             context: context);
+    //         // Navigator.of(context).pop();
+    //         widget.onError(e.toString());
+    //       } else {
+    //         pp('... Widget not mounted ... ');
+    //       }
+    //       return;
+    //     }
+    //   }
+    //
+    //   if (mUser != null) {
+    //     pp('$mm KasieTransie user found on database: 🍎 ${mUser.name} 🍎 will initialize ...');
+    //     myPrettyJsonPrint(mUser.toJson());
+    //     prefs.saveUser(mUser);
+    //     final ass = await listApiDog.getAssociationById(mUser.associationId!);
+    //     prefs.saveAssociation(ass!);
+    //
+    //     try {
+    //
+    //       final countries = await routesIsolate.getCountries(true);
+    //       pp('$mm KasieTransie countries found on database:  🍎 ${countries.length} 🍎');
+    //       lib.Country? myCountry;
+    //       for (var country in countries) {
+    //         if (country.countryId == ass.countryId!) {
+    //           myCountry = country;
+    //           prefs.saveCountry(myCountry);
+    //           pp('$mm KasieTransie country:  🍎 ${country.toJson()} 🍎');
+    //           break;
+    //         }
+    //       }
+    //       //
+    //
+    //       try {
+    //         final users =
+    //             await routesIsolate.getUsers(mUser.associationId!, true);
+    //         pp('$mm KasieTransie users found on database:  🍎 ${users.length} 🍎');
+    //         var vehicleIsolate = GetIt.instance<SemCache>();
+    //         await vehicleIsolate.getVehicles(mUser.associationId!);
+    //         await routesIsolate.getCities(myCountry!.countryId!, true);
+    //         await routesIsolate.getRoutes(mUser.associationId!, true);
+    //       } catch (e, stackTrace) {
+    //         pp('$mm SOMETHING REALLY WRONG!, Bubba! : $e $stackTrace');
+    //       }
+    //       //
+    //       final elapsed = DateTime.now().difference(start).inSeconds;
+    //
+    //       pp('\n\n$mm ... ${E.leaf}${E.leaf} we should be good! .... '
+    //           'elapsed time: $elapsed seconds} ${E.leaf}'
+    //           '${E.leaf}${E.leaf}${E.leaf}');
+    //       //
+    //       if (mounted) {
+    //         pp('$mm KasieTransie initialization completed  🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎 should pop');
+    //         Navigator.of(context).pop(mUser);
+    //         return;
+    //       } else {
+    //         pp('$mm ... ${E.redDot}${E.redDot}${E.redDot} NOT MOUNTED, wtf??  cannot poop!!!');
+    //       }
+    //     } catch (e) {
+    //       pp(e);
+    //       if (mounted) {
+    //         setState(() {
+    //           initializing = false;
+    //           enteredText = '';
+    //         });
+    //         // Navigator.of(context).pop(mUser);
+    //         widget.onError(e.toString());
+    //       }
+    //     }
+    //   } else {
+    //     if (mounted) {
+    //       const msg = 'User unknown, please check with your Admin';
+    //       showSnackBar(message: msg, context: context);
+    //       // Navigator.of(context).pop();
+    //       widget.onError(msg);
+    //       return;
+    //     }
+    //   }
+    // } catch (e) {
+    //   pp(e);
+    //   if (mounted) {
+    //     showSnackBar(message: '$e', context: context);
+    //     // Navigator.of(context).pop();
+    //     widget.onError(e.toString());
+    //   }
+    // }
+    // return 0;
   }
 
   @override
