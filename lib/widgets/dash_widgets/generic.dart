@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -7,11 +6,12 @@ import '../../utils/functions.dart';
 class TotalWidget extends StatelessWidget {
   const TotalWidget(
       {super.key,
-        required this.caption,
-        required this.number,
-        required this.onTapped,
-        required this.color,
-        required this.fontSize});
+      required this.caption,
+      required this.number,
+      required this.onTapped,
+      required this.color,
+      required this.fontSize});
+
   final String caption;
   final int number;
   final Function onTapped;
@@ -49,10 +49,11 @@ class TotalWidget extends StatelessWidget {
 class NumberAndCaption extends StatelessWidget {
   const NumberAndCaption(
       {super.key,
-        required this.caption,
-        required this.number,
-        required this.color,
-        required this.fontSize});
+      required this.caption,
+      required this.number,
+      required this.color,
+      required this.fontSize});
+
   final String caption;
   final int number;
   final Color color;
@@ -62,8 +63,10 @@ class NumberAndCaption extends StatelessWidget {
   Widget build(BuildContext context) {
     final fmt = NumberFormat.decimalPattern();
     return SizedBox(
-      height: 100,
+      height: 64,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             fmt.format(number),

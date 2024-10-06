@@ -26,7 +26,8 @@ class CityChooser extends StatefulWidget {
   State<CityChooser> createState() => CityChooserState();
 }
 
-class CityChooserState extends State<CityChooser>  with AutomaticKeepAliveClientMixin{
+class CityChooserState extends State<CityChooser>
+    with AutomaticKeepAliveClientMixin {
   List<lib.Country> countries = <lib.Country>[];
   bool loading = false;
   lib.SettingsModel? settings;
@@ -210,85 +211,100 @@ class _CitySearchState extends State<CitySearch> {
       leftPadding = 2.0;
     }
 
-    return Card(
-      shape: getDefaultRoundedBorder(),
-      elevation: 12,
-      child: Padding(
-        padding:  EdgeInsets.all(leftPadding),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(mainAxisAlignment: MainAxisAlignment.start,
+    return SizedBox(
+        width: 460,
+        child: Card(
+          shape: getDefaultRoundedBorder(),
+          elevation: 12,
+          child: Padding(
+            padding: EdgeInsets.all(leftPadding),
+            child: Column(children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.title,
+                      style: myTextStyleMediumBoldPrimaryColor(context),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 24,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Text(
-                    widget.title,
-                    style: myTextStyleMediumBoldPrimaryColor(context),
+                  SizedBox(
+                    width: type == 'phone' ? 220 : 400,
+                    child: SearchBar(
+                      controller: _textEditingController,
+                      leading: IconButton(
+                        onPressed: () {
+                          pp('$mm search icon tapped .... ${_textEditingController.text}');
+                        },
+                        icon: const Icon(Icons.search),
+                      ),
+                      onChanged: (s) {
+                        pp('$mm search onChanged: .... ${_textEditingController.text}');
+                        _runFilter(_textEditingController.text);
+                      },
+                    ),
                   ),
+                  const SizedBox(
+                    width: 4,
+                  ),
+                  IconButton(
+                      onPressed: () {
+                        NavigationUtils.navigateTo(
+                            context: context,
+                            widget: const CityCreatorMap(),
+                            transitionType: PageTransitionType.leftToRight);
+                      },
+                      icon: Icon(
+                        Icons.add,
+                        color: Theme.of(context).primaryColor,
+                      ))
                 ],
               ),
-            ),
-            const SizedBox(
-              height: 24,
-            ),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                SizedBox(width: type == 'phone'? 220: 400,
-                  child: SearchBar(
-                    controller: _textEditingController,
-                    leading: IconButton(
-                      onPressed: () {
-                        pp('$mm search icon tapped .... ${_textEditingController.text}');
-                      },
-                      icon: const Icon(Icons.search),
+              const SizedBox(
+                height: 24,
+              ),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(type == 'phone' ? 8 : 48.0),
+                  child: bd.Badge(
+                    badgeContent: Text(
+                      '${_citiesToDisplay.length}',
+                      style: myTextStyleTiny(context),
                     ),
-
-                    onChanged: (s){
-                      pp('$mm search onChanged: .... ${_textEditingController.text}');
-                        _runFilter(_textEditingController.text);
-                    },
+                    badgeStyle:
+                        const bd.BadgeStyle(padding: EdgeInsets.all(8.0)),
+                    child: ListView.builder(
+                        itemCount: _citiesToDisplay.length,
+                        itemBuilder: (ctx, index) {
+                          var city = _citiesToDisplay.elementAt(index);
+                          return GestureDetector(
+                            onTap: () {
+                              _close(city);
+                            },
+                            child: Card(
+                              elevation: 2,
+                              shape: getDefaultRoundedBorder(),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text('${city.name}'),
+                              ),
+                            ),
+                          );
+                        }),
                   ),
                 ),
-                const SizedBox(width: 2,),
-                bd.Badge(
-                  badgeContent: Text('${_citiesToDisplay.length}', style: myTextStyleTiny(context),),
-                  badgeStyle: const bd.BadgeStyle(padding: EdgeInsets.all(8.0)),
-                ),
-                const SizedBox(width: 4,),
-                IconButton(onPressed: (){
-                  NavigationUtils.navigateTo(context: context, widget: const CityCreatorMap(), transitionType: PageTransitionType.leftToRight);
-                }, icon: Icon(Icons.add, color: Theme.of(context).primaryColor,))
-              ],
-            ),
-            const SizedBox(
-              height: 24,
-            ),
-            Expanded(
-              child: Padding(
-                padding:  EdgeInsets.all(type == 'phone'?8:48.0),
-                child: ListView.builder(
-                    itemCount: _citiesToDisplay.length,
-                    itemBuilder: (ctx, index) {
-                      var city = _citiesToDisplay.elementAt(index);
-                      return GestureDetector(
-                        onTap: () {
-                          _close(city);
-                        },
-                        child: Card(
-                          elevation: 2,
-                          shape: getDefaultRoundedBorder(),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text('${city.name}'),
-                          ),
-                        ),
-                      );
-                    }),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
+            ]),
+          ),
+        ));
   }
 }

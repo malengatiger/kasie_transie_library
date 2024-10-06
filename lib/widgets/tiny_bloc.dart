@@ -10,13 +10,17 @@ import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 
+import '../data/data_schemas.dart';
+
 
 final TinyBloc tinyBloc = TinyBloc();
 
 class TinyBloc {
   final mm = '🧩🧩🧩🧩🧩🧩 TinyBloc: 😎';
   ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  SemCache semCache = GetIt.instance<SemCache>();
   Prefs prefs = GetIt.instance<Prefs>();
+
   final StreamController<lib.Route> _streamController =
       StreamController.broadcast();
   Stream<lib.Route> get routeStream => _streamController.stream;
@@ -31,7 +35,7 @@ class TinyBloc {
 
 
   void setRouteId(String routeId) {
-    pp('$mm ... putting routeId on _streamIdController...');
+    pp('$mm ... putting routeId on _streamIdController... $routeId');
     routeIdStreamIdController.sink.add(routeId);
   }
 
@@ -84,7 +88,8 @@ class TinyBloc {
       {required double latitude,
       required double longitude,
       required List<lib.RoutePoint> points}) {
-    pp('$mm ... findRoutePoint nearest $latitude - $longitude ...');
+
+    pp('\n\n$mm ... findRoutePoint nearest this location: 🌶 $latitude - $longitude ... points: ${points.length}');
 
     var kMap = HashMap<double, lib.RoutePoint>();
     for (var p in points) {
@@ -95,17 +100,38 @@ class TinyBloc {
 
     List list = kMap.keys.toList();
     list.sort();
-    pp('$mm nearest distance; ${list.first} metres');
-    pp('$mm furthest distance; ${list.last} metres');
-
+    pp('$mm nearest distance; 🌶 ${list.first} metres');
+    pp('$mm furthest distance; 🌶 ${list.last} metres');
 
     if (list.first > 50) {
-      pp('$mm nearest routePoint is too far away; ${E.redDot} distance: ${list.first} metres');
+      pp('$mm nearest routePoint is more than 50 metres away; ${E.redDot} distance: ${list.first} metres');
+      return null;
     }
+
     lib.RoutePoint? rp = kMap[list.first];
     pp('$mm ... findRoutePoint nearest  ...');
     myPrettyJsonPrint(rp!.toJson());
 
     return rp;
   }
+  Future<double> calculateRouteLength(String routeId) async {
+    var points = await semCache.getRoutePoints(routeId);
+    RoutePoint? point;
+    int index = 0;
+    double total = 0.0;
+    for (var p in points) {
+      if (index == 0) {
+        point = p;
+      } else {
+      var distance = geo.GeolocatorPlatform.instance.distanceBetween(point!.position!.coordinates[1],
+          point!.position!.coordinates[0], p.position!.coordinates[1], p.position!.coordinates[0]);
+      total += distance;
+      point = p;
+      }
+      index++;
+    }
+    return total;
+
+  }
+
 }

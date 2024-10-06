@@ -28,6 +28,7 @@ class ListApiDog {
   static const mm = '🔵🔵🔵🔵🔵🔵🔵🔵️ ListApiDog: ❤️: ';
   final ZipHandler zipHandler;
   final SemCache semCache;
+
   Map<String, String> headers = {
     'Content-type': 'application/json',
     'Accept': 'application/json',
@@ -42,16 +43,14 @@ class ListApiDog {
 
   final http.Client client;
   final AppAuth appAuth;
-  final CacheManager cacheManager;
   final Prefs prefs;
   final ErrorHandler errorHandler;
-
   bool initialized = false;
+  String token = 'NoTokenYet';
 
   ListApiDog(
     this.client,
     this.appAuth,
-    this.cacheManager,
     this.prefs,
     this.errorHandler,
     this.zipHandler,
@@ -186,8 +185,6 @@ class ListApiDog {
   Future<Vehicle?> getVehicle(String vehicleId) async {
     return null;
   }
-
-
 
   final StreamController<List<Vehicle>> _vehiclesStreamController =
       StreamController.broadcast();
@@ -364,12 +361,13 @@ class ListApiDog {
     if (list.isEmpty || refresh) {
       final cmd = '${url}association/getAssociations';
       List resp = await _sendHttpGET(cmd);
+      list.clear();
       for (var m in resp) {
         list.add(Association.fromJson(m));
       }
       await semCache.saveAssociations(list);
     }
-    pp('$mm cached associations: ${list.length}');
+    pp('$mm cached associations: ${list.length} - refresh: $refresh');
     return list;
   }
 
@@ -388,6 +386,9 @@ class ListApiDog {
 
   Stream<List<Route>> get routeStream => _routeController.stream;
 
+  void putRouteInStream(List<Route> routes) {
+    _routeController.sink.add(routes);
+  }
   final StreamController<List<City>> _cityController =
       StreamController.broadcast();
 
@@ -395,11 +396,13 @@ class ListApiDog {
 
   Future<List<RouteLandmark>> getRouteLandmarks(
       String routeId, bool refresh) async {
-    var localList = <RouteLandmark>[];
+    List<RouteLandmark> localList = await semCache.getRouteLandmarks(routeId);
 
     try {
-      localList = await _getRouteLandmarksFromBackend(routeId: routeId);
-      pp('$mm RouteLandmarks from backend:: ${localList.length}');
+      if (refresh || localList.isEmpty) {
+        localList = await _getRouteLandmarksFromBackend(routeId: routeId);
+        pp('$mm RouteLandmarks from backend:: ${localList.length}');
+      }
     } catch (e) {
       pp(e);
     }
@@ -410,19 +413,21 @@ class ListApiDog {
   }
 
   Future<List<RoutePoint>> getRoutePoints(String routeId, bool refresh) async {
-    var localList = <RoutePoint>[];
+    List<RoutePoint> localList = await semCache.getRoutePoints(routeId);
 
     if (localList.isEmpty || refresh) {
       try {
         final token = await appAuth.getAuthToken();
-        if (token != null) {
-          final s =
-              await zipHandler.getRoutePoints(routeId: routeId);
-          localList = jsonDecode(s);
-          pp('$mm RoutePoints from backend via zip: ${localList.length}');
+        final s = await zipHandler.getRoutePoints(routeId: routeId);
+        List m = jsonDecode(s);
+        for (var r in m) {
+          localList.add(RoutePoint.fromJson(r));
         }
+        pp('$mm RoutePoints from backend via zip: ${localList.length}');
+
       } catch (e) {
         pp(e);
+        rethrow;
       }
     }
     //
@@ -900,14 +905,18 @@ class ListApiDog {
     return routes;
   }
 
-  // Future<List<Route>> getRoutes(String associationId, bool refresh) async {
-  //   var routesIsolate = GetIt.instance<RoutesIsolate>();
-  //   final remoteList = await routesIsolate.getRoutes(associationId, refresh);
-  //   pp('$mm ... Routes from backend:: ${remoteList.length}');
-  //
-  //   _routeController.sink.add(remoteList);
-  //   return remoteList;
-  // }
+  Future<List<Route>> getAssociationRoutes(String associationId, bool refresh) async {
+    final list = <Route>[];
+    final cmd = '${url}routes/getAssociationRoutes?associationId=$associationId';
+    List resp = await _sendHttpGET(cmd);
+    for (var value in resp) {
+      var r = Route.fromJson(value);
+      list.add(r);
+    }
+
+    pp('$mm Routes found: ${list.length}');
+    return list;
+  }
 
   Future<List<Landmark>> findLandmarksByLocation(
       {required double latitude,
@@ -947,7 +956,7 @@ class ListApiDog {
   Future<List<RouteLandmark>> _getRouteLandmarksFromBackend(
       {required String routeId}) async {
     final list = <RouteLandmark>[];
-    final cmd = '${url}getRouteLandmarks?routeId=$routeId';
+    final cmd = '${url}routes/getRouteLandmarks?routeId=$routeId';
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
       var r = RouteLandmark.fromJson(value);
@@ -1030,8 +1039,8 @@ class ListApiDog {
   Future<List<City>> findCitiesByLocation(LocationFinderParameter p) async {
     var list = <City>[];
     final user = prefs.getUser();
-    final cmd = '${url}findCitiesByLocation?latitude=${p.latitude}'
-        '&longitude=${p.longitude}&radiusInKM=${p.radiusInKM}&limit=${p.limit}';
+    final cmd = '${url}city/findCitiesByLocation?latitude=${p.latitude}'
+        '&longitude=${p.longitude}&maxDistanceInMetres=${p.radiusInKM}&limit=${p.limit}';
 
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
@@ -1102,15 +1111,11 @@ class ListApiDog {
 
   static const xz = '🌎🌎🌎🌎🌎🌎 ListApiDog: ';
 
-  String token = 'NoTokenYet';
 
   Future _sendHttpGET(String mUrl) async {
     pp('$xz _sendHttpGET: 🔆 🔆 🔆 ...... calling : 💙 $mUrl  💙');
     var start = DateTime.now();
-    var token = await appAuth.getAuthToken();
-    // if (token == null) {
-    //   throw Exception('Token not found');
-    // }
+
     headers['Authorization'] = 'Bearer $token';
     try {
       var resp = await client

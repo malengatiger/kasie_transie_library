@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:archive/archive_io.dart';
@@ -108,6 +109,7 @@ class ZipHandler {
   }
 
   int count = 0;
+
   Future<List<City>> getCities(String countryId, bool refresh) async {
     pp('$xz ....... getCities: refresh: $refresh');
     List<City> mCities = await semCache.getCities();
@@ -164,32 +166,8 @@ class ZipHandler {
     return jsonEncode(cities);
   }
 
-  Future<List<Route>> getRoutes(
-      {required String associationId, required bool refresh}) async {
-
-    pp('$xz ... getRoutes starting ... refresh: $refresh');
-    if (refresh) {
-      var string =
-          await getRouteDataString(associationId: associationId);
-      var mJson = jsonDecode(string);
-      var routeData = RouteData.fromJson(mJson);
-      return routeData.routes;
-    }
-    var routes = await semCache.getRoutes(associationId);
-    if (routes.isEmpty) {
-      pp('$xz ... getRoutes 😈😈routes not found in Mongo ... count: $count');
-      if (count == 0) {
-        count++;
-        routes = await getRoutes(associationId: associationId, refresh: true);
-      }
-    }
-    count = 0;
-    return routes;
-  }
-
-  Future<String> getRouteDataString(
-      {required String associationId}) async {
-    pp('$xz getRouteDataString: 🔆🔆🔆 get zipped route data; ... associationId: $associationId ...');
+  Future<RouteData> getRoutes({required String associationId}) async {
+    pp('$xz getRouteData: 🔆🔆🔆 zipped for associationId: $associationId ...');
 
     final mUrl =
         '${KasieEnvironment.getUrl()}routes/getAssociationRouteZippedFile?associationId'
@@ -197,7 +175,7 @@ class ZipHandler {
 
     var start = DateTime.now();
     RouteData routeData =
-        RouteData(routes: [], routePoints: [], landmarks: [], cities: []);
+        RouteData(routes: [], routePoints: [], landmarks: [], cities: [], associationId: associationId);
 
     Map<String, String> headers = {
       'Accept': '*/*',
@@ -242,30 +220,37 @@ class ZipHandler {
             });
           }
           pp('$xz getRouteDataString 🍎🍎 routePoints: ${routePoints.length}');
+
           for (var mCities in dCities) {
             mCities.forEach((element) {
               cities.add(RouteCity.fromJson(element));
             });
           }
-          pp('$xz getRouteDataString 🍎🍎 cities: ${cities.length}');
+          var hashMap = HashMap<String, RouteCity>();
+          for (var city in cities) {
+            hashMap[city.cityName!] = city;
+          }
+          var finalCities = hashMap.values.toList();
+          pp('$xz getRouteDataString 🍎🍎 cities: ${finalCities.length}');
 
           routeData = RouteData(
               routes: routes,
               routePoints: routePoints,
               landmarks: landmarks,
-              cities: cities);
+              cities: finalCities, associationId: associationId);
 
           //cache data locally
+          await semCache.saveRouteData(routeData);
           await semCache.saveRoutes(routes);
           await semCache.saveRoutePoints(routePoints);
-          await semCache.saveRouteCities(cities);
+          await semCache.saveRouteCities(finalCities);
           await semCache.saveRouteLandmarks(landmarks);
 
           pp('$xz getRouteDataString 🍎🍎🍎🍎 RouteData has been filled and cached!');
           var end = DateTime.now();
           var ms = end.difference(start).inSeconds;
           pp('$xz getRouteDataString 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎 return string ...\n\n');
-          return jsonEncode(routeData.toJson());
+          return routeData;
         }
       }
     } catch (e, stackTrace) {
@@ -276,11 +261,11 @@ class ZipHandler {
     throw Exception('Bad moon rising!');
   }
 
-  Future<String> getRoutePoints(
-      {required String routeId}) async {
+  Future<String> getRoutePoints({required String routeId}) async {
     pp('$xz getRoutePoints: 🔆🔆🔆 get zipped data; ... routeId: $routeId ...');
 
-    final mUrl = '${KasieEnvironment.getUrl()}getRoutePointsZipped?routeId'
+    final mUrl =
+        '${KasieEnvironment.getUrl()}routes/getRoutePointsZipped?routeId'
         '=$routeId';
 
     Map<String, String> headers = {
@@ -339,8 +324,7 @@ class ZipHandler {
     return routePoints;
   }
 
-  Future<RouteBag?> refreshRoute(
-      {required String routeId}) async {
+  Future<RouteBag?> refreshRoute({required String routeId}) async {
     pp('$xz refreshRoute: 🔆🔆🔆 get zipped data; ... routeId: $routeId ...');
 
     final mUrl = '${KasieEnvironment.getUrl()}refreshRoute?routeId'

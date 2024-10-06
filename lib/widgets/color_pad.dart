@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 
 class ColorPad extends StatelessWidget {
-  const ColorPad({super.key, required this.onColorPicked});
+  const ColorPad({super.key, required this.onColorPicked, required this.onClose});
 
   final Function(Color, String) onColorPicked;
+  final Function() onClose;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,12 @@ class ColorPad extends StatelessWidget {
         width: 640,
         child: Column(
           children: [
-            Text('Tap to change Route colour', style: myTextStyleMediumLarge(context, 16),),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Tap to change Route colour', style: myTextStyleMediumLarge(context, 16),),
+                IconButton(onPressed: (){}, icon: const Icon(Icons.close))
+              ],
+            ),
             gapH8,
             Expanded(
               child: GridView.builder(

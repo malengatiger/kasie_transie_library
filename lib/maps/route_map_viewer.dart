@@ -35,7 +35,7 @@ class RouteMapViewer extends StatefulWidget {
 }
 
 class RouteMapViewerState extends State<RouteMapViewer> {
-  static const defaultZoom = 14.0;
+  static const defaultZoom = 12.0;
   final Completer<GoogleMapController> _mapController = Completer();
   late GoogleMapController googleMapController;
   CameraPosition? _myCurrentCameraPosition;
@@ -484,7 +484,11 @@ class RouteMapViewerState extends State<RouteMapViewer> {
                                       newColor = c;
                                     });
                                     _changeRouteColor();
-                                  },
+                                  }, onClose: () {
+                                    setState(() {
+                                      showColors = false;
+                                    });
+                                },
                                 ),
                               )),
                         ),

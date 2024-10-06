@@ -342,7 +342,7 @@ class DetailsWidget extends StatelessWidget {
         builder: (ctx) {
           return ColorPad(onColorPicked: (color, stringColor) {
             onColorChanged(color, stringColor);
-          });
+          }, onClose: () {  },);
         });
   }
 

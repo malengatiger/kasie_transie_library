@@ -20,6 +20,7 @@ import '../utils/functions.dart';
 import '../utils/prefs.dart';
 import 'app_auth.dart';
 import 'cache_manager.dart';
+import 'list_api_dog.dart';
 
 class DataApiDog {
   static const mm = '🌎🌎🌎🌎🌎🌎 DataApiDog: 🌎🌎';
@@ -41,16 +42,29 @@ class DataApiDog {
 
   late String url;
   static const timeOutInSeconds = 360;
-
+  String token = 'NoTokenYet';
   final http.Client client;
   final AppAuth appAuth;
   final CacheManager cacheManager;
   final Prefs prefs;
   final ErrorHandler errorHandler;
+  final SemCache semCache;
 
   DataApiDog(this.client, this.appAuth, this.cacheManager, this.prefs,
-      this.errorHandler) {
+      this.errorHandler, this.semCache) {
     url = KasieEnvironment.getUrl();
+    getAuthToken();
+  }
+  Future getAuthToken() async {
+    pp('\n\n$mm getAuthToken: ...... Getting Firebase token ......');
+    var m = await appAuth.getAuthToken();
+    if (m == null) {
+      pp('$mm Unable to get Firebase token');
+      token = 'NoToken';
+    } else {
+      pp('$mm getAuthToken: Firebase token retrieved OK');
+      token = m;
+    }
   }
 
   Future<List<RouteAssignment>> addRouteAssignments(
@@ -101,6 +115,7 @@ class DataApiDog {
     final bag = vehicle.toJson();
     final cmd = '${url}addVehicle';
     final res = await _callPost(cmd, bag);
+    semCache.saveVehicles([vehicle]);
     pp('$mm vehicle added to database: $res');
   }
 
@@ -169,7 +184,7 @@ class DataApiDog {
     final cmd = '${url}routes/addRoutePoints';
     var res = await _callPost(cmd, routePointList.toJson());
     pp('$mm routePoints added to MongoDB Atlas database: $res');
-    SemCache semCache = GetIt.instance<SemCache>();
+
     await semCache.saveRoutePoints(routePointList.routePoints);
     return res as int;
   }
@@ -197,6 +212,10 @@ class DataApiDog {
     pp('$mm route added to database ...');
     myPrettyJsonPrint(res);
     final r = Route.fromJson(res);
+    await semCache.saveRoutes([r]);
+    var dog = GetIt.instance<ListApiDog>();
+    var routes = await semCache.getRoutes(route.associationId!);
+    dog.putRouteInStream(routes);
     return r;
   }
 
@@ -296,6 +315,8 @@ class DataApiDog {
     pp('$mm RouteLandmark added to database ...');
     myPrettyJsonPrint(res);
     final r = RouteLandmark.fromJson(res);
+
+    semCache.saveRouteLandmarks([r]);
     _routeLandmarkController.sink.add(r);
     return r;
   }
@@ -357,12 +378,11 @@ class DataApiDog {
     List res = await _sendHttpGET(cmd);
     pp('$mm deleteRoutePointsFromIndex happened ... returned ');
     List<RoutePoint> routePoints = [];
-
-    routePoints.clear();
     for (var value in res) {
       routePoints.add(RoutePoint.fromJson(value));
     }
-
+    await semCache.deleteRoutePoints(routeId);
+    await semCache.saveRoutePoints(routePoints);
     return routePoints;
   }
 
@@ -380,8 +400,10 @@ class DataApiDog {
 
     return res;
   }
+
   Future deleteRouteLandmark(String routeLandmarkId) async {
-    final cmd = '${url}routes/deleteRouteLandmark?routeLandmarkId=$routeLandmarkId';
+    final cmd =
+        '${url}routes/deleteRouteLandmark?routeLandmarkId=$routeLandmarkId';
     final res = await _sendHttpGET(cmd);
     pp('$mm deleteRouteLandmark happened ...');
 
@@ -614,10 +636,10 @@ class DataApiDog {
     var retryCount = 0;
     var waitTime = const Duration(seconds: 2);
     var start = DateTime.now();
-    var token = await appAuth.getAuthToken();
-    if (token == null) {
-      throw Exception('No fucking token!');
-    }
+    // var token = await appAuth.getAuthToken();
+    // if (token == null) {
+    //   throw Exception('No fucking token!');
+    // }
     headers['Authorization'] = 'Bearer $token';
     while (retryCount < maxRetries) {
       try {

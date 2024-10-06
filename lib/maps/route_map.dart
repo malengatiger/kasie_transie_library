@@ -106,7 +106,7 @@ class RouteMapState extends State<RouteMap> {
           return AlertDialog(
             elevation: 12,
             title: Text(
-              'Route Mapping',
+              'Route Point Mapping',
               style: myTextStyleLarge(context),
             ),
             content: Card(

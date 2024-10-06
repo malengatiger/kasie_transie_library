@@ -1033,6 +1033,10 @@ class SettingsModel {
       this.vehicleGeoQueryRadius,
       this.numberOfLandmarksToScan,
       this.distanceFilter);
+
+
+  SettingsModel.name();
+
   factory SettingsModel.fromJson(Map<String, dynamic> json) =>
       _$SettingsModelFromJson(json);
 

@@ -34,13 +34,21 @@ class RegisterServices {
     final ErrorHandler errorHandler = ErrorHandler(DeviceLocationBloc(), prefs);
     final Database db= await dbFactory.openDatabase(dbPath);
     pp('$mm .... dbFactory.openDatabase: 🦠database initialized: ${db.path}');
+
     final SemCache semCache = SemCache(db);
+    pp('$mm .... SemCache: 🦠cache initialized');
+
     final ZipHandler zipHandler = ZipHandler(appAuth, semCache);
+    pp('$mm .... ZipHandler: 🦠handler initialized');
+
     final dataApi =
-        DataApiDog(client, appAuth, cacheManager, prefs, errorHandler);
+        DataApiDog(client, appAuth, cacheManager, prefs, errorHandler, semCache);
+    pp('$mm .... DataApiDog: 🦠dataApiDog initialized');
+
     final listApi =
-        ListApiDog(client, appAuth, cacheManager, prefs, errorHandler, zipHandler, semCache);
+        ListApiDog(client, appAuth, prefs, errorHandler, zipHandler, semCache);
     //
+    pp('$mm .... SemCachee: 🦠registerLazySingletons ...');
 
     GetIt.instance.registerLazySingleton<SemCache>(
             () => semCache);
