@@ -133,7 +133,7 @@ class TheGreatGeofencer {
       final List<RouteLandmark> list = [];
       final routeIds = map.values.toList();
       for (var routeId in routeIds) {
-        list.addAll(await listApiDog.getRouteLandmarks(routeId, false));
+        list.addAll(await listApiDog.getRouteLandmarks(routeId, false,'TBD'));
       }
       pp('$xx _getLandmarksFromAssignments .... found: ${list.length} ');
 

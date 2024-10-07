@@ -31,7 +31,7 @@ class RoutePointDeletionState extends State<RoutePointDeletion> {
   }
 
   _getPoints() async {
-    points = await semCache.getRoutePoints(widget.routeId);
+    points = await semCache.getRoutePoints(widget.routeId, widget.associationId);
     points.sort((a, b) => a.index!.compareTo(b.index!));
     const max = 12;
 

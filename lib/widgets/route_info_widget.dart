@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
@@ -18,8 +19,8 @@ class RouteInfoWidget extends StatefulWidget {
       required this.routeId,
       required this.onClose,
       required this.onNavigateToMapViewer,
-      required this.onColorChanged});
-  final String? routeId;
+      required this.onColorChanged, required this.associationId});
+  final String routeId, associationId;
   final Function onClose;
   final Function onNavigateToMapViewer;
   final Function(Color, String) onColorChanged;
@@ -76,6 +77,8 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
     });
   }
 
+  SemCache semCache = GetIt.instance<SemCache>();
+
   Future _getData(String? routeId) async {
     pp('$mm _getData ..... numberOfLandmarks, '
         'numberOfPoints; routeId: $routeId ');
@@ -86,9 +89,12 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
       });
     }
     if (routeId != null) {
-      numberOfLandmarks = await tinyBloc.getNumberOfLandmarks(routeId);
-      numberOfPoints = await tinyBloc.getNumberOfPoints(routeId);
-      route = await tinyBloc.getRoute(routeId);
+      var marks =
+      await semCache.getRouteLandmarks(routeId, widget.associationId!);
+      numberOfLandmarks = marks.length;
+      var points = await semCache.getRoutePoints(routeId, widget.associationId!);
+      numberOfPoints = points.length;
+      route = await semCache.getRoute(routeId, widget.associationId!);
     }
     if (mounted) {
       setState(() {
@@ -144,7 +150,7 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
                             shape: getDefaultRoundedBorder(),
                             elevation: 12,
                             child: CalculatedDistancesWidget(
-                                routeId: widget.routeId!),
+                                routeId: widget.routeId!, associationId: widget.associationId!,),
                           ),
                         ),
                       ],
@@ -183,6 +189,7 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
                                       shape: getDefaultRoundedBorder(),
                                       elevation: 12,
                                       child: CalculatedDistancesWidget(
+                                          associationId: widget.associationId!,
                                           routeId: widget.routeId!),
                                     ),
                                   ),
@@ -222,6 +229,7 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
                                         shape: getDefaultRoundedBorder(),
                                         elevation: 12,
                                         child: CalculatedDistancesWidget(
+                                            associationId: widget.associationId!,
                                             routeId: widget.routeId!),
                                       ),
                                     ),
@@ -342,7 +350,9 @@ class DetailsWidget extends StatelessWidget {
         builder: (ctx) {
           return ColorPad(onColorPicked: (color, stringColor) {
             onColorChanged(color, stringColor);
-          }, onClose: () {  },);
+          }, onClose: () {
+            Navigator.of(context).pop();
+          },);
         });
   }
 

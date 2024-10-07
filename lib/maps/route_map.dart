@@ -93,7 +93,7 @@ class RouteMapState extends State<RouteMap> {
 
   Future _getRouteLandmarks(lib.Route route, bool refresh) async {
     routeLandmarks =
-        await listApiDog.getRouteLandmarks(route.routeId!, refresh);
+        await listApiDog.getRouteLandmarks(route.routeId!, refresh, route.associationId!);
     pp('$mm _getRouteLandmarks ...  route: ${route.name}; found: ${routeLandmarks.length} ');
 
     setState(() {});
@@ -142,7 +142,7 @@ class RouteMapState extends State<RouteMap> {
       _user = prefs.getUser();
       pp('$mm getting existing RoutePoints .......');
       existingRoutePoints =
-          await semCache.getRoutePoints(route.routeId!);
+          await semCache.getRoutePoints(route.routeId!, route.associationId!);
     } catch (e) {
       pp(e);
     }

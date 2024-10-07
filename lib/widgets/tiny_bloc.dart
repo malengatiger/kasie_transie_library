@@ -71,15 +71,15 @@ class TinyBloc {
 
   Future<int> getNumberOfLandmarks(String routeId) async {
     pp('$mm ... getNumberOfLandmarks cached  ...');
-    final res = await listApiDog.getRouteLandmarks(routeId, false);
+    final res = await semCache.getRouteLandmarks(routeId, 'TBD');
     final m = res.length;
     return m;
   }
 
-  Future<int> getNumberOfPoints(String routeId) async {
+  Future<int> getNumberOfPoints(String routeId, String associationId) async {
     pp('$mm ... getNumberOfPoints cached ...');
     var semCache = GetIt.instance<SemCache>();
-    final res = await semCache.getRoutePoints(routeId);
+    final res = await semCache.getRoutePoints(routeId, associationId);
     final m = res.length;
     return m;
   }
@@ -114,8 +114,8 @@ class TinyBloc {
 
     return rp;
   }
-  Future<double> calculateRouteLength(String routeId) async {
-    var points = await semCache.getRoutePoints(routeId);
+  Future<double> calculateRouteLength(String routeId, String associationId) async {
+    var points = await semCache.getRoutePoints(routeId, associationId);
     RoutePoint? point;
     int index = 0;
     double total = 0.0;

@@ -163,7 +163,7 @@ class DataApiDog {
   }
 
   Future sendRouteUpdateMessage(RouteUpdateRequest req) async {
-    final cmd = '${url}addRouteUpdateRequest';
+    final cmd = '${url}routes/addRouteUpdateRequest';
     final res = await _callPost(cmd, req.toJson());
     pp('$mm .......... Route Update Message sent: $res, response 0 means GOOD!');
   }

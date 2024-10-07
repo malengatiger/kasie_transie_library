@@ -125,7 +125,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
 
   Future _getRouteLandmarks(bool refresh) async {
     routeLandmarks =
-        await listApiDog.getRouteLandmarks(widget.route.routeId!, refresh);
+        await semCache.getRouteLandmarks(widget.route.routeId!, widget.route.associationId!);
     pp('\n\n$mm RouteLandmarks ...  ${E.appleRed} '
         'route: ${widget.route.name}; found: ${routeLandmarks.length} refresh: $refresh');
     await _putLandmarksOnMap();
@@ -179,7 +179,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
       _user = prefs.getUser();
       pp('$mm ...... getting existing RoutePoints .......');
       existingRoutePoints =
-          await listApiDog.getRoutePoints(widget.route.routeId!, false);
+          await semCache.getRoutePoints(widget.route.routeId!,  widget.route.associationId!);
 
       pp('$mm .......... existingRoutePoints ....  🍎 found: '
           '${existingRoutePoints.length} points');

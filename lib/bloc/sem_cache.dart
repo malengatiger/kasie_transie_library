@@ -41,22 +41,20 @@ class SemCache {
     return routes;
   }
 
-  Future<Route?> getRoute(String routeId) async {
+  Future<Route?> getRoute(String routeId, String associationId) async {
     pp('$mm .... getRoute: $routeId');
 
-    var store = intMapStoreFactory.store('routes');
-    var finder = Finder(filter: Filter.equals('routeId', routeId));
-    var records = await store.find(db, finder: finder);
+    var data = await getRouteData(associationId);
+    if (data != null) {
+      List<Route> routes = data.routes;
+      for (var route in routes) {
+        if (route.routeId! == routeId) {
+          pp('$mm routes retrieved from cache: ${route.name}');
+          return route;
+        }
+      }
+    }
 
-    List<Route> routes = [];
-    for (var rec in records) {
-      var route = Route.fromJson(rec.value);
-      routes.add(route);
-    }
-    pp('$mm routes retrieved from cache: ${routes.length}');
-    if (routes.isNotEmpty) {
-      return routes[0];
-    }
     return null;
   }
 
@@ -119,7 +117,7 @@ class SemCache {
     int count = 0;
     var routeData = await getRouteData(associationId);
     if (routeData != null) {
-     count = routeData.routePoints.length;
+      count = routeData.routePoints.length;
     }
     pp('\n$mm countRoutePoints: TOTAL: 🥦 $count 🥦 route points\n');
     return count;
@@ -136,16 +134,19 @@ class SemCache {
     return count;
   }
 
-  Future<List<RoutePoint>> getRoutePoints(String routeId) async {
-    var store = intMapStoreFactory.store('routePoints');
-    var finder = Finder(filter: Filter.equals('routeId', routeId));
-    var records = await store.find(db, finder: finder);
+  Future<List<RoutePoint>> getRoutePoints(
+      String routeId, String associationId) async {
+    var data = await getRouteData(associationId);
 
     List<RoutePoint> routePoints = [];
-    for (var rec in records) {
-      var routePoint = RoutePoint.fromJson(rec.value);
-      routePoints.add(routePoint);
+    if (data != null) {
+      for (var rec in data.routePoints) {
+        if (rec.routeId == routeId) {
+          routePoints.add(rec);
+        }
+      }
     }
+    routePoints.sort((a,b) => a.index!.compareTo(b.index!));
     pp('$mm routePoints retrieved from cache: 🥦 ${routePoints.length} route: $routeId');
     return routePoints;
   }
@@ -166,16 +167,18 @@ class SemCache {
     pp('$mm routeLandmarks added to cache: 🥦 ${routeLandmarks.length} 🥦');
   }
 
-  Future<List<RouteLandmark>> getRouteLandmarks(String routeId) async {
-    var store = intMapStoreFactory.store('routeLandmarks');
-    var finder = Finder(filter: Filter.equals('routeId', routeId));
-    var records = await store.find(db, finder: finder);
+  Future<List<RouteLandmark>> getRouteLandmarks(String routeId, String associationId) async {
+    var data = await getRouteData(associationId);
 
     List<RouteLandmark> routeLandmarks = [];
-    for (var rec in records) {
-      var routePoint = RouteLandmark.fromJson(rec.value);
-      routeLandmarks.add(routePoint);
+    if (data != null) {
+      for (var rec in data.landmarks) {
+        if (rec.routeId == routeId) {
+          routeLandmarks.add(rec);
+        }
+      }
     }
+    routeLandmarks.sort((a,b) => a.index!.compareTo(b.index!));
     pp('$mm routeLandmarks retrieved from cache: 😡 ${routeLandmarks.length} route: $routeId');
     return routeLandmarks;
   }

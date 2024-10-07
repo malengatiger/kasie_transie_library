@@ -395,8 +395,8 @@ class ListApiDog {
   Stream<List<City>> get cityStream => _cityController.stream;
 
   Future<List<RouteLandmark>> getRouteLandmarks(
-      String routeId, bool refresh) async {
-    List<RouteLandmark> localList = await semCache.getRouteLandmarks(routeId);
+      String routeId, bool refresh, String associationId) async {
+    List<RouteLandmark> localList = await semCache.getRouteLandmarks(routeId, associationId);
 
     try {
       if (refresh || localList.isEmpty) {
@@ -412,8 +412,8 @@ class ListApiDog {
     return localList;
   }
 
-  Future<List<RoutePoint>> getRoutePoints(String routeId, bool refresh) async {
-    List<RoutePoint> localList = await semCache.getRoutePoints(routeId);
+  Future<List<RoutePoint>> getRoutePoints(String routeId, bool refresh, String associationId) async {
+    List<RoutePoint> localList = await semCache.getRoutePoints(routeId, associationId);
 
     if (localList.isEmpty || refresh) {
       try {

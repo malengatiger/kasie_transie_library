@@ -21,13 +21,13 @@ import '../widgets/timer_widget.dart';
 import '../widgets/tiny_bloc.dart';
 
 class RouteMapViewer extends StatefulWidget {
-  final String routeId;
+  final String routeId, associationId;
   final Function onRouteUpdated;
 
   const RouteMapViewer({
     super.key,
     required this.onRouteUpdated,
-    required this.routeId,
+    required this.routeId, required this.associationId,
   });
 
   @override
@@ -84,7 +84,7 @@ class RouteMapViewerState extends State<RouteMapViewer> {
       busy = true;
     });
     try {
-      route = await semCache.getRoute(widget.routeId);
+      route = await semCache.getRoute(widget.routeId, widget.associationId);
       if (route == null) {
         throw Exception('Route not found! 😈😈😈😈 WTF!!');
       }
@@ -127,7 +127,7 @@ class RouteMapViewerState extends State<RouteMapViewer> {
   }
 
   Future _getRouteLandmarks() async {
-    routeLandmarks = await semCache.getRouteLandmarks(widget.routeId);
+    routeLandmarks = await semCache.getRouteLandmarks(widget.routeId, widget.associationId);
     pp('$mm _getRouteLandmarks ...  route: ${widget.routeId}; found: ${routeLandmarks.length} ');
 
     landmarkIndex = 0;
@@ -216,7 +216,7 @@ class RouteMapViewerState extends State<RouteMapViewer> {
       pp('$mm getting existing RoutePoints .......');
       existingRoutePoints =
           // await routesIsolate.getRoutePoints(widget.routeId, refresh);
-          await semCache.getRoutePoints(widget.routeId);
+          await semCache.getRoutePoints(widget.routeId, widget.associationId!);
 
       pp('$mm .......... existingRoutePoints ....  🍎 found: '
           '${existingRoutePoints.length} points');
@@ -254,7 +254,7 @@ class RouteMapViewerState extends State<RouteMapViewer> {
   Future _getCurrentRouteLocation() async {
     pp('$mm .......... get current route ....');
 
-    route = await semCache.getRoute(widget.routeId);
+    route = await semCache.getRoute(widget.routeId, widget.associationId);
     if (route != null) {
       _myCurrentCameraPosition = CameraPosition(
         target: LatLng(route!.routeStartEnd!.startCityPosition!.coordinates[1],

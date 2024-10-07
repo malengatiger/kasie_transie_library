@@ -53,14 +53,14 @@ class RouteDistanceCalculator {
     pp('$mm ... starting calculateRouteDistances for $routeId');
     var routesIsolate = GetIt.instance<SemCache>();
 
-    final routeLandmarks = await routesIsolate.getRouteLandmarks(routeId);
+    final routeLandmarks = await routesIsolate.getRouteLandmarks(routeId, associationId);
     if (routeLandmarks.isEmpty) {
       pp('$mm ... 1. stopping calculateRouteDistances for $routeId, no routeLandmarks');
       return [];
     }
 
     routeLandmarks.sort((a, b) => a.index!.compareTo(b.index!));
-    final routePoints = await routesIsolate.getRoutePoints(routeId);
+    final routePoints = await semCache.getRoutePoints(routeId, associationId);
     if (routePoints.isEmpty) {
       pp('$mm ... 2. stopping calculateRouteDistances for $routeId, routePoints');
       return [];
@@ -126,10 +126,10 @@ class RouteDistanceCalculator {
   }
 
   Future<double> calculateTotalRouteDistanceInMetres(
-      String routeId) async {
+      String routeId, String associationId) async {
     pp('$mm ... starting calculateTotalRouteDistance for $routeId');
     var semCache = GetIt.instance<SemCache>();
-    final routePoints = await semCache.getRoutePoints(routeId);
+    final routePoints = await semCache.getRoutePoints(routeId, associationId);
     if (routePoints.isEmpty) {
       pp('$mm ... 2. stopping calculateRouteDistances for $routeId, routePoints');
       return 0.0;
@@ -203,7 +203,7 @@ class RouteDistanceCalculator {
     pp('🥬🥬🥬🥬🥬🥬🥬 calculateFromLocation starting: 💛 ${DateTime.now().toIso8601String()}');
     var semCache = GetIt.instance<SemCache>();
     final routePoints =
-        await semCache.getRoutePoints(route.routeId!);
+        await semCache.getRoutePoints(route.routeId!, route.associationId!);
 
     pp('🥬🥬🥬🥬🥬🥬🥬  ${route.name} points: ${routePoints.length}');
     List<RoutePointDistance> rpdList = [];
@@ -276,9 +276,9 @@ class RouteDistanceCalculator {
     return list;
   }
 
-  Future<double> calculateRouteLengthInKM(String routeId) async {
+  Future<double> calculateRouteLengthInKM(String routeId, String associationId) async {
     var semCache = GetIt.instance<SemCache>();
-    final routePoints = await semCache.getRoutePoints(routeId);
+    final routePoints = await semCache.getRoutePoints(routeId, associationId);
     if (routePoints.isEmpty) {
       pp('$mm ... 2. stopping calculateRouteLengthInKM for $routeId, routePoints');
       return 0.0;

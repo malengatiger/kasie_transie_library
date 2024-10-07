@@ -287,7 +287,7 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
 
     for (var r in routes) {
       final latLngs = <LatLng>[];
-      final rps = await semCache.getRoutePoints(r.routeId!);
+      final rps = await semCache.getRoutePoints(r.routeId!, r.associationId!);
       for (var rp in rps) {
         latLngs.add(LatLng(
             rp.position!.coordinates.last, rp.position!.coordinates.first));
@@ -320,7 +320,7 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
     var routesIsolate = GetIt.instance<SemCache>();
 
     for (var r in routes) {
-      final rps = await routesIsolate.getRouteLandmarks(r.routeId!);
+      final rps = await routesIsolate.getRouteLandmarks(r.routeId!, r.associationId!);
       int index = 0;
       for (var mark in rps) {
         final latLng = LatLng(

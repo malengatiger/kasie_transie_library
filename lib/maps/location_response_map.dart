@@ -91,8 +91,8 @@ class LocationResponseMapState extends State<LocationResponseMap> {
     _polyLines.clear();
     var semCache = GetIt.instance<SemCache>();
     for (var route in routes) {
-      final points = await semCache.getRoutePoints(route.routeId!);
-      final marks = await semCache.getRouteLandmarks(route.routeId!);
+      final points = await semCache.getRoutePoints(route.routeId!, route.associationId!);
+      final marks = await semCache.getRouteLandmarks(route.routeId!, route.associationId!);
       hash[route.routeId!] = points;
       //add polyline
       final List<LatLng> latLngs = [];

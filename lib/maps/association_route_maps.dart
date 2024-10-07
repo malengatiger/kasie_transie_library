@@ -279,8 +279,8 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   void _buildHashMap() async {
     pp('$mm ... _buildHashMap: routesPicked: ${routesPicked.length}');
     for (var route in routesPicked) {
-      final points = await listApiDog.getRoutePoints(route.routeId!, false);
-      final marks = await listApiDog.getRouteLandmarks(route.routeId!, false);
+      final points = await listApiDog.getRoutePoints(route.routeId!, false, route.associationId!);
+      final marks = await listApiDog.getRouteLandmarks(route.routeId!, false, route.associationId!);
       final icons = <BitmapDescriptor>[];
       for (var i = 0; i < marks.length; i++) {
         final icon = await getMarkerBitmap(72,

@@ -106,7 +106,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
 
   Future getRouteLandmarks(bool refresh) async {
     try {
-      routeLandmarks = await listApiDog.getRouteLandmarks(widget.route.routeId!, refresh);
+      routeLandmarks = await listApiDog.getRouteLandmarks(widget.route.routeId!, refresh, widget.route.associationId!);
       pp('\n\n$mm _getRouteLandmarks: ...  ${E.appleRed} route: ${widget.route.name}; found: ${routeLandmarks.length} ');
       if (routeLandmarks.isEmpty) {
         pp('$mm ... NO ROUTE LANDMARKS FOUND for ${widget.route.name}');
@@ -181,7 +181,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
         busy = true;
       });
       existingRoutePoints =
-          await listApiDog.getRoutePoints(widget.route.routeId!, refresh);
+          await listApiDog.getRoutePoints(widget.route.routeId!, refresh, widget.route.associationId!);
       pp('$mm .......... existingRoutePoints ....  🍎 found: '
           '${existingRoutePoints.length} points');
       routePointIndex = existingRoutePoints.length;

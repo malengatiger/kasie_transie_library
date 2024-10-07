@@ -10,14 +10,15 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import 'package:kasie_transie_library/widgets/tiny_bloc.dart';
 
+import '../bloc/sem_cache.dart';
 import '../l10n/translation_handler.dart';
 import '../utils/prefs.dart';
 import '../utils/route_distance_calculator.dart';
 
 class CalculatedDistancesWidget extends StatefulWidget {
-  const CalculatedDistancesWidget({super.key, required this.routeId});
+  const CalculatedDistancesWidget({super.key, required this.routeId, required this.associationId});
 
-  final String routeId;
+  final String routeId, associationId;
   @override
   CalculatedDistancesWidgetState createState() =>
       CalculatedDistancesWidgetState();
@@ -71,6 +72,7 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
   }
 
   double total = 0.0;
+  SemCache semCache = GetIt.instance<SemCache>();
   void _getData(bool refresh) async {
     pp('$mm ... getting data ...');
     if (mounted) {
@@ -80,7 +82,7 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
       });
     }
     try {
-      route = await tinyBloc.getRoute(widget.routeId);
+      route = await semCache.getRoute(widget.routeId, widget.associationId);
       if (refresh) {
         calculatedDistances = await routeDistanceCalculator
             .calculateRouteDistances(widget.routeId, route!.associationId!);
@@ -89,7 +91,7 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
             widget.routeId, route!.associationId!, false);
       }
       total = await routeDistanceCalculator
-          .calculateRouteLengthInKM(widget.routeId);
+          .calculateRouteLengthInKM(widget.routeId, widget.associationId);
       if (mounted) {
         showOKToast(message: 'Route distances calculated', context: context);
       }
