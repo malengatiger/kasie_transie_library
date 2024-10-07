@@ -407,24 +407,32 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
 
   Future<void> _processNewLandmark() async {
-    final routeLandmark = lib.RouteLandmark(
-        position: lib.Position(type: 'Point', coordinates: [
-          routePointForLandmark!.position!.coordinates.first,
-          routePointForLandmark!.position!.coordinates.last
-        ]),
-        routeId: widget.route.routeId!,
-        routeLandmarkId: '${DateTime.now().toUtc().millisecondsSinceEpoch}',
-        landmarkName: landmarkName!,
-        index: landmarkIndex,
-        created: DateTime.now().toUtc().toIso8601String(),
-        landmarkId: DateTime.now().toIso8601String(),
-        routePointId: routePointForLandmark!.routePointId!,
-        routePointIndex: routePointForLandmark!.index!,
-        associationId: widget.route.associationId!,
-        routeName: widget.route.name!);
+    try {
+      final routeLandmark = lib.RouteLandmark(
+              position: lib.Position(type: 'Point', coordinates: [
+                routePointForLandmark!.position!.coordinates.first,
+                routePointForLandmark!.position!.coordinates.last
+              ]),
+              routeId: widget.route.routeId!,
+              routeLandmarkId: '${DateTime.now().toUtc().millisecondsSinceEpoch}',
+              landmarkName: landmarkName!,
+              index: landmarkIndex,
+              created: DateTime.now().toUtc().toIso8601String(),
+              landmarkId: DateTime.now().toIso8601String(),
+              routePointId: routePointForLandmark!.routePointId!,
+              routePointIndex: routePointForLandmark!.index!,
+              associationId: widget.route.associationId!,
+              routeName: widget.route.name!);
 
-    await dataApiDog.addRouteLandmark(routeLandmark);
-    pp('$mm landmark added! ... 😎😎😎 Good Fucking Luck!!');
+      await dataApiDog.addRouteLandmark(routeLandmark, widget.route.associationId!);
+      await semCache.saveRouteLandmarks([routeLandmark], widget.route.associationId!);
+      pp('$mm landmark added! ... 😎😎😎 Good Fucking Luck!!');
+    } catch (e) {
+      pp(e);
+      if (mounted) {
+        showErrorSnackBar(message: '$e', context: context);
+      }
+    }
   }
 
   void _deleteLandmark(lib.RouteLandmark landmark) async {

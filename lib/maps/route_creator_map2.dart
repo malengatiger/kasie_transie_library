@@ -345,10 +345,8 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
       startTimer();
     }
     totalPoints++;
-    // pp('$mm RoutePoint added to map; index: $routePointIndex '
-    //     '🔵 🔵 🔵 total points: $totalPoints');
-
     routePointIndex++;
+
     var routePoint = lib.RoutePoint(
         latitude: latLng.latitude,
         longitude: latLng.longitude,
@@ -368,7 +366,6 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
     rpList.add(routePoint);
 
     _addPolyLine();
-
     _animateCamera(latLng, zoom: defaultZoom + 6);
     setState(() {});
   }
@@ -398,7 +395,8 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
     rpList.clear();
     sending = true;
     var ml = RoutePointList(sList);
-    final count = await dataApiDog.addRoutePoints(ml);
+    final count = await dataApiDog.addRoutePoints(ml,widget.route.associationId!);
+    await semCache.saveRoutePoints(sList, widget.route.associationId!);
     sending = false;
     pp('$mm ... _sendRoutePointsToBackend: ❤️❤️route points saved to Kasie backend: ❤️ $count ❤️ DONE!\n\n');
   }
@@ -420,10 +418,13 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
                     color = mColor;
                     stringColor = name;
                   });
+                  Navigator.of(context).pop();
                   changeRouteColor();
                 },
                 onClose: () {
-                  setState(() {});
+                  setState(() {
+                    Navigator.of(context).pop();
+                  });
                 },
               ),
               actions: [
@@ -455,7 +456,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
       final m = await dataApiDog.updateRouteColor(
           routeId: widget.route.routeId!, color: stringColor);
       final SemCache semCache = GetIt.instance<SemCache>();
-      semCache.saveRoutes([m]);
+      semCache.saveRoutes([m], widget.route.associationId!);
       pp('$mm ... color has been updated ... result: $m ; 0 is good!');
       tinyBloc.setRouteId(widget.route.routeId!);
     } catch (e) {
@@ -474,6 +475,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
         context: context,
         widget: RoutePointDeletion(
             routeId: widget.route.routeId!,
+            associationId: widget.route.associationId!,
             onDeletionComplete: () {
               pp('$mm ... onDeletionComplete ....');
               showOKToast(message: 'Route points updated!', context: context);

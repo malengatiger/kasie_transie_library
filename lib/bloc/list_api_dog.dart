@@ -278,7 +278,7 @@ class ListApiDog {
     for (var mJson in resp) {
       list.add(RouteLandmark.fromJson(mJson));
     }
-    await semCache.saveRouteLandmarks(list);
+    await semCache.saveRouteLandmarks(list, associationId);
     return list;
   }
 

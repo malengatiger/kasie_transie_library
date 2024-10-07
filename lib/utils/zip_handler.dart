@@ -174,8 +174,12 @@ class ZipHandler {
         '=$associationId';
 
     var start = DateTime.now();
-    RouteData routeData =
-        RouteData(routes: [], routePoints: [], landmarks: [], cities: [], associationId: associationId);
+    RouteData routeData = RouteData(
+        routes: [],
+        routePoints: [],
+        landmarks: [],
+        cities: [],
+        associationId: associationId);
 
     Map<String, String> headers = {
       'Accept': '*/*',
@@ -237,19 +241,16 @@ class ZipHandler {
               routes: routes,
               routePoints: routePoints,
               landmarks: landmarks,
-              cities: finalCities, associationId: associationId);
+              cities: finalCities,
+              associationId: associationId);
 
           //cache data locally
           await semCache.saveRouteData(routeData);
-          await semCache.saveRoutes(routes);
-          await semCache.saveRoutePoints(routePoints);
-          await semCache.saveRouteCities(finalCities);
-          await semCache.saveRouteLandmarks(landmarks);
 
-          pp('$xz getRouteDataString 🍎🍎🍎🍎 RouteData has been filled and cached!');
+          pp('$xz getRoutes: 🍎🍎🍎🍎 RouteData has been filled and cached!');
           var end = DateTime.now();
           var ms = end.difference(start).inSeconds;
-          pp('$xz getRouteDataString 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎 return string ...\n\n');
+          pp('$xz getRoutes: 🍎🍎🍎🍎 work is done!, elapsed seconds: 🍎$ms 🍎 return string ...\n\n');
           return routeData;
         }
       }

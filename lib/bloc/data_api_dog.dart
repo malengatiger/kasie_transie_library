@@ -179,13 +179,13 @@ class DataApiDog {
     return m;
   }
 
-  Future addRoutePoints(RoutePointList routePointList) async {
+  Future addRoutePoints(RoutePointList routePointList, String associationId) async {
     pp('$mm ... adding routePoints to database ...${routePointList.routePoints.length}');
     final cmd = '${url}routes/addRoutePoints';
     var res = await _callPost(cmd, routePointList.toJson());
     pp('$mm routePoints added to MongoDB Atlas database: $res');
 
-    await semCache.saveRoutePoints(routePointList.routePoints);
+    await semCache.saveRoutePoints(routePointList.routePoints, associationId);
     return res as int;
   }
 
@@ -212,10 +212,9 @@ class DataApiDog {
     pp('$mm route added to database ...');
     myPrettyJsonPrint(res);
     final r = Route.fromJson(res);
-    await semCache.saveRoutes([r]);
+    await semCache.saveRoutes([r], route.associationId!);
     var dog = GetIt.instance<ListApiDog>();
-    var routes = await semCache.getRoutes(route.associationId!);
-    dog.putRouteInStream(routes);
+    dog.putRouteInStream([r]);
     return r;
   }
 
@@ -308,7 +307,7 @@ class DataApiDog {
     _routeLandmarkController.sink.add(route);
   }
 
-  Future<RouteLandmark> addRouteLandmark(RouteLandmark route) async {
+  Future<RouteLandmark> addRouteLandmark(RouteLandmark route, String associationId) async {
     final bag = route.toJson();
     final cmd = '${url}routes/addRouteLandmark';
     final res = await _callPost(cmd, bag);
@@ -316,7 +315,7 @@ class DataApiDog {
     myPrettyJsonPrint(res);
     final r = RouteLandmark.fromJson(res);
 
-    semCache.saveRouteLandmarks([r]);
+    semCache.saveRouteLandmarks([r],associationId);
     _routeLandmarkController.sink.add(r);
     return r;
   }
@@ -372,7 +371,7 @@ class DataApiDog {
   }
 
   Future<List<RoutePoint>> deleteRoutePointsFromIndex(
-      String routeId, int index) async {
+      String routeId, int index,  String associationId) async {
     final cmd =
         '${url}routes/deleteRoutePointsFromIndex?routeId=$routeId&index=$index';
     List res = await _sendHttpGET(cmd);
@@ -382,7 +381,7 @@ class DataApiDog {
       routePoints.add(RoutePoint.fromJson(value));
     }
     await semCache.deleteRoutePoints(routeId);
-    await semCache.saveRoutePoints(routePoints);
+    await semCache.saveRoutePoints(routePoints, associationId);
     return routePoints;
   }
 

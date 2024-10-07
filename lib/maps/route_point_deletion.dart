@@ -8,9 +8,10 @@ import 'package:responsive_builder/responsive_builder.dart';
 
 class RoutePointDeletion extends StatefulWidget {
   const RoutePointDeletion(
-      {super.key, required this.routeId, required this.onDeletionComplete});
+      {super.key, required this.routeId, required this.onDeletionComplete, required this.associationId});
 
   final String routeId;
+  final String associationId;
   final Function() onDeletionComplete;
 
   @override
@@ -93,7 +94,7 @@ class RoutePointDeletionState extends State<RoutePointDeletion> {
     pp('$mm ........... delete starting ...');
     try {
       var routePoints =
-          await api.deleteRoutePointsFromIndex(point.routeId!, point.index!);
+          await api.deleteRoutePointsFromIndex(point.routeId!, point.index!, widget.associationId);
       pp('$mm .... delete done, 🍎 points remaining: ${routePoints.length}');
     } catch (e) {
       pp(e);
