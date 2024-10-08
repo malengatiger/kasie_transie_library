@@ -123,111 +123,107 @@ class SchemeUtil {
   static void _setThemes() {
     _themeBags.clear();
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.deepBlue),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.deepBlue)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.deepBlue, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.deepBlue, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.green),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.green)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.green, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.green, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.redWine),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.redWine)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.redWine, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.redWine, useMaterial3: true, background: Colors.grey.shade700)));
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.barossa),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.barossa)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.barossa, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.barossa, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.mallardGreen),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.mallardGreen)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.mallardGreen, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.mallardGreen, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.mandyRed),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.mandyRed)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.mandyRed, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.mandyRed, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.red),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.red)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.red, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.red, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.blue),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.blue)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.blue, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.blue, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.mango),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.mango)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.mango, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.mango, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.indigo),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.indigo)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.indigo, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.indigo, useMaterial3: true, background: Colors.grey.shade700)));
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.hippieBlue),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.hippieBlue)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.hippieBlue, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.hippieBlue, useMaterial3: true, background: Colors.grey.shade700)));
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.deepPurple),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.deepPurple)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.deepPurple, useMaterial3: true, background: Colors.grey.shade700, colorScheme: ColorScheme.fromSwatch(backgroundColor: Colors.deepPurple)),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.deepPurple, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.espresso),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.espresso)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.espresso, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.espresso, useMaterial3: true, background: Colors.grey.shade700)));
+
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.barossa),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.barossa)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.bigStone, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.bigStone, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.bigStone),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.bigStone)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.damask, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.damask, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.damask),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.damask)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.purpleBrown, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.purpleBrown, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.purpleBrown),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.purpleBrown)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.wasabi, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.wasabi, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.wasabi),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.wasabi)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.rosewood, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.rosewood, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.rosewood),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.rosewood)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.sanJuanBlue, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.sanJuanBlue, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.sanJuanBlue),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.sanJuanBlue)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.amber, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.amber, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.amber),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.amber)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.dellGenoa, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.dellGenoa, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.dellGenoa),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.dellGenoa)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.gold, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.gold, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.gold),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.gold)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.blueWhale, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.blueWhale, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.blueWhale),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.blueWhale)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.ebonyClay, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.ebonyClay, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.ebonyClay),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.ebonyClay)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.money, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.money, useMaterial3: true, background: Colors.grey.shade700)));
 
     _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.money),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.money)));
+        lightTheme: FlexThemeData.light(scheme: FlexScheme.aquaBlue, useMaterial3: true, background: Colors.grey.shade700),
+        darkTheme: FlexThemeData.dark(scheme: FlexScheme.aquaBlue, useMaterial3: true, background: Colors.grey.shade700)));
 
-    _themeBags.add(ThemeBag(
-        lightTheme: FlexThemeData.light(scheme: FlexScheme.aquaBlue),
-        darkTheme: FlexThemeData.dark(scheme: FlexScheme.aquaBlue)));
-    _themeBags.add(
-        ThemeBag(lightTheme: getMyThemeLight(), darkTheme: getMyThemeDark()));
   }
 }
 
@@ -250,119 +246,4 @@ class LocaleAndTheme {
   late Locale locale;
 
   LocaleAndTheme({required this.themeIndex, required this.locale});
-}
-
-ThemeData getMyThemeLight() {
-  final td = ThemeData(
-    indicatorColor: const Color(0xff00a6ed),
-    primaryColor: const Color(0xFF424343),
-    cardColor: const Color(0xffe4e4e4),
-    scaffoldBackgroundColor: Colors.white,
-    canvasColor: const Color(0xFF424343),
-    splashColor: const Color(0xFF424343),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.transparent,
-      actionsIconTheme: IconThemeData(color: Colors.black),
-    ),
-    brightness: Brightness.light,
-  );
-
-  return td;
-}
-
-ThemeData getMyThemeDark() {
-  final td = ThemeData(
-    indicatorColor: const Color(0xff00a6ed),
-    primaryColor: const Color(0xfff4f3ee),
-    cardColor: const Color(0xff222222),
-    canvasColor: const Color(0xffffb400),
-    scaffoldBackgroundColor: Colors.black,
-    brightness: Brightness.dark,
-    splashColor: const Color(0xffffb400),
-    appBarTheme: AppBarTheme(
-      backgroundColor: Colors.black.withOpacity(0.6),
-      actionsIconTheme: IconThemeData(color: Colors.white.withOpacity(0.4)),
-    ),
-  );
-  return td;
-}
-
-class KhayaTheme {
-  static const ColorScheme flexSchemeDark = ColorScheme(
-    brightness: Brightness.dark,
-    primary: Color(0xff9fc9ff),
-    onPrimary: Color(0xff101314),
-    primaryContainer: Color(0xff00325b),
-    onPrimaryContainer: Color(0xffdfe7ee),
-    secondary: Color(0xffffb59d),
-    onSecondary: Color(0xff141210),
-    secondaryContainer: Color(0xff872100),
-    onSecondaryContainer: Color(0xfff4e4df),
-    tertiary: Color(0xff86d2e1),
-    onTertiary: Color(0xff0e1414),
-    tertiaryContainer: Color(0xff004e59),
-    onTertiaryContainer: Color(0xffdfeced),
-    error: Color(0xffcf6679),
-    onError: Color(0xff140c0d),
-    errorContainer: Color(0xffb1384e),
-    onErrorContainer: Color(0xfffbe8ec),
-    surface: Color(0xff191b1f),
-    onSurface: Color(0xffeceded),
-    surfaceContainerHighest: Color(0xff21262d),
-    onSurfaceVariant: Color(0xffdcdcde),
-    outline: Color(0xff9da3a3),
-    shadow: Color(0xff000000),
-    inverseSurface: Color(0xfff9fbff),
-    onInverseSurface: Color(0xff131314),
-    inversePrimary: Color(0xff536578),
-    surfaceTint: Color(0xff9fc9ff),
-  );
-
-  var theme1 = ThemeData.dark();
-
-  var themeLight = FlexThemeData.light(
-        colors: const FlexSchemeColor(
-          primary: Color(0xff004881),
-          primaryContainer: Color(0xffd0e4ff),
-          secondary: Color(0xffac3306),
-          secondaryContainer: Color(0xffd9754f),
-          tertiary: Color(0xff006875),
-          tertiaryContainer: Color(0xff95f0ff),
-          appBarColor: Color(0xffd9754f),
-          error: Color(0xffb00020),
-        ),
-        surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
-        blendLevel: 9,
-        subThemesData: const FlexSubThemesData(
-          blendOnLevel: 10,
-          blendOnColors: false,
-        ),
-        visualDensity: FlexColorScheme.comfortablePlatformDensity,
-        useMaterial3: true,
-        swapLegacyOnMaterial3: true,
-        // To use the playground font, add GoogleFonts package and uncomment
-        // fontFamily: GoogleFonts.notoSans().fontFamily,
-      ),
-      themeDark = FlexThemeData.dark(
-        colors: const FlexSchemeColor(
-          primary: Color(0xff9fc9ff),
-          primaryContainer: Color(0xff00325b),
-          secondary: Color(0xffffb59d),
-          secondaryContainer: Color(0xff872100),
-          tertiary: Color(0xff86d2e1),
-          tertiaryContainer: Color(0xff004e59),
-          appBarColor: Color(0xff872100),
-          error: Color(0xffcf6679),
-        ),
-        surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
-        blendLevel: 15,
-        subThemesData: const FlexSubThemesData(
-          blendOnLevel: 20,
-        ),
-        visualDensity: FlexColorScheme.comfortablePlatformDensity,
-        useMaterial3: true,
-        swapLegacyOnMaterial3: true,
-        // To use the Playground font, add GoogleFonts package and uncomment
-        fontFamily: GoogleFonts.lato().fontFamily,
-      );
 }

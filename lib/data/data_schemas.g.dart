@@ -743,6 +743,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       email: json['email'] as String?,
       cellphone: json['cellphone'] as String?,
       thumbnailUrl: json['thumbnailUrl'] as String?,
+      created: json['created'] as String?,
       imageUrl: json['imageUrl'] as String?,
     );
 
@@ -761,6 +762,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'cellphone': instance.cellphone,
       'thumbnailUrl': instance.thumbnailUrl,
       'imageUrl': instance.imageUrl,
+      'created': instance.created,
     };
 
 RegistrationBag _$RegistrationBagFromJson(Map<String, dynamic> json) =>

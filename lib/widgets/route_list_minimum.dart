@@ -82,6 +82,7 @@ class RouteListMinimumState extends State<RouteListMinimum>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return SafeArea(
         child: Scaffold(
             // appBar: AppBar(
@@ -111,7 +112,7 @@ class RouteListMinimumState extends State<RouteListMinimum>
                   padding: EdgeInsets.all(12),
                   badgeColor: Colors.indigo,
                 ),
-                badgeContent: Text('${routes.length}'),
+                badgeContent: Text('${routes.length}', style: const TextStyle(color: Colors.white)),
                 child: ListView.builder(
                     itemCount: routes.length,
                     itemBuilder: (ctx, index) {
@@ -127,7 +128,7 @@ class RouteListMinimumState extends State<RouteListMinimum>
                             padding: const EdgeInsets.all(16.0),
                             child: Text(
                               '${r.name}',
-                              style: myTextStyleSmall(context),
+                              style: myTextStyleMediumLarge(context, 15),
                             ),
                           ),
                         ),

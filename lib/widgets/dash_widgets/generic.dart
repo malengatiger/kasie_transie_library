@@ -9,14 +9,12 @@ class TotalWidget extends StatelessWidget {
       required this.caption,
       required this.number,
       required this.onTapped,
-      required this.color,
-      required this.fontSize});
+      this.fontSize});
 
   final String caption;
   final int number;
   final Function onTapped;
-  final Color color;
-  final double fontSize;
+  final double? fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +34,6 @@ class TotalWidget extends StatelessWidget {
               child: NumberAndCaption(
                   caption: caption,
                   number: number,
-                  color: color,
                   fontSize: fontSize),
             ),
           ),
@@ -51,17 +48,18 @@ class NumberAndCaption extends StatelessWidget {
       {super.key,
       required this.caption,
       required this.number,
-      required this.color,
-      required this.fontSize});
+      this.fontSize});
 
   final String caption;
   final int number;
-  final Color color;
-  final double fontSize;
+  final double? fontSize;
 
   @override
   Widget build(BuildContext context) {
     final fmt = NumberFormat.decimalPattern();
+    final ThemeData mode = Theme.of(context);
+
+
     return SizedBox(
       height: 64,
       child: Column(
@@ -70,7 +68,7 @@ class NumberAndCaption extends StatelessWidget {
         children: [
           Text(
             fmt.format(number),
-            style: myNumberStyleLargerWithColor(color, fontSize, context),
+            style: myTextStyleMediumLarge(context, fontSize),
           ),
           const SizedBox(
             height: 4,

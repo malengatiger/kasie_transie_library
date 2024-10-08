@@ -25,19 +25,16 @@ class SemCache {
   }
 
   Future<List<Route>> getRoutes(String associationId) async {
-    var store = intMapStoreFactory.store('routes');
 
-    var finder = Finder(
-        filter: Filter.equals('associationId', associationId),
-        sortOrders: [SortOrder('associationName')]);
-    var records = await store.find(db, finder: finder);
-
+    var data = await getRouteData(associationId);
     List<Route> routes = [];
-    for (var rec in records) {
-      var route = Route.fromJson(rec.value);
-      routes.add(route);
+
+    if (data != null) {
+      routes = data.routes;
     }
-    pp('$mm routes retrieved from cache: ${routes.length}');
+
+    routes.sort((a,b) => a.name!.compareTo(b.name!));
+    pp('$mm routes retrieved from cache: 😡 ${routes.length} ');
     return routes;
   }
 
@@ -167,6 +164,19 @@ class SemCache {
     pp('$mm routeLandmarks added to cache: 🥦 ${routeLandmarks.length} 🥦');
   }
 
+  Future saveUsers(
+      List<User> users) async {
+    var store = intMapStoreFactory.store('users');
+
+    for (var user in users) {
+      store
+          .record(dateToInt(user.created!))
+          .put(db, user.toJson());
+    }
+
+    pp('$mm users added to cache: 🥦 ${users.length} 🥦');
+  }
+
   Future<List<RouteLandmark>> getRouteLandmarks(String routeId, String associationId) async {
     var data = await getRouteData(associationId);
 
@@ -232,7 +242,7 @@ class SemCache {
   Future saveCities(List<City> cities) async {
     var store = intMapStoreFactory.store('cities');
     for (var city in cities) {
-      store.record(dateToInt(city.created!)).put(db, city.toJson());
+      store.record(dateToInt(city.created?? DateTime.now().toIso8601String())).put(db, city.toJson());
     }
     pp('$mm cities added to cache: ☎️ ${cities.length} ☎️ ');
   }

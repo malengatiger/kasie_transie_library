@@ -90,6 +90,7 @@ dependencies:
 
   flutter_sim_country_code: any
   uuid: any
+  theme_mode_handler: ^3.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

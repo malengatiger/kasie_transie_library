@@ -80,6 +80,7 @@ class CityChooserState extends State<CityChooser>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return loading
         ? const SizedBox(
             height: 20,
@@ -114,14 +115,14 @@ class CitySearch extends StatefulWidget {
     required this.showScaffold,
     required this.onCitySelected,
     required this.cities,
-    required this.title,
+    required this.title, required this.onCityAdded,
   });
 
   final bool showScaffold;
   final List<lib.City> cities;
   final Function(lib.City) onCitySelected;
   final String title;
-
+  final Function(lib.City) onCityAdded;
   @override
   State<CitySearch> createState() => _CitySearchState();
 }
@@ -260,7 +261,10 @@ class _CitySearchState extends State<CitySearch> {
                       onPressed: () {
                         NavigationUtils.navigateTo(
                             context: context,
-                            widget: const CityCreatorMap(),
+                            widget: CityCreatorMap(onCityAdded: (c ) {
+                              pp('$mm ... city added: ${c.toJson()}');
+                              widget.onCityAdded(c);
+                            },),
                             transitionType: PageTransitionType.leftToRight);
                       },
                       icon: Icon(
@@ -278,10 +282,10 @@ class _CitySearchState extends State<CitySearch> {
                   child: bd.Badge(
                     badgeContent: Text(
                       '${_citiesToDisplay.length}',
-                      style: myTextStyleTiny(context),
+                      style: const TextStyle(color: Colors.white),
                     ),
                     badgeStyle:
-                        const bd.BadgeStyle(padding: EdgeInsets.all(8.0)),
+                        const bd.BadgeStyle(padding: EdgeInsets.all(24.0), badgeColor: Colors.blue),
                     child: ListView.builder(
                         itemCount: _citiesToDisplay.length,
                         itemBuilder: (ctx, index) {

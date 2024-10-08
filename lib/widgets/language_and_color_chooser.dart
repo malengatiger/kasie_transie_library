@@ -1,9 +1,10 @@
+import 'package:badges/badges.dart' as bd;
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/data/color_and_locale.dart';
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
-import 'package:badges/badges.dart' as bd;
 import 'package:responsive_builder/responsive_builder.dart';
+
 import '../bloc/theme_bloc.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
@@ -13,6 +14,7 @@ class LanguageAndColorChooser extends StatefulWidget {
   const LanguageAndColorChooser({super.key, required this.onLanguageChosen});
 
   final Function onLanguageChosen;
+
   @override
   LanguageAndColorChooserState createState() => LanguageAndColorChooserState();
 }
@@ -27,7 +29,8 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
   List<LangBag> languageBags = [];
   bool busy = false;
   late ColorAndLocale colorAndLocale;
- var languageColor = 'languageColor';
+  var languageColor = 'languageColor';
+
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
@@ -40,9 +43,7 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
     final c = prefs.getColorAndLocale();
     final loc = c.locale;
     languageColor = await translator.translate('languageColor', loc);
-   setState(() {
-
-   });
+    setState(() {});
   }
 
   @override
@@ -76,6 +77,7 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
   }
 
   var locale = 'en';
+
   Future getLanguages() async {
     setState(() {
       busy = true;
@@ -175,8 +177,9 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
 
   ColorFromTheme? colorFromTheme;
   ThemeBloc themeBloc = GetIt.instance<ThemeBloc>();
+
   void onColorChosen(ColorFromTheme colorFromTheme) async {
-    pp('$mm onColorChosen, index: ${colorFromTheme.themeIndex}');
+    pp('$mm ... onColorChosen, index: ${colorFromTheme.themeIndex}');
     colorAndLocale.themeIndex = colorFromTheme.themeIndex;
     prefs.saveColorAndLocale(colorAndLocale);
     themeBloc.changeColorAndLocale(colorAndLocale);
@@ -189,6 +192,7 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
 
   Future<void> onLanguageChosen(LangBag bag) async {
     pp('$mm ......... onLanguageChosen, language: ${bag.language}');
+
     colorAndLocale.locale = bag.locale;
     prefs.saveColorAndLocale(colorAndLocale);
     locale = bag.locale;
@@ -199,7 +203,6 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
     });
 
     widget.onLanguageChosen();
-
   }
 
   @override
@@ -212,7 +215,8 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
       child: Scaffold(
         appBar: AppBar(
           leading: const SizedBox(),
-          title: Text(languageColor,
+          title: Text(
+            languageColor,
             style: myTextStyleMediumLargeWithColor(
                 context, Theme.of(context).primaryColor, 24),
           ),
@@ -224,14 +228,14 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
                 icon: const Icon(Icons.check)),
           ],
           bottom: PreferredSize(
-              preferredSize:  Size.fromHeight(type == 'phone'? 64: 100),
+              preferredSize: Size.fromHeight(type == 'phone' ? 64 : 100),
               child: Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        width: type == 'phone'? 100.0 : 200.0,
+                        width: type == 'phone' ? 100.0 : 200.0,
                         height: 32,
                         color: colorFromTheme == null
                             ? Colors.grey
@@ -256,8 +260,8 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
                             )
                     ],
                   ),
-                   SizedBox(
-                    height: type == 'phone'? 16: 32,
+                  SizedBox(
+                    height: type == 'phone' ? 16 : 32,
                   ),
                 ],
               )),
@@ -275,107 +279,111 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
               )
             : ScreenTypeLayout.builder(
                 tablet: (ctx) {
-                   return OrientationLayoutBuilder(
-                       landscape: (ctx){
-                         return Center(
-                             child: SizedBox(
-                               height: height,
-                               child: Row(
-                                 children: [
-                                   SizedBox(
-                                       width: (width /2),
-                                       child: Card(
-                                         shape: getDefaultRoundedBorder(),
-                                         elevation: 8,
-                                         child: Padding(
-                                           padding: const EdgeInsets.all(8.0),
-                                           child: ColorGrid(
-                                               colors: colors,
-                                               onColorChosen: (c) {
-                                                 onColorChosen(c);
-                                               }, crossAxisCount: 6,),
-                                         ),
-                                       )),
-                                   const SizedBox(
-                                     width: 8,
-                                   ),
-                                   SizedBox(
-                                     width: (width /2) - 48,
-                                     child: LanguageList(
-                                         languageBags: languageBags,
-                                         onLanguageChosen: (l) {
-                                           onLanguageChosen(l);
-                                         }),
-                                   ),
-                                 ],
-                               ),
-                             ));
-                       },
-                       portrait: (ctx){
-                     return Center(
-                         child: SizedBox(
-                           height: height,
-                           child: Row(
-                             children: [
-                               SizedBox(
-                                   width: (width /2) - 40,
-                                   child: Card(
-                                     elevation: 8,
-                                     shape: getDefaultRoundedBorder(),
-                                     child: Padding(
-                                       padding: const EdgeInsets.all(8.0),
-                                       child: ColorGrid(
-                                         crossAxisCount: 4,
-                                           colors: colors,
-                                           onColorChosen: (c) {
-                                             onColorChosen(c);
-                                           }),
-                                     ),
-                                   )),
-                               const SizedBox(
-                                 width: 8,
-                               ),
-                               SizedBox(
-                                 width: (width /2),
-                                 child: LanguageList(
-                                     languageBags: languageBags,
-                                     onLanguageChosen: (l) {
-                                       onLanguageChosen(l);
-                                     }),
-                               ),
-                             ],
-                           ),
-                         ));
-                   });
+                  return OrientationLayoutBuilder(landscape: (ctx) {
+                    return Center(
+                        child: SizedBox(
+                            height: height,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 64, horizontal: 64),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                      width: (width / 2) - 64,
+                                      child: Card(
+                                        shape: getDefaultRoundedBorder(),
+                                        elevation: 8,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: ColorGrid(
+                                            colors: colors,
+                                            onColorChosen: (c) {
+                                              onColorChosen(c);
+                                            },
+                                            crossAxisCount: 6,
+                                          ),
+                                        ),
+                                      )),
+                                  const SizedBox(
+                                    width: 8,
+                                  ),
+                                  SizedBox(
+                                    width: (width / 2) - 160,
+                                    child: LanguageList(
+                                        languageBags: languageBags,
+                                        onLanguageChosen: (l) {
+                                          onLanguageChosen(l);
+                                        }),
+                                  ),
+                                ],
+                              ),
+                            )));
+                  }, portrait: (ctx) {
+                    return Center(
+                        child: SizedBox(
+                      height: height,
+                      child: Row(
+                        children: [
+                          SizedBox(
+                              width: (width / 2) - 40,
+                              child: Card(
+                                elevation: 8,
+                                shape: getDefaultRoundedBorder(),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: ColorGrid(
+                                      crossAxisCount: 4,
+                                      colors: colors,
+                                      onColorChosen: (c) {
+                                        onColorChosen(c);
+                                      }),
+                                ),
+                              )),
+                          const SizedBox(
+                            width: 8,
+                          ),
+                          SizedBox(
+                            width: (width / 2),
+                            child: LanguageList(
+                                languageBags: languageBags,
+                                onLanguageChosen: (l) {
+                                  onLanguageChosen(l);
+                                }),
+                          ),
+                        ],
+                      ),
+                    ));
+                  });
                 },
                 mobile: (ctx) {
                   return Center(
-                      child: SizedBox(
-                    height: height,
-                    child: Row(
-                      children: [
-                        SizedBox(
-                            width: (width /2) - 24,
-                            child: ColorGrid(
-                              crossAxisCount: 2,
-                                colors: colors,
-                                onColorChosen: (c) {
-                                  onColorChosen(c);
-                                })),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        SizedBox(
-                          width: (width /2),
-                          child: LanguageList(
-                              languageBags: languageBags,
-                              onLanguageChosen: (l) {
-                                onLanguageChosen(l);
-                              }),
-                        ),
-                      ],
+                    child: SizedBox(
+                      height: height,
+                      child: Row(
+                        children: [
+                          SizedBox(
+                              width: (width / 2) - 24,
+                              child: ColorGrid(
+                                  crossAxisCount: 2,
+                                  colors: colors,
+                                  onColorChosen: (c) {
+                                    onColorChosen(c);
+                                  })),
+                          const SizedBox(
+                            width: 8,
+                          ),
+                          SizedBox(
+                            width: (width / 2),
+                            child: LanguageList(
+                                languageBags: languageBags,
+                                onLanguageChosen: (l) {
+                                  onLanguageChosen(l);
+                                }),
+                          ),
+                        ],
+                      ),
                     ),
-                  ));
+                  );
                 },
               ),
       ),
@@ -389,13 +397,14 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
 class LanguageList extends StatelessWidget {
   const LanguageList(
       {super.key, required this.languageBags, required this.onLanguageChosen});
+
   final List<LangBag> languageBags;
   final Function(LangBag) onLanguageChosen;
 
   @override
   Widget build(BuildContext context) {
     languageBags.sort((a, b) => a.language.compareTo(b.language));
-    return Card(
+    return SizedBox(width: 300, child: Card(
       shape: getDefaultRoundedBorder(),
       elevation: 4,
       child: Padding(
@@ -429,12 +438,16 @@ class LanguageList extends StatelessWidget {
               }),
         ),
       ),
-    );
+    ));
   }
 }
 
 class ColorGrid extends StatelessWidget {
-  const ColorGrid({super.key, required this.colors, required this.onColorChosen, required this.crossAxisCount});
+  const ColorGrid(
+      {super.key,
+      required this.colors,
+      required this.onColorChosen,
+      required this.crossAxisCount});
 
   final List<ColorFromTheme> colors;
   final Function(ColorFromTheme) onColorChosen;
@@ -444,8 +457,10 @@ class ColorGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: GridView.builder(
-          gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisSpacing: 2, mainAxisSpacing: 2, crossAxisCount: crossAxisCount),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisSpacing: 2,
+              mainAxisSpacing: 2,
+              crossAxisCount: crossAxisCount),
           itemCount: colors.length,
           itemBuilder: (ctx, index) {
             final c = colors.elementAt(index);

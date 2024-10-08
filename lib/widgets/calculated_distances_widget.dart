@@ -107,6 +107,7 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final fmt = NumberFormat.decimalPattern();
     final type = getThisDeviceType();
     return busy
@@ -128,7 +129,7 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
                     children: [
                       Text(
                         routeLength,
-                        style: myTextStyleSmall(context),
+                        style: myTextStyleMediumLarge(context, 20),
                       ),
                       const SizedBox(
                         width: 8,
@@ -138,7 +139,7 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
                         style: myTextStyleMediumLargeWithColor(
                             context,
                             Theme.of(context).primaryColor,
-                            type == 'phone' ? 16 : 20),
+                            type == 'phone' ? 16 : 36),
                       ),
                       const SizedBox(
                         width: 8,
@@ -147,16 +148,14 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
                     ],
                   ),
                 ),
-                const SizedBox(
-                  height: 8,
-                ),
+               gapH32,
                 Expanded(
                   child: GestureDetector(
                     onTap: () {
                       _getData(true);
                     },
                     child: bd.Badge(
-                      badgeContent: Text('${calculatedDistances.length}'),
+                      badgeContent: Text('${calculatedDistances.length}', style: const TextStyle(color: Colors.white)),
                       position: bd.BadgePosition.topEnd(top: 8, end: -8),
                       badgeStyle: const bd.BadgeStyle(
                           padding: EdgeInsets.all(8.0),

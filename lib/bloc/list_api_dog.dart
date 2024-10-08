@@ -942,7 +942,7 @@ class ListApiDog {
     pp('$mm .................. _getCalculatedDistancesFromBackend; routeId: $routeId');
 
     final list = <CalculatedDistance>[];
-    final cmd = '${url}getCalculatedDistances?routeId=$routeId';
+    final cmd = '${url}routes/getCalculatedDistances?routeId=$routeId';
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
       var r = CalculatedDistance.fromJson(value);
@@ -1038,7 +1038,7 @@ class ListApiDog {
 
   Future<List<City>> findCitiesByLocation(LocationFinderParameter p) async {
     var list = <City>[];
-    final user = prefs.getUser();
+    pp('$mm findCitiesByLocation: 🍎🍎lat: ${p.latitude} lng: ${p.longitude} 🍎🍎 radiusInKM: ${p.radiusInKM} 🍎🍎associationId: ${p.associationId}');
     final cmd = '${url}city/findCitiesByLocation?latitude=${p.latitude}'
         '&longitude=${p.longitude}&maxDistanceInMetres=${p.radiusInKM}&limit=${p.limit}';
 
@@ -1066,6 +1066,7 @@ class ListApiDog {
       String associationId, bool refresh) async {
     var list = <User>[];
     await _getUsersFromBackEnd(associationId, list);
+    await semCache.saveUsers(list);
     return list;
   }
 

@@ -431,20 +431,20 @@ class RouteMapViewerState extends State<RouteMapViewer> {
                                 _getRoutePoints(true);
                               },
                               icon: Icon(
-                                Icons.toggle_on,
+                                Icons.refresh,
                                 color: Theme.of(context).primaryColor,
                               )),
                           const SizedBox(
                             width: 28,
                           ),
-                          IconButton(
-                              onPressed: () {
-                                _showColorChoices();
-                              },
-                              icon: Icon(
-                                Icons.color_lens,
-                                color: Theme.of(context).primaryColor,
-                              ))
+                          // IconButton(
+                          //     onPressed: () {
+                          //       _showColorChoices();
+                          //     },
+                          //     icon: Icon(
+                          //       Icons.color_lens,
+                          //       color: Theme.of(context).primaryColor,
+                          //     ))
                         ],
                       ),
                     )),
@@ -464,36 +464,7 @@ class RouteMapViewerState extends State<RouteMapViewer> {
                         ),
                       )
                     : const SizedBox(),
-                showColors
-                    ? Positioned(
-                        top: 24,
-                        right: 24,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 16, horizontal: 24),
-                          child: Card(
-                              elevation: 16,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 48, horizontal: 48),
-                                child: ColorPad(
-                                  onColorPicked: (c, s) {
-                                    pp('$mm ColorPad(onColorPicked: picked: ${c.toString()} - $s');
-                                    setState(() {
-                                      stringColor = s;
-                                      newColor = c;
-                                    });
-                                    _changeRouteColor();
-                                  }, onClose: () {
-                                    setState(() {
-                                      showColors = false;
-                                    });
-                                },
-                                ),
-                              )),
-                        ),
-                      )
-                    : const SizedBox(),
+
               ]));
   }
 }

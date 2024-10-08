@@ -18,10 +18,10 @@ import '../utils/prefs.dart';
 import '../widgets/searching_cities_busy.dart';
 
 class CityCreatorMap extends ConsumerStatefulWidget {
-  const CityCreatorMap({
+  const CityCreatorMap({required this.onCityAdded,
     super.key,
   });
-
+  final Function (lib.City) onCityAdded;
   @override
   ConsumerState createState() => CityCreatorMapState();
 }
@@ -174,13 +174,11 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
 
     final icon = await getMarkerBitmap(200,
         text: 'OK', color: 'black', fontSize: 40, fontWeight: FontWeight.w800);
-
     _markers.add(Marker(
         markerId: MarkerId(DateTime.now().toIso8601String()),
         icon: icon,
         onTap: () {
           pp('$mm .............. marker tapped: $index');
-          //_deleteRoutePoint(routePoint);
         },
         infoWindow: InfoWindow(
             snippet: 'This is a new place',
@@ -192,7 +190,6 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
         position: latLng!));
 
     setState(() {});
-
     var cameraPos = CameraPosition(target: latLng!, zoom: defaultZoom);
     final GoogleMapController controller = await _mapController.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
@@ -224,17 +221,25 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
           countryName: country!.name,
           stateName: stateName,
           stateId: stateId,
+          latitude: latLng!.latitude,
+          longitude: latLng!.longitude,
           position: lib.Position(
             type: 'Point',
             coordinates: [latLng!.longitude, latLng!.latitude],
             latitude: latLng!.latitude,
             longitude: latLng!.longitude,
           ));
+
       pp('$mm adding city to the database now!! ${city.name}');
       var mCity = await dataApiDog.addCity(city);
       pp('$mm city should be in the database now!! ${mCity.name}');
+      _showCityForm = false;
+      widget.onCityAdded(mCity);
     } catch (e) {
       pp('$mm ... error adding city : $e');
+      if (mounted) {
+        showErrorSnackBar(message: '$e', context: context);
+      }
     }
     setState(() {
       busy = false;
@@ -246,7 +251,7 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
     return Scaffold(
         appBar: AppBar(
           title: Text(
-            'Place Maker',
+            'City, Town and Place Maker',
             style: myTextStyleLarge(context),
           ),
         ),
@@ -292,14 +297,14 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
                 _showCityForm
                     ? Positioned(
                         bottom: 80,
-                        left: 20,
-                        right: 20,
+                        left: 360,
+                        right: 360,
                         child: SizedBox(
                           height: 360,
                           width: 400,
                           child: Card(
                             shape: getDefaultRoundedBorder(),
-                            color: Colors.black54,
+                            // color: Colors.black54,
                             elevation: 8,
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),

@@ -33,7 +33,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
 
   var formKey = GlobalKey<FormState>();
   bool busy = false;
-  bool initializing = false;
+  // bool initializing = false;
   User? user;
   SignInStrings? signInStrings;
   ListApiDog listApiDog = GetIt.instance<ListApiDog>();
@@ -94,82 +94,20 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
             }
           }
 
-          if (mounted) {
-            finishUp();
-          }
+         widget.onGoodSignIn();
         }
       } else {
+
         widget.onSignInError();
       }
     } catch (e) {
       pp(e);
       widget.onSignInError();
+
     }
     setState(() {
       busy = false;
     });
-  }
-
-  void finishUp() {
-    showSnackBar(
-        duration: const Duration(seconds: 5),
-        padding: 20,
-        backgroundColor: Theme.of(context).primaryColor,
-        textStyle: myTextStyleMedium(context),
-        message: 'You have been signed in OK. Welcome!',
-        context: context);
-
-    NavigationUtils.navigateTo(context: context, widget:  InitializerCover(
-      onInitializationComplete: () {
-        pp('$mm initialization should be complete! ');
-        widget.onGoodSignIn();
-      },
-      onError: () {
-        pp('$mm initialization is fucked! ');
-        widget.onSignInError();
-      },
-    ), transitionType: PageTransitionType.leftToRight);
-
-  }
-
-  Future<void> _doSettings() async {
-    // try {
-    // var settingsList =
-    //     await listApiDog.getSettings(user!.associationId!, true);
-    // if (settingsList.isNotEmpty) {
-    //   settingsList.sort((a, b) => b.created!.compareTo(a.created!));
-    //   await themeBloc.changeToTheme(settingsList.first.themeIndex!);
-    //   pp('$mm KasieTransie theme has been set to:  🍎 ${settingsList.first.themeIndex!} 🍎');
-    //   await themeBloc.changeToLocale(settingsList.first.locale!);
-    //   await prefs.saveSettings(settingsList.first);
-    //   pp('$mm ........ settings should be saved by now ...');
-    // } else {
-    //   final m = lib.SettingsModel(ObjectId(),
-    //     associationId: user!.associationId,
-    //     created: DateTime.now().toUtc().toIso8601String(),
-    //     commuterGeofenceRadius: 200,
-    //     commuterSearchMinutes: 30,
-    //     commuterGeoQueryRadius: 50,
-    //     distanceFilter: 10,
-    //     geofenceRadius: 200,
-    //     heartbeatIntervalSeconds: 300,
-    //     locale: 'en',
-    //     loiteringDelay: 30,
-    //     themeIndex: 0,
-    //     vehicleGeoQueryRadius: 200,
-    //     vehicleSearchMinutes: 30,
-    //     numberOfLandmarksToScan: 0,
-    //     refreshRateInSeconds: 300,
-    //   );
-    //   //
-    //   pp('$mm ........ adding default settings for association ...');
-    //   final sett = await dataApiDog.addSettings(m);
-    //   await prefs.saveSettings(sett);
-    // }
-    // } catch (e) {
-    //   pp('$mm ... settings fucking up! ${E.redDot}');
-    //   pp(e);
-    // }
   }
 
   @override
@@ -180,7 +118,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
           title: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Email Sign In',
+              'KasieTransie Email Sign In',
               style: myTextStyleLarge(context),
             ),
           ),
@@ -280,20 +218,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
                 ),
               ),
             ),
-            initializing
-                ? Positioned(
-                    child: InitializerCover(onInitializationComplete: () {
-                    pp('$mm ................................'
-                        '... onInitializationComplete .... ');
-                    Navigator.of(context).pop();
-                    widget.onGoodSignIn();
-                  }, onError: () {
-                    pp('$mm ................................'
-                        '... onError .... ');
-                    Navigator.of(context).pop();
-                    widget.onSignInError();
-                  }))
-                : const SizedBox(),
+
           ],
         ),
       ),

@@ -764,7 +764,7 @@ class User {
   String? fcmToken;
   String? password;
   String? email;
-  String? cellphone, thumbnailUrl, imageUrl;
+  String? cellphone, thumbnailUrl, imageUrl, created;
 
 
   User({
@@ -780,7 +780,7 @@ class User {
       this.password,
       this.email,
       this.cellphone,
-      this.thumbnailUrl,
+      this.thumbnailUrl, this.created,
       this.imageUrl});
   factory User.fromJson(Map<String, dynamic> json) =>
       _$UserFromJson(json);

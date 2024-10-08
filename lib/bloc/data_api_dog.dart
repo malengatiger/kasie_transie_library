@@ -193,7 +193,7 @@ class DataApiDog {
       CalculatedDistanceList calculatedDistanceList) async {
     pp('$mm ... adding CalculatedDistances to database ...');
 
-    final cmd = '${url}addCalculatedDistances';
+    final cmd = '${url}routes/addCalculatedDistances';
     List res = await _callPost(cmd, calculatedDistanceList.toJson());
     pp('$mm CalculatedDistances added to database: ${res.length}');
     final items = <CalculatedDistance>[];
@@ -283,12 +283,12 @@ class DataApiDog {
 
   Future<City> addCity(City city) async {
     final bag = city.toJson();
-    final cmd = '${url}addCity';
+    final cmd = '${url}city/addCity';
     final res = await _callPost(cmd, bag);
     pp('$mm City added to database ...');
     myPrettyJsonPrint(res);
     final r = City.fromJson(res);
-
+    await semCache.saveCities([r]);
     return r;
   }
 
