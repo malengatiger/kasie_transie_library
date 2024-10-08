@@ -262,11 +262,15 @@ class _CitySearchState extends State<CitySearch> {
                         NavigationUtils.navigateTo(
                             context: context,
                             widget: CityCreatorMap(onCityAdded: (c ) {
-                              pp('$mm ... city added: ${c.toJson()}');
+                              pp('$mm ... city added by CityCreatorMap: 🌀🌀${c.toJson()}');
                               widget.onCityAdded(c);
+                              setState(() {
+                                _citiesToDisplay.insert(0, c);
+                              });
                             },),
                             transitionType: PageTransitionType.leftToRight);
                       },
+                      tooltip: 'Create a new city, town or place ',
                       icon: Icon(
                         Icons.add,
                         color: Theme.of(context).primaryColor,

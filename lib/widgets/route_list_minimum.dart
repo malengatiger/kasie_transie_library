@@ -105,6 +105,11 @@ class RouteListMinimumState extends State<RouteListMinimum>
               const SizedBox(
                 height: 24,
               ),
+              Text(
+                'Taxi Routes',
+                style: myTextStyleMediumLarge(context, 18),
+              ),
+              gapH32,
               Expanded(
                   child: bd.Badge(
                 position: bd.BadgePosition.topEnd(end: 12),
@@ -112,26 +117,58 @@ class RouteListMinimumState extends State<RouteListMinimum>
                   padding: EdgeInsets.all(12),
                   badgeColor: Colors.indigo,
                 ),
-                badgeContent: Text('${routes.length}', style: const TextStyle(color: Colors.white)),
-                child: ListView.builder(
-                    itemCount: routes.length,
-                    itemBuilder: (ctx, index) {
-                      final r = routes.elementAt(index);
-                      return GestureDetector(
-                        onTap: () {
-                          widget.onRoutePicked(r);
-                        },
-                        child: Card(
-                          shape: getDefaultRoundedBorder(),
-                          elevation: 6,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text(
-                              '${r.name}',
-                              style: myTextStyleMediumLarge(context, 15),
-                            ),
-                          ),
-                        ),
+                badgeContent: Text('${routes.length}',
+                    style: const TextStyle(color: Colors.white)),
+                child: StreamBuilder<List<lib.Route>>(
+                    stream: listApiDog.routeStream,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        pp('$mm snapshot has routes: ${snapshot.data!.length}');
+                        routes = snapshot.data!;
+                        routes.sort((a, b) => a.name!.compareTo(b.name!));
+                        pp('$mm routes has: ${routes.length} - should show up!!!!');
+
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 24, horizontal: 64.0),
+                        child: ListView.builder(
+                            itemCount: routes.length,
+                            itemBuilder: (ctx, index) {
+                              final route = routes.elementAt(index);
+                              return GestureDetector(
+                                onTap: () {
+                                  widget.onRoutePicked(route);
+                                },
+                                child: Card(
+                                  shape: getDefaultRoundedBorder(),
+                                  elevation: 6,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: ListTile(
+                                      leading: Container(
+                                        color: getColor(route.color!),
+                                        width: 24,
+                                        height: 24, child: Center(
+                                        child: Text(
+                                          '${index + 1}',
+                                          style: myTextStyleMediumLargeWithColor(
+                                              context,
+                                              route.color == 'white'? Colors.black:Colors.white,
+                                              14),
+                                        ),
+                                      ),
+                                      ),
+                                      title: Text(
+                                        '${route.name}',
+                                        style:
+                                            myTextStyleMediumLarge(context, 15),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
                       );
                     }),
               )),

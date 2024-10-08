@@ -206,16 +206,29 @@ class DataApiDog {
   }
 
   Future<Route> addRoute(Route route) async {
+    pp('$mm add route to database ...');
+    myPrettyJsonPrint(route.toJson());
+
     final bag = route.toJson();
     final cmd = '${url}routes/addRoute';
-    final res = await _callPost(cmd, bag);
-    pp('$mm route added to database ...');
-    myPrettyJsonPrint(res);
-    final r = Route.fromJson(res);
-    await semCache.saveRoutes([r], route.associationId!);
-    var dog = GetIt.instance<ListApiDog>();
-    dog.putRouteInStream([r]);
-    return r;
+    try {
+      final res = await _callPost(cmd, bag);
+      final newRoute = Route.fromJson(res);
+
+      pp('$mm new route added to database ...  💙 💙 💙 check!');
+      myPrettyJsonPrint(newRoute.toJson());
+      pp('$mm add new route cache ...  💙 💙 💙 check!');
+      var list = await semCache.saveRoutes([newRoute], newRoute.associationId!);
+
+      var dog = GetIt.instance<ListApiDog>();
+      pp('$mm putting routes on stream ... ${list.length} routes');
+      dog.putRouteInStream(list);
+
+      return route;
+    } catch (e,s) {
+      pp("WTF? - $e - \n$s");
+    }
+    return route;
   }
 
   Future addAppError(AppError error) async {

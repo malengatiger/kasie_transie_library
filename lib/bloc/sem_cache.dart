@@ -12,16 +12,16 @@ class SemCache {
 
   SemCache(this.db);
 
-  Future saveRoutes(List<Route> routes, String associationId) async {
-    var store = intMapStoreFactory.store('routes');
-    for (var route in routes) {
-      store.record(dateToInt(route.created!)).put(db, route.toJson());
-      pp('$mm route added to cache: 🥬🥬 ${route.name}');
-    }
+  Future<List<Route>> saveRoutes(List<Route> routes, String associationId) async {
+    pp('$mm ... saveRoutes: 🥬🥬 ${routes.length} associationId: $associationId');
+
     var data = await getRouteData(associationId);
     if (data != null) {
+      pp('$mm routes added to cache: 🥬🥬 ${routes.length}');
       data.routes.addAll(routes);
+      return data.routes;
     }
+    return routes;
   }
 
   Future<List<Route>> getRoutes(String associationId) async {
