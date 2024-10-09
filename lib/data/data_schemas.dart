@@ -155,10 +155,11 @@ class Association {
   String? dateRegistered;
   Position? position;
   String? geoHash;
-  String? adminUserName;
+  String? adminUserFirstName, adminUserLastName;
   String? userId;
   String? adminCellphone;
   String? adminEmail;
+  String? password;
 
   Association({
       this.cityId,
@@ -171,8 +172,8 @@ class Association {
       this.dateRegistered,
       this.position,
       this.geoHash,
-      this.adminUserName,
-      this.userId,
+      this.adminUserFirstName, this.adminUserLastName,
+      this.userId, this.password,
       this.adminCellphone,
       this.adminEmail});
 

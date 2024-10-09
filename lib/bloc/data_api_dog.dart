@@ -434,21 +434,18 @@ class DataApiDog {
     return res;
   }
 
-  Future registerAssociation(Association association) async {
+  Future<RegistrationBag> registerAssociation(Association association) async {
     final bag = association.toJson();
-    final cmd = '${url}registerAssociation';
+    final cmd = '${url}association/registerAssociation';
 
     final res = await _callPost(cmd, bag);
     RegistrationBag rBag = RegistrationBag.fromJson(res);
     prefs.saveAssociation(rBag.association!);
     prefs.saveUser(rBag.user!);
-
-    var cred = await appAuth.firebaseAuth?.signInWithEmailAndPassword(
-        email: rBag.user!.email!, password: rBag.user!.password!);
-
-    pp('$mm administrator authed;! 🍎${cred.toString()}');
+    await semCache.saveRegistrationBag(rBag);
     pp('$mm association registered! added to cache: 🍎${rBag.association!.toJson()}');
     pp('$mm administrator registered! added to cache: 🍎${rBag.user!.toJson()}');
+    return rBag;
   }
 
   Future<SettingsModel> addSettings(SettingsModel settings) async {

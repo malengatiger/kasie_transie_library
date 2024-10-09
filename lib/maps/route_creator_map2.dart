@@ -232,7 +232,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
       timer!.cancel();
       timer == null;
     }
-    if (rpList.isNotEmpty && rpList.length > 1) {
+    if (rpList.isNotEmpty && rpList.length > 2) {
       _sendRoutePointsToBackend();
     }
     super.dispose();

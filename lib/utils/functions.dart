@@ -1106,6 +1106,7 @@ showErrorToast(
     required BuildContext context,
     TextStyle? textStyle,
     double? padding,
+      Duration? duration,
     ToastGravity? toastGravity}) {
   FToast fToast = FToast();
   const mm = 'FunctionsAndShit: 💀 💀 💀 💀 💀 : ';
@@ -1115,7 +1116,7 @@ showErrorToast(
     pp('$mm FToast may already be initialized');
   }
   Widget toastContainer = Container(
-    width: 320,
+    width: 400,
     padding: EdgeInsets.symmetric(
         horizontal: padding ?? 20.0, vertical: padding ?? 20.0),
     decoration: BoxDecoration(
@@ -1141,7 +1142,7 @@ showErrorToast(
     fToast.showToast(
       child: toastContainer,
       gravity: toastGravity ?? ToastGravity.CENTER,
-      toastDuration: const Duration(seconds: 10),
+      toastDuration: duration?? const Duration(seconds: 10),
     );
   } catch (e) {
     pp('$mm 👿👿👿👿👿 we have a small TOAST problem, Boss! - 👿 $e');
@@ -1163,7 +1164,7 @@ showOKToast(
     pp('$mm FToast may already be initialized');
   }
   Widget toastContainer = Container(
-    width: 320,
+    width: 400,
     padding: EdgeInsets.symmetric(
         horizontal: padding ?? 20.0, vertical: padding ?? 20.0),
     decoration: BoxDecoration(
@@ -1189,7 +1190,7 @@ showOKToast(
     fToast.showToast(
       child: toastContainer,
       gravity: toastGravity ?? ToastGravity.CENTER,
-      toastDuration: duration ?? const Duration(seconds: 3),
+      toastDuration: duration ?? const Duration(seconds: 10),
     );
   } catch (e) {
     pp('$mm 👿👿👿👿👿 we have a small TOAST problem, Boss! - 👿 $e');

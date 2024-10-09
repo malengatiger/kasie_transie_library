@@ -12,6 +12,26 @@ class SemCache {
 
   SemCache(this.db);
 
+  Future saveRegistrationBag(RegistrationBag bag) async {
+    pp('$mm ... saveRegistrationBag ...');
+
+    var store = intMapStoreFactory.store('bag');
+    var records
+    = await store.record(1).put(db, bag.toJson());
+  }
+  Future<RegistrationBag?> getRegistrationBag() async {
+    pp('$mm ... getRegistrationBag ....');
+
+    var store = intMapStoreFactory.store('bag');
+    var records
+    = await store.find(db);
+    if (records.isNotEmpty) {
+      var bag = RegistrationBag.fromJson( records.first.value);
+      return bag;
+    }
+    return null;
+  }
+
   Future<List<Route>> saveRoutes(List<Route> routes, String associationId) async {
     pp('$mm ... saveRoutes: 🥬🥬 ${routes.length} associationId: $associationId');
 

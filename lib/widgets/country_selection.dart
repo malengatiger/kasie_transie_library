@@ -60,14 +60,14 @@ class CountryChooserState extends State<CountryChooser> {
   Future _buildDropDown() async {
     var style = myTextStyleSmall(context);
     for (var entry in countries) {
-      var translated =
-          await translator.translate('${entry.name}', settings!.locale!);
-      var m = translated.replaceAll('UNAVAILABLE KEY:', '');
+      // var translated =
+      //     await translator.translate('${entry.name}', settings!.locale!);
+      // var m = translated.replaceAll('UNAVAILABLE KEY:', '');
       if (mounted) {
         list.add(DropdownMenuItem<lib.Country>(
           value: entry,
           child: Text(
-            m,
+            entry.name!,
             style: myTextStyleSmallWithColor(context, Colors.black),
           ),
         ));
@@ -198,6 +198,7 @@ class _CountrySearchState extends State<CountrySearch>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     var color = getTextColorForBackground(Theme.of(context).primaryColor);
     var color2 = getTextColorForBackground(Theme.of(context).primaryColor);
 

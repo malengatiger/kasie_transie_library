@@ -155,8 +155,10 @@ Association _$AssociationFromJson(Map<String, dynamic> json) => Association(
           ? null
           : Position.fromJson(json['position'] as Map<String, dynamic>),
       geoHash: json['geoHash'] as String?,
-      adminUserName: json['adminUserName'] as String?,
+      adminUserFirstName: json['adminUserFirstName'] as String?,
+      adminUserLastName: json['adminUserLastName'] as String?,
       userId: json['userId'] as String?,
+      password: json['password'] as String?,
       adminCellphone: json['adminCellphone'] as String?,
       adminEmail: json['adminEmail'] as String?,
     );
@@ -173,10 +175,12 @@ Map<String, dynamic> _$AssociationToJson(Association instance) =>
       'dateRegistered': instance.dateRegistered,
       'position': instance.position?.toJson(),
       'geoHash': instance.geoHash,
-      'adminUserName': instance.adminUserName,
+      'adminUserFirstName': instance.adminUserFirstName,
+      'adminUserLastName': instance.adminUserLastName,
       'userId': instance.userId,
       'adminCellphone': instance.adminCellphone,
       'adminEmail': instance.adminEmail,
+      'password': instance.password,
     };
 
 RouteUpdateRequest _$RouteUpdateRequestFromJson(Map<String, dynamic> json) =>
