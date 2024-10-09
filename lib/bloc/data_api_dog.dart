@@ -213,6 +213,10 @@ class DataApiDog {
     final cmd = '${url}routes/addRoute';
     try {
       final res = await _callPost(cmd, bag);
+      pp('$mm Raw response: $res');
+      if (res == null) {
+
+      }
       final newRoute = Route.fromJson(res);
 
       pp('$mm new route added to database ...  💙 💙 💙 check!');
@@ -227,6 +231,7 @@ class DataApiDog {
       return route;
     } catch (e,s) {
       pp("WTF? - $e - \n$s");
+      rethrow;
     }
     return route;
   }
@@ -648,10 +653,7 @@ class DataApiDog {
     var retryCount = 0;
     var waitTime = const Duration(seconds: 2);
     var start = DateTime.now();
-    // var token = await appAuth.getAuthToken();
-    // if (token == null) {
-    //   throw Exception('No fucking token!');
-    // }
+
     headers['Authorization'] = 'Bearer $token';
     while (retryCount < maxRetries) {
       try {

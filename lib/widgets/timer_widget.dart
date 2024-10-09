@@ -60,19 +60,19 @@ class TimerWidgetState extends State<TimerWidget>
       width: widget.isSmallSize ? 300 : 400,
       height: widget.isSmallSize ? 400 : 500,
       child: Padding(
-        padding: EdgeInsets.all(widget.isSmallSize ? 8 : 12.0),
+        padding: EdgeInsets.all(widget.isSmallSize ? 8 : 20.0),
         child: Card(
           shape: getDefaultRoundedBorder(),
           elevation: 12,
           child: SingleChildScrollView(
             child: Padding(
-              padding: EdgeInsets.all(widget.isSmallSize ? 8 : 12.0),
+              padding: EdgeInsets.all(widget.isSmallSize ? 8 : 20.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
-                    height: widget.isSmallSize ? 16 : 24,
+                    height: widget.isSmallSize ? 16 : 48,
                   ),
                   Text(
                     widget.title,
@@ -80,7 +80,7 @@ class TimerWidgetState extends State<TimerWidget>
                         context, Colors.grey.shade700, 16),
                   ),
                   SizedBox(
-                    height: widget.isSmallSize ? 16 : 24,
+                    height: widget.isSmallSize ? 16 : 32,
                   ),
                   widget.subTitle == null
                       ? const SizedBox()

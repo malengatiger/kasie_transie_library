@@ -1055,12 +1055,12 @@ const gapH32 = SizedBox(height: 32.0);
 
 showToast(
     {required String message,
-    required BuildContext context,
-    Color? backgroundColor,
-    TextStyle? textStyle,
-    Duration? duration,
-    double? padding,
-    ToastGravity? toastGravity}) {
+      required BuildContext context,
+      Color? backgroundColor,
+      TextStyle? textStyle,
+      Duration? duration,
+      double? padding,
+      ToastGravity? toastGravity}) {
   FToast fToast = FToast();
   const mm = 'FunctionsAndShit: 💀 💀 💀 💀 💀 : ';
   try {
@@ -1096,6 +1096,52 @@ showToast(
       child: toastContainer,
       gravity: toastGravity ?? ToastGravity.CENTER,
       toastDuration: duration ?? const Duration(seconds: 3),
+    );
+  } catch (e) {
+    pp('$mm 👿👿👿👿👿 we have a small TOAST problem, Boss! - 👿 $e');
+  }
+}
+showErrorToast(
+    {required String message,
+    required BuildContext context,
+    TextStyle? textStyle,
+    double? padding,
+    ToastGravity? toastGravity}) {
+  FToast fToast = FToast();
+  const mm = 'FunctionsAndShit: 💀 💀 💀 💀 💀 : ';
+  try {
+    fToast.init(context);
+  } catch (e) {
+    pp('$mm FToast may already be initialized');
+  }
+  Widget toastContainer = Container(
+    width: 320,
+    padding: EdgeInsets.symmetric(
+        horizontal: padding ?? 20.0, vertical: padding ?? 20.0),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(8.0),
+      color: Colors.pink,
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  try {
+    fToast.showToast(
+      child: toastContainer,
+      gravity: toastGravity ?? ToastGravity.CENTER,
+      toastDuration: const Duration(seconds: 10),
     );
   } catch (e) {
     pp('$mm 👿👿👿👿👿 we have a small TOAST problem, Boss! - 👿 $e');
