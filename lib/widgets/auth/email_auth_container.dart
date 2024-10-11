@@ -8,6 +8,12 @@ import '../../utils/functions.dart';
 class EmailAuthContainer extends StatelessWidget {
   const EmailAuthContainer({super.key});
 
+  _handleGoodSignIn(BuildContext context) {
+    Navigator.of(context).pop(true);
+  }
+  _handleSignInError(BuildContext context) {
+    Navigator.of(context).pop(false);
+  }
   @override
   Widget build(BuildContext context) {
     var width = MediaQuery.sizeOf(context).width;
@@ -29,11 +35,11 @@ class EmailAuthContainer extends StatelessWidget {
                     SizedBox(
                       width: (width / 2) - 64,
                       child: EmailAuthSignin(onGoodSignIn: () {
-                        pp('...... on good sign in');
-                        Navigator.of(context).pop(true);
+                        pp('..... on good sign in');
+                       _handleGoodSignIn(context);
                       }, onSignInError: () {
                         pp('Sign in error');
-                        Navigator.of(context).pop(false);
+                        _handleSignInError(context);
                       }),
                     ),
                     SizedBox(
