@@ -562,6 +562,7 @@ Vehicle _$VehicleFromJson(Map<String, dynamic> json) => Vehicle(
       model: json['model'] as String?,
       year: json['year'] as String?,
       qrCodeUrl: json['qrCodeUrl'] as String?,
+      ownerCellphone: json['ownerCellphone'] as String?,
       passengerCapacity: (json['passengerCapacity'] as num?)?.toInt(),
       associationId: json['associationId'] as String?,
       associationName: json['associationName'] as String?,
@@ -572,6 +573,7 @@ Map<String, dynamic> _$VehicleToJson(Vehicle instance) => <String, dynamic>{
       'countryId': instance.countryId,
       'ownerName': instance.ownerName,
       'ownerId': instance.ownerId,
+      'ownerCellphone': instance.ownerCellphone,
       'created': instance.created,
       'dateInstalled': instance.dateInstalled,
       'vehicleReg': instance.vehicleReg,
@@ -1062,4 +1064,36 @@ Map<String, dynamic> _$RouteStartEndToJson(RouteStartEnd instance) =>
       'endCityName': instance.endCityName,
       'startCityPosition': instance.startCityPosition?.toJson(),
       'endCityPosition': instance.endCityPosition?.toJson(),
+    };
+
+AddCarsResponse _$AddCarsResponseFromJson(Map<String, dynamic> json) =>
+    AddCarsResponse(
+      (json['cars'] as List<dynamic>)
+          .map((e) => Vehicle.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['errors'] as List<dynamic>)
+          .map((e) => Vehicle.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$AddCarsResponseToJson(AddCarsResponse instance) =>
+    <String, dynamic>{
+      'cars': instance.cars.map((e) => e.toJson()).toList(),
+      'errors': instance.errors.map((e) => e.toJson()).toList(),
+    };
+
+AddUsersResponse _$AddUsersResponseFromJson(Map<String, dynamic> json) =>
+    AddUsersResponse(
+      (json['users'] as List<dynamic>)
+          .map((e) => User.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['errors'] as List<dynamic>)
+          .map((e) => User.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$AddUsersResponseToJson(AddUsersResponse instance) =>
+    <String, dynamic>{
+      'users': instance.users.map((e) => e.toJson()).toList(),
+      'errors': instance.errors.map((e) => e.toJson()).toList(),
     };

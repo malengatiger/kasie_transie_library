@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/data/vehicle_list.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
+import 'package:universal_io/io.dart';
 
 import '../data/calculated_distance_list.dart';
 import '../data/data_schemas.dart';
@@ -21,7 +22,8 @@ import '../utils/prefs.dart';
 import 'app_auth.dart';
 import 'cache_manager.dart';
 import 'list_api_dog.dart';
-
+import 'package:file_picker/file_picker.dart';
+import 'package:http_parser/http_parser.dart';
 class DataApiDog {
   static const mm = '🌎🌎🌎🌎🌎🌎 DataApiDog: 🌎🌎';
 
@@ -65,6 +67,100 @@ class DataApiDog {
       pp('$mm getAuthToken: Firebase token retrieved OK');
       token = m;
     }
+  }
+
+
+  Future<AddCarsResponse?> importVehiclesFromCSV(PlatformFile file, String associationId) async {
+    pp('$mm importVehiclesFromCSV: 🌿 associationId: $associationId');
+
+    var url = KasieEnvironment.getUrl();
+    var mUrl = '${url}vehicle/importVehiclesFromCSV?associationId=$associationId';
+    var request = http.MultipartRequest('POST', Uri.parse(mUrl));
+    if (kIsWeb) {
+      request.files.add(
+          http.MultipartFile.fromBytes(
+            'file',
+            file.bytes!,
+            filename: file.name,
+          )
+      );
+    } else {
+      // For mobile/desktop, use fromPath
+      request.files.add(await http.MultipartFile.fromPath('file', file.path!));
+    }
+    if (kIsWeb) {
+      // For web, read bytes as string
+      final fileContents = utf8.decode(file.bytes!);
+      pp('$mm 🌿🌿🌿🌿File contents:\n$fileContents 🌿');
+    } else {
+      // For mobile/desktop, read file from path
+      final fileContents = await File(file.path!).readAsString();
+      pp('$mm 🌿🌿🌿🌿 File contents:\n$fileContents File');
+    }
+
+    var response = await request.send();
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      pp('$mm File uploaded successfully! 🥬🥬🥬🥬🥬');
+      final responseBody = await response.stream.bytesToString();
+      final mJson = jsonDecode(responseBody);
+      var result = AddCarsResponse.fromJson(mJson);
+      for (var c in result.cars) {
+        pp('$mm car added: ${c.vehicleReg}');
+      }
+      for (var c in result.errors) {
+        pp('$mm car fucked up: ${c.vehicleReg}');
+      }
+      return result;
+    } else {
+      pp('$mm 😈😈File upload failed with status code: 😈${response.statusCode} 😈 ${response.reasonPhrase}');
+    }
+    throw Exception('Vehicles File upload failed');
+  }
+  Future<AddUsersResponse?> importUsersFromCSV(PlatformFile file, String associationId) async {
+    pp('$mm importUsersFromCSV: 🌿 associationId: $associationId');
+
+    var url = KasieEnvironment.getUrl();
+    var mUrl = '${url}user/importUsersFromCSV?associationId=$associationId';
+    var request = http.MultipartRequest('POST', Uri.parse(mUrl));
+    if (kIsWeb) {
+      request.files.add(
+          http.MultipartFile.fromBytes(
+            'file',
+            file.bytes!,
+            filename: file.name,
+          )
+      );
+    } else {
+      // For mobile/desktop, use fromPath
+      request.files.add(await http.MultipartFile.fromPath('file', file.path!));
+    }
+    if (kIsWeb) {
+      // For web, read bytes as string
+      final fileContents = utf8.decode(file.bytes!);
+      pp('$mm 🌿🌿🌿🌿File contents:\n$fileContents 🌿');
+    } else {
+      // For mobile/desktop, read file from path
+      final fileContents = await File(file.path!).readAsString();
+      pp('$mm 🌿🌿🌿🌿 File contents:\n$fileContents File');
+    }
+
+    var response = await request.send();
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      pp('$mm File uploaded successfully! 🥬🥬🥬🥬🥬');
+      final responseBody = await response.stream.bytesToString();
+      final mJson = jsonDecode(responseBody);
+      var result = AddUsersResponse.fromJson(mJson);
+      for (var c in result.users) {
+        pp('$mm user added: ${c.firstName} ${c.lastName} - ${c.userType}');
+      }
+      for (var c in result.errors) {
+        pp('$mm user fucked up: ${c.firstName} ${c.lastName} - ${c.userType}');
+      }
+      return result;
+    } else {
+      pp('$mm 😈😈File upload failed with status code: 😈${response.statusCode} 😈 ${response.reasonPhrase}');
+    }
+    throw Exception('Users File upload failed');
   }
 
   Future<List<RouteAssignment>> addRouteAssignments(
@@ -113,10 +209,17 @@ class DataApiDog {
 
   Future addVehicle(Vehicle vehicle) async {
     final bag = vehicle.toJson();
-    final cmd = '${url}addVehicle';
+    final cmd = '${url}vehicle/addVehicle';
     final res = await _callPost(cmd, bag);
     semCache.saveVehicles([vehicle]);
     pp('$mm vehicle added to database: $res');
+  }
+  Future addUser(User user) async {
+    final bag = user.toJson();
+    final cmd = '${url}user/addUser';
+    final res = await _callPost(cmd, bag);
+    semCache.saveUsers([user]);
+    pp('$mm user added to database: $res');
   }
 
   Future addUserGeofenceEvent(UserGeofenceEvent event) async {

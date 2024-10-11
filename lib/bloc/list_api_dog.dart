@@ -1066,7 +1066,7 @@ class ListApiDog {
       String associationId, bool refresh) async {
     var list = <User>[];
     await _getUsersFromBackEnd(associationId, list);
-    await semCache.saveUsers(list);
+    // await semCache.saveUsers(list);
     return list;
   }
 

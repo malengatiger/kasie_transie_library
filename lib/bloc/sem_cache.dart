@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:kasie_transie_library/data/data_schemas.dart';
 import 'package:sembast_web/sembast_web.dart';
 
@@ -190,8 +192,9 @@ class SemCache {
 
     for (var user in users) {
       store
-          .record(dateToInt(user.created!))
+          .record(dateToInt(user.created?? DateTime.now().toIso8601String()))
           .put(db, user.toJson());
+      sleep(const Duration(milliseconds: 5));
     }
 
     pp('$mm users added to cache: 🥦 ${users.length} 🥦');
