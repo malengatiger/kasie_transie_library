@@ -232,7 +232,7 @@ class DataApiDog {
     final bag = user.toJson();
     final cmd = '${url}user/addUser';
     final res = await _callPost(cmd, bag);
-    semCache.saveUsers([user]);
+    // semCache.saveUsers([user]);
     pp('$mm user added to database: $res');
   }
 
@@ -768,7 +768,9 @@ class DataApiDog {
     var waitTime = const Duration(seconds: 2);
     var start = DateTime.now();
     token ??= await getAuthToken();
-
+    if (token == null) {
+      throw Exception('Token missing');
+    }
     headers['Authorization'] = 'Bearer $token';
     while (retryCount < maxRetries) {
       try {
