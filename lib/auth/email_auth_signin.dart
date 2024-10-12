@@ -28,7 +28,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
   final mm = '💦💦💦💦💦💦 EmailAuthSignin 🔷🔷';
   late AnimationController _controller;
   TextEditingController emailController =
-      TextEditingController(text: "admin4@sowertech.com");
+      TextEditingController(text: "admin5@sowertech.com");
   TextEditingController pswdController = TextEditingController(text: "pass123");
 
   var formKey = GlobalKey<FormState>();
@@ -67,37 +67,9 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
       if (userCred.user != null) {
         user = await listApiDog.getUserById(userCred.user!.uid);
         if (user != null) {
-          pp('$mm KasieTransie user found on database:  🍎 ${user!.toJson()} 🍎');
-          user!.password = pswdController.text;
-          prefs.saveUser(user!);
-          pp('$mm KasieTransie user cached:  🍎 ${user!.toJson()} 🍎');
-          Association? association;
-          if (user!.associationId != null) {
-            if (user!.associationId != 'ADMIN') {
-              association =
-                  await listApiDog.getAssociationById(user!.associationId!);
-              if (association != null) {
-                prefs.saveAssociation(association);
-                pp('$mm KasieTransie association found on database:  🍎 ${association.toJson()} 🍎');
-                final users = await listApiDog.getAssociationUsers(
-                    user!.associationId!, true);
-                pp('$mm users in association: ${users.length}');
-              }
-            }
-          }
-          final countries = await listApiDog.getCountries();
-          for (var country in countries) {
-            if (country.countryId == user?.countryId!) {
-              prefs.saveCountry(country);
-              pp('$mm KasieTransie user country: 🍎 ${country.name} 🍎');
-              break;
-            }
-          }
-
-         widget.onGoodSignIn();
+          await _handleUser();
         }
       } else {
-
         widget.onSignInError();
       }
     } catch (e) {
@@ -108,6 +80,37 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
     setState(() {
       busy = false;
     });
+  }
+
+  Future<void> _handleUser() async {
+     pp('$mm KasieTransie user found on database:  🍎 ${user!.toJson()} 🍎');
+    user!.password = pswdController.text;
+    prefs.saveUser(user!);
+    pp('$mm KasieTransie user cached:  🍎 ${user!.toJson()} 🍎');
+    Association? association;
+    if (user!.associationId != null) {
+      if (user!.associationId != 'ADMIN') {
+        association =
+            await listApiDog.getAssociationById(user!.associationId!);
+        if (association != null) {
+          prefs.saveAssociation(association);
+          pp('$mm KasieTransie association found on database:  🍎 ${association.toJson()} 🍎');
+          final users = await listApiDog.getAssociationUsers(
+              user!.associationId!, true);
+          pp('$mm users in association: ${users.length}');
+        }
+      }
+    }
+    final countries = await listApiDog.getCountries();
+    for (var country in countries) {
+      if (country.countryId == user?.countryId!) {
+        prefs.saveCountry(country);
+        pp('$mm KasieTransie user country: 🍎 ${country.name} 🍎');
+        break;
+      }
+    }
+
+             widget.onGoodSignIn();
   }
 
   @override

@@ -44,7 +44,7 @@ class DataApiDog {
 
   late String url;
   static const timeOutInSeconds = 360;
-  String token = 'NoTokenYet';
+  String? token;
   final http.Client client;
   final AppAuth appAuth;
   final CacheManager cacheManager;
@@ -55,7 +55,7 @@ class DataApiDog {
   DataApiDog(this.client, this.appAuth, this.cacheManager, this.prefs,
       this.errorHandler, this.semCache) {
     url = KasieEnvironment.getUrl();
-    getAuthToken();
+    // getAuthToken();
   }
   Future getAuthToken() async {
     pp('\n\n$mm getAuthToken: ...... Getting Firebase token ......');
@@ -67,6 +67,7 @@ class DataApiDog {
       pp('$mm getAuthToken: Firebase token retrieved OK');
       token = m;
     }
+    return token;
   }
 
 
@@ -75,6 +76,14 @@ class DataApiDog {
 
     var url = KasieEnvironment.getUrl();
     var mUrl = '${url}vehicle/importVehiclesFromCSV?associationId=$associationId';
+
+    token = await getAuthToken();
+    if (token == null) {
+      throw Exception('Missing auth token');
+    }
+
+    headers['Authorization'] = 'Bearer $token';
+
     var request = http.MultipartRequest('POST', Uri.parse(mUrl));
     if (kIsWeb) {
       request.files.add(
@@ -97,7 +106,7 @@ class DataApiDog {
       final fileContents = await File(file.path!).readAsString();
       pp('$mm 🌿🌿🌿🌿 File contents:\n$fileContents File');
     }
-
+    request.headers['Authorization'] = 'Bearer $token';
     var response = await request.send();
     if (response.statusCode == 200 || response.statusCode == 201) {
       pp('$mm File uploaded successfully! 🥬🥬🥬🥬🥬');
@@ -143,6 +152,11 @@ class DataApiDog {
       final fileContents = await File(file.path!).readAsString();
       pp('$mm 🌿🌿🌿🌿 File contents:\n$fileContents File');
     }
+    token = await getAuthToken();
+    if (token == null) {
+      throw Exception('Missing auth token');
+    }
+    request.headers['Authorization'] = 'Bearer $token';
 
     var response = await request.send();
     if (response.statusCode == 200 || response.statusCode == 201) {
@@ -753,6 +767,7 @@ class DataApiDog {
     var retryCount = 0;
     var waitTime = const Duration(seconds: 2);
     var start = DateTime.now();
+    token ??= await getAuthToken();
 
     headers['Authorization'] = 'Bearer $token';
     while (retryCount < maxRetries) {
@@ -846,7 +861,7 @@ class DataApiDog {
     var waitTime = const Duration(seconds: 2);
     var token = await appAuth.getAuthToken();
     if (token != null) {
-      // pp('$mm _sendHttpGET: 😡😡😡 Firebase Auth Token: 💙️ Token is GOOD! 💙 ');
+      pp('$mm _sendHttpGET: 😡😡😡 Firebase Auth Token: 💙️ Token is GOOD! 💙 ');
     } else {
       pp('$mm Firebase token missing ${E.redDot}${E.redDot}${E.redDot}${E.redDot}');
       final gex = KasieException(

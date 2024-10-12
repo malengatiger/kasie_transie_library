@@ -46,7 +46,7 @@ class ListApiDog {
   final Prefs prefs;
   final ErrorHandler errorHandler;
   bool initialized = false;
-  String token = 'NoTokenYet';
+  String? token;
 
   ListApiDog(
     this.client,
@@ -58,7 +58,6 @@ class ListApiDog {
   ) {
     url = KasieEnvironment.getUrl();
     databaseString = KasieEnvironment.getUrl();
-    getAuthToken();
   }
 
   Future getAuthToken() async {
@@ -71,22 +70,28 @@ class ListApiDog {
       pp('$mm Firebase token retrieved OK');
       token = m;
     }
+    return token;
   }
 
   Future<User?> getUserById(String userId) async {
     final cmd = '${url}user/getUserById?userId=$userId';
-    final resp = await _sendHttpGET(cmd);
-    pp('$mm getUserById: ........ response: $resp');
-    if (resp is String) {
-      if (resp.contains('not found')) {
-        throw Exception('User not found');
+    try {
+      final resp = await _sendHttpGET(cmd);
+      pp('$mm getUserById: ........ response: $resp');
+      if (resp is String) {
+        if (resp.contains('not found')) {
+          throw Exception('User not found');
+        }
       }
-    }
-    final user = User.fromJson(resp);
+      final user = User.fromJson(resp);
 
-    pp('$mm getUserById found this user: ${user.name} ');
-    myPrettyJsonPrint(resp);
-    return user;
+      pp('$mm getUserById found this user: ${user.name} ');
+      myPrettyJsonPrint(resp);
+      return user;
+    } catch (e, s) {
+      pp('$e $s');
+      throw Exception('User fucked: $e');
+    }
   }
 
   Future<User?> getUserByEmail(String email) async {
@@ -1116,7 +1121,10 @@ class ListApiDog {
   Future _sendHttpGET(String mUrl) async {
     pp('$xz _sendHttpGET: 🔆 🔆 🔆 ...... calling : 💙 $mUrl  💙');
     var start = DateTime.now();
-
+    token ??= await getAuthToken();
+    if (token == null) {
+      throw Exception('Firebase auth token is null');
+    }
     headers['Authorization'] = 'Bearer $token';
     try {
       var resp = await client
