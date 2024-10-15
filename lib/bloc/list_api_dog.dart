@@ -362,16 +362,13 @@ class ListApiDog {
   }
 
   Future<List<Association>> getAssociations(bool refresh) async {
-    final list = await semCache.getAssociations();
-    if (list.isEmpty || refresh) {
       final cmd = '${url}association/getAssociations';
+      List<Association> list = [];
       List resp = await _sendHttpGET(cmd);
-      list.clear();
       for (var m in resp) {
         list.add(Association.fromJson(m));
       }
-      await semCache.saveAssociations(list);
-    }
+
     pp('$mm cached associations: ${list.length} - refresh: $refresh');
     return list;
   }

@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/cloud_storage_bloc.dart';
@@ -22,43 +23,41 @@ import 'list_api_dog.dart';
 class RegisterServices {
   static const mm = '🅿️ 🅿️ 🅿️ 🅿️ RegisterServices  🅿️ 🅿️';
   static String dbPath = 'kasie.db';
-  static DatabaseFactory dbFactory = databaseFactoryWeb;
+  static DatabaseFactory dbFactoryWeb = databaseFactoryWeb;
 
   static Future<void> register() async {
     pp('\n\n$mm  initialize service singletons with GetIt .... 🍎🍎🍎');
 
     final http.Client client = http.Client();
     final AppAuth appAuth = AppAuth(FirebaseAuth.instance);
+    pp('$mm .... AppAuth: 🦠auth initialized');
+
     final CacheManager cacheManager = CacheManager();
     final Prefs prefs = Prefs(await SharedPreferences.getInstance());
     final ErrorHandler errorHandler = ErrorHandler(DeviceLocationBloc(), prefs);
-    final Database db= await dbFactory.openDatabase(dbPath);
-    pp('$mm .... dbFactory.openDatabase: 🦠database initialized: ${db.path}');
 
-    final SemCache semCache = SemCache(db);
+    final SemCache semCache = SemCache();
     pp('$mm .... SemCache: 🦠cache initialized');
-
     final ZipHandler zipHandler = ZipHandler(appAuth, semCache);
     pp('$mm .... ZipHandler: 🦠handler initialized');
-
-    final dataApi =
-        DataApiDog(client, appAuth, cacheManager, prefs, errorHandler, semCache);
+    final dataApi = DataApiDog(
+        client, appAuth, cacheManager, prefs, errorHandler, semCache);
     pp('$mm .... DataApiDog: 🦠dataApiDog initialized');
-
     final listApi =
         ListApiDog(client, appAuth, prefs, errorHandler, zipHandler, semCache);
+    pp('$mm .... ListApiDog: 🦠listApiDog initialized');
     //
-    pp('$mm .... SemCachee: 🦠registerLazySingletons ...');
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ...');
 
-    GetIt.instance.registerLazySingleton<SemCache>(
-            () => semCache);
-    GetIt.instance.registerLazySingleton<ZipHandler>(
-            () => zipHandler);
+    GetIt.instance.registerLazySingleton<SemCache>(() => semCache);
+
+    GetIt.instance.registerLazySingleton<ZipHandler>(() => zipHandler);
+
     GetIt.instance.registerLazySingleton<RouteDistanceCalculator>(
         () => RouteDistanceCalculator(prefs, listApi, dataApi));
 
     GetIt.instance.registerLazySingleton<CloudStorageBloc>(
-            () => CloudStorageBloc(dataApi, prefs));
+        () => CloudStorageBloc(dataApi, prefs));
 
     GetIt.instance.registerLazySingleton<TheGreatGeofencer>(
         () => TheGreatGeofencer(dataApi, listApi, prefs));
@@ -77,6 +76,6 @@ class RegisterServices {
 
     GetIt.instance.registerLazySingleton<ErrorHandler>(() => errorHandler);
 
-    pp('$mm  11 Service singletons registered! .... 🍎🍎🍎\n');
+    pp('\n$mm  12 Service singletons registered! .... 🍎🍎🍎\n');
   }
 }

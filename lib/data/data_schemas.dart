@@ -306,6 +306,25 @@ class VehiclePhoto {
 }
 
 @JsonSerializable(explicitToJson: true)
+class UserPhoto {
+  String? userPhotoId;
+  String? associationId, associationName;
+  String? userName, userId;
+  String? created;
+  String? thumbNailUrl;
+  String? url;
+
+
+  UserPhoto({required this.userPhotoId, required this.associationId, required this.associationName,
+    required this.userName, required this.userId, required this.created, required this.thumbNailUrl,  required this.url});
+
+  factory UserPhoto.fromJson(Map<String, dynamic> json) =>
+      _$UserPhotoFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserPhotoToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class VehicleVideo {
   String? vehicleVideoId;
   String? landmarkId;
@@ -740,8 +759,7 @@ class User {
   String? fcmToken;
   String? password;
   String? email;
-  String? cellphone, thumbnailUrl, imageUrl, created;
-
+  String? cellphone, profileThumbnail, profileUrl, created;
   User(
       {this.userType,
       this.userId,
@@ -755,9 +773,9 @@ class User {
       this.password,
       this.email,
       this.cellphone,
-      this.thumbnailUrl,
+      this.profileThumbnail,
       this.created,
-      this.imageUrl});
+      this.profileUrl});
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserToJson(this);

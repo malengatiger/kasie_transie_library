@@ -1,4 +1,3 @@
-import 'package:account_picker/account_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart' as fbui;
@@ -135,12 +134,12 @@ class DamnEmailLinkState extends State<DamnEmailLink>
   }
 
   void _getEmail() async {
-    final EmailResult? emailResult = await AccountPicker.emailHint();
-    if (emailResult != null) {
-      pp('$mm emailResult: ${emailResult.email} - ${emailResult.type}');
-      emailController.text = emailResult.email;
-      _sendEmail();
-    }
+    // final EmailResult? emailResult = await AccountPicker.emailHint();
+    // if (emailResult != null) {
+    //   pp('$mm emailResult: ${emailResult.email} - ${emailResult.type}');
+    //   emailController.text = emailResult.email;
+    //   _sendEmail();
+    // }
   }
 
   Future _setTexts() async {

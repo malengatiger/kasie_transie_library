@@ -1,4 +1,4 @@
-import 'package:background_location/background_location.dart';
+import 'package:geofence_service/geofence_service.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 
@@ -23,28 +23,28 @@ class DeviceBackgroundLocation {
     pp('$mm ... starting & initializing location ...');
     pp('$mm ... initializing location service ... ${E.heartRed} enabling background mode');
 
-    BackgroundLocation.setAndroidNotification(
-      title: "Notification title",
-      message: "Notification message",
-      icon: "@mipmap/ic_launcher",
-    );
-
-    BackgroundLocation.startLocationService();
-
-    BackgroundLocation.getLocationUpdates((location) {
-      pp('$mm ... DeviceBackgroundLocation FIRED!');
-        pp('$mm onLocationChanged FIRED! locationData: '
-            '\n${E.appleRed} accuracy: ${location.accuracy} '
-            '\n${E.appleRed} latitude: ${location.latitude} '
-            '\n${E.appleRed} longitude: ${location.longitude}'
-            '\n${E.appleRed} speed: ${location.speed} '
-            '\n${E.appleRed} bearing: ${location.bearing} '
-            '\n${E.appleRed} altitude: ${location.altitude}');
-
-        processUpdate(location);
-
-
-    });
+    // BackgroundLocation.setAndroidNotification(
+    //   title: "Notification title",
+    //   message: "Notification message",
+    //   icon: "@mipmap/ic_launcher",
+    // );
+    //
+    // BackgroundLocation.startLocationService();
+    //
+    // BackgroundLocation.getLocationUpdates((location) {
+    //   pp('$mm ... DeviceBackgroundLocation FIRED!');
+    //     pp('$mm onLocationChanged FIRED! locationData: '
+    //         '\n${E.appleRed} accuracy: ${location.accuracy} '
+    //         '\n${E.appleRed} latitude: ${location.latitude} '
+    //         '\n${E.appleRed} longitude: ${location.longitude}'
+    //         '\n${E.appleRed} speed: ${location.speed} '
+    //         '\n${E.appleRed} bearing: ${location.bearing} '
+    //         '\n${E.appleRed} altitude: ${location.altitude}');
+    //
+    //     processUpdate(location);
+    //
+    //
+    // });
 
   }
 

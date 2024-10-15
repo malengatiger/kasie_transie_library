@@ -310,7 +310,7 @@ class VideoRecorderState extends State<VideoRecorder>
     pp('$mm.......... _danceWithTheVideo ... Take Me To Church!!');
 
     widget.onVideoMade(mFile,tFile);
-    cloudStorageBloc.uploadVideo(car: widget.vehicle, file: mFile, thumbnailFile: tFile);
+    cloudStorageBloc.uploadVehicleVideo(car: widget.vehicle, file: mFile, thumbnailFile: tFile);
 
     if (mounted) {
       showToast(

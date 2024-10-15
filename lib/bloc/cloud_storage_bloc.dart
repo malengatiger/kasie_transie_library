@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
@@ -40,7 +41,38 @@ class CloudStorageBloc {
 
   Stream<String> get errorStream => _errorStreamController.stream;
 
-  Future<int> uploadPhoto(
+  Future<int> uploadUserPhoto(
+      {required lib.User mUser,
+        required File file,
+        required File thumbnailFile}) async {
+    pp('\n\n\n$mm️ uploadUserPhoto ☕️☕️☕️☕️☕️☕️☕️️ ... ${mUser.email}');
+
+    pp('\n$mm adding photo data to the database ...');
+    try {
+      pp('$mm uploading photo ..... 😡😡 😡😡');
+
+      final urls = await _doTheUpload(
+          file: file,
+          thumbnailFile: thumbnailFile,
+          id: mUser.userId!,
+          isVideo: false);
+
+      pp('$mm adding photo ..... 😡😡 😡😡');
+
+      var userPhoto = lib.UserPhoto(userPhotoId: 'userPhotoId',
+          associationId: mUser.associationId, associationName: mUser.associationName, userName: '${mUser.firstName} ${mUser.lastName}',
+          userId: mUser.userId, created: DateTime.now().toIso8601String(),
+          thumbNailUrl: urls.$2, url: urls.$1);
+
+      await dataApiDog.addUserPhoto(userPhoto);
+      return uploadFinished;
+    } catch (e,s) {
+      pp('\n\n$mm 👿👿👿👿 Photo write to database failed, We may have a database problem: 🔴🔴🔴 $e');
+      return uploadError;
+    }
+  }
+
+  Future<int> uploadVehiclePhoto(
       {required lib.Vehicle car,
       required File file,
       required File thumbnailFile}) async {
@@ -54,7 +86,7 @@ class CloudStorageBloc {
       final urls = await _doTheUpload(
           file: file,
           thumbnailFile: thumbnailFile,
-          vehicleId: car.vehicleId!,
+          id: car.vehicleId!,
           isVideo: false);
       final loc = await locationBloc.getLocation();
       final position = lib.Position(
@@ -84,7 +116,7 @@ class CloudStorageBloc {
     }
   }
 
-  Future<int> uploadVideo(
+  Future<int> uploadVehicleVideo(
       {required lib.Vehicle car,
       required File file,
       required File thumbnailFile}) async {
@@ -98,7 +130,7 @@ class CloudStorageBloc {
       final urls = await _doTheUpload(
           file: file,
           thumbnailFile: thumbnailFile,
-          vehicleId: car.vehicleId!,
+          id: car.vehicleId!,
           isVideo: true);
       final loc = await locationBloc.getLocation();
       final position = lib.Position(
@@ -128,39 +160,62 @@ class CloudStorageBloc {
     }
   }
 
-  Future<(String, String)> _doTheUpload(
-      {required File file,
-      required File thumbnailFile,
-      required String vehicleId,
-      required bool isVideo}) async {
+
+  Future<(String, String)> _doTheUpload({
+    required File file,
+    required File thumbnailFile,
+    required String id,
+    required bool isVideo,
+  }) async {
     pp('$mm️ uploadPhoto ☕️☕️☕️☕️☕️☕️☕️ file path: \n${file.path}');
-    //upload main file
+
+    // Upload main file
     late UploadTask uploadTask;
     late TaskSnapshot taskSnapshot;
     var type = 'jpg';
     if (isVideo) {
       type = 'mp4';
     }
-    final suffix = '${vehicleId}__${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final suffix = '${id}__${DateTime.now().millisecondsSinceEpoch}.$type';
 
     var fileName = 'photo_$suffix';
     var firebaseStorageRef =
-        FirebaseStorage.instance.ref().child(photoStorageName).child(fileName);
-    uploadTask = firebaseStorageRef.putFile(file);
+    FirebaseStorage.instance.ref().child(photoStorageName).child(fileName);
+
+    if (kIsWeb) {
+      // For web, use putData instead of putFile
+      final bytes = await file.readAsBytes();
+      uploadTask = firebaseStorageRef.putData(bytes);
+    } else {
+      // For mobile/desktop, use putFile
+      uploadTask = firebaseStorageRef.putFile(file);
+    }
+
     _reportProgress(uploadTask);
     taskSnapshot = await uploadTask.whenComplete(() {});
     final url = await taskSnapshot.ref.getDownloadURL();
     pp('$mm file url is available, meaning that upload is complete: \n$url');
     _printSnapshot(taskSnapshot);
-    // upload thumbnail here
+
+    // Upload thumbnail
     final thumbName = 'thumbnail_$suffix';
     final firebaseStorageRef2 =
-        FirebaseStorage.instance.ref().child(photoStorageName).child(thumbName);
+    FirebaseStorage.instance.ref().child(photoStorageName).child(thumbName);
 
-    final thumbUploadTask = firebaseStorageRef2.putFile(thumbnailFile);
+    late UploadTask thumbUploadTask;
+    if (kIsWeb) {
+      // For web, use putData instead of putFile
+      final thumbBytes = await thumbnailFile.readAsBytes();
+      thumbUploadTask = firebaseStorageRef2.putData(thumbBytes);
+    } else {
+      // For mobile/desktop, use putFile
+      thumbUploadTask = firebaseStorageRef2.putFile(thumbnailFile);
+    }
+
     final thumbTaskSnapshot = await thumbUploadTask.whenComplete(() {});
     final thumbUrl = await thumbTaskSnapshot.ref.getDownloadURL();
-    pp('$mm thumbnail file url is available, meaning that upload is complete: \n$thumbUrl');
+    pp(
+        '$mm thumbnail file url is available, meaning that upload is complete: \n$thumbUrl');
     _printSnapshot(thumbTaskSnapshot);
 
     return (url, thumbUrl);

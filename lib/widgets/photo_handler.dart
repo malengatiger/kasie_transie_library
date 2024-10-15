@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
@@ -102,11 +103,11 @@ class PhotoHandlerState extends State<PhotoHandler>
 
   File? finalFile;
   Future<void> _processFile(XFile file) async {
-    File mImageFile = File(file.path);
+    PlatformFile mImageFile = PlatformFile(name: file.name, size: await file.length());
     pp('$mm _processFile 🔵🔵🔵 file to upload, '
-        'size: ${await mImageFile.length()} bytes🔵');
+        'size: ${await mImageFile.bytes?.length} bytes🔵');
 
-    var thumbnailFile = await getPhotoThumbnail(file: mImageFile);
+    var thumbnailFile = await getPhotoThumbnail(file: File(mImageFile.path!));
     bool isLandscape = false;
     if (_deviceOrientation != null) {
       switch (_deviceOrientation!.name) {
@@ -128,25 +129,25 @@ class PhotoHandlerState extends State<PhotoHandler>
     var x = '/photo_$suffix';
     final File mFile = File('${directory.path}$x');
     var z = '/photo_thumbnail_$suffix';
-    final File tFile =
-        File('${directory.path}$z${DateTime.now().millisecondsSinceEpoch}.jpg');
-    await thumbnailFile.copy(tFile.path);
-    //can i force
-    if (_deviceOrientation != null) {
-      final finalFile =
-          await _processOrientation(mImageFile, _deviceOrientation!);
-      await finalFile.copy(mFile.path);
-    } else {
-      await mImageFile.copy(mFile.path);
-    }
+    // final File tFile =
+    //     File('${directory.path}$z${DateTime.now().millisecondsSinceEpoch}.jpg');
+    // await thumbnailFile?.copy(tFile.path);
+    // //can i force
+    // if (_deviceOrientation != null) {
+    //   final finalFile =
+    //       await _processOrientation(mImageFile, _deviceOrientation!);
+    //   await finalFile.copy(mFile.path);
+    // } else {
+    //   await mImageFile.copy(mFile.path);
+    // }
     setState(() {
       finalFile = mFile;
     });
 
-    widget.onPhotoTaken(mFile, tFile);
-
-    cloudStorageBloc.uploadPhoto(
-        car: widget.vehicle, file: mFile, thumbnailFile: tFile);
+    // widget.onPhotoTaken(mFile, tFile);
+    //
+    // cloudStorageBloc.uploadPhoto(
+    //     car: widget.vehicle, file: mFile, thumbnailFile: tFile);
 
     var size = await mFile.length();
     var m = (size / 1024 / 1024).toStringAsFixed(2);

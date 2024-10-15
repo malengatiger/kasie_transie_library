@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_sim_country_code/flutter_sim_country_code.dart';
 import 'package:intl_phone_field/countries.dart' as cc;
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -25,20 +24,20 @@ class _CountryListState extends State<CountryList> {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      _countryCode = await FlutterSimCountryCode.simCountryCode;
-      pp('....................... _countryCode: $_countryCode');
-      for (var value in cc.countries) {
-        if (value.code == _countryCode) {
-          setState(() {
-            country = value;
-          });
-        }
-      }
-    } on PlatformException {
-      _countryCode = 'Failed to get sim country code.';
-    }
-    if (!mounted) return;
+    // try {
+    //   _countryCode = await FlutterSimCountryCode.simCountryCode;
+    //   pp('....................... _countryCode: $_countryCode');
+    //   for (var value in cc.countries) {
+    //     if (value.code == _countryCode) {
+    //       setState(() {
+    //         country = value;
+    //       });
+    //     }
+    //   }
+    // } on PlatformException {
+    //   _countryCode = 'Failed to get sim country code.';
+    // }
+    // if (!mounted) return;
 
     setState(() {});
   }

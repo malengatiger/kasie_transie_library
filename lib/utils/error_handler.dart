@@ -102,7 +102,7 @@ class ErrorHandler {
         uploadedDate: null,
         baseOS: deviceData['baseOS'],
         deviceType: deviceType,
-        userUrl: user?.thumbnailUrl,
+        userUrl: user?.profileUrl,
         vehicleId: car?.vehicleId,
         vehicleReg: car?.vehicleReg,
         iosSystemName: deviceData['systemName'],

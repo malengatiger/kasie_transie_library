@@ -23,7 +23,8 @@ import 'app_auth.dart';
 import 'cache_manager.dart';
 import 'list_api_dog.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:http_parser/http_parser.dart';
+import 'dart:html' as html;
+
 class DataApiDog {
   static const mm = '🌎🌎🌎🌎🌎🌎 DataApiDog: 🌎🌎';
 
@@ -51,7 +52,18 @@ class DataApiDog {
   final Prefs prefs;
   final ErrorHandler errorHandler;
   final SemCache semCache;
+/*
 
+
+  @Post("uploadUserProfilePicture")
+  async uploadUserProfilePicture(
+    @UploadedFiles()
+    files: {
+      imageFile: Express.Multer.File[];
+      thumbFile: Express.Multer.File[];
+    },
+    @Query('userId') userId: string,
+ */
   DataApiDog(this.client, this.appAuth, this.cacheManager, this.prefs,
       this.errorHandler, this.semCache) {
     url = KasieEnvironment.getUrl();
@@ -70,12 +82,71 @@ class DataApiDog {
     return token;
   }
 
+  Future uploadProfilePicture(
+      {required File file, required File thumb, required String userId}) async {
+    pp('\n\n$mm ............ uploadProfilePicture: 🌿 userId: $userId');
 
-  Future<AddCarsResponse?> importVehiclesFromCSV(PlatformFile file, String associationId) async {
+    var url = KasieEnvironment.getUrl();
+    var mUrl = '${url}storage/uploadUserProfilePicture?userId=$userId';
+
+    token = await getAuthToken();
+    if (token == null) {
+      throw Exception('Missing auth token');
+    }
+
+    headers['Authorization'] = 'Bearer $token';
+
+    var request = http.MultipartRequest('POST', Uri.parse(mUrl));
+
+    if (kIsWeb) {
+      // For web, use fromBytes and avoid file system operations
+      final imageFileBytes = await _readFileBytes(file);
+      final thumbFileBytes = await _readFileBytes(thumb);
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'imageFile',
+          imageFileBytes,
+          filename: file.path.split('/').last, // Use path for filename
+        ),
+      );
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'thumbFile',
+          thumbFileBytes,
+          filename: thumb.path.split('/').last, // Use path for filename
+        ),
+      );
+    } else {
+      // For mobile/desktop, use fromPath
+      request.files
+          .add(await http.MultipartFile.fromPath('imageFile', file.path));
+      request.files
+          .add(await http.MultipartFile.fromPath('thumbFile', thumb.path));
+    }
+
+    pp('$mm File upload starting .....: $mUrl');
+
+    request.headers['Authorization'] = 'Bearer $token';
+    var response = await request.send();
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      pp('$mm File uploaded successfully! 🥬🥬🥬🥬🥬');
+      final responseBody = await response.stream.bytesToString();
+      return responseBody;
+    } else {
+      pp('$mm 😈😈File upload failed with status code: 😈${response.statusCode} 😈 ${response.reasonPhrase}');
+    }
+
+    throw Exception('User Profile File upload failed');
+  }
+
+  Future<AddCarsResponse?> importVehiclesFromCSV(
+      PlatformFile file, String associationId) async {
     pp('$mm importVehiclesFromCSV: 🌿 associationId: $associationId');
 
     var url = KasieEnvironment.getUrl();
-    var mUrl = '${url}vehicle/importVehiclesFromCSV?associationId=$associationId';
+    var mUrl =
+        '${url}vehicle/importVehiclesFromCSV?associationId=$associationId';
 
     token = await getAuthToken();
     if (token == null) {
@@ -86,13 +157,11 @@ class DataApiDog {
 
     var request = http.MultipartRequest('POST', Uri.parse(mUrl));
     if (kIsWeb) {
-      request.files.add(
-          http.MultipartFile.fromBytes(
-            'file',
-            file.bytes!,
-            filename: file.name,
-          )
-      );
+      request.files.add(http.MultipartFile.fromBytes(
+        'file',
+        file.bytes!,
+        filename: file.name,
+      ));
     } else {
       // For mobile/desktop, use fromPath
       request.files.add(await http.MultipartFile.fromPath('file', file.path!));
@@ -125,20 +194,20 @@ class DataApiDog {
     }
     throw Exception('Vehicles File upload failed');
   }
-  Future<AddUsersResponse?> importUsersFromCSV(PlatformFile file, String associationId) async {
+
+  Future<AddUsersResponse?> importUsersFromCSV(
+      PlatformFile file, String associationId) async {
     pp('$mm importUsersFromCSV: 🌿 associationId: $associationId');
 
     var url = KasieEnvironment.getUrl();
     var mUrl = '${url}user/importUsersFromCSV?associationId=$associationId';
     var request = http.MultipartRequest('POST', Uri.parse(mUrl));
     if (kIsWeb) {
-      request.files.add(
-          http.MultipartFile.fromBytes(
-            'file',
-            file.bytes!,
-            filename: file.name,
-          )
-      );
+      request.files.add(http.MultipartFile.fromBytes(
+        'file',
+        file.bytes!,
+        filename: file.name,
+      ));
     } else {
       // For mobile/desktop, use fromPath
       request.files.add(await http.MultipartFile.fromPath('file', file.path!));
@@ -175,6 +244,61 @@ class DataApiDog {
       pp('$mm 😈😈File upload failed with status code: 😈${response.statusCode} 😈 ${response.reasonPhrase}');
     }
     throw Exception('Users File upload failed');
+  }
+
+  Future<User> importUserProfile({
+      required PlatformFile file, required PlatformFile thumb, required String userId}) async {
+    pp('$mm importUserProfile: 🌿 userId: $userId');
+
+    var url = KasieEnvironment.getUrl();
+    var mUrl = '${url}storage/uploadUserProfilePicture?userId=$userId';
+    var request = http.MultipartRequest('POST', Uri.parse(mUrl));
+    if (kIsWeb) {
+      request.files.add(http.MultipartFile.fromBytes(
+        'imageFile',
+        file.bytes!,
+        filename: file.name,
+      ));
+      request.files.add(http.MultipartFile.fromBytes(
+        'thumbFile',
+        thumb.bytes!,
+        filename: thumb.name,
+      ));
+    } else {
+      // For mobile/desktop, use fromPath
+      request.files.add(await http.MultipartFile.fromPath('imageFile', file.path!));
+      request.files.add(await http.MultipartFile.fromPath('thumbFile', thumb.path!));
+
+    }
+
+    token = await getAuthToken();
+    if (token == null) {
+      throw Exception('Missing auth token');
+    }
+    request.headers['Authorization'] = 'Bearer $token';
+
+    var response = await request.send();
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      pp('\n\n$mm File uploaded successfully! 🥬🥬🥬🥬🥬\n');
+      final responseBody = await response.stream.bytesToString();
+      final mJson = jsonDecode(responseBody);
+      var result = User.fromJson(mJson);
+      return result;
+    } else {
+      pp('$mm 😈😈File upload failed with status code: 😈${response.statusCode} 😈 ${response.reasonPhrase}');
+    }
+    throw Exception('Users File upload failed');
+  }
+
+
+  Future<Uint8List> _readFileBytes(File file) async {
+    final reader = html.FileReader();
+    final blob = html.Blob([await file.readAsBytes()]);
+    reader.readAsArrayBuffer(blob);
+    await reader.onLoadEnd.first;
+    var res = reader.result as Uint8List;
+    pp('$mm _readFileBytes: ... bytes from file: ${res.length}');
+    return res;
   }
 
   Future<List<RouteAssignment>> addRouteAssignments(
@@ -228,6 +352,7 @@ class DataApiDog {
     semCache.saveVehicles([vehicle]);
     pp('$mm vehicle added to database: $res');
   }
+
   Future addUser(User user) async {
     final bag = user.toJson();
     final cmd = '${url}user/addUser';
@@ -296,7 +421,8 @@ class DataApiDog {
     return m;
   }
 
-  Future addRoutePoints(RoutePointList routePointList, String associationId) async {
+  Future addRoutePoints(
+      RoutePointList routePointList, String associationId) async {
     pp('$mm ... adding routePoints to database ...${routePointList.routePoints.length}');
     final cmd = '${url}routes/addRoutePoints';
     var res = await _callPost(cmd, routePointList.toJson());
@@ -331,9 +457,7 @@ class DataApiDog {
     try {
       final res = await _callPost(cmd, bag);
       pp('$mm Raw response: $res');
-      if (res == null) {
-
-      }
+      if (res == null) {}
       final newRoute = Route.fromJson(res);
 
       pp('$mm new route added to database ...  💙 💙 💙 check!');
@@ -346,7 +470,7 @@ class DataApiDog {
       dog.putRouteInStream(list);
 
       return route;
-    } catch (e,s) {
+    } catch (e, s) {
       pp("WTF? - $e - \n$s");
       rethrow;
     }
@@ -442,7 +566,8 @@ class DataApiDog {
     _routeLandmarkController.sink.add(route);
   }
 
-  Future<RouteLandmark> addRouteLandmark(RouteLandmark route, String associationId) async {
+  Future<RouteLandmark> addRouteLandmark(
+      RouteLandmark route, String associationId) async {
     final bag = route.toJson();
     final cmd = '${url}routes/addRouteLandmark';
     final res = await _callPost(cmd, bag);
@@ -450,7 +575,7 @@ class DataApiDog {
     myPrettyJsonPrint(res);
     final r = RouteLandmark.fromJson(res);
 
-    semCache.saveRouteLandmarks([r],associationId);
+    semCache.saveRouteLandmarks([r], associationId);
     _routeLandmarkController.sink.add(r);
     return r;
   }
@@ -506,7 +631,7 @@ class DataApiDog {
   }
 
   Future<List<RoutePoint>> deleteRoutePointsFromIndex(
-      String routeId, int index,  String associationId) async {
+      String routeId, int index, String associationId) async {
     final cmd =
         '${url}routes/deleteRoutePointsFromIndex?routeId=$routeId&index=$index';
     List res = await _sendHttpGET(cmd);
@@ -586,6 +711,19 @@ class DataApiDog {
     final r = VehiclePhoto.fromJson(res);
 
     pp('$mm VehiclePhoto added to database ...');
+    myPrettyJsonPrint(res);
+
+    return r;
+  }
+
+  Future<UserPhoto> addUserPhoto(UserPhoto userPhoto) async {
+    final bag = userPhoto.toJson();
+    final cmd = '${url}user/addUserPhoto';
+
+    final res = await _callPost(cmd, bag);
+    final r = UserPhoto.fromJson(res);
+
+    pp('$mm UserPhoto added to database ...');
     myPrettyJsonPrint(res);
 
     return r;

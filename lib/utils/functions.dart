@@ -1,6 +1,5 @@
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 import 'dart:ui' as ui;
@@ -8,18 +7,24 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// import 'package:flutter_sim_country_code/flutter_sim_country_code.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:image/image.dart' as img;
 import 'package:intl/date_symbol_data_file.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:path_provider/path_provider.dart';
 import 'package:pretty_json/pretty_json.dart';
+import 'package:universal_html/html.dart' as html;
+import 'package:universal_io/io.dart';
 import 'package:video_thumbnail/video_thumbnail.dart' as vt;
 import '../data/data_schemas.dart';
 import 'emojis.dart';
+
+// import 'dart:html' as html;
+import 'dart:typed_data';
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 pp(dynamic msg) {
   var time = getFormattedDateHour(DateTime.now().toIso8601String());
@@ -33,6 +38,56 @@ pp(dynamic msg) {
       print('$time ==> $msg');
     }
   }
+}
+
+TextStyle myTextStyle({Color? color, double? fontSize, FontWeight? weight}) {
+  if (color != null) {
+    return GoogleFonts.roboto(
+      fontWeight: weight ?? FontWeight.normal,
+      fontSize: fontSize ?? 14,
+      color: color,
+    );
+  }
+
+  return GoogleFonts.roboto(
+    fontWeight: weight ?? FontWeight.normal,
+    fontSize: fontSize ?? 14,
+    color: color,
+  );
+}
+
+TextStyle myNumberThickStyle(
+    {Color? color, double? fontSize, FontWeight? weight}) {
+  if (color != null) {
+    return GoogleFonts.protestStrike(
+      fontWeight: weight ?? FontWeight.normal,
+      fontSize: fontSize ?? 14,
+      color: color,
+    );
+  }
+
+  return GoogleFonts.protestStrike(
+    fontWeight: weight ?? FontWeight.normal,
+    fontSize: fontSize ?? 14,
+    color: color,
+  );
+}
+
+TextStyle myNumberNormalStyle(
+    {Color? color, double? fontSize, FontWeight? weight}) {
+  if (color != null) {
+    return GoogleFonts.notoSans(
+      fontWeight: weight ?? FontWeight.normal,
+      fontSize: fontSize ?? 14,
+      color: color,
+    );
+  }
+
+  return GoogleFonts.notoSans(
+    fontWeight: weight ?? FontWeight.normal,
+    fontSize: fontSize ?? 14,
+    color: color,
+  );
 }
 
 Future<String> getFmtDate(String date, String locale) async {
@@ -199,19 +254,62 @@ Random random = Random(DateTime.now().millisecondsSinceEpoch);
   }
 }
 
-Future<File> getPhotoThumbnail({required File file}) async {
-  final Directory directory = await getApplicationDocumentsDirectory();
 
-  img.Image? image = img.decodeImage(file.readAsBytesSync());
-  var thumbnail = img.copyResize(image!, width: 160);
-  const slash = '/thumbnail_';
+Future<File?> getPhotoThumbnail({required File file}) async {
+  pp('.... getPhotoThumbnail ...');
+  if (kIsWeb) {
+    // For web, use the browser's built-in image resizing capabilities
+    final reader = html.FileReader();
+    // Convert File to Blob
+    final blob = html.Blob(
+      [await file.readAsBytes()],
+      (file as html.File).type, // Access type from html.File
+    );
+    reader.readAsDataUrl(blob); // Pass the Blob to readAsDataUrl
+    await reader.onLoadEnd.first;
+    final dataUrl = reader.result as String;
 
-  final File mFile = File(
-      '${directory.path}$slash${DateTime.now().millisecondsSinceEpoch}.jpg');
-  var thumb = mFile..writeAsBytesSync(img.encodeJpg(thumbnail, quality: 100));
-  var len = await thumb.length();
-  pp('🔷🔷 photo thumbnail generated: 😡 ${(len / 1024).toStringAsFixed(1)} KB');
-  return thumb;
+    // Create an image element to resize the image
+    final image = html.ImageElement();
+    image.src = dataUrl;
+    await image.onLoad.first;
+
+    // Create a canvas element to draw the resized image
+    final canvas = html.CanvasElement(
+      width: 100,
+      height: 100,
+    );
+    final ctx = canvas.context2D;
+    ctx.drawImageScaled(image, 0, 0, 100, 100);
+
+    // Get the resized image data as bytes
+    final resizedDataUrl = canvas.toDataUrl('image/jpeg');
+    final bytes = _dataUrlToBytes(resizedDataUrl);
+
+    // Instead of creating a temporary file, return a File object
+    // with the bytes and a dummy path.
+    return File.fromRawPath(bytes);
+  } else {
+    // For mobile/desktop, use FlutterImageCompress
+    var result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      'thumb_${file.path}',
+      minHeight: 100,
+      minWidth: 100,
+      quality: 100,
+    );
+    return File(result!.path);
+  }
+}
+
+// Helper function to convert data URL to bytes
+Uint8List _dataUrlToBytes(String dataUrl) {
+  final parts = dataUrl.split(',');
+  if (parts.length != 2) {
+    throw Exception('Invalid data URL');
+  }
+  final encodedData = parts[1];
+  return base64Decode(encodedData);
 }
 
 Future<File> getVideoThumbnail(File file) async {
@@ -706,9 +804,10 @@ void prettyJson(String input) {
   var prettyString = encoder.convert(object);
   prettyString.split('\n').forEach((element) => myPrint(element));
 }
-String getPhoneFormat(String phoneNumber) {
-  return phoneNumber.replaceAllMapped(RegExp(r'(\d{3})(\d{3})(\d+)'), (Match m) => "(${m[1]}) ${m[2]}-${m[3]}");
 
+String getPhoneFormat(String phoneNumber) {
+  return phoneNumber.replaceAllMapped(
+      RegExp(r'(\d{3})(\d{3})(\d+)'), (Match m) => "(${m[1]}) ${m[2]}-${m[3]}");
 }
 
 Future<Country?> getDeviceCountry(List<Country> countries) async {
@@ -725,7 +824,7 @@ Future<Country?> getDeviceCountry(List<Country> countries) async {
       return c;
     }
   }
- return country;
+  return country;
 }
 
 void myPrettyJsonPrint(Map map) {
@@ -750,7 +849,6 @@ showSnackBar(
     duration: duration ?? const Duration(seconds: 5),
     backgroundColor: backgroundColor ?? Theme.of(context).primaryColor,
     showCloseIcon: true,
-
     elevation: elevation ?? 8,
     content: Padding(
       padding: EdgeInsets.all(padding ?? 8),
@@ -764,10 +862,10 @@ showSnackBar(
 
 showErrorSnackBar(
     {required String message,
-      required BuildContext context,
-      Duration? duration,
-      double? padding,
-      double? elevation}) {
+    required BuildContext context,
+    Duration? duration,
+    double? padding,
+    double? elevation}) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     duration: duration ?? const Duration(seconds: 5),
     backgroundColor: Colors.red,
@@ -1055,12 +1153,12 @@ const gapH32 = SizedBox(height: 32.0);
 
 showToast(
     {required String message,
-      required BuildContext context,
-      Color? backgroundColor,
-      TextStyle? textStyle,
-      Duration? duration,
-      double? padding,
-      ToastGravity? toastGravity}) {
+    required BuildContext context,
+    Color? backgroundColor,
+    TextStyle? textStyle,
+    Duration? duration,
+    double? padding,
+    ToastGravity? toastGravity}) {
   FToast fToast = FToast();
   const mm = 'FunctionsAndShit: 💀 💀 💀 💀 💀 : ';
   try {
@@ -1101,12 +1199,13 @@ showToast(
     pp('$mm 👿👿👿👿👿 we have a small TOAST problem, Boss! - 👿 $e');
   }
 }
+
 showErrorToast(
     {required String message,
     required BuildContext context,
     TextStyle? textStyle,
     double? padding,
-      Duration? duration,
+    Duration? duration,
     ToastGravity? toastGravity}) {
   FToast fToast = FToast();
   const mm = 'FunctionsAndShit: 💀 💀 💀 💀 💀 : ';
@@ -1142,20 +1241,21 @@ showErrorToast(
     fToast.showToast(
       child: toastContainer,
       gravity: toastGravity ?? ToastGravity.CENTER,
-      toastDuration: duration?? const Duration(seconds: 10),
+      toastDuration: duration ?? const Duration(seconds: 10),
     );
   } catch (e) {
     pp('$mm 👿👿👿👿👿 we have a small TOAST problem, Boss! - 👿 $e');
   }
 }
+
 showOKToast(
     {required String message,
-      required BuildContext context,
-      Color? backgroundColor,
-      TextStyle? textStyle,
-      Duration? duration,
-      double? padding,
-      ToastGravity? toastGravity}) {
+    required BuildContext context,
+    Color? backgroundColor,
+    TextStyle? textStyle,
+    Duration? duration,
+    double? padding,
+    ToastGravity? toastGravity}) {
   FToast fToast = FToast();
   const mm = 'FunctionsAndShit: 💀 💀 💀 💀 💀 : ';
   try {
@@ -1196,6 +1296,7 @@ showOKToast(
     pp('$mm 👿👿👿👿👿 we have a small TOAST problem, Boss! - 👿 $e');
   }
 }
+
 Future<String> getStringFromAssets(String path) async {
   final mPath = 'assets/l10n/$path.json';
 
@@ -1215,6 +1316,7 @@ const lorem =
     'continuous improvement and optimization of field operations. Overall, building multimedia timelines '
     'can provide valuable insights and information for managers and executives to make informed decisions and improve '
     'the overall efficiency of field operations.';
+
 class MyRGB {
   late int red, green, blue;
 

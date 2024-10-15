@@ -303,6 +303,28 @@ Map<String, dynamic> _$VehiclePhotoToJson(VehiclePhoto instance) =>
       'userName': instance.userName,
     };
 
+UserPhoto _$UserPhotoFromJson(Map<String, dynamic> json) => UserPhoto(
+      userPhotoId: json['userPhotoId'] as String?,
+      associationId: json['associationId'] as String?,
+      associationName: json['associationName'] as String?,
+      userName: json['userName'] as String?,
+      userId: json['userId'] as String?,
+      created: json['created'] as String?,
+      thumbNailUrl: json['thumbNailUrl'] as String?,
+      url: json['url'] as String?,
+    );
+
+Map<String, dynamic> _$UserPhotoToJson(UserPhoto instance) => <String, dynamic>{
+      'userPhotoId': instance.userPhotoId,
+      'associationId': instance.associationId,
+      'associationName': instance.associationName,
+      'userName': instance.userName,
+      'userId': instance.userId,
+      'created': instance.created,
+      'thumbNailUrl': instance.thumbNailUrl,
+      'url': instance.url,
+    };
+
 VehicleVideo _$VehicleVideoFromJson(Map<String, dynamic> json) => VehicleVideo(
       vehicleVideoId: json['vehicleVideoId'] as String?,
       landmarkId: json['landmarkId'] as String?,
@@ -748,9 +770,9 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       password: json['password'] as String?,
       email: json['email'] as String?,
       cellphone: json['cellphone'] as String?,
-      thumbnailUrl: json['thumbnailUrl'] as String?,
+      profileThumbnail: json['profileThumbnail'] as String?,
       created: json['created'] as String?,
-      imageUrl: json['imageUrl'] as String?,
+      profileUrl: json['profileUrl'] as String?,
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -766,8 +788,8 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'password': instance.password,
       'email': instance.email,
       'cellphone': instance.cellphone,
-      'thumbnailUrl': instance.thumbnailUrl,
-      'imageUrl': instance.imageUrl,
+      'profileThumbnail': instance.profileThumbnail,
+      'profileUrl': instance.profileUrl,
       'created': instance.created,
     };
 
