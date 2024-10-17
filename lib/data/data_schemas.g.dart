@@ -587,6 +587,12 @@ Vehicle _$VehicleFromJson(Map<String, dynamic> json) => Vehicle(
       ownerCellphone: json['ownerCellphone'] as String?,
       passengerCapacity: (json['passengerCapacity'] as num?)?.toInt(),
       associationId: json['associationId'] as String?,
+      photos: (json['photos'] as List<dynamic>?)
+          ?.map((e) => VehiclePhoto.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      videos: (json['videos'] as List<dynamic>?)
+          ?.map((e) => VehicleVideo.fromJson(e as Map<String, dynamic>))
+          .toList(),
       associationName: json['associationName'] as String?,
     );
 
@@ -606,6 +612,8 @@ Map<String, dynamic> _$VehicleToJson(Vehicle instance) => <String, dynamic>{
       'passengerCapacity': instance.passengerCapacity,
       'associationId': instance.associationId,
       'associationName': instance.associationName,
+      'photos': instance.photos?.map((e) => e.toJson()).toList(),
+      'videos': instance.videos?.map((e) => e.toJson()).toList(),
     };
 
 CalculatedDistance _$CalculatedDistanceFromJson(Map<String, dynamic> json) =>

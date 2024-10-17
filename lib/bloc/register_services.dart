@@ -26,7 +26,7 @@ class RegisterServices {
   static DatabaseFactory dbFactoryWeb = databaseFactoryWeb;
 
   static Future<void> register() async {
-    pp('\n\n$mm  initialize service singletons with GetIt .... 🍎🍎🍎');
+    pp('\n\n$mm  ... initialize service singletons with GetIt .... 🍎🍎🍎');
 
     final http.Client client = http.Client();
     final AppAuth appAuth = AppAuth(FirebaseAuth.instance);
@@ -47,35 +47,52 @@ class RegisterServices {
         ListApiDog(client, appAuth, prefs, errorHandler, zipHandler, semCache);
     pp('$mm .... ListApiDog: 🦠listApiDog initialized');
     //
-    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ...');
+    pp('$mm ..... 🦠🦠🦠🦠🦠registerLazySingletons ...');
+
+    GetIt.instance.registerLazySingleton<DeviceLocationBloc>(() => DeviceLocationBloc());
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... DeviceLocationBloc');
 
     GetIt.instance.registerLazySingleton<SemCache>(() => semCache);
 
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... SemCache');
+
     GetIt.instance.registerLazySingleton<ZipHandler>(() => zipHandler);
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... ZipHandler');
 
     GetIt.instance.registerLazySingleton<RouteDistanceCalculator>(
         () => RouteDistanceCalculator(prefs, listApi, dataApi));
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... RouteDistanceCalculator');
 
     GetIt.instance.registerLazySingleton<CloudStorageBloc>(
         () => CloudStorageBloc(dataApi, prefs));
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... CloudStorageBloc');
 
     GetIt.instance.registerLazySingleton<TheGreatGeofencer>(
         () => TheGreatGeofencer(dataApi, listApi, prefs));
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... TheGreatGeofencer');
 
     GetIt.instance.registerLazySingleton<ThemeBloc>(() => ThemeBloc(prefs));
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... ThemeBloc');
 
     GetIt.instance.registerLazySingleton<ListApiDog>(() => listApi);
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... ListApiDog');
 
     GetIt.instance.registerLazySingleton<DataApiDog>(() => dataApi);
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... DataApiDog');
 
     GetIt.instance.registerLazySingleton<CacheManager>(() => cacheManager);
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... CacheManager');
 
     GetIt.instance.registerLazySingleton<Prefs>(() => prefs);
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... Prefs');
 
     GetIt.instance.registerLazySingleton<AppAuth>(() => appAuth);
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... AppAuth');
 
     GetIt.instance.registerLazySingleton<ErrorHandler>(() => errorHandler);
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... ErrorHandler');
 
-    pp('\n$mm  12 Service singletons registered! .... 🍎🍎🍎\n');
+
+    pp('\n\n$mm   🍎🍎🍎 13 Service singletons registered! .... 🍎🍎🍎\n');
   }
 }

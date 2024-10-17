@@ -296,6 +296,26 @@ class ListApiDog {
     return 0;
   }
 
+  Future<List<Vehicle>> getAssociationCars(String associationId, bool refresh) async {
+    var cachedList = await semCache.getVehicles(associationId);
+    if (refresh || cachedList.isEmpty) {
+      final cmd =
+          '${url}association/getAssociationVehicles?associationId=$associationId';
+      List resp = await _sendHttpGET(cmd);
+      var list = <Vehicle>[];
+      for (var vehicleJson in resp) {
+        list.add(Vehicle.fromJson(vehicleJson));
+      }
+      pp('$mm ... cars found on Atlas: ${list.length}');
+      await semCache.saveVehicles(list);
+      return list;
+    } else {
+      pp('$mm ... cars found on sembast cache: ${cachedList.length}');
+      return cachedList;
+    }
+
+
+  }
   Future<List<Vehicle>> getCarsFromBackend(String associationId) async {
     final cmd =
         '${url}association/getAssociationVehicles?associationId=$associationId';
@@ -304,7 +324,8 @@ class ListApiDog {
     for (var vehicleJson in resp) {
       list.add(Vehicle.fromJson(vehicleJson));
     }
-
+    pp('$mm ... cars found: ${list.length}');
+    await semCache.saveVehicles(list);
     return list;
   }
 
@@ -739,7 +760,7 @@ class ListApiDog {
   Future<List<VehiclePhoto>> _getVehiclePhotosFromBackend(
       {required String vehicleId}) async {
     final list = <VehiclePhoto>[];
-    final cmd = '${url}getVehiclePhotos?vehicleId=$vehicleId';
+    final cmd = '${url}vehicle/getVehiclePhotos?vehicleId=$vehicleId';
     List resp = await _sendHttpGET(cmd);
     pp('$mm VehiclePhotos found: ${resp.length}');
 
@@ -792,7 +813,7 @@ class ListApiDog {
   Future<List<VehicleVideo>> _getVehicleVideosFromBackend(
       {required String vehicleId}) async {
     final list = <VehicleVideo>[];
-    final cmd = '${url}getVehicleVideos?vehicleId=$vehicleId';
+    final cmd = '${url}vehicle/getVehicleVideos?vehicleId=$vehicleId';
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
       var r = VehicleVideo.fromJson(value);

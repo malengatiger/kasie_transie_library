@@ -52,7 +52,6 @@ class _VehicleSearchState extends State<VehicleSearch> {
     return null;
   }
 
-
   void _runFilter(String text) {
     pp('$mm .... _runFilter: text: $text ......');
     if (text.isEmpty) {

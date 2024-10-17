@@ -52,18 +52,7 @@ class DataApiDog {
   final Prefs prefs;
   final ErrorHandler errorHandler;
   final SemCache semCache;
-/*
 
-
-  @Post("uploadUserProfilePicture")
-  async uploadUserProfilePicture(
-    @UploadedFiles()
-    files: {
-      imageFile: Express.Multer.File[];
-      thumbFile: Express.Multer.File[];
-    },
-    @Query('userId') userId: string,
- */
   DataApiDog(this.client, this.appAuth, this.cacheManager, this.prefs,
       this.errorHandler, this.semCache) {
     url = KasieEnvironment.getUrl();
@@ -246,8 +235,59 @@ class DataApiDog {
     throw Exception('Users File upload failed');
   }
 
-  Future<User> importUserProfile({
-      required PlatformFile file, required PlatformFile thumb, required String userId}) async {
+  Future<VehiclePhoto> importVehicleProfile(
+      {required PlatformFile file,
+      required PlatformFile thumb,
+      required String vehicleId,
+      required double latitude,
+      required double longitude}) async {
+    pp('$mm importVehicleProfile: 🌿........... userId: $vehicleId');
+
+    var url = KasieEnvironment.getUrl();
+    var mUrl =
+        '${url}storage/uploadVehiclePhoto?vehicleId=$vehicleId&latitude=$latitude&longitude=$longitude';
+    var request = http.MultipartRequest('POST', Uri.parse(mUrl));
+    if (kIsWeb) {
+      request.files.add(http.MultipartFile.fromBytes(
+        'imageFile',
+        file.bytes!,
+        filename: file.name,
+      ));
+      request.files.add(http.MultipartFile.fromBytes(
+        'thumbFile',
+        thumb.bytes!,
+        filename: thumb.name,
+      ));
+    } else {
+      // For mobile/desktop, use fromPath
+      request.files
+          .add(await http.MultipartFile.fromPath('imageFile', file.path!));
+      request.files
+          .add(await http.MultipartFile.fromPath('thumbFile', thumb.path!));
+    }
+
+    token = await getAuthToken();
+    if (token == null) {
+      throw Exception('Missing auth token');
+    }
+    request.headers['Authorization'] = 'Bearer $token';
+    var response = await request.send();
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      pp('\n\n$mm Yebo! Vehicle photo file uploaded successfully! 🥬🥬🥬🥬🥬\n');
+      final responseBody = await response.stream.bytesToString();
+      final mJson = jsonDecode(responseBody);
+      var result = VehiclePhoto.fromJson(mJson);
+      return result;
+    } else {
+      pp('$mm 😈😈File upload failed with status code: 😈${response.statusCode} 😈 ${response.reasonPhrase}');
+    }
+    throw Exception('Vehicle photo file upload failed');
+  }
+
+  Future<User> importUserProfile(
+      {required PlatformFile file,
+      required PlatformFile thumb,
+      required String userId}) async {
     pp('$mm importUserProfile: 🌿 userId: $userId');
 
     var url = KasieEnvironment.getUrl();
@@ -266,9 +306,10 @@ class DataApiDog {
       ));
     } else {
       // For mobile/desktop, use fromPath
-      request.files.add(await http.MultipartFile.fromPath('imageFile', file.path!));
-      request.files.add(await http.MultipartFile.fromPath('thumbFile', thumb.path!));
-
+      request.files
+          .add(await http.MultipartFile.fromPath('imageFile', file.path!));
+      request.files
+          .add(await http.MultipartFile.fromPath('thumbFile', thumb.path!));
     }
 
     token = await getAuthToken();
@@ -289,7 +330,6 @@ class DataApiDog {
     }
     throw Exception('Users File upload failed');
   }
-
 
   Future<Uint8List> _readFileBytes(File file) async {
     final reader = html.FileReader();
