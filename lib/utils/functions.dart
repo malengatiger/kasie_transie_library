@@ -209,7 +209,6 @@ Random random = Random(DateTime.now().millisecondsSinceEpoch);
 
 (Color, String) getRandomColor() {
   final colors = [
-    'white',
     'red',
     'black',
     'amber',
@@ -220,13 +219,15 @@ Random random = Random(DateTime.now().millisecondsSinceEpoch);
     'teal',
     'indigo',
     'blue',
-    'orange'
+    'orange',
+    'deepPurple',
+    'deepOrange',
+    'grey',
+    'black54'
   ];
   final index = random.nextInt(colors.length - 1);
   final stringColor = colors.elementAt(index);
   switch (stringColor) {
-    case 'white':
-      return (Colors.white, 'white');
     case 'red':
       return (Colors.red, 'red');
     case 'black':
@@ -234,7 +235,7 @@ Random random = Random(DateTime.now().millisecondsSinceEpoch);
     case 'amber':
       return (Colors.amber, 'amber');
     case 'yellow':
-      return (Colors.yellow, 'yellow');
+      return (Colors.yellow.shade900, 'yellow');
     case 'pink':
       return (Colors.pink, 'pink');
     case 'purple':
@@ -249,8 +250,16 @@ Random random = Random(DateTime.now().millisecondsSinceEpoch);
       return (Colors.blue, 'blue');
     case 'orange':
       return (Colors.orange, 'orange');
+    case 'deepOrange':
+      return (Colors.deepOrange, 'deepOrange');
+    case 'deepPurple':
+      return (Colors.deepPurple, 'deepPurple');
+    case 'grey':
+      return (Colors.grey.shade600, 'grey');
+    case 'black54':
+      return (Colors.black54, 'black54');
     default:
-      return (Colors.black, 'black');
+      return (Colors.black54, 'black54');
   }
 }
 

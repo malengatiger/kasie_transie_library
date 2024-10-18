@@ -385,12 +385,15 @@ class DataApiDog {
     return lr;
   }
 
-  Future addVehicle(Vehicle vehicle) async {
+  Future<Vehicle> addVehicle(Vehicle vehicle) async {
     final bag = vehicle.toJson();
     final cmd = '${url}vehicle/addVehicle';
     final res = await _callPost(cmd, bag);
-    semCache.saveVehicles([vehicle]);
-    pp('$mm vehicle added to database: $res');
+    var car = Vehicle.fromJson(res);
+
+    semCache.saveVehicles([car]);
+    pp('$mm vehicle added to database and cache: ${car.toJson()}');
+    return car;
   }
 
   Future addUser(User user) async {

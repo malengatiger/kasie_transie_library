@@ -77,7 +77,7 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
         busy = true;
       });
       vehiclePhotos =
-          await listApiDog.getVehiclePhotos(widget.vehicle.vehicleId!, refresh);
+          await listApiDog.getVehiclePhotos(widget.vehicle, refresh);
       vehiclePhotos.sort((a, b) => b.created!.compareTo(a.created!));
       pp('$mm ... received prior photos ...${E.appleRed} ${vehiclePhotos.length}');
     } catch (e) {

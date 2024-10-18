@@ -296,7 +296,8 @@ class ListApiDog {
     return 0;
   }
 
-  Future<List<Vehicle>> getAssociationCars(String associationId, bool refresh) async {
+  Future<List<Vehicle>> getAssociationCars(
+      String associationId, bool refresh) async {
     var cachedList = await semCache.getVehicles(associationId);
     if (refresh || cachedList.isEmpty) {
       final cmd =
@@ -313,9 +314,8 @@ class ListApiDog {
       pp('$mm ... cars found on sembast cache: ${cachedList.length}');
       return cachedList;
     }
-
-
   }
+
   Future<List<Vehicle>> getCarsFromBackend(String associationId) async {
     final cmd =
         '${url}association/getAssociationVehicles?associationId=$associationId';
@@ -383,14 +383,21 @@ class ListApiDog {
   }
 
   Future<List<Association>> getAssociations(bool refresh) async {
-      final cmd = '${url}association/getAssociations';
-      List<Association> list = [];
+    final cmd = '${url}association/getAssociations';
+    List<Association> list = await semCache.getAssociations();;
+    if (refresh || list.isEmpty) {
       List resp = await _sendHttpGET(cmd);
+      list.clear();
       for (var m in resp) {
         list.add(Association.fromJson(m));
       }
 
-    pp('$mm cached associations: ${list.length} - refresh: $refresh');
+      pp('$mm associations from atlas: ${list.length} - refresh: $refresh');
+      await semCache.saveAssociations(list);
+      return list;
+    }
+
+    pp('$mm associations from cache: ${list.length} - refresh: $refresh');
     return list;
   }
 
@@ -412,6 +419,7 @@ class ListApiDog {
   void putRouteInStream(List<Route> routes) {
     _routeController.sink.add(routes);
   }
+
   final StreamController<List<City>> _cityController =
       StreamController.broadcast();
 
@@ -419,7 +427,8 @@ class ListApiDog {
 
   Future<List<RouteLandmark>> getRouteLandmarks(
       String routeId, bool refresh, String associationId) async {
-    List<RouteLandmark> localList = await semCache.getRouteLandmarks(routeId, associationId);
+    List<RouteLandmark> localList =
+        await semCache.getRouteLandmarks(routeId, associationId);
 
     try {
       if (refresh || localList.isEmpty) {
@@ -435,8 +444,10 @@ class ListApiDog {
     return localList;
   }
 
-  Future<List<RoutePoint>> getRoutePoints(String routeId, bool refresh, String associationId) async {
-    List<RoutePoint> localList = await semCache.getRoutePoints(routeId, associationId);
+  Future<List<RoutePoint>> getRoutePoints(
+      String routeId, bool refresh, String associationId) async {
+    List<RoutePoint> localList =
+        await semCache.getRoutePoints(routeId, associationId);
 
     if (localList.isEmpty || refresh) {
       try {
@@ -447,7 +458,6 @@ class ListApiDog {
           localList.add(RoutePoint.fromJson(r));
         }
         pp('$mm RoutePoints from backend via zip: ${localList.length}');
-
       } catch (e) {
         pp(e);
         rethrow;
@@ -458,14 +468,49 @@ class ListApiDog {
     return localList;
   }
 
-  Future<List<VehiclePhoto>> getVehiclePhotos(
-      String vehicleId, bool refresh) async {
-    var localList = <VehiclePhoto>[];
+  Future getAllPhotosAndVideos({Association? association}) async {
+    association ?? prefs.getAssociation();
+    if (association == null) {
+      pp('$mm Association is null ... quitting!');
+      return;
+    }
+    List<Vehicle> cars = await getCarsFromBackend(association.associationId!);
+    pp('$mm getAllPhotosAndVideos: ... cars: ${cars.length} from association: ${association.associationName}');
+    var totalPhotos = 0;
+    var totalVideos = 0;
+    for (var car in cars) {
+      var listP = await _getVehiclePhotosFromBackend(vehicleId: car.vehicleId!);
+      var listV = await _getVehicleVideosFromBackend(vehicleId: car.vehicleId!);
+      car.photos = listP;
+      car.videos = listV;
 
+      totalPhotos += listP.length;
+      totalVideos += listV.length;
+
+      await semCache.saveVehicles([car]);
+    }
+
+    pp('$mm getAllPhotosAndVideos completed: ${cars.length} cars and totalPhotos: $totalPhotos and totalVideos: $totalVideos');
+  }
+
+  Future getVehicleMedia(Vehicle car, bool refresh) async {
+    var listP = await _getVehiclePhotosFromBackend(vehicleId: car.vehicleId!);
+    var listV = await _getVehicleVideosFromBackend(vehicleId: car.vehicleId!);
+    car.photos = listP;
+    car.videos = listV;
+    pp('$mm car media found for ${car.vehicleReg} photos: ${listP.length} videos: ${listV.length}');
+  }
+
+  Future<List<VehiclePhoto>> getVehiclePhotos(
+      Vehicle vehicle, bool refresh) async {
+    var localList = <VehiclePhoto>[];
     //
     try {
-      localList = await _getVehiclePhotosFromBackend(vehicleId: vehicleId);
-      pp('$mm VehiclePhoto from backend:: ${localList.length}');
+      localList =
+          await _getVehiclePhotosFromBackend(vehicleId: vehicle.vehicleId!);
+      pp('$mm VehiclePhotos from backend: vehicleId: ${vehicle.vehicleReg} found: ${localList.length} photos');
+      vehicle.photos = localList;
+      await semCache.saveVehicles([vehicle]);
     } catch (e) {
       pp(e);
     }
@@ -473,13 +518,15 @@ class ListApiDog {
   }
 
   Future<List<VehicleVideo>> getVehicleVideos(
-      String vehicleId, bool refresh) async {
+      Vehicle vehicle, bool refresh) async {
     var localList = <VehicleVideo>[];
-
     //
     try {
-      localList = await _getVehicleVideosFromBackend(vehicleId: vehicleId);
-      pp('$mm VehicleVideos from backend:: ${localList.length}');
+      localList =
+          await _getVehicleVideosFromBackend(vehicleId: vehicle.vehicleId!);
+      pp('$mm VehicleVideos from backend: vehicleId: ${vehicle.vehicleReg} found: ${localList.length} photos');
+      vehicle.videos = localList;
+      await semCache.saveVehicles([vehicle]);
     } catch (e) {
       pp(e);
     }
@@ -928,9 +975,11 @@ class ListApiDog {
     return routes;
   }
 
-  Future<List<Route>> getAssociationRoutes(String associationId, bool refresh) async {
+  Future<List<Route>> getAssociationRoutes(
+      String associationId, bool refresh) async {
     final list = <Route>[];
-    final cmd = '${url}routes/getAssociationRoutes?associationId=$associationId';
+    final cmd =
+        '${url}routes/getAssociationRoutes?associationId=$associationId';
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
       var r = Route.fromJson(value);
@@ -1134,7 +1183,6 @@ class ListApiDog {
   }
 
   static const xz = '🌎🌎🌎🌎🌎🌎 ListApiDog: ';
-
 
   Future _sendHttpGET(String mUrl) async {
     pp('$xz _sendHttpGET: 🔆 🔆 🔆 ...... calling : 💙 $mUrl  💙');

@@ -79,7 +79,7 @@ class _RouteAssignerState extends State<RouteAssigner>
     final user = prefs.getUser();
     if (widget.associationId != null) {
       cars =
-          await semCache.getVehicles();
+          await semCache.getVehicles(widget.associationId!);
     } else {
       cars = await listApiDog.getOwnerVehicles(user!.userId!, false);
     }

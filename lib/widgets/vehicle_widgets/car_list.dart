@@ -57,7 +57,7 @@ class CarListState extends State<CarList>
     });
     try {
       if (widget.associationId != null) {
-        cars = await semCache.getVehicles();
+        cars = await semCache.getVehicles(widget.associationId!);
       }
       if (widget.ownerId != null) {
         cars = await listApiDog.getOwnerVehicles(widget.ownerId!, refresh);
