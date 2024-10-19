@@ -19,7 +19,8 @@ class RouteInfoWidget extends StatefulWidget {
       {super.key,
       required this.onClose,
       required this.onNavigateToMapViewer,
-      required this.onColorChanged, required this.route});
+      required this.onColorChanged,
+      required this.route});
 
   final lib.Route route;
   final Function onClose;
@@ -89,8 +90,8 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
       });
     }
     if (routeId != null) {
-      var marks =
-          await semCache.getRouteLandmarks(routeId, widget.route.associationId!);
+      var marks = await semCache.getRouteLandmarks(
+          routeId, widget.route.associationId!);
       numberOfLandmarks = marks.length;
       var points =
           await semCache.getRoutePoints(routeId, widget.route.associationId!);
@@ -117,29 +118,29 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
               mobile: (ctx) {
                 return Column(
                   children: [
-                     Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 64, horizontal: 100),
-                            child: DetailsWidget(
-                              route: widget.route,
-                              numberOfLandmarks: numberOfLandmarks,
-                              fontSize: 18,
-                              numberOfPoints: numberOfPoints,
-                              routeColor: routeColor,
-                              routePointsMapped: routePointsMapped,
-                              routeLandmarks: routeLandmarks,
-                              routeDetails: routeDetails,
-                              onClose: () {
-                                widget.onClose();
-                              },
-                              onNavigateToMapViewer: () {
-                                widget.onNavigateToMapViewer();
-                              },
-                              onColorChanged: (color, string) {
-                                widget.onColorChanged(color, string);
-                              },
-                            ),
-                          ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 64, horizontal: 100),
+                      child: DetailsWidget(
+                        route: widget.route,
+                        numberOfLandmarks: numberOfLandmarks,
+                        fontSize: 18,
+                        numberOfPoints: numberOfPoints,
+                        routeColor: routeColor,
+                        routePointsMapped: routePointsMapped,
+                        routeLandmarks: routeLandmarks,
+                        routeDetails: routeDetails,
+                        onClose: () {
+                          widget.onClose();
+                        },
+                        onNavigateToMapViewer: () {
+                          widget.onNavigateToMapViewer();
+                        },
+                        onColorChanged: (color, string) {
+                          widget.onColorChanged(color, string);
+                        },
+                      ),
+                    ),
                     Expanded(
                       child: Card(
                           shape: getDefaultRoundedBorder(),
@@ -164,27 +165,33 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
                         child: Card(
                           elevation: 8,
                           shape: getDefaultRoundedBorder(),
-                          child: Padding(
-                              padding: const EdgeInsets.all(64),
-                              child: DetailsWidget(
-                                route: widget.route,
-                                fontSize: 24,
-                                numberOfLandmarks: numberOfLandmarks,
-                                numberOfPoints: numberOfPoints,
-                                onClose: () {
-                                  widget.onClose();
-                                },
-                                onNavigateToMapViewer: () {
-                                  widget.onNavigateToMapViewer();
-                                },
-                                routeColor: routeColor,
-                                routeLandmarks: routeLandmarks,
-                                routePointsMapped: routePointsMapped,
-                                routeDetails: routeDetails,
-                                onColorChanged: (color, string) {
-                                  widget.onColorChanged(color, string);
-                                },
-                              )),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Padding(
+                                  padding: const EdgeInsets.all(64),
+                                  child: DetailsWidget(
+                                    route: widget.route,
+                                    fontSize: 24,
+                                    numberOfLandmarks: numberOfLandmarks,
+                                    numberOfPoints: numberOfPoints,
+                                    onClose: () {
+                                      widget.onClose();
+                                    },
+                                    onNavigateToMapViewer: () {
+                                      widget.onNavigateToMapViewer();
+                                    },
+                                    routeColor: routeColor,
+                                    routeLandmarks: routeLandmarks,
+                                    routePointsMapped: routePointsMapped,
+                                    routeDetails: routeDetails,
+                                    onColorChanged: (color, string) {
+                                      widget.onColorChanged(color, string);
+                                    },
+                                  )),
+                            ],
+                          ),
                         )),
                     gapW32,
                     SizedBox(
@@ -209,27 +216,33 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
                         child: Card(
                           elevation: 8,
                           shape: getDefaultRoundedBorder(),
-                          child: Padding(
-                              padding: const EdgeInsets.all(64),
-                              child: DetailsWidget(
-                                route: widget.route,
-                                fontSize: 24,
-                                numberOfLandmarks: numberOfLandmarks,
-                                numberOfPoints: numberOfPoints,
-                                onClose: () {
-                                  widget.onClose();
-                                },
-                                onNavigateToMapViewer: () {
-                                  widget.onNavigateToMapViewer();
-                                },
-                                routeColor: routeColor,
-                                routeLandmarks: routeLandmarks,
-                                routePointsMapped: routePointsMapped,
-                                routeDetails: routeDetails,
-                                onColorChanged: (color, string) {
-                                  widget.onColorChanged(color, string);
-                                },
-                              )),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Padding(
+                                  padding: const EdgeInsets.all(64),
+                                  child: DetailsWidget(
+                                    route: widget.route,
+                                    fontSize: 24,
+                                    numberOfLandmarks: numberOfLandmarks,
+                                    numberOfPoints: numberOfPoints,
+                                    onClose: () {
+                                      widget.onClose();
+                                    },
+                                    onNavigateToMapViewer: () {
+                                      widget.onNavigateToMapViewer();
+                                    },
+                                    routeColor: routeColor,
+                                    routeLandmarks: routeLandmarks,
+                                    routePointsMapped: routePointsMapped,
+                                    routeDetails: routeDetails,
+                                    onColorChanged: (color, string) {
+                                      widget.onColorChanged(color, string);
+                                    },
+                                  )),
+                            ],
+                          ),
                         )),
                     gapW32,
                     SizedBox(
@@ -368,9 +381,7 @@ class DetailsWidget extends StatelessWidget {
         ),
         gapH32,
         Text(getFormattedDateLong(route.created!)),
-        const SizedBox(
-          height: 8,
-        ),
+       gapH32,
         Text(
           '${route.userName}',
           style: myTextStyleMediumBoldGrey(context),
@@ -406,10 +417,10 @@ class DetailsWidget extends StatelessWidget {
                         height: 64,
                         color: getColor(route.color!),
                       ),
-                      gapW32,
+                      gapW32,gapW32,
                       Icon(
-                        Icons.route,
-                        size: 32,
+                        Icons.roundabout_right,
+                        size: 64,
                         color: getColor(route.color!),
                       ),
                     ],

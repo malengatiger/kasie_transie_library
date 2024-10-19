@@ -16,7 +16,6 @@ import '../bloc/data_api_dog.dart';
 import '../bloc/list_api_dog.dart';
 import '../data/data_schemas.dart';
 import '../utils/prefs.dart';
-import '../widgets/color_pad.dart';
 import '../widgets/timer_widget.dart';
 import '../widgets/tiny_bloc.dart';
 
@@ -35,7 +34,7 @@ class RouteMapViewer extends StatefulWidget {
 }
 
 class RouteMapViewerState extends State<RouteMapViewer> {
-  static const defaultZoom = 12.0;
+  static const defaultZoom = 13.0;
   final Completer<GoogleMapController> _mapController = Completer();
   late GoogleMapController googleMapController;
   CameraPosition? _myCurrentCameraPosition;
