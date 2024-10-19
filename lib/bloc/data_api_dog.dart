@@ -391,8 +391,14 @@ class DataApiDog {
     final res = await _callPost(cmd, bag);
     var car = Vehicle.fromJson(res);
 
+    ListApiDog dog = GetIt.instance<ListApiDog>();
+    var photos = await dog.getVehiclePhotos(vehicle, true);
+    var videos = await dog.getVehicleVideos(vehicle, true);
+    car.photos = photos;
+    car.videos = videos;
+
     semCache.saveVehicles([car]);
-    pp('$mm vehicle added to database and cache: ${car.toJson()}');
+    pp('$mm vehicle added or updated on Atlas database and local cache: \n${car.toJson()}');
     return car;
   }
 
