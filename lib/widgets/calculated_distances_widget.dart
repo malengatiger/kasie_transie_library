@@ -16,9 +16,11 @@ import '../utils/prefs.dart';
 import '../utils/route_distance_calculator.dart';
 
 class CalculatedDistancesWidget extends StatefulWidget {
-  const CalculatedDistancesWidget({super.key, required this.routeId, required this.associationId});
+  const CalculatedDistancesWidget(
+      {super.key, required this.routeId, required this.associationId});
 
   final String routeId, associationId;
+
   @override
   CalculatedDistancesWidgetState createState() =>
       CalculatedDistancesWidgetState();
@@ -37,7 +39,9 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
   lib.Route? route;
   String distanceFromStart = '', routeLength = '';
 
-  RouteDistanceCalculator routeDistanceCalculator = GetIt.instance<RouteDistanceCalculator>();
+  RouteDistanceCalculator routeDistanceCalculator =
+      GetIt.instance<RouteDistanceCalculator>();
+
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
@@ -73,6 +77,7 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
 
   double total = 0.0;
   SemCache semCache = GetIt.instance<SemCache>();
+
   void _getData(bool refresh) async {
     pp('$mm ... getting data ...');
     if (mounted) {
@@ -90,8 +95,8 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
         calculatedDistances = await listApiDog.getCalculatedDistances(
             widget.routeId, route!.associationId!, false);
       }
-      total = await routeDistanceCalculator
-          .calculateRouteLengthInKM(widget.routeId, widget.associationId);
+      total = await routeDistanceCalculator.calculateRouteLengthInKM(
+          widget.routeId, widget.associationId);
       if (mounted) {
         showOKToast(message: 'Route distances calculated', context: context);
       }
@@ -116,6 +121,8 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
         : Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(
                   height: type == 'phone' ? 0 : 8,
@@ -148,14 +155,16 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
                     ],
                   ),
                 ),
-               gapH32,
+                gapH32,
+                gapH32,
                 Expanded(
                   child: GestureDetector(
                     onTap: () {
                       _getData(true);
                     },
                     child: bd.Badge(
-                      badgeContent: Text('${calculatedDistances.length}', style: const TextStyle(color: Colors.white)),
+                      badgeContent: Text('${calculatedDistances.length}',
+                          style: const TextStyle(color: Colors.white)),
                       position: bd.BadgePosition.topEnd(top: 8, end: -8),
                       badgeStyle: const bd.BadgeStyle(
                           padding: EdgeInsets.all(8.0),
@@ -180,14 +189,14 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
                                       '$dist1 km',
                                       style: myTextStyleSmallBold(context),
                                     ),
-                                    const SizedBox(
-                                      width: 12,
-                                    ),
+                                    gapW16,
                                     Flexible(
                                         child: Text(
                                       '${d.fromLandmark} - ${d.toLandmark}',
-                                      style:
-                                          myTextStyleSmallPrimaryColor(context),
+                                      style: myTextStyle(
+                                          fontSize: 20,
+                                          color: Theme.of(context).primaryColor,
+                                          weight: FontWeight.w900),
                                     )),
                                   ],
                                 ),

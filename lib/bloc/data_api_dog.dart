@@ -674,7 +674,7 @@ class DataApiDog {
   Future deleteRoutePoint(String routePointId) async {
     final cmd = '${url}routes/deleteRoutePoint?routePointId=$routePointId';
     final res = await _sendHttpGET(cmd);
-    pp('$mm deleteRoutePoint happened ...');
+    pp('$mm deleteRoutePoint happened ... $res');
 
     return res;
   }

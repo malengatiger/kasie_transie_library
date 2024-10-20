@@ -370,6 +370,12 @@ class DetailsWidget extends StatelessWidget {
     return Column(
       children: [
         gapH32,
+        Icon(
+          Icons.roundabout_right,
+          size: 100,
+          color: getColor(route.color!),
+        ),
+        gapH32,gapH32,
         Header(
           onClose: onClose,
           routeName: route.name!,
@@ -380,7 +386,13 @@ class DetailsWidget extends StatelessWidget {
           },
         ),
         gapH32,
-        Text(getFormattedDateLong(route.created!)),
+        Row(mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Date Created:', style: myTextStyle(fontSize: 10),),
+            gapW16,
+            Text(getFormattedDateLong(route.created!)),
+          ],
+        ),
        gapH32,
         Text(
           '${route.userName}',
@@ -415,12 +427,6 @@ class DetailsWidget extends StatelessWidget {
                       Container(
                         width: 64,
                         height: 64,
-                        color: getColor(route.color!),
-                      ),
-                      gapW32,gapW32,
-                      Icon(
-                        Icons.roundabout_right,
-                        size: 64,
                         color: getColor(route.color!),
                       ),
                     ],
