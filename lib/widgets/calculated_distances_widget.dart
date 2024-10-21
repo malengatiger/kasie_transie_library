@@ -138,9 +138,7 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
                         routeLength,
                         style: myTextStyleMediumLarge(context, 20),
                       ),
-                      const SizedBox(
-                        width: 8,
-                      ),
+                     gapW32,
                       Text(
                         fmt.format(total),
                         style: myTextStyleMediumLargeWithColor(

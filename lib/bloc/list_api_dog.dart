@@ -474,20 +474,19 @@ class ListApiDog {
 
     if (localList.isEmpty || refresh) {
       try {
-        final token = await appAuth.getAuthToken();
         final s = await zipHandler.getRoutePoints(routeId: routeId);
         List m = jsonDecode(s);
+        localList.clear();
         for (var r in m) {
           localList.add(RoutePoint.fromJson(r));
         }
-        pp('$mm RoutePoints from backend via zip: ${localList.length}');
+        pp('$mm RoutePoints from backend via zip: 🍎 ${localList.length} points');
       } catch (e) {
         pp(e);
         rethrow;
       }
     }
     //
-
     return localList;
   }
 

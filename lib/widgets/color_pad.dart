@@ -27,7 +27,7 @@ class ColorPad extends StatelessWidget {
     ];
     List<Container> widgets = [];
     for (var c in colors) {
-      widgets.add(Container(color: c, width: 24, height: 24));
+      widgets.add(Container(color: c, width: 16, height: 16));
     }
 
     return SizedBox(
@@ -35,10 +35,9 @@ class ColorPad extends StatelessWidget {
         width: 640,
         child: Column(
           children: [
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Row(mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Tap to change Route colour', style: myTextStyleMediumLarge(context, 16),),
-                IconButton(onPressed: (){}, icon: const Icon(Icons.close))
+                Text('Tap to change Route colour', style: myTextStyle(fontSize: 16),),
               ],
             ),
             gapH8,
@@ -60,7 +59,7 @@ class ColorPad extends StatelessWidget {
                         onColorPicked(color, stringColor);
                       },
                       child: Card(
-                        elevation: 4,
+                        elevation: 8,
                         child: colorContainer,
                       ),
                     );

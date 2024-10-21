@@ -672,10 +672,19 @@ class DataApiDog {
     }
   }
 
-  Future deleteRoutePoint(String routePointId) async {
-    final cmd = '${url}routes/deleteRoutePoint?routePointId=$routePointId';
+  Future deleteRoutePointList(RoutePointList routePoints) async {
+    pp('$mm deleteRoutePointList :  ... ${routePoints.routePoints.length}');
+
+    final mUrl = '${url}routes/deleteRoutePointList';
+    final res = await _callPost(mUrl, routePoints.toJson());
+    pp('$mm deleteRoutePointList happened ... $res');
+
+    return res;
+  }
+  Future deleteAllRoutePoints(String routeId) async {
+    final cmd = '${url}routes/deleteRoutePoints?routeId=$routeId';
     final res = await _sendHttpGET(cmd);
-    pp('$mm deleteRoutePoint happened ... $res');
+    pp('$mm deleteAllRoutePoints happened ... $res');
 
     return res;
   }

@@ -16,6 +16,7 @@ import '../bloc/list_api_dog.dart';
 import '../bloc/sem_cache.dart';
 import '../l10n/translation_handler.dart';
 import '../utils/prefs.dart';
+import 'mapping_toolbar.dart';
 
 ///Using a map, place each route point after another till the route is mapped
 class RouteCreatorMap2 extends StatefulWidget {
@@ -37,6 +38,11 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
   Prefs prefs = GetIt.instance<Prefs>();
   DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
   SemCache semCache = GetIt.instance<SemCache>();
+
+  String deleteRoutePoints = 'Do you want to delete all '
+      'the route points starting from here';
+  String yes = 'yes', no = 'no';
+  String routePointRemoval = 'Route Point Removal';
 
   final CameraPosition _myCurrentCameraPosition =
       const CameraPosition(target: LatLng(-26.5, 27.6), zoom: 14.6);
@@ -69,6 +75,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
   @override
   void initState() {
     super.initState();
+    color = getColor(widget.route.color!);
   }
 
   Future _setTexts() async {
@@ -83,16 +90,27 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
     setState(() {});
   }
 
-  void _controlReads(bool refresh) async {
+  void _getPointsAndLandmarks(bool refresh) async {
     setState(() {
       busy = true;
     });
+    timer?.cancel();
     try {
       await _setTexts();
       await getRoutePoints(refresh);
       await getRouteLandmarks(refresh);
-    } catch (e) {
-      pp(e);
+      startTimer();
+      if (routeLandmarks.isNotEmpty) {
+        var last = routeLandmarks.last;
+        final latLng = LatLng(
+            last.position!.coordinates.last, last.position!.coordinates.first);
+        _animateCamera(latLng, zoom: 14);
+      }
+    } catch (e,s) {
+      pp('$mm $e \n$s');
+      if (mounted) {
+        showErrorToast(message: '_getPointsAndLandmarks: $e', context: context);
+      }
     }
     setState(() {
       busy = false;
@@ -105,7 +123,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
           widget.route.routeId!, refresh, widget.route.associationId!);
       pp('\n\n$mm _getRouteLandmarks: ...  ${E.appleRed} route: ${widget.route.name}; found: ${routeLandmarks.length} ');
       if (routeLandmarks.isEmpty) {
-        pp('$mm ... NO ROUTE LANDMARKS FOUND for ${widget.route.name}');
+        pp('$mm ... NO ROUTE LANDMARKS FOUND for ${widget.route.name}, quitting!');
         return;
       }
       try {
@@ -148,40 +166,34 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
         myPrettyJsonPrint(landmark.toJson());
       }
     } catch (e, stack) {
-      pp('$mm $e $stack');
+      pp('$mm getRouteLandmarks $e $stack');
       if (mounted) {
-        showSnackBar(message: '$e', context: context);
+        showSnackBar(message: 'getRouteLandmarks: $e', context: context);
       }
     }
     setState(() {});
 
-    var last = routeLandmarks.last;
-    final latLng = LatLng(
-        last.position!.coordinates.last, last.position!.coordinates.first);
-
-    _animateCamera(latLng, zoom: 14);
   }
-
   Future<void> _animateCamera(LatLng latLng, {double? zoom}) async {
     var cameraPos = CameraPosition(target: latLng, zoom: zoom ?? defaultZoom);
     final GoogleMapController controller = await _mapController.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
   }
-
   Future getRoutePoints(bool refresh) async {
     pp('$mm .... getRoutePoints ... refresh $refresh');
     try {
-      color = getColor(widget.route.color!);
       pp('$mm getting existing RoutePoints ....... refresh: $refresh');
       setState(() {
         busy = true;
       });
       existingRoutePoints = await listApiDog.getRoutePoints(
           widget.route.routeId!, refresh, widget.route.associationId!);
-      pp('$mm .......... existingRoutePoints ....  🍎 found: '
+      pp('$mm .......... existingRoutePoints ....  🍎 '
           '${existingRoutePoints.length} points');
       routePointIndex = existingRoutePoints.length;
-      _addPolyLine();
+      if (existingRoutePoints.isNotEmpty) {
+        _addPolyLine();
+      }
     } catch (e, stack) {
       pp('$mm ERROR: $e - $stack');
     }
@@ -192,6 +204,10 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
 
   void _addPolyLine() {
     if (existingRoutePoints.isEmpty) {
+      _polyLines.clear();
+      setState(() {
+
+      });
       return;
     }
     try {
@@ -218,11 +234,10 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
       setState(() {});
     } catch (e, stack) {
       pp('$mm _addPolyLine: $e - $stack');
-      showSnackBar(
-          backgroundColor: Colors.red, message: '$e', context: context);
+      showErrorToast(
+           message: 'PolyLine: $e', context: context);
     }
   }
-
   @override
   void dispose() {
     if (timer != null) {
@@ -246,6 +261,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
       setState(() {});
     }
   }
+
   DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
   bool checkDistance(LatLng latLng) {
     double? mLat, mLng;
@@ -275,11 +291,6 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
     }
     return true;
   }
-
-  String deleteRoutePoints = 'Do you want to delete all '
-      'the route points starting from here';
-  String yes = 'yes', no = 'no';
-  String routePointRemoval = 'Route Point Removal';
 
   void _addNewRoutePoint(LatLng latLng) async {
     if (!checkDistance(latLng)) {
@@ -322,6 +333,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
       _sendRoutePointsToBackend();
     });
   }
+
   void _sendRoutePointsToBackend() async {
     pp('\n\n$mm ... sending route points to backend ... ${rpList.length} ');
     if (rpList.isEmpty || rpList.length == 1) {
@@ -341,33 +353,59 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
     var ml = RoutePointList(sList);
     final count =
         await dataApiDog.addRoutePoints(ml, widget.route.associationId!);
-    await semCache.saveRoutePoints(routePoints: sList, associationId: widget.route.associationId!, routeId: widget.route.routeId!);
+    await semCache.saveRoutePoints(
+        routePoints: sList,
+        associationId: widget.route.associationId!,
+        routeId: widget.route.routeId!);
     sending = false;
     pp('$mm ... _sendRoutePointsToBackend: ❤️❤️route points saved to Kasie backend: ❤️ $count ❤️ DONE!\n\n');
   }
-  Color newColor = Colors.black;
+
   Color color = Colors.black;
-  void _deleteLastRoutePoint() async {
-    pp('$mm ... _deleteLastRoutePoint ....');
-    try {
-      var routePoint = existingRoutePoints.last;
-      dataApiDog.deleteRoutePoint(routePoint.routePointId!);
-      existingRoutePoints.removeLast();
-      rpList.removeLast();
-      _addPolyLine();
-    } catch (e) {
-      pp(e);
-    }
-    if (existingRoutePoints.isNotEmpty) {
-      _animateCamera(LatLng(existingRoutePoints.last.position!.coordinates[1], existingRoutePoints.last.position!.coordinates[0]), zoom: defaultZoom + 6);
-    }
-    setState(() {});
+  var topHeight = 108.0;
+  _setColor(c) {
+    pp('$mm change color to $c');
+    color = getColor(c);
+    _addPolyLine();
+  }
+
+  _onRefresh() async {
+    pp('$mm Refresh the map ....');
+    _polyLines.clear();
+    _markers.clear();
+    setState(() {
+
+    });
+    _getPointsAndLandmarks(true);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         key: _key,
+        appBar: AppBar(
+          title: Text(
+            'Route Point Mapping & Colour Edits',
+            style: myTextStyle(weight: FontWeight.w900, fontSize: 20),
+          ),
+          bottom: PreferredSize(
+              preferredSize: Size.fromHeight(topHeight),
+              child: Column(
+                children: [
+                  MappingToolbar(
+                    routeId: widget.route.routeId!,
+                    routePoints: existingRoutePoints,
+                    onRefresh: () {
+                      _onRefresh();
+                    },
+                    onColorUpdated: (c) {
+                      _setColor(c);
+                    },
+                  ),
+                  gapH8,
+                ],
+              )),
+        ),
         body: Stack(children: [
           GoogleMap(
             mapType: isHybrid ? MapType.hybrid : MapType.normal,
@@ -381,7 +419,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
               _mapController.complete(controller);
               googleMapController = controller;
               _zoomToStartCity();
-              _controlReads(true);
+              _getPointsAndLandmarks(true);
             },
           ),
           Positioned(
@@ -472,7 +510,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
                       width: 16,
                     ),
                     Text(
-                      '$totalPoints',
+                      '${existingRoutePoints.length}',
                       style: myNumberStyleLargerWithColor(
                           Colors.black26, 44, context),
                     ),
@@ -489,7 +527,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
                   children: [
                     IconButton(
                         onPressed: () {
-                          _controlReads(true);
+                          _getPointsAndLandmarks(true);
                         },
                         icon: Icon(
                           Icons.refresh,
@@ -497,14 +535,14 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
                         )),
                     gapW32,
                     gapW32,
-                    IconButton(
-                        onPressed: () {
-                          _deleteLastRoutePoint();
-                        },
-                        icon: Icon(
-                          Icons.delete,
-                          color: Theme.of(context).primaryColor,
-                        )),
+                    // IconButton(
+                    //     onPressed: () {
+                    //       _deleteLastRoutePoint();
+                    //     },
+                    //     icon: Icon(
+                    //       Icons.delete,
+                    //       color: Theme.of(context).primaryColor,
+                    //     )),
                   ],
                 ),
               )),
@@ -514,7 +552,6 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
                   child: TimerWidget(title: 'Loading ...', isSmallSize: true),
                 ))
               : const SizedBox(),
-
         ]));
   }
 }

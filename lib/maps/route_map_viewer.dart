@@ -19,6 +19,7 @@ import '../data/route_data.dart';
 import '../utils/prefs.dart';
 import '../widgets/timer_widget.dart';
 import '../widgets/tiny_bloc.dart';
+import 'mapping_toolbar.dart';
 
 class RouteMapViewer extends StatefulWidget {
   final lib.Route route;
@@ -80,9 +81,8 @@ class RouteMapViewerState extends State<RouteMapViewer> {
   }
 
   Future _setRouteColor() async {
-      route = widget.route;
-      color = getColor(route!.color!);
-
+    route = widget.route;
+    color = getColor(route!.color!);
   }
 
   @override
@@ -217,7 +217,9 @@ class RouteMapViewerState extends State<RouteMapViewer> {
   Future _getCurrentRouteLocation() async {
     pp('$mm .......... get current route ....');
 
-    routeData = await semCache.getRouteData(associationId:  widget.route.associationId!, routeId: widget.route.routeId!);
+    routeData = await semCache.getRouteData(
+        associationId: widget.route.associationId!,
+        routeId: widget.route.routeId!);
     if (routeData != null) {
       route = routeData!.route!;
       _myCurrentCameraPosition = CameraPosition(
@@ -278,9 +280,10 @@ class RouteMapViewerState extends State<RouteMapViewer> {
 
   String waitingForGPS = 'waitingForGPS';
   bool showColors = false;
-
+  var topHeight = 100.0;
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
         key: _key,
         body: _myCurrentCameraPosition == null
@@ -427,7 +430,6 @@ class RouteMapViewerState extends State<RouteMapViewer> {
                         ),
                       )
                     : const SizedBox(),
-
               ]));
   }
 }
