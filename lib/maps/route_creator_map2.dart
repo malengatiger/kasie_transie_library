@@ -16,6 +16,7 @@ import '../bloc/list_api_dog.dart';
 import '../bloc/sem_cache.dart';
 import '../l10n/translation_handler.dart';
 import '../utils/prefs.dart';
+import '../utils/route_update_listener.dart';
 import 'mapping_toolbar.dart';
 
 ///Using a map, place each route point after another till the route is mapped
@@ -38,7 +39,8 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
   Prefs prefs = GetIt.instance<Prefs>();
   DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
   SemCache semCache = GetIt.instance<SemCache>();
-
+  RouteUpdateListener routeUpdateListener =
+  GetIt.instance<RouteUpdateListener>();
   String deleteRoutePoints = 'Do you want to delete all '
       'the route points starting from here';
   String yes = 'yes', no = 'no';
@@ -141,7 +143,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
             landmark.position!.coordinates.first);
         final icon = await getMarkerBitmap(72,
             text: '${landmarkIndex + 1}',
-            color: widget.route.color!,
+            color: getStringColor(color),
             borderColor: borderColor,
             fontSize: 16,
             fontWeight: FontWeight.w900);
@@ -163,7 +165,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
             position: latLng));
         landmarkIndex++;
         pp('$mm ... routeLandmark added to markers: ${_markers.length}');
-        myPrettyJsonPrint(landmark.toJson());
+        // myPrettyJsonPrint(landmark.toJson());
       }
     } catch (e, stack) {
       pp('$mm getRouteLandmarks $e $stack');
@@ -247,6 +249,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
     if (rpList.isNotEmpty && rpList.length > 2) {
       _sendRoutePointsToBackend();
     }
+    routeUpdateListener.update(widget.route);
     super.dispose();
   }
 
@@ -353,26 +356,27 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
     var ml = RoutePointList(sList);
     final count =
         await dataApiDog.addRoutePoints(ml, widget.route.associationId!);
-    await semCache.saveRoutePoints(
-        routePoints: sList,
-        associationId: widget.route.associationId!,
-        routeId: widget.route.routeId!);
+
     sending = false;
     pp('$mm ... _sendRoutePointsToBackend: ❤️❤️route points saved to Kasie backend: ❤️ $count ❤️ DONE!\n\n');
   }
 
   Color color = Colors.black;
   var topHeight = 108.0;
-  _setColor(c) {
+  _setColor(c) async {
     pp('$mm change color to $c');
     color = getColor(c);
-    _addPolyLine();
+    routeUpdateListener.update(widget.route);
+    _polyLines.clear();
+    _markers.clear();
+    _getPointsAndLandmarks(true);
   }
 
   _onRefresh() async {
     pp('$mm Refresh the map ....');
     _polyLines.clear();
     _markers.clear();
+    routeUpdateListener.update(widget.route);
     setState(() {
 
     });

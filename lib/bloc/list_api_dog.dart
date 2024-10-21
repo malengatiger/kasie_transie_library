@@ -292,7 +292,7 @@ class ListApiDog {
       String associationId) async {
     return [];
   }
-  Future<RouteData?> getAssociationRouteData(
+  Future<AssociationRouteData?> getAssociationRouteData(
       String associationId) async {
     pp('\n\n$mm getAssociationRouteData: ... starting ...');
     var start = DateTime.now();
@@ -300,15 +300,12 @@ class ListApiDog {
         '${url}routes/getAssociationRouteData?associationId=$associationId';
     try {
       var resp = await _sendHttpGET(cmd);
-
       var data = AssociationRouteData.fromJson(resp);
-
       pp('$mm getAssociationRouteData: ... routes: ${data.routeDataList.length}');
-
       await semCache.saveAssociationRouteData(data);
       var end = DateTime.now();
       pp('$mm getAssociationRouteData: elapsed seconds: 🍎${end.difference(start).inSeconds} 🍎');
-      return null;
+      return data;
     } catch (e,s) {
       pp('$mm ERROR in getAssociationRouteData: $e \n$s');
       throw Exception('ERROR loading Association Route Data: $e');

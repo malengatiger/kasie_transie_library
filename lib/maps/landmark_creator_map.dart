@@ -14,6 +14,7 @@ import '../bloc/data_api_dog.dart';
 import '../bloc/list_api_dog.dart';
 import '../bloc/sem_cache.dart';
 import '../utils/prefs.dart';
+import '../utils/route_update_listener.dart';
 import '../widgets/timer_widget.dart';
 import '../widgets/tiny_bloc.dart';
 
@@ -30,12 +31,13 @@ class LandmarkCreatorMap extends StatefulWidget {
 }
 
 class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
-  static const defaultZoom = 16.0;
+  static const defaultZoom = 14.0;
   final Completer<GoogleMapController> _mapController = Completer();
   ListApiDog listApiDog = GetIt.instance<ListApiDog>();
   Prefs prefs = GetIt.instance<Prefs>();
   SemCache semCache = GetIt.instance<SemCache>();
-
+  RouteUpdateListener routeUpdateListener =
+  GetIt.instance<RouteUpdateListener>();
   CameraPosition? _myCurrentCameraPosition;
   static const mm = '🍐🍐🍐🍐🍐🍐🍐🍐 LandmarkCreatorMap: 💪 ';
   late StreamSubscription<List<lib.RouteLandmark>> completionSub;
@@ -71,7 +73,6 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   late StreamSubscription<lib.RouteLandmark> _sub;
   var routeLandmarks = <lib.RouteLandmark>[];
   var landmarkIndex = 0;
-
   @override
   void initState() {
     super.initState();
@@ -108,7 +109,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     // });
   }
 
-  void _controlReads(bool refresh) async {
+  void _getPointsAndLandmarks(bool refresh) async {
     setState(() {
       busy = true;
     });
@@ -124,8 +125,8 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   }
 
   Future _getRouteLandmarks(bool refresh) async {
-    routeLandmarks =
-        await semCache.getRouteLandmarks(routeId: widget.route.routeId!, associationId: widget.route.associationId!);
+    routeLandmarks = await listApiDog.getRouteLandmarks(
+        widget.route.routeId!, true, widget.route.associationId!);
     pp('\n\n$mm RouteLandmarks ...  ${E.appleRed} '
         'route: ${widget.route.name}; found: ${routeLandmarks.length} refresh: $refresh');
     await _putLandmarksOnMap();
@@ -133,8 +134,9 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
 
   Future _putLandmarksOnMap() async {
     pp('$mm ..._putLandmarksOnMap: routeLandmarks: ${routeLandmarks.length}');
-
     if (routeLandmarks.isEmpty) {
+      _markers.clear();
+      setState(() {});
       return;
     }
     _markers.clear();
@@ -158,28 +160,28 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
               snippet: 'This routeLandmark is part of the route.',
               title: '🔵 ${routeLandmark.landmarkName}',
               onTap: () {
-                pp('$mm ............. infoWindow tapped, point index: $index ... confirm delete!');
+                pp('$mm ............. infoWindow tapped, point index: $index '
+                    '... confirm delete! ${routeLandmark.landmarkName}');
                 _confirmDelete(routeLandmark);
               }),
           position: latLng));
       landmarkIndex++;
     }
-    pp('$mm ... routeLandmark added to markers: ${_markers.length}');
 
-    setState(() {});
     var last = routeLandmarks.last;
     final latLng = LatLng(
         last.position!.coordinates.last, last.position!.coordinates.first);
     totalLandmarks = routeLandmarks.length;
-    _animateCamera(latLng, 12);
+    _animateCamera(latLng, defaultZoom);
+    setState(() {});
   }
 
   Future _getRoutePoints(bool refresh) async {
     try {
       _user = prefs.getUser();
       pp('$mm ...... getting existing RoutePoints .......');
-      existingRoutePoints =
-          await semCache.getRoutePoints(widget.route.routeId!,  widget.route.associationId!);
+      existingRoutePoints = await listApiDog.getRoutePoints(
+          widget.route.routeId!, true, widget.route.associationId!);
 
       pp('$mm .......... existingRoutePoints ....  🍎 found: '
           '${existingRoutePoints.length} points');
@@ -193,6 +195,8 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     pp('$mm .......... _addPolyLine ....... .');
     if (existingRoutePoints.isEmpty) {
       pp('$mm route points empty. WTF?');
+      _polyLines.clear();
+      setState(() {});
       return;
     }
     _polyLines.clear();
@@ -227,7 +231,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     totalPoints = existingRoutePoints.length;
     // routePointIndex = existingRoutePoints.length;
 
-    _animateCamera(latLng, 12);
+    _animateCamera(latLng, defaultZoom);
     setState(() {});
   }
 
@@ -254,6 +258,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   Future _getUser() async {
     _user = prefs.getUser();
   }
+
   DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
   Future _getCurrentLocation() async {
     pp('$mm .......... get current location ....');
@@ -272,7 +277,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
       final latLng = LatLng(
           widget.route.routeStartEnd!.startCityPosition!.coordinates.last,
           widget.route.routeStartEnd!.startCityPosition!.coordinates.first);
-      await _animateCamera(latLng, 20);
+      await _animateCamera(latLng, defaultZoom);
       setState(() {});
     }
   }
@@ -304,7 +309,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
 
   void _addNewLandmark() async {
     if (routePointForLandmark == null) {
-      pp('....... routePointForLandmark == null, ignore!');
+      pp('$mm ....... routePointForLandmark == null, ignore!');
       return;
     }
     pendingCount++;
@@ -317,14 +322,13 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
         fontSize: 20,
         fontWeight: FontWeight.w900);
 
-    pp('....... _addNewLandmark: landmarkIndex: $landmarkIndex');
+    pp('$mm....... _addNewLandmark: landmarkIndex: $landmarkIndex');
 
     _markers.add(Marker(
         markerId: MarkerId('${routePointForLandmark!.routePointId}'),
         icon: ic2,
         onTap: () {
           pp('$mm .............. marker tapped: $index');
-          //_deleteRoutePoint(routePoint);
         },
         infoWindow: InfoWindow(
             snippet: 'This landmark is part of the route.',
@@ -339,16 +343,9 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
 
     var latLng = LatLng(routePointForLandmark!.position!.coordinates.last,
         routePointForLandmark!.position!.coordinates.first);
-    _animateCamera(latLng, 16);
+    _animateCamera(latLng, defaultZoom + 2.0);
     //
-    if (mounted) {
-      showSnackBar(
-          duration: const Duration(seconds: 5),
-          padding: 16,
-          message: 'New Route landmark is being processed '
-              'and will show up in a few seconds',
-          context: context);
-    }
+
     _processNewLandmark();
   }
 
@@ -409,23 +406,24 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   Future<void> _processNewLandmark() async {
     try {
       final routeLandmark = lib.RouteLandmark(
-              position: lib.Position(type: 'Point', coordinates: [
-                routePointForLandmark!.position!.coordinates.first,
-                routePointForLandmark!.position!.coordinates.last
-              ]),
-              routeId: widget.route.routeId!,
-              routeLandmarkId: '${DateTime.now().toUtc().millisecondsSinceEpoch}',
-              landmarkName: landmarkName!,
-              index: landmarkIndex,
-              created: DateTime.now().toUtc().toIso8601String(),
-              landmarkId: DateTime.now().toIso8601String(),
-              routePointId: routePointForLandmark!.routePointId!,
-              routePointIndex: routePointForLandmark!.index!,
-              associationId: widget.route.associationId!,
-              routeName: widget.route.name!);
+          position: lib.Position(type: 'Point', coordinates: [
+            routePointForLandmark!.position!.coordinates.first,
+            routePointForLandmark!.position!.coordinates.last
+          ]),
+          routeId: widget.route.routeId!,
+          routeLandmarkId: '${DateTime.now().toUtc().millisecondsSinceEpoch}',
+          landmarkName: landmarkName!,
+          index: landmarkIndex,
+          created: DateTime.now().toUtc().toIso8601String(),
+          landmarkId: DateTime.now().toIso8601String(),
+          routePointId: routePointForLandmark!.routePointId!,
+          routePointIndex: routePointForLandmark!.index!,
+          associationId: widget.route.associationId!,
+          routeName: widget.route.name!);
 
-      await dataApiDog.addRouteLandmark(routeLandmark, widget.route.associationId!);
-      await semCache.saveRouteLandmarks(associationId: widget.route.associationId!, landmarks: [routeLandmark], routeId: widget.route.routeId!);
+      await dataApiDog.addRouteLandmark(
+          routeLandmark, widget.route.associationId!);
+      routeUpdateListener.update(widget.route);
       pp('$mm landmark added! ... 😎😎😎 Good Fucking Luck!!');
     } catch (e) {
       pp(e);
@@ -449,8 +447,12 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
       routeLandmarks =
           await dataApiDog.deleteRouteLandmark(landmark.landmarkId!);
       pp('$mm ... removed landmark from database: ${routeLandmarks.length} total remaining; ${E.nice}');
+      routeUpdateListener.update(widget.route);
       landmarkIndex = 0;
-      _controlReads(true);
+      _markers.clear();
+      pp('\n\n$mm RouteLandmarks ...  ${E.appleRed} '
+          'route: ${widget.route.name}; found: ${routeLandmarks.length} ');
+      await _putLandmarksOnMap();
     } catch (e) {
       pp('$mm $e');
       if (mounted) {
@@ -466,7 +468,10 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
 
   void findRoutePoint(LatLng latLng) {
     pp('$mm findRoutePoint ... $latLng');
-
+    if (existingRoutePoints.isEmpty) {
+      showErrorToast(message: 'The route has not been mapped yet', context: context);
+      return;
+    }
     routePointForLandmark = tinyBloc.findRoutePoint(
         latitude: latLng.latitude,
         longitude: latLng.longitude,
@@ -510,7 +515,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
                     _mapController.complete(controller);
                     googleMapController = controller;
                     _zoomToStartCity();
-                    _controlReads(true);
+                    _getPointsAndLandmarks(true);
                   },
                 ),
                 Positioned(
@@ -618,32 +623,11 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
                         ),
                       ),
                     )),
-                Positioned(
-                    right: 12,
-                    top: 40,
-                    child: Card(
-                      elevation: 8,
-                      shape: getRoundedBorder(radius: 12),
-                      child: Row(
-                        children: [
-                          IconButton(
-                              onPressed: () async {
-                                _controlReads(true);
-                              },
-                              icon: Icon(
-                                Icons.toggle_on,
-                                color: Theme.of(context).primaryColor,
-                              ))
-                        ],
-                      ),
-                    )),
                 _showLandmark
                     ? Positioned(
-                        bottom: 80,
-                        left: 200,
-                        right: 200,
+                        child: Center(
                         child: SizedBox(
-                          height: 320,
+                          height: 400,
                           width: 400,
                           child: Card(
                             shape: getDefaultRoundedBorder(),
@@ -693,7 +677,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
                                       onPressed: () {
                                         if (nameEditController
                                             .value.text.isEmpty) {
-                                          showSnackBar(
+                                          showErrorToast(
                                               message: 'Please enter the name',
                                               context: context,
                                               padding: 16);
@@ -718,8 +702,9 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
                               ),
                             ),
                           ),
-                        ))
-                    : const SizedBox(),
+                        ),
+                      ))
+                    : gapW32,
                 busy
                     ? const Positioned(
                         left: 300,

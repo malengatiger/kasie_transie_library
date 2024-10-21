@@ -707,17 +707,22 @@ class DataApiDog {
   Future deleteRouteLandmark(String routeLandmarkId) async {
     final cmd =
         '${url}routes/deleteRouteLandmark?routeLandmarkId=$routeLandmarkId';
-    final res = await _sendHttpGET(cmd);
-    pp('$mm deleteRouteLandmark happened ...');
 
     try {
-      //listApiDog.removeRoutePoint(routePointId);
-      pp('$mm deleteRoutePoint for Realm happened ...');
+      List res = await _sendHttpGET(cmd);
+      List<RouteLandmark> list = [];
+      for (var json in res) {
+        list.add(RouteLandmark.fromJson(json));
+      }
+      pp('$mm deleteRouteLandmark happened ... leftover marks: ${list.length}');
+
+      return list;
+
     } catch (e) {
       pp(e);
+      throw Exception('Delete Route Landmark failed:\n$e');
     }
 
-    return res;
   }
 
   Future<RegistrationBag> registerAssociation(Association association) async {
