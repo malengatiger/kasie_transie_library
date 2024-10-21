@@ -74,7 +74,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
         }
       }
     } else {
-      routes = await semCache.getRoutes(widget.locationResponse.associationId!);
+      routes = await semCache.getRoutes(associationId: widget.locationResponse.associationId!);
     }
     pp('$mm ... ${routes.length} routes to be put on map ...');
 
@@ -92,7 +92,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
     var semCache = GetIt.instance<SemCache>();
     for (var route in routes) {
       final points = await semCache.getRoutePoints(route.routeId!, route.associationId!);
-      final marks = await semCache.getRouteLandmarks(route.routeId!, route.associationId!);
+      final marks = await semCache.getRouteLandmarks(routeId: route.routeId!, associationId: route.associationId!);
       hash[route.routeId!] = points;
       //add polyline
       final List<LatLng> latLngs = [];

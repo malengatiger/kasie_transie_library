@@ -7,6 +7,7 @@ import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/data/counter_bag.dart';
+import 'package:kasie_transie_library/data/route_data.dart';
 import 'package:kasie_transie_library/data/vehicle_bag.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
@@ -283,13 +284,35 @@ class ListApiDog {
     for (var mJson in resp) {
       list.add(RouteLandmark.fromJson(mJson));
     }
-    await semCache.saveRouteLandmarks(list, associationId);
+    await semCache.saveRouteLandmarks( associationId: associationId, landmarks: list, routeId: list[0].routeId!);
     return list;
   }
 
-  Future<List<RoutePoint>> getAssociationRoutePoints(
+  Future<List<RoutePoint?>> getAssociationRoutePoints(
       String associationId) async {
     return [];
+  }
+  Future<RouteData?> getAssociationRouteData(
+      String associationId) async {
+    pp('\n\n$mm getAssociationRouteData: ... starting ...');
+    var start = DateTime.now();
+    final cmd =
+        '${url}routes/getAssociationRouteData?associationId=$associationId';
+    try {
+      var resp = await _sendHttpGET(cmd);
+
+      var data = AssociationRouteData.fromJson(resp);
+
+      pp('$mm getAssociationRouteData: ... routes: ${data.routeDataList.length}');
+
+      await semCache.saveAssociationRouteData(data);
+      var end = DateTime.now();
+      pp('$mm getAssociationRouteData: elapsed seconds: 🍎${end.difference(start).inSeconds} 🍎');
+      return null;
+    } catch (e,s) {
+      pp('$mm ERROR in getAssociationRouteData: $e \n$s');
+      throw Exception('ERROR loading Association Route Data: $e');
+    }
   }
 
   Future<int> countAssociationRoutePoints() async {
@@ -428,7 +451,7 @@ class ListApiDog {
   Future<List<RouteLandmark>> getRouteLandmarks(
       String routeId, bool refresh, String associationId) async {
     List<RouteLandmark> localList =
-        await semCache.getRouteLandmarks(routeId, associationId);
+        await semCache.getRouteLandmarks(routeId: routeId, associationId: associationId);
 
     try {
       if (refresh || localList.isEmpty) {

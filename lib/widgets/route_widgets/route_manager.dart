@@ -17,7 +17,6 @@ import 'package:responsive_builder/responsive_builder.dart';
 
 import '../../bloc/data_api_dog.dart';
 import '../../bloc/list_api_dog.dart';
-import '../../data/generation_request.dart';
 import '../../utils/prefs.dart';
 
 class RouteManager extends StatefulWidget {
@@ -34,6 +33,7 @@ class RouteManager extends StatefulWidget {
 class _RouteManagerState extends State<RouteManager> {
   static const mm = '🔵🔵🔵🔵 RouteManager 🔵🔵';
   ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
   Prefs prefs = GetIt.instance<Prefs>();
   DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
   bool busy = false;
@@ -55,7 +55,7 @@ class _RouteManagerState extends State<RouteManager> {
       final loc = await locationBloc.getLocation();
       pp('$mm ... location found: ${E.redDot} $loc');
       var mRoutes = await semCache.getRoutes(
-          widget.association.associationId!);
+          associationId: widget.association.associationId!);
       await _filter(mRoutes);
     } catch (e) {
       pp(e);

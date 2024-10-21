@@ -320,7 +320,7 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
     var routesIsolate = GetIt.instance<SemCache>();
 
     for (var r in routes) {
-      final rps = await routesIsolate.getRouteLandmarks(r.routeId!, r.associationId!);
+      final rps = await routesIsolate.getRouteLandmarks(routeId: r.routeId!, associationId: r.associationId!);
       int index = 0;
       for (var mark in rps) {
         final latLng = LatLng(

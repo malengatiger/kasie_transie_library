@@ -69,12 +69,7 @@ class TinyBloc {
     return route;
   }
 
-  Future<int> getNumberOfLandmarks(String routeId) async {
-    pp('$mm ... getNumberOfLandmarks cached  ...');
-    final res = await semCache.getRouteLandmarks(routeId, 'TBD');
-    final m = res.length;
-    return m;
-  }
+
 
   Future<int> getNumberOfPoints(String routeId, String associationId) async {
     pp('$mm ... getNumberOfPoints cached ...');

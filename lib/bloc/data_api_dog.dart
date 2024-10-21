@@ -477,7 +477,8 @@ class DataApiDog {
     var res = await _callPost(cmd, routePointList.toJson());
     pp('$mm routePoints added to MongoDB Atlas database: $res');
 
-    await semCache.saveRoutePoints(routePointList.routePoints, associationId);
+    var routeId = routePointList.routePoints[0].routeId;
+    await semCache.saveRoutePoints(routePoints: routePointList.routePoints, associationId: associationId, routeId: routeId!);
     return res as int;
   }
 
@@ -512,7 +513,7 @@ class DataApiDog {
       pp('$mm new route added to database ...  💙 💙 💙 check!');
       myPrettyJsonPrint(newRoute.toJson());
       pp('$mm add new route cache ...  💙 💙 💙 check!');
-      var list = await semCache.saveRoutes([newRoute], newRoute.associationId!);
+      var list = await semCache.saveRoute(route: newRoute);
 
       var dog = GetIt.instance<ListApiDog>();
       pp('$mm putting routes on stream ... ${list.length} routes');
@@ -624,7 +625,7 @@ class DataApiDog {
     myPrettyJsonPrint(res);
     final r = RouteLandmark.fromJson(res);
 
-    semCache.saveRouteLandmarks([r], associationId);
+    semCache.saveRouteLandmarks(routeId: route.routeId!, associationId: associationId, landmarks: [r]);
     _routeLandmarkController.sink.add(r);
     return r;
   }
@@ -677,21 +678,6 @@ class DataApiDog {
     pp('$mm deleteRoutePoint happened ... $res');
 
     return res;
-  }
-
-  Future<List<RoutePoint>> deleteRoutePointsFromIndex(
-      String routeId, int index, String associationId) async {
-    final cmd =
-        '${url}routes/deleteRoutePointsFromIndex?routeId=$routeId&index=$index';
-    List res = await _sendHttpGET(cmd);
-    pp('$mm deleteRoutePointsFromIndex happened ... returned ');
-    List<RoutePoint> routePoints = [];
-    for (var value in res) {
-      routePoints.add(RoutePoint.fromJson(value));
-    }
-    await semCache.deleteRoutePoints(routeId);
-    await semCache.saveRoutePoints(routePoints, associationId);
-    return routePoints;
   }
 
   Future deleteLandmark(String landmarkId) async {

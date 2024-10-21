@@ -30,7 +30,7 @@ class RouteDistanceCalculator {
     pp('... starting ... calculateAssociationRouteDistances ...');
     final user = prefs.getUser();
     final routes = await semCache
-        .getRoutes(user!.associationId!);
+        .getRoutes(associationId: user!.associationId!);
     final distances = <CalculatedDistance>[];
     for (var value in routes) {
       final list =
@@ -53,7 +53,7 @@ class RouteDistanceCalculator {
     pp('$mm ... starting calculateRouteDistances for $routeId');
     var routesIsolate = GetIt.instance<SemCache>();
 
-    final routeLandmarks = await routesIsolate.getRouteLandmarks(routeId, associationId);
+    final routeLandmarks = await routesIsolate.getRouteLandmarks(routeId: routeId, associationId: associationId);
     if (routeLandmarks.isEmpty) {
       pp('$mm ... 1. stopping calculateRouteDistances for $routeId, no routeLandmarks');
       return [];

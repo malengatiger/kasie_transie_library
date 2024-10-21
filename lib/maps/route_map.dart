@@ -8,12 +8,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
-import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 
 import '../bloc/data_api_dog.dart';
 import '../bloc/sem_cache.dart';
+import '../utils/device_location_bloc.dart';
 import '../utils/emojis.dart';
 
 class RouteMap extends StatefulWidget {
@@ -151,6 +151,7 @@ class RouteMapState extends State<RouteMap> {
     });
   }
 
+  DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
   Future<void> _buildMap() async {
     pp('$mm .......... existingRoutePoints ....  🍎 found: '
         '${existingRoutePoints.length} points');

@@ -125,7 +125,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
 
   Future _getRouteLandmarks(bool refresh) async {
     routeLandmarks =
-        await semCache.getRouteLandmarks(widget.route.routeId!, widget.route.associationId!);
+        await semCache.getRouteLandmarks(routeId: widget.route.routeId!, associationId: widget.route.associationId!);
     pp('\n\n$mm RouteLandmarks ...  ${E.appleRed} '
         'route: ${widget.route.name}; found: ${routeLandmarks.length} refresh: $refresh');
     await _putLandmarksOnMap();
@@ -254,7 +254,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   Future _getUser() async {
     _user = prefs.getUser();
   }
-
+  DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
   Future _getCurrentLocation() async {
     pp('$mm .......... get current location ....');
     _currentPosition = await locationBloc.getLocation();
@@ -425,7 +425,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
               routeName: widget.route.name!);
 
       await dataApiDog.addRouteLandmark(routeLandmark, widget.route.associationId!);
-      await semCache.saveRouteLandmarks([routeLandmark], widget.route.associationId!);
+      await semCache.saveRouteLandmarks(associationId: widget.route.associationId!, landmarks: [routeLandmark], routeId: widget.route.routeId!);
       pp('$mm landmark added! ... 😎😎😎 Good Fucking Luck!!');
     } catch (e) {
       pp(e);

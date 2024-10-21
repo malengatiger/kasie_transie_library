@@ -21,7 +21,7 @@ import 'data_api_dog.dart';
 import 'list_api_dog.dart';
 
 class RegisterServices {
-  static const mm = '🅿️ 🅿️ 🅿️ 🅿️ RegisterServices  🅿️ 🅿️';
+  static const mm = '🅿️🅿️🅿️🅿️ RegisterServices  🅿️🅿️';
   static String dbPath = 'kasie.db';
   static DatabaseFactory dbFactoryWeb = databaseFactoryWeb;
 

@@ -11,6 +11,7 @@ import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:universal_io/io.dart';
 
 import '../data/data_schemas.dart';
+import '../data/route_data.dart';
 import 'functions.dart';
 import 'kasie_exception.dart';
 
@@ -166,7 +167,7 @@ class ZipHandler {
     return jsonEncode(cities);
   }
 
-  Future<RouteData> getRoutes({required String associationId}) async {
+  Future<AssociationRouteData> getRoutes({required String associationId}) async {
     pp('$xz getRouteData: 🔆🔆🔆 zipped for associationId: $associationId ...');
 
     final mUrl =
@@ -174,12 +175,6 @@ class ZipHandler {
         '=$associationId';
 
     var start = DateTime.now();
-    RouteData routeData = RouteData(
-        routes: [],
-        routePoints: [],
-        landmarks: [],
-        cities: [],
-        associationId: associationId);
 
     Map<String, String> headers = {
       'Accept': '*/*',
@@ -201,51 +196,10 @@ class ZipHandler {
 
           final content = utf8.decode(file.content as List<int>);
           final mJson = json.decode(content);
-
-          List dRoutes = mJson['routes'];
-          List dRoutePoints = mJson['points'];
-          List dLandmarks = mJson['landmarks'];
-          List dCities = mJson['cities'];
-
-          for (var json in dRoutes) {
-            routes.add(Route.fromJson(json));
-          }
-          pp('$xz getRouteDataString 🍎🍎 routes: ${routes.length}');
-          for (var marks in dLandmarks) {
-            marks.forEach((element) {
-              landmarks.add(RouteLandmark.fromJson(element));
-            });
-          }
-          pp('$xz getRouteDataString 🍎🍎 landmarks: ${landmarks.length}');
-
-          for (var mPoints in dRoutePoints) {
-            mPoints.forEach((element) {
-              routePoints.add(RoutePoint.fromJson(element));
-            });
-          }
-          pp('$xz getRouteDataString 🍎🍎 routePoints: ${routePoints.length}');
-
-          for (var mCities in dCities) {
-            mCities.forEach((element) {
-              cities.add(RouteCity.fromJson(element));
-            });
-          }
-          var hashMap = HashMap<String, RouteCity>();
-          for (var city in cities) {
-            hashMap[city.cityName!] = city;
-          }
-          var finalCities = hashMap.values.toList();
-          pp('$xz getRouteDataString 🍎🍎 cities: ${finalCities.length}');
-
-          routeData = RouteData(
-              routes: routes,
-              routePoints: routePoints,
-              landmarks: landmarks,
-              cities: finalCities,
-              associationId: associationId);
-
+          AssociationRouteData routeData = AssociationRouteData.fromJson(mJson);
           //cache data locally
-          await semCache.saveRouteData(routeData);
+          routeData.associationId = associationId;
+          await semCache.saveAssociationRouteData(routeData);
 
           pp('$xz getRoutes: 🍎🍎🍎🍎 RouteData has been filled and cached!');
           var end = DateTime.now();
@@ -255,9 +209,9 @@ class ZipHandler {
         }
       }
     } catch (e, stackTrace) {
-      pp('Error parsing JSON: $e');
-      pp('Stack trace: $stackTrace');
-      rethrow;
+      pp('$xz Error parsing JSON: $e');
+      pp('$xz Stack trace: $stackTrace');
+      throw Exception('$xz \nFailed to retrieve route data zipped file: $e');
     }
     throw Exception('Bad moon rising!');
   }

@@ -7,13 +7,13 @@ import 'package:geolocator/geolocator.dart' as geo;
 import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
-import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/route_widgets/multi_route_chooser.dart';
 
 import '../bloc/list_api_dog.dart';
 import '../bloc/sem_cache.dart';
 import '../isolates/local_finder.dart';
+import '../utils/device_location_bloc.dart';
 import '../utils/emojis.dart';
 import '../utils/prefs.dart';
 import '../widgets/timer_widget.dart';
@@ -91,13 +91,13 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
                 : widget.radiusInMetres!);
         if (mRoutes.isEmpty) {
           mRoutes = await semCache
-              .getRoutes(_user!.associationId!);
+              .getRoutes(associationId: _user!.associationId!);
         }
         await _filter(mRoutes);
       } else {
         pp('\n\n$mm .......... get all Association Routes ... refresh: $refresh');
         final mRoutes = await semCache
-            .getRoutes(_user!.associationId!);
+            .getRoutes(associationId: _user!.associationId!);
         _printy();
         await _filter(mRoutes);
         if (mounted) {
@@ -188,7 +188,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   Future _getUser() async {
     _user = prefs.getUser();
   }
-
+  DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
   Future _getCurrentLocation() async {
     pp('$mm .......... get current location ....');
     _currentPosition = await locationBloc.getLocation();

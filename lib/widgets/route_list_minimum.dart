@@ -63,7 +63,7 @@ class RouteListMinimumState extends State<RouteListMinimum>
       busy = true;
     });
     try {
-      routes = await semCache.getRoutes(widget.association.associationId!);
+      routes = await semCache.getRoutes(associationId: widget.association.associationId!);
       routes.sort((a, b) => a.name!.compareTo(b.name!));
       pp('$mm ... found ${routes.length}');
     } catch (e) {

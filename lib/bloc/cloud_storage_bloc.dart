@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
@@ -40,7 +41,7 @@ class CloudStorageBloc {
   Stream<lib.VehicleVideo> get videoStream => _videoStreamController.stream;
 
   Stream<String> get errorStream => _errorStreamController.stream;
-
+  DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
   Future<int> uploadUserPhoto(
       {required lib.User mUser,
         required File file,

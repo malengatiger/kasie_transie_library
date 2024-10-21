@@ -80,7 +80,7 @@ class ClusterMapControllerState extends State<ClusterMapController> with Automat
       busy = true;
     });
     try {
-      final mRoutes = await semCache.getRoutes(
+      final mRoutes = await semCache.getRoutes(associationId:
           association!.associationId!);
       _filter(mRoutes);
       dispatches = await listApiDog.getAssociationDispatchRecords(

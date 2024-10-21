@@ -6,21 +6,16 @@ import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/data/route_point_list.dart';
-import 'package:kasie_transie_library/maps/route_point_deletion.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
-import 'package:page_transition/page_transition.dart';
 
 import '../bloc/data_api_dog.dart';
 import '../bloc/list_api_dog.dart';
 import '../bloc/sem_cache.dart';
 import '../l10n/translation_handler.dart';
-import '../utils/navigator_utils.dart';
 import '../utils/prefs.dart';
-import '../widgets/color_pad.dart';
-import '../widgets/tiny_bloc.dart';
 
 ///Using a map, place each route point after another till the route is mapped
 class RouteCreatorMap2 extends StatefulWidget {
@@ -251,7 +246,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
       setState(() {});
     }
   }
-
+  DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
   bool checkDistance(LatLng latLng) {
     double? mLat, mLng;
     lib.RoutePoint? prev;
@@ -346,7 +341,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
     var ml = RoutePointList(sList);
     final count =
         await dataApiDog.addRoutePoints(ml, widget.route.associationId!);
-    await semCache.saveRoutePoints(sList, widget.route.associationId!);
+    await semCache.saveRoutePoints(routePoints: sList, associationId: widget.route.associationId!, routeId: widget.route.routeId!);
     sending = false;
     pp('$mm ... _sendRoutePointsToBackend: ❤️❤️route points saved to Kasie backend: ❤️ $count ❤️ DONE!\n\n');
   }

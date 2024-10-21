@@ -5,7 +5,6 @@ import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart';
 import 'package:kasie_transie_library/messaging/fcm_bloc.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
-
 import '../bloc/data_api_dog.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
@@ -17,6 +16,7 @@ class HeartbeatManager {
   final mm = '🔴🔴🔴🔴🔴🔴 HeartbeatManager: 🔴🔴🔴🔴🔴🔴';
 
   late Timer timer;
+  DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
   Prefs prefs = GetIt.instance<Prefs>();
   DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
 

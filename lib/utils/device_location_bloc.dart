@@ -3,7 +3,7 @@ import 'package:geolocator/geolocator.dart';
 
 import 'functions.dart';
 
-final DeviceLocationBloc locationBloc = DeviceLocationBloc();
+// final DeviceLocationBloc locationBloc = DeviceLocationBloc();
 
 class DeviceLocationBloc {
   final mm = '🍐🍐🍐🍐🍐🍐🍐 DeviceLocationBloc: ';

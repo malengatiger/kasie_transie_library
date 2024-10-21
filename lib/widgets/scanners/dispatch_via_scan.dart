@@ -29,6 +29,7 @@ class DispatchViaScan extends StatefulWidget {
 class DispatchViaScanState extends State<DispatchViaScan>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
   final mm = '${E.heartOrange}${E.heartOrange}${E.heartOrange}${E.heartOrange}'
       ' ScanDispatch: ${E.heartOrange}${E.heartOrange} ';
   ListApiDog listApiDog = GetIt.instance<ListApiDog>();

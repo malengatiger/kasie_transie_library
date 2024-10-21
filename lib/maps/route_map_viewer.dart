@@ -15,18 +15,19 @@ import 'package:page_transition/page_transition.dart';
 import '../bloc/data_api_dog.dart';
 import '../bloc/list_api_dog.dart';
 import '../data/data_schemas.dart';
+import '../data/route_data.dart';
 import '../utils/prefs.dart';
 import '../widgets/timer_widget.dart';
 import '../widgets/tiny_bloc.dart';
 
 class RouteMapViewer extends StatefulWidget {
-  final String routeId, associationId;
+  final lib.Route route;
   final Function onRouteUpdated;
 
   const RouteMapViewer({
     super.key,
+    required this.route,
     required this.onRouteUpdated,
-    required this.routeId, required this.associationId,
   });
 
   @override
@@ -58,7 +59,6 @@ class RouteMapViewerState extends State<RouteMapViewer> {
   var routeLandmarks = <lib.RouteLandmark>[];
   int landmarkIndex = 0;
   lib.Route? route;
-  Color newColor = Colors.black;
   String? stringColor;
   String routeMapViewer = 'Viewer', changeColor = '';
 
@@ -66,6 +66,7 @@ class RouteMapViewerState extends State<RouteMapViewer> {
   void initState() {
     super.initState();
     _setTexts();
+    _setRouteColor();
     _getCurrentRouteLocation();
     _getUser();
   }
@@ -78,23 +79,10 @@ class RouteMapViewerState extends State<RouteMapViewer> {
     setState(() {});
   }
 
-  Future _getRoute() async {
-    setState(() {
-      busy = true;
-    });
-    try {
-      route = await semCache.getRoute(widget.routeId, widget.associationId);
-      if (route == null) {
-        throw Exception('Route not found! 😈😈😈😈 WTF!!');
-      }
+  Future _setRouteColor() async {
+      route = widget.route;
       color = getColor(route!.color!);
-      _zoomToStartCity();
-    } catch (e) {
-      pp(e);
-    }
-    setState(() {
-      busy = false;
-    });
+
   }
 
   @override
@@ -102,32 +90,9 @@ class RouteMapViewerState extends State<RouteMapViewer> {
     super.dispose();
   }
 
-  void _changeRouteColor() async {
-    pp('$mm ... updateRouteColor ...color: $stringColor');
-    color = newColor;
-    _addPolyLine();
-    setState(() {});
-    try {
-      final m = await dataApiDog.updateRouteColor(
-          routeId: widget.routeId, color: stringColor!);
-      pp('\n\n$mm ... color has been updated ... result route: ${m.toJson()} ');
-      tinyBloc.setRouteId(widget.routeId);
-      _getRouteLandmarks();
-    } catch (e) {
-      pp(e);
-    }
-    //
-  }
-
-  void _showColorChoices() {
-    setState(() {
-      showColors = !showColors;
-    });
-  }
-
   Future _getRouteLandmarks() async {
-    routeLandmarks = await semCache.getRouteLandmarks(widget.routeId, widget.associationId);
-    pp('$mm _getRouteLandmarks ...  route: ${widget.routeId}; found: ${routeLandmarks.length} ');
+    routeLandmarks = routeData!.landmarks;
+    pp('$mm _getRouteLandmarks ...  route: ${widget.route.routeId!}; found: ${routeLandmarks.length} ');
 
     landmarkIndex = 0;
     for (var landmark in routeLandmarks) {
@@ -213,9 +178,7 @@ class RouteMapViewerState extends State<RouteMapViewer> {
     try {
       _user = prefs.getUser();
       pp('$mm getting existing RoutePoints .......');
-      existingRoutePoints =
-          // await routesIsolate.getRoutePoints(widget.routeId, refresh);
-          await semCache.getRoutePoints(widget.routeId, widget.associationId!);
+      existingRoutePoints = routeData!.routePoints;
 
       pp('$mm .......... existingRoutePoints ....  🍎 found: '
           '${existingRoutePoints.length} points');
@@ -250,11 +213,13 @@ class RouteMapViewerState extends State<RouteMapViewer> {
     _user = prefs.getUser();
   }
 
+  RouteData? routeData;
   Future _getCurrentRouteLocation() async {
     pp('$mm .......... get current route ....');
 
-    route = await semCache.getRoute(widget.routeId, widget.associationId);
-    if (route != null) {
+    routeData = await semCache.getRouteData(associationId:  widget.route.associationId!, routeId: widget.route.routeId!);
+    if (routeData != null) {
+      route = routeData!.route!;
       _myCurrentCameraPosition = CameraPosition(
         target: LatLng(route!.routeStartEnd!.startCityPosition!.coordinates[1],
             route!.routeStartEnd!.startCityPosition!.coordinates[0]),
@@ -335,7 +300,6 @@ class RouteMapViewerState extends State<RouteMapViewer> {
                   },
                   onMapCreated: (GoogleMapController controller) async {
                     _mapController.complete(controller);
-                    await _getRoute();
                     await _getRoutePoints(false);
                     _getRouteLandmarks();
                   },

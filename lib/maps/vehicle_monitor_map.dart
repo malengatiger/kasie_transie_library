@@ -187,7 +187,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     try {
       pp('$mm ..... getRoutes ..');
         routes =
-            await semCache.getRoutes(widget.vehicle.associationId!);
+            await semCache.getRoutes(associationId: widget.vehicle.associationId!);
       // }
       _printRoutes();
       if (routes.isNotEmpty) {
@@ -217,7 +217,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     lib.RouteLandmark? mLandmark;
     for (var route in routes) {
       final points = await semCache.getRoutePoints(route.routeId!,route.associationId!);
-      final marks = await semCache.getRouteLandmarks(route.routeId!, route.associationId!);
+      final marks = await semCache.getRouteLandmarks(routeId: route.routeId!, associationId: route.associationId!);
       hash[route.routeId!] = points;
       //add polyline
       final List<LatLng> latLngs = [];

@@ -107,7 +107,7 @@ class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
 
   // 👌the hill is being climbed!
   lib.Country? country;
-
+  DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
   Future _getStates() async {
     country = prefs.getCountry();
   }

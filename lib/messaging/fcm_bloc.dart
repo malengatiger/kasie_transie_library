@@ -30,7 +30,7 @@ String? appName;
 class FCMBloc {
   final fb.FirebaseMessaging firebaseMessaging;
   final mm = '🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎 FCMBloc: 🔵🔵 ';
-
+  DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
   FCMBloc(this.firebaseMessaging) {
     initialize();
   }
@@ -1036,6 +1036,7 @@ void respondToLocationRequest(
     {required lib.LocationRequest request,
     required String token,
     required lib.Vehicle car}) async {
+  DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
   final loc = await locationBloc.getLocation();
   pp('$mxx .. location in background: $loc');
   final resp = lib.LocationResponse(

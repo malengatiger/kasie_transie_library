@@ -4,18 +4,20 @@ import 'package:sembast/sembast_io.dart' as sp;
 import 'package:sembast_web/sembast_web.dart' as sw;
 import 'package:sembast_web/sembast_web.dart';
 import 'package:path_provider/path_provider.dart';
-import '../data/route_bag.dart';
 import 'package:path/path.dart' as p;
 
+import '../data/route_data.dart';
 import '../utils/functions.dart'; // Import the path package
 
 class SemCache {
   late sp.Database dbPhone;
   late sw.Database dbWeb;
   static String dbPath = 'kasie.db';
+
   SemCache() {
     initializeDatabase();
   }
+
   static const mm = '👽👽👽 SemCache 👽👽👽';
 
   void initializeDatabase() async {
@@ -32,6 +34,7 @@ class SemCache {
       pp('$mm cache database set up for phone');
     }
   }
+
   //
   Future getDb() async {
     if (kIsWeb) {
@@ -40,6 +43,7 @@ class SemCache {
       return dbPhone;
     }
   }
+
   int dateToInt(String date) {
     final DateTime dt = DateTime.parse(date);
     return dt.microsecondsSinceEpoch;
@@ -57,64 +61,21 @@ class SemCache {
     pp('$mm ... saveRegistrationBag ...');
 
     var store = intMapStoreFactory.store('bag');
-    var records
-    = await store.record(1).put(await getDb(), bag.toJson());
+    var records = await store.record(1).put(await getDb(), bag.toJson());
   }
+
   Future<RegistrationBag?> getRegistrationBag() async {
     pp('$mm ... getRegistrationBag ....');
 
     var store = intMapStoreFactory.store('bag');
-    var records
-    = await store.find(await getDb());
+    var records = await store.find(await getDb());
     if (records.isNotEmpty) {
-      var bag = RegistrationBag.fromJson( records.first.value);
+      var bag = RegistrationBag.fromJson(records.first.value);
       return bag;
     }
     return null;
   }
 
-  Future<List<Route>> saveRoutes(List<Route> routes, String associationId) async {
-    pp('$mm ... saveRoutes: 🥬🥬 ${routes.length} associationId: $associationId');
-
-    var data = await getRouteData(associationId);
-    if (data != null) {
-      pp('$mm routes added to cache: 🥬🥬 ${routes.length}');
-      data.routes.addAll(routes);
-      return data.routes;
-    }
-    return routes;
-  }
-
-  Future<List<Route>> getRoutes(String associationId) async {
-
-    var data = await getRouteData(associationId);
-    List<Route> routes = [];
-
-    if (data != null) {
-      routes = data.routes;
-    }
-
-    routes.sort((a,b) => a.name!.compareTo(b.name!));
-    pp('$mm routes retrieved from cache: 😡 ${routes.length} ');
-    return routes;
-  }
-
-  Future<Route?> getRoute(String routeId, String associationId) async {
-    pp('$mm .... getRoute: $routeId');
-
-    var data = await getRouteData(associationId);
-    if (data != null) {
-      List<Route> routes = data.routes;
-      for (var route in routes) {
-        if (route.routeId! == routeId) {
-          pp('$mm routes retrieved from cache: ${route.name}');
-          return route;
-        }
-      }
-    }
-
-    return null;
-  }
 
   Future<City?> getCity(String cityId) async {
     pp('$mm .... getCity: $cityId');
@@ -139,43 +100,22 @@ class SemCache {
     var store = intMapStoreFactory.store('routeCities');
     int count = 0;
 
-    var r = await getRoutes(associationId);
-    for (var value in r) {
-      var finder = Finder(filter: Filter.equals('routeId', value.routeId));
-      var list = await store.find(await getDb(), finder: finder);
-      count += list.length;
+    var r = await getAssociationRouteData(associationId);
+    for (var value in r!.routeDataList) {
+     count += value.cities.length;
     }
     pp('$mm countRouteCities: 🥦 $count route cities');
     return count;
   }
 
-  Future saveRoutePoints(
-      List<RoutePoint> routePoints, String associationId) async {
-    var store = intMapStoreFactory.store('routePoints');
-    for (var routePoint in routePoints) {
-      store.record(dateToInt(routePoint.created!)).put(await getDb(), routePoint.toJson());
-    }
-    var data = await getRouteData(associationId);
-    if (data != null) {
-      data.routePoints.addAll(routePoints);
-    }
-    pp('$mm routePoints added to cache: 🌀🌀${routePoints.length} 🌀🌀');
-  }
-
-  Future deleteRoutePoints(String routeId) async {
-    var store = intMapStoreFactory.store('routePoints');
-    var finder = Finder(filter: Filter.equals('routeId', routeId));
-
-    var deleted = await store.delete(await getDb(), finder: finder);
-    pp('$mm routePoints deleted from cache: 🦠$deleted 🦠 routeId: $routeId');
-  }
-
   Future<int> countRoutePoints(String associationId) async {
     pp('\n$mm countRoutePoints: associationId: 🥦 $associationId 🥦');
     int count = 0;
-    var routeData = await getRouteData(associationId);
+    var routeData = await getAssociationRouteData(associationId);
     if (routeData != null) {
-      count = routeData.routePoints.length;
+      for (var d in routeData.routeDataList) {
+        count += d.routePoints.length;
+      }
     }
     pp('\n$mm countRoutePoints: TOTAL: 🥦 $count 🥦 route points\n');
     return count;
@@ -183,55 +123,25 @@ class SemCache {
 
   Future<int> countRouteLandmarks(String associationId) async {
     int count = 0;
-    var routeData = await getRouteData(associationId);
+    var routeData = await getAssociationRouteData(associationId);
     if (routeData != null) {
-      count = routeData.landmarks.length;
+      for (var rd in routeData.routeDataList) {
+        count += rd.landmarks.length;
+      }
     }
     pp('\n$mm countRouteLandmarks: TOTAL: 🌸🌸 $count route landmarks');
 
     return count;
   }
 
-  Future<List<RoutePoint>> getRoutePoints(
-      String routeId, String associationId) async {
-    var data = await getRouteData(associationId);
 
-    List<RoutePoint> routePoints = [];
-    if (data != null) {
-      for (var rec in data.routePoints) {
-        if (rec.routeId == routeId) {
-          routePoints.add(rec);
-        }
-      }
-    }
-    routePoints.sort((a,b) => a.index!.compareTo(b.index!));
-    pp('$mm routePoints retrieved from cache: 🥦 ${routePoints.length} route: $routeId');
-    return routePoints;
-  }
 
-  Future saveRouteLandmarks(
-      List<RouteLandmark> routeLandmarks, String associationId) async {
-    var store = intMapStoreFactory.store('routeLandmarks');
-
-    for (var routeLandmark in routeLandmarks) {
-      store
-          .record(dateToInt(routeLandmark.created!))
-          .put(await getDb(), routeLandmark.toJson());
-    }
-    var data = await getRouteData(associationId);
-    if (data != null) {
-      data.landmarks.addAll(routeLandmarks);
-    }
-    pp('$mm routeLandmarks added to cache: 🥦 ${routeLandmarks.length} 🥦');
-  }
-
-  Future saveUsers(
-      List<User> users) async {
+  Future saveUsers(List<User> users) async {
     var store = intMapStoreFactory.store('users');
 
     for (var user in users) {
       store
-          .record(dateToInt(user.created?? DateTime.now().toIso8601String()))
+          .record(dateToInt(user.created ?? DateTime.now().toIso8601String()))
           .put(await getDb(), user.toJson());
       // sleep(const Duration(milliseconds: 5));
     }
@@ -239,27 +149,14 @@ class SemCache {
     pp('$mm users added to cache: 🥦 ${users.length} 🥦');
   }
 
-  Future<List<RouteLandmark>> getRouteLandmarks(String routeId, String associationId) async {
-    var data = await getRouteData(associationId);
-
-    List<RouteLandmark> routeLandmarks = [];
-    if (data != null) {
-      for (var rec in data.landmarks) {
-        if (rec.routeId == routeId) {
-          routeLandmarks.add(rec);
-        }
-      }
-    }
-    routeLandmarks.sort((a,b) => a.index!.compareTo(b.index!));
-    pp('$mm routeLandmarks retrieved from cache: 😡 ${routeLandmarks.length} route: $routeId');
-    return routeLandmarks;
-  }
 
   //
   Future saveRouteCities(List<RouteCity> routeCities) async {
     var store = intMapStoreFactory.store('routeCities');
     for (var routeCity in routeCities) {
-      store.record(dateToInt(routeCity.created!)).put(await getDb(), routeCity.toJson());
+      store
+          .record(dateToInt(routeCity.created!))
+          .put(await getDb(), routeCity.toJson());
     }
     pp('$mm routeCities added to cache: 🖐🏾 ${routeCities.length} 🖐🏾');
   }
@@ -291,14 +188,14 @@ class SemCache {
   Future<List<Vehicle>> getVehicles(String associationId) async {
     sp.Finder finder;
     if (kIsWeb) {
-      finder = sw.Finder(filter: sw.Filter.equals('associationId', associationId));
+      finder =
+          sw.Finder(filter: sw.Filter.equals('associationId', associationId));
     } else {
-      finder = sp.Finder(filter: sp.Filter.equals('associationId', associationId));
-
+      finder =
+          sp.Finder(filter: sp.Filter.equals('associationId', associationId));
     }
     var store = intMapStoreFactory.store('vehicles');
-    var records
-    = await store.find(await getDb(), finder: finder);
+    var records = await store.find(await getDb(), finder: finder);
     pp('$mm ... getVehicles: looking for cars cars found: $associationId');
 
     List<Vehicle> vehicles = [];
@@ -314,7 +211,9 @@ class SemCache {
   Future saveCities(List<City> cities) async {
     var store = intMapStoreFactory.store('cities');
     for (var city in cities) {
-      store.record(dateToInt(city.created?? DateTime.now().toIso8601String())).put(await getDb(), city.toJson());
+      store
+          .record(dateToInt(city.created ?? DateTime.now().toIso8601String()))
+          .put(await getDb(), city.toJson());
     }
     pp('$mm cities added to cache: ☎️ ${cities.length} ☎️ ');
   }
@@ -357,25 +256,151 @@ class SemCache {
   }
 
 //
-  Future saveRouteData(RouteData data) async {
+  Future saveAssociationRouteData(AssociationRouteData data) async {
     var store = intMapStoreFactory.store('routeData');
-    store.record(stringToInt(data.associationId!)).put(await getDb(), data.toJson());
+    store
+        .record(stringToInt(data.associationId!))
+        .put(await getDb(), data.toJson());
 
-    pp('$mm RouteData added to cache: ☎️ ${data.associationId} ☎️ ');
+    pp('$mm RouteData assoc added to cache: ☎️ ${data.associationId} ☎️ ');
+    pp('$mm routes added to cache: ☎️ ${data.routeDataList.length} ☎️ ');
+    
   }
 
-  Future<RouteData?> getRouteData(String associationId) async {
+  Future<AssociationRouteData?> getAssociationRouteData(String associationId) async {
     var store = intMapStoreFactory.store('routeData');
-    var records = await store.find(await getDb());
+    sw.Finder finder = sw.Finder(
+        filter: sw.Filter.equals('associationId', associationId), limit: 1);
+    var records = await store.find(
+      await getDb()
+    );
 
-    for (var rec in records) {
-      var d = RouteData.fromJson(rec.value);
-      if (d.associationId! == associationId) {
-        return d;
+    if (records.isNotEmpty) {
+      var mData = records[0].value;
+      pp('\n\n$mm association route data has been found in cache $mData \n\n\n');
+
+      var assocRouteData = AssociationRouteData.fromJson(mData);
+      pp('$mm association route data has been found in cache, Yebo!!');
+      return assocRouteData;
+    }
+    pp('$mm association route data not found in cache 😈😈😈😈');
+    return null;
+  }
+  Future<RouteData?> getRouteData({required String associationId, required String routeId}) async {
+
+    var ard = await getAssociationRouteData(associationId);
+    RouteData? routeData;
+    if (ard != null) {
+      pp('$mm route data has been found in cache, Yebo!!');
+      for (var rd in ard.routeDataList) {
+        if (rd.routeId == routeId) {
+          routeData = rd;
+        }
+      }
+    }
+    pp('$mm route data not found in cache 😈😈😈😈');
+    return routeData;
+  }
+  Future saveRoutePoints({required String associationId, required List<RoutePoint> routePoints, required String routeId}) async {
+
+    var ard = await getAssociationRouteData(associationId);
+    if (ard != null) {
+      pp('$mm route data has been found in cache, Yebo!!');
+      for (var rd in ard.routeDataList) {
+        if (rd.routeId == routeId) {
+          rd.routePoints.addAll(routePoints);
+          await saveAssociationRouteData(ard);
+          pp('$mm route points added to cache ');
+          return;
+        }
+      }
+    }
+  }
+
+  Future saveRouteLandmarks({required List<RouteLandmark> landmarks, required String associationId, required String routeId}) async {
+    var ard = await getAssociationRouteData(associationId);
+    if (ard != null) {
+      pp('$mm route data has been found in cache, Yebo!!');
+      for (var rd in ard.routeDataList) {
+        if (rd.routeId == routeId) {
+          rd.landmarks.addAll(landmarks);
+          await saveAssociationRouteData(ard);
+          pp('$mm route landmarks added to cache ');
+          return;
+        }
+      }
+    }
+  }
+  Future saveRoute({required Route route}) async {
+
+    var ard = await getAssociationRouteData(route.associationId!);
+    RouteData? routeData;
+    if (ard != null) {
+      pp('$mm route data has been found in cache, Yebo!!');
+      RouteData rd = RouteData(routeId: route.routeId!, route: route, routePoints: [], landmarks: [], cities: []);
+      ard.routeDataList.add(rd);
+      await saveAssociationRouteData(ard);
+
+    }
+    pp('$mm route added to cache');
+  }
+
+  Future<List<Route>> getRoutes({required String associationId}) async {
+    List<Route> list = [];
+    var ard = await getAssociationRouteData(associationId);
+    RouteData? routeData;
+    if (ard != null) {
+      pp('$mm routes have been found in cache, Yebo!!');
+      for (var rd in ard.routeDataList) {
+        list.add(rd.route!);
+      }
+    }
+    list.sort((a,b) => a.name!.compareTo(b.name!));
+    return list;
+  }
+  Future<List<RouteLandmark>> getRouteLandmarks({required String associationId, required routeId}) async {
+    List<RouteLandmark> list = [];
+    var ard = await getAssociationRouteData(associationId);
+    if (ard != null) {
+      pp('$mm routes have been found in cache, Yebo!!');
+      for (var rd in ard.routeDataList) {
+        if (rd.routeId == routeId) {
+          list = rd.landmarks;
+        }
+      }
+    }
+    list.sort((a,b) => a.index!.compareTo(b.index!));
+    return list;
+  }
+  Future<List<RoutePoint>> getRoutePoints(
+      String routeId, String associationId) async {
+    List<RoutePoint> list = [];
+    var ard = await getAssociationRouteData(associationId);
+    if (ard != null) {
+      pp('$mm routes have been found in cache, Yebo!!');
+      for (var rd in ard.routeDataList) {
+        if (rd.routeId == routeId) {
+          list = rd.routePoints;
+        }
       }
     }
 
-    return null;
+    return list;
   }
+  Future<Route?> getRoute(
+      String routeId, String associationId) async {
+    Route? route;
+    var ard = await getAssociationRouteData(associationId);
+    if (ard != null) {
+      pp('$mm routes have been found in cache, Yebo!!');
+      for (var rd in ard.routeDataList) {
+        if (rd.routeId == routeId) {
+          route = rd.route;
+        }
+      }
+    }
 
+    return route;
+  }
 }
+

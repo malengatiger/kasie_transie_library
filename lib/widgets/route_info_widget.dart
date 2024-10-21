@@ -91,7 +91,7 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
     }
     if (routeId != null) {
       var marks = await semCache.getRouteLandmarks(
-          routeId, widget.route.associationId!);
+          routeId: routeId, associationId: widget.route.associationId!);
       numberOfLandmarks = marks.length;
       var points =
           await semCache.getRoutePoints(routeId, widget.route.associationId!);

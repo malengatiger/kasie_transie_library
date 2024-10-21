@@ -33,6 +33,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
   ListApiDog listApiDog = GetIt.instance<ListApiDog>();
   Prefs prefs = GetIt.instance<Prefs>();
   DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
+  DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
   static const mm = ' 🔷🔷🔷🔷🔷🔷 VehiclePassengerCount 🔷';
   var passengerCounts = <lib.AmbassadorPassengerCount>[];
 

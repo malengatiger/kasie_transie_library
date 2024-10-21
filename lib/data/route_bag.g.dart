@@ -27,28 +27,3 @@ Map<String, dynamic> _$RouteBagToJson(RouteBag instance) => <String, dynamic>{
       'routeLandmarks': instance.routeLandmarks.map((e) => e.toJson()).toList(),
       'routeCities': instance.routeCities.map((e) => e.toJson()).toList(),
     };
-
-RouteData _$RouteDataFromJson(Map<String, dynamic> json) => RouteData(
-      routes: (json['routes'] as List<dynamic>)
-          .map((e) => Route.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      routePoints: (json['routePoints'] as List<dynamic>)
-          .map((e) => RoutePoint.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      landmarks: (json['landmarks'] as List<dynamic>)
-          .map((e) => RouteLandmark.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      cities: (json['cities'] as List<dynamic>)
-          .map((e) => RouteCity.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      associationId: json['associationId'] as String?,
-    )..routeDataKey = (json['routeDataKey'] as num).toInt();
-
-Map<String, dynamic> _$RouteDataToJson(RouteData instance) => <String, dynamic>{
-      'routes': instance.routes.map((e) => e.toJson()).toList(),
-      'routePoints': instance.routePoints.map((e) => e.toJson()).toList(),
-      'landmarks': instance.landmarks.map((e) => e.toJson()).toList(),
-      'cities': instance.cities.map((e) => e.toJson()).toList(),
-      'associationId': instance.associationId,
-      'routeDataKey': instance.routeDataKey,
-    };

@@ -132,7 +132,7 @@ final   Prefs prefs = GetIt.instance<Prefs>();
       final user = prefs.getUser();
       if (user != null) {
         var routesIsolate = GetIt.instance<SemCache>();
-        routesIsolate.getRoutes(user.associationId!);
+        routesIsolate.getRoutes(associationId: user.associationId!);
       }
     }
 
@@ -169,7 +169,7 @@ final   Prefs prefs = GetIt.instance<Prefs>();
       final user = prefs.getUser();
       if (user != null) {
         var routesIsolate = GetIt.instance<SemCache>();
-        rList = await routesIsolate.getRoutes(user.associationId!);
+        rList = await routesIsolate.getRoutes(associationId:user.associationId!);
       }
       final comm = prefs.getCommuter();
       if (comm != null) {
