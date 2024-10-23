@@ -24,13 +24,16 @@ Future<Uint8List> generateQrCode(Map<String, dynamic> data) async {
   final image = await qrPainter.toImage(imageSize.shortestSide);
   final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
   var fileBytes = byteData!.buffer.asUint8List();
-  pp('image fileBytes: ${fileBytes!.length} bytes');
+  pp('generateQrCode: 🌶🌶🌶 image fileBytes: ${fileBytes.length} bytes');
 
   return fileBytes;
 }
 
-List<Vehicle> getVehiclesFromCsv({required String csv, required String countryId,
-  required String associationId, required String associationName}) {
+List<Vehicle> getVehiclesFromCsv(
+    {required String csv,
+    required String countryId,
+    required String associationId,
+    required String associationName}) {
   List<Vehicle> cars = [];
   List<List<dynamic>> mCars = convertCsv(csv);
   pp('🥏🥏🥏 mCars: $mCars');
@@ -56,7 +59,8 @@ List<Vehicle> getVehiclesFromCsv({required String csv, required String countryId
       make: make,
       model: model,
       year: year,
-      passengerCapacity: int.tryParse(capacity) ?? 0, // Handle parsing errors
+      passengerCapacity: int.tryParse(capacity) ?? 0,
+      // Handle parsing errors
       associationId: associationId,
       associationName: associationName,
       ownerName: owner,
@@ -68,43 +72,46 @@ List<Vehicle> getVehiclesFromCsv({required String csv, required String countryId
   return cars;
 }
 
-List<User> getUsersFromCsv({required String csv, required String countryId, required String associationId,
-  required String associationName}) {
+List<User> getUsersFromCsv(
+    {required String csv,
+    required String countryId,
+    required String associationId,
+    required String associationName}) {
   List<User> users = [];
   List<List<dynamic>> mUsers = convertCsv(csv);
-  for (var value in mUsers) {
-    var userType = value[0];
-    var firstName = value[1];
-    var lastName = value[2];
-    var email = value[3];
-    var cellphone = value[4];
+  // Skip the header row (index 0)
+  for (int i = 1; i < mUsers.length; i++) {
+    var row = mUsers[i];
+    var userType = row[0].toString(); // Convert to String
+    var firstName = row[1].toString();
+    var lastName = row[2].toString();
+    var email = row[3].toString();
+    var cellphone = row[4].toString();
+
+    pp("🌶🌶🌶 userType: $userType firstName: $firstName lastName: $lastName email: $email cellphone: $cellphone");
 
     var user = User(
+        userType: userType,
         firstName: firstName,
         lastName: lastName,
         countryId: countryId,
         associationId: associationId,
         associationName: associationName,
         email: email,
-        cellphone: cellphone,
-        userType: userType);
+        password: 'pass${DateTime.now().millisecondsSinceEpoch}_${random.toString()}',
+        cellphone: cellphone);
     users.add(user);
   }
-  pp('🥦🥦🥦 users from file: 🍎 ${users.length} users');
+  pp('🥦🥦🥦 users from csv file: 🍎 ${users.length} users');
 
   return users;
 }
 
 List<List<String>> convertCsv(String csv) {
   final result = CsvConverter().convert(csv);
-  pp(result.join('\n'));
   for (var i = 1; i < result.length; i++) {
     final row = result[i];
-    pp('🍎 row: $row');
-
-    final car = row[1];
-    final price = num.parse(row[5]);
-    pp('🍎 $car $price');
+    pp('🍎🍎🍎 csv row #$i: $row 🍎');
   }
 
   return result;

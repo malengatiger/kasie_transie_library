@@ -155,12 +155,11 @@ class DataApiDog {
       ),
     );
 
-    pp('$mm File upload starting .....: $mUrl');
     request.headers['Authorization'] = 'Bearer $token';
     var response = await request.send();
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      pp('$mm  🥬 🥬 QRCode File uploaded successfully! 🥬🥬🥬🥬🥬');
+      pp('$mm 🥬🥬 QRCode File uploaded successfully! 🥬🥬🥬🥬🥬');
       final responseBody = await response.stream.bytesToString();
       return responseBody;
     } else {
@@ -445,12 +444,13 @@ class DataApiDog {
     return car;
   }
 
-  Future addUser(User user) async {
+  Future<User> addUser(User user) async {
     final bag = user.toJson();
     final cmd = '${url}user/addUser';
     final res = await _callPost(cmd, bag);
     // semCache.saveUsers([user]);
     pp('$mm user added to database: 🥬 🥬 $res');
+    return User.fromJson(res);
   }
 
   Future addUserGeofenceEvent(UserGeofenceEvent event) async {
