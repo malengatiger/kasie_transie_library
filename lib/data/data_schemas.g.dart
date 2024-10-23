@@ -780,6 +780,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       cellphone: json['cellphone'] as String?,
       profileThumbnail: json['profileThumbnail'] as String?,
       created: json['created'] as String?,
+      qrCodeUrl: json['qrCodeUrl'] as String?,
       profileUrl: json['profileUrl'] as String?,
     );
 
@@ -799,6 +800,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'profileThumbnail': instance.profileThumbnail,
       'profileUrl': instance.profileUrl,
       'created': instance.created,
+      'qrCodeUrl': instance.qrCodeUrl,
     };
 
 RegistrationBag _$RegistrationBagFromJson(Map<String, dynamic> json) =>

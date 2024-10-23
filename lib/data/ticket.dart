@@ -1,6 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:json_annotation/json_annotation.dart';
 
-import 'data_schemas.dart';
 
 part 'ticket.g.dart';
 
@@ -13,6 +14,7 @@ class Ticket {
   int? numberOfTrips;
   TicketType? ticketType;
   List<TicketRoute> ticketRoutes = [];
+
 
   Ticket(
       this.associationId,

@@ -89,6 +89,9 @@ dependencies:
   theme_mode_handler: ^3.0.0
   flutter_image_compress: ^2.3.0
   universal_html: ^2.2.4
+  qr_flutter: ^4.1.0
+  fast_csv: ^0.2.11
+#  csv: ^6.0.0
 
 dev_dependencies:
   flutter_test:

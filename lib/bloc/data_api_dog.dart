@@ -8,6 +8,7 @@ import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/data/vehicle_list.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
+import 'package:universal_io/io.dart' as io;
 import 'package:universal_io/io.dart';
 
 import '../data/calculated_distance_list.dart';
@@ -23,7 +24,7 @@ import 'app_auth.dart';
 import 'cache_manager.dart';
 import 'list_api_dog.dart';
 import 'package:file_picker/file_picker.dart';
-import 'dart:html' as html;
+import 'package:universal_html/html.dart' as html;
 
 class DataApiDog {
   static const mm = '🌎🌎🌎🌎🌎🌎 DataApiDog: 🌎🌎';
@@ -58,8 +59,8 @@ class DataApiDog {
     url = KasieEnvironment.getUrl();
     // getAuthToken();
   }
+
   Future getAuthToken() async {
-    pp('\n\n$mm getAuthToken: ...... Getting Firebase token ......');
     var m = await appAuth.getAuthToken();
     if (m == null) {
       pp('$mm Unable to get Firebase token');
@@ -129,6 +130,46 @@ class DataApiDog {
     throw Exception('User Profile File upload failed');
   }
 
+  Future<String?> uploadQRCodeFile(
+      {required Uint8List imageBytes, required String associationId}) async {
+    pp('\n\n$mm ............ uploadQRCodeFile: 🌿 associationId: $associationId');
+
+    var url = KasieEnvironment.getUrl();
+    var mUrl = '${url}storage/uploadQRCodeFile?associationId=$associationId';
+
+    token = await getAuthToken();
+    if (token == null) {
+      throw Exception('Missing auth token');
+    }
+
+    headers['Authorization'] = 'Bearer $token';
+
+    var request = http.MultipartRequest('POST',
+        Uri.parse(mUrl));
+
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'imageFile',
+        imageBytes,
+        filename: 'qrcode_$associationId.png', // Use path for filename
+      ),
+    );
+
+    pp('$mm File upload starting .....: $mUrl');
+    request.headers['Authorization'] = 'Bearer $token';
+    var response = await request.send();
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      pp('$mm  🥬 🥬 QRCode File uploaded successfully! 🥬🥬🥬🥬🥬');
+      final responseBody = await response.stream.bytesToString();
+      return responseBody;
+    } else {
+      pp('$mm 😈😈File upload failed with status code: 😈${response.statusCode} 😈 ${response.reasonPhrase}');
+    }
+
+    throw Exception('QRCode File upload failed');
+  }
+
   Future<AddCarsResponse?> importVehiclesFromCSV(
       PlatformFile file, String associationId) async {
     pp('$mm importVehiclesFromCSV: 🌿 associationId: $associationId');
@@ -161,7 +202,7 @@ class DataApiDog {
       pp('$mm 🌿🌿🌿🌿File contents:\n$fileContents 🌿');
     } else {
       // For mobile/desktop, read file from path
-      final fileContents = await File(file.path!).readAsString();
+      final fileContents = await io.File(file.path!).readAsString();
       pp('$mm 🌿🌿🌿🌿 File contents:\n$fileContents File');
     }
     request.headers['Authorization'] = 'Bearer $token';
@@ -207,7 +248,7 @@ class DataApiDog {
       pp('$mm 🌿🌿🌿🌿File contents:\n$fileContents 🌿');
     } else {
       // For mobile/desktop, read file from path
-      final fileContents = await File(file.path!).readAsString();
+      final fileContents = await io.File(file.path!).readAsString();
       pp('$mm 🌿🌿🌿🌿 File contents:\n$fileContents File');
     }
     token = await getAuthToken();
@@ -331,7 +372,7 @@ class DataApiDog {
     throw Exception('Users File upload failed');
   }
 
-  Future<Uint8List> _readFileBytes(File file) async {
+  Future<Uint8List> _readFileBytes(io.File file) async {
     final reader = html.FileReader();
     final blob = html.Blob([await file.readAsBytes()]);
     reader.readAsArrayBuffer(blob);
@@ -388,6 +429,7 @@ class DataApiDog {
   Future<Vehicle> addVehicle(Vehicle vehicle) async {
     final bag = vehicle.toJson();
     final cmd = '${url}vehicle/addVehicle';
+
     final res = await _callPost(cmd, bag);
     var car = Vehicle.fromJson(res);
 
@@ -398,7 +440,8 @@ class DataApiDog {
     car.videos = videos;
 
     semCache.saveVehicles([car]);
-    pp('$mm vehicle added or updated on Atlas database and local cache: \n${car.toJson()}');
+    pp('$mm vehicle added or updated on Atlas database and local cache : 🥬 🥬 🥬 '
+        ' \n${car.toJson()}');
     return car;
   }
 
@@ -407,7 +450,7 @@ class DataApiDog {
     final cmd = '${url}user/addUser';
     final res = await _callPost(cmd, bag);
     // semCache.saveUsers([user]);
-    pp('$mm user added to database: $res');
+    pp('$mm user added to database: 🥬 🥬 $res');
   }
 
   Future addUserGeofenceEvent(UserGeofenceEvent event) async {
@@ -478,7 +521,10 @@ class DataApiDog {
     pp('$mm routePoints added to MongoDB Atlas database: $res');
 
     var routeId = routePointList.routePoints[0].routeId;
-    await semCache.saveRoutePoints(routePoints: routePointList.routePoints, associationId: associationId, routeId: routeId!);
+    await semCache.saveRoutePoints(
+        routePoints: routePointList.routePoints,
+        associationId: associationId,
+        routeId: routeId!);
     return res as int;
   }
 
@@ -625,7 +671,8 @@ class DataApiDog {
     myPrettyJsonPrint(res);
     final r = RouteLandmark.fromJson(res);
 
-    semCache.saveRouteLandmarks(routeId: route.routeId!, associationId: associationId, landmarks: [r]);
+    semCache.saveRouteLandmarks(
+        routeId: route.routeId!, associationId: associationId, landmarks: [r]);
     _routeLandmarkController.sink.add(r);
     return r;
   }
@@ -681,6 +728,7 @@ class DataApiDog {
 
     return res;
   }
+
   Future deleteAllRoutePoints(String routeId) async {
     final cmd = '${url}routes/deleteRoutePoints?routeId=$routeId';
     final res = await _sendHttpGET(cmd);
@@ -717,12 +765,10 @@ class DataApiDog {
       pp('$mm deleteRouteLandmark happened ... leftover marks: ${list.length}');
 
       return list;
-
     } catch (e) {
       pp(e);
       throw Exception('Delete Route Landmark failed:\n$e');
     }
-
   }
 
   Future<RegistrationBag> registerAssociation(Association association) async {
@@ -988,7 +1034,7 @@ class DataApiDog {
           pp("$mm 👿👿👿👿👿👿👿 json.decode failed, returning response body");
           return resp.body;
         }
-      } on SocketException catch (e) {
+      } on io.SocketException catch (e) {
         pp('$mm  SocketException: really means that server cannot be reached 😑');
         final gex = KasieException(
             message: 'Server not available: $e',
@@ -997,7 +1043,7 @@ class DataApiDog {
             errorType: KasieException.socketException);
         errorHandler.handleError(exception: gex);
         throw gex;
-      } on HttpException catch (e) {
+      } on io.HttpException catch (e) {
         pp("$mm  HttpException occurred 😱");
         final gex = KasieException(
             message: 'Server not available: $e',
@@ -1105,7 +1151,7 @@ class DataApiDog {
         }
         var mJson = json.decode(resp.body);
         return mJson;
-      } on SocketException catch (e) {
+      } on io.SocketException catch (e) {
         pp('$mm  SocketException: really means that server cannot be reached 😑');
         final gex = KasieException(
             message: 'Server not available: $e',
@@ -1114,7 +1160,7 @@ class DataApiDog {
             errorType: KasieException.socketException);
         errorHandler.handleError(exception: gex);
         throw gex;
-      } on HttpException catch (e) {
+      } on io.HttpException catch (e) {
         pp("$mm  HttpException occurred 😱");
         final gex = KasieException(
             message: 'Server not available: $e',

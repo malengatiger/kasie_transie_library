@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
@@ -14,7 +17,11 @@ import 'package:uuid/uuid.dart';
 import '../utils/device_location_bloc.dart';
 import '../utils/functions.dart';
 import 'data_api_dog.dart';
-
+import 'dart:async';
+import 'package:firebase_core/firebase_core.dart' as fb;
+import 'package:universal_io/io.dart' as io;
+import 'package:firebase_storage/firebase_storage.dart' as store;
+// import 'package:firebase/firebase.dart' as fb;
 const photoStorageName = 'kasieTransiePhotos';
 const videoStorageName = 'kasieTransieVideos';
 
@@ -42,6 +49,30 @@ class CloudStorageBloc {
 
   Stream<String> get errorStream => _errorStreamController.stream;
   DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
+
+  // Future<String> uploadFile(Uint8List fileBytes,
+  //     {required String associationName, required String fileName}) async {
+  //   final storageRef = FirebaseStorage.instance.ref()
+  //   .child('/kasie2025_data/$associationName/$fileName');
+  //   // Create file metadata to update
+  //   final newMetadata = SettableMetadata(
+  //     cacheControl: "public,max-age=300",
+  //     contentType: "image/png",
+  //     customMetadata: <String, String>{'public': 'true'},
+  //   );
+  //   final metadata = await storageRef.updateMetadata(newMetadata);
+  //   pp('$mm metadata: 🍎 contentType ${metadata.contentType} 🍎 fullPath: ${metadata.fullPath}');
+  //   pp('$mm storageRef name: 🍎 ${storageRef.name}');
+  //   try {
+  //     await storageRef.putData(fileBytes);
+  //     var url = await storageRef.getDownloadURL();
+  //     pp('$mm url: $url');
+  //     return url;
+  //   } catch (e,s) {
+  //     pp('$mm 😈😈😈ERROR: 😈😈😈$e \n$s');
+  //     throw Exception('File upload failed: $e');
+  //   }
+  // }
   Future<int> uploadUserPhoto(
       {required lib.User mUser,
         required File file,

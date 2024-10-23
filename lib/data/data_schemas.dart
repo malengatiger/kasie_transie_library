@@ -584,22 +584,22 @@ class Vehicle {
   List<VehicleVideo>? videos = [];
 
   Vehicle({this.vehicleId,
-    this.countryId,
+    required this.countryId,
     this.ownerName,
     this.ownerId,
     this.created,
     this.dateInstalled,
-    this.vehicleReg,
-    this.make,
-    this.model,
-    this.year,
+    required this.vehicleReg,
+    required this.make,
+    required this.model,
+    required this.year,
     this.qrCodeUrl,
     this.ownerCellphone,
-    this.passengerCapacity,
-    this.associationId,
+    required this.passengerCapacity,
+    required this.associationId,
     this.photos,
     this.videos,
-    this.associationName});
+    required this.associationName});
 
   factory Vehicle.fromJson(Map<String, dynamic> json) =>
       _$VehicleFromJson(json);
@@ -764,22 +764,22 @@ class User {
   String? fcmToken;
   String? password;
   String? email;
-  String? cellphone, profileThumbnail, profileUrl, created;
+  String? cellphone, profileThumbnail, profileUrl, created, qrCodeUrl;
 
-  User({this.userType,
+  User({required this.userType,
     this.userId,
-    this.firstName,
-    this.lastName,
+    required this.firstName,
+    required this.lastName,
     this.gender,
-    this.countryId,
-    this.associationId,
-    this.associationName,
+    required this.countryId,
+    required this.associationId,
+    required this.associationName,
     this.fcmToken,
     this.password,
-    this.email,
-    this.cellphone,
+    required this.email,
+    required this.cellphone,
     this.profileThumbnail,
-    this.created,
+    this.created, this.qrCodeUrl,
     this.profileUrl});
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
