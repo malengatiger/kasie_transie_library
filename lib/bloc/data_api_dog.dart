@@ -16,6 +16,7 @@ import '../data/data_schemas.dart';
 import '../data/generation_request.dart';
 import '../data/route_assignment_list.dart';
 import '../data/route_point_list.dart';
+import '../data/ticket.dart';
 import '../utils/emojis.dart';
 import '../utils/error_handler.dart';
 import '../utils/functions.dart';
@@ -570,7 +571,22 @@ class DataApiDog {
       pp("WTF? - $e - \n$s");
       rethrow;
     }
-    return route;
+  }
+  Future<Ticket> addTicket(Ticket ticket) async {
+    pp('$mm add ticket to database ...');
+
+    final bag = ticket.toJson();
+    final cmd = '${url}ticket/addTicket';
+    try {
+      final res = await _callPost(cmd, bag);
+      final newTicket = Ticket.fromJson(res);
+      pp('$mm new ticket added to database ...  💙 💙 💙 check! ticketId');
+      myPrettyJsonPrint(newTicket.toJson());
+      return newTicket;
+    } catch (e, s) {
+      pp("WTF? - $e - \n$s");
+      throw Exception('Failed to add ticket to database.\n$e');
+    }
   }
 
   Future addAppError(AppError error) async {

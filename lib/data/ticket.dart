@@ -1,7 +1,4 @@
-import 'dart:typed_data';
-
 import 'package:json_annotation/json_annotation.dart';
-
 
 part 'ticket.g.dart';
 
@@ -10,23 +7,22 @@ class Ticket {
   String? associationId, associationName, userId;
   String? ticketId;
   double? value;
-  String? validFromDate, validToDate;
   int? numberOfTrips;
   TicketType? ticketType;
-  List<TicketRoute> ticketRoutes = [];
-
+  List<TicketRoute>? ticketRoutes = [];
+  String? created, qrCodeUrl;
 
   Ticket(
-      this.associationId,
-      this.userId,
-      this.associationName,
+      {required this.associationId,
+      required this.userId,
+      required this.associationName,
       this.ticketId,
-      this.value,
-      this.validFromDate,
-      this.validToDate,
-      this.ticketRoutes,
+      required this.value,
+      required this.ticketRoutes,
       this.numberOfTrips,
-      this.ticketType);
+      this.created,
+      this.qrCodeUrl,
+      required this.ticketType});
 
   factory Ticket.fromJson(Map<String, dynamic> json) => _$TicketFromJson(json);
 
@@ -43,8 +39,8 @@ class CommuterTicket {
       commuterEmail,
       commuterCellphone;
   double? value;
-  String? validFrom, validTo;
   int? numberOfTrips;
+  String? validFromDate, validToDate;
 
   TicketType? ticketType;
   List<TicketRoute> ticketRoutes = [];
@@ -59,9 +55,9 @@ class CommuterTicket {
       this.commuterCellphone,
       this.commuterTicketId,
       this.value,
-      this.validFrom,
+      this.validFromDate,
       this.numberOfTrips,
-      this.validTo,
+      this.validToDate,
       this.ticketRoutes,
       this.ticketType);
 
@@ -86,13 +82,13 @@ class CommuterTicketPunched {
 
 @JsonSerializable(explicitToJson: true)
 class TicketRoute {
-  String? routeId,
-      routeName,
-      startCityName,
-      endCityName;
+  String? routeName, startCityName, endCityName;
 
-  TicketRoute(this.routeId, this.routeName, this.startCityName,
-      this.endCityName);
+  TicketRoute(
+      {
+      required this.routeName,
+      required this.startCityName,
+      required this.endCityName});
 
   factory TicketRoute.fromJson(Map<String, dynamic> json) =>
       _$TicketRouteFromJson(json);
@@ -101,6 +97,7 @@ class TicketRoute {
 }
 
 enum TicketType {
+  oneTrip,
   daily,
   weekly,
   monthly,

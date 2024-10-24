@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/data/counter_bag.dart';
 import 'package:kasie_transie_library/data/route_data.dart';
+import 'package:kasie_transie_library/data/ticket.dart';
 import 'package:kasie_transie_library/data/vehicle_bag.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
@@ -1158,6 +1159,19 @@ class ListApiDog {
     var list = <User>[];
     await _getUsersFromBackEnd(associationId, list);
     // await semCache.saveUsers(list);
+    return list;
+  }
+
+  Future<List<Ticket>> getAssociationTickets(
+      String associationId) async {
+    List<Ticket> list = [];
+    final cmd =
+        '${url}ticket/getAssociationTickets?associationId=$associationId';
+    List resp = await _sendHttpGET(cmd);
+    for (var value in resp) {
+      list.add(Ticket.fromJson(value));
+    }
+
     return list;
   }
 

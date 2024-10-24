@@ -7,18 +7,18 @@ part of 'ticket.dart';
 // **************************************************************************
 
 Ticket _$TicketFromJson(Map<String, dynamic> json) => Ticket(
-      json['associationId'] as String?,
-      json['userId'] as String?,
-      json['associationName'] as String?,
-      json['ticketId'] as String?,
-      (json['value'] as num?)?.toDouble(),
-      json['validFromDate'] as String?,
-      json['validToDate'] as String?,
-      (json['ticketRoutes'] as List<dynamic>)
-          .map((e) => TicketRoute.fromJson(e as Map<String, dynamic>))
+      associationId: json['associationId'] as String?,
+      userId: json['userId'] as String?,
+      associationName: json['associationName'] as String?,
+      ticketId: json['ticketId'] as String?,
+      value: (json['value'] as num?)?.toDouble(),
+      ticketRoutes: (json['ticketRoutes'] as List<dynamic>?)
+          ?.map((e) => TicketRoute.fromJson(e as Map<String, dynamic>))
           .toList(),
-      (json['numberOfTrips'] as num?)?.toInt(),
-      $enumDecodeNullable(_$TicketTypeEnumMap, json['ticketType']),
+      numberOfTrips: (json['numberOfTrips'] as num?)?.toInt(),
+      created: json['created'] as String?,
+      qrCodeUrl: json['qrCodeUrl'] as String?,
+      ticketType: $enumDecodeNullable(_$TicketTypeEnumMap, json['ticketType']),
     );
 
 Map<String, dynamic> _$TicketToJson(Ticket instance) => <String, dynamic>{
@@ -27,14 +27,15 @@ Map<String, dynamic> _$TicketToJson(Ticket instance) => <String, dynamic>{
       'userId': instance.userId,
       'ticketId': instance.ticketId,
       'value': instance.value,
-      'validFromDate': instance.validFromDate,
-      'validToDate': instance.validToDate,
       'numberOfTrips': instance.numberOfTrips,
       'ticketType': _$TicketTypeEnumMap[instance.ticketType],
-      'ticketRoutes': instance.ticketRoutes.map((e) => e.toJson()).toList(),
+      'ticketRoutes': instance.ticketRoutes?.map((e) => e.toJson()).toList(),
+      'created': instance.created,
+      'qrCodeUrl': instance.qrCodeUrl,
     };
 
 const _$TicketTypeEnumMap = {
+  TicketType.oneTrip: 'oneTrip',
   TicketType.daily: 'daily',
   TicketType.weekly: 'weekly',
   TicketType.monthly: 'monthly',
@@ -52,9 +53,9 @@ CommuterTicket _$CommuterTicketFromJson(Map<String, dynamic> json) =>
       json['commuterCellphone'] as String?,
       json['commuterTicketId'] as String?,
       (json['value'] as num?)?.toDouble(),
-      json['validFrom'] as String?,
+      json['validFromDate'] as String?,
       (json['numberOfTrips'] as num?)?.toInt(),
-      json['validTo'] as String?,
+      json['validToDate'] as String?,
       (json['ticketRoutes'] as List<dynamic>)
           .map((e) => TicketRoute.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -72,9 +73,9 @@ Map<String, dynamic> _$CommuterTicketToJson(CommuterTicket instance) =>
       'commuterEmail': instance.commuterEmail,
       'commuterCellphone': instance.commuterCellphone,
       'value': instance.value,
-      'validFrom': instance.validFrom,
-      'validTo': instance.validTo,
       'numberOfTrips': instance.numberOfTrips,
+      'validFromDate': instance.validFromDate,
+      'validToDate': instance.validToDate,
       'ticketType': _$TicketTypeEnumMap[instance.ticketType],
       'ticketRoutes': instance.ticketRoutes.map((e) => e.toJson()).toList(),
     };
@@ -100,15 +101,13 @@ Map<String, dynamic> _$CommuterTicketPunchedToJson(
     };
 
 TicketRoute _$TicketRouteFromJson(Map<String, dynamic> json) => TicketRoute(
-      json['routeId'] as String?,
-      json['routeName'] as String?,
-      json['startCityName'] as String?,
-      json['endCityName'] as String?,
+      routeName: json['routeName'] as String?,
+      startCityName: json['startCityName'] as String?,
+      endCityName: json['endCityName'] as String?,
     );
 
 Map<String, dynamic> _$TicketRouteToJson(TicketRoute instance) =>
     <String, dynamic>{
-      'routeId': instance.routeId,
       'routeName': instance.routeName,
       'startCityName': instance.startCityName,
       'endCityName': instance.endCityName,
