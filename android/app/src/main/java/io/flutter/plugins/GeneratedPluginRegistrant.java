@@ -76,6 +76,11 @@ public final class GeneratedPluginRegistrant {
       Log.e(TAG, "Error registering plugin flutter_activity_recognition, com.pravera.flutter_activity_recognition.FlutterActivityRecognitionPlugin", e);
     }
     try {
+      flutterEngine.getPlugins().add(new com.odehbros.flutter_file_downloader.FlutterFileDownloaderPlugin());
+    } catch (Exception e) {
+      Log.e(TAG, "Error registering plugin flutter_file_downloader, com.odehbros.flutter_file_downloader.FlutterFileDownloaderPlugin", e);
+    }
+    try {
       flutterEngine.getPlugins().add(new com.fluttercandies.flutter_image_compress.ImageCompressPlugin());
     } catch (Exception e) {
       Log.e(TAG, "Error registering plugin flutter_image_compress_common, com.fluttercandies.flutter_image_compress.ImageCompressPlugin", e);

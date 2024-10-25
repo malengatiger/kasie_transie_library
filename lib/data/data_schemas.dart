@@ -755,7 +755,6 @@ class Commuter {
 @JsonSerializable(explicitToJson: true)
 class User {
   String? userType;
-
   String? userId;
   String? firstName, lastName, gender;
   String? countryId;

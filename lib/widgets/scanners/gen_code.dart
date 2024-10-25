@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:uuid/uuid.dart';
 import 'dart:ui' as ui;
 
 import '../../utils/functions.dart';
@@ -64,6 +65,7 @@ List<Vehicle> getVehiclesFromCsv(
       associationId: associationId,
       associationName: associationName,
       ownerName: owner,
+      vehicleId: const Uuid().v4(),
     );
     cars.add(car);
   }
@@ -98,7 +100,6 @@ List<User> getUsersFromCsv(
         associationId: associationId,
         associationName: associationName,
         email: email,
-        password: 'pass${DateTime.now().millisecondsSinceEpoch}_${random.toString()}',
         cellphone: cellphone);
     users.add(user);
   }

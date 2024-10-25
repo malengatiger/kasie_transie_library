@@ -17,6 +17,7 @@ import 'package:kasie_transie_library/utils/zip_handler.dart';
 
 import '../data/big_bag.dart';
 import '../data/data_schemas.dart';
+import '../data/example_file.dart';
 import '../data/route_bag.dart';
 import '../isolates/local_finder.dart';
 import '../utils/emojis.dart';
@@ -174,6 +175,20 @@ class ListApiDog {
     return mList;
   }
 
+  Future<List<ExampleFile>> getExampleFiles() async {
+    List<ExampleFile> list1 = [];
+
+      final cmd = '${url}storage/getExampleFiles';
+      List resp = await _sendHttpGET(cmd);
+      list1.clear();
+      for (var value in resp) {
+        list1.add(ExampleFile.fromJson(value));
+        pp('$mm example: $value');
+      }
+
+    pp('$mm example files: ${list1.length}');
+    return list1;
+  }
   Future<List<SettingsModel>> getSettings(
       String associationId, bool refresh) async {
     List<SettingsModel> list1 = [];
