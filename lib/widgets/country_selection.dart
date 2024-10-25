@@ -60,15 +60,19 @@ class CountryChooserState extends State<CountryChooser> {
   Future _buildDropDown() async {
     var style = myTextStyleSmall(context);
     for (var entry in countries) {
-      // var translated =
-      //     await translator.translate('${entry.name}', settings!.locale!);
-      // var m = translated.replaceAll('UNAVAILABLE KEY:', '');
+
       if (mounted) {
         list.add(DropdownMenuItem<lib.Country>(
           value: entry,
-          child: Text(
-            entry.name!,
-            style: myTextStyleSmallWithColor(context, Colors.black),
+          child: Row(
+            children: [
+              const Icon(Icons.cottage_outlined, color: Colors.blue,),
+              gapW16,
+              Text(
+                entry.name!,
+                style: myTextStyleSmallWithColor(context, Colors.black),
+              ),
+            ],
           ),
         ));
       }
