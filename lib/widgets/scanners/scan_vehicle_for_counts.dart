@@ -6,12 +6,12 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/route_list_minimum.dart';
-import 'package:kasie_transie_library/widgets/scanners/qr_scanner_mobile.dart';
 import 'package:kasie_transie_library/widgets/vehicle_passenger_count.dart';
 import 'package:page_transition/page_transition.dart';
 
 import '../../bloc/list_api_dog.dart';
 import '../../utils/emojis.dart';
+import 'kasie/kasie_ai_scanner.dart';
 
 class ScanVehicleForCounts extends StatefulWidget {
   const ScanVehicleForCounts({super.key});
@@ -169,33 +169,9 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
   void _navigateToScan() async {
     final mCar = await NavigationUtils.navigateTo(
         context: context,
-        widget: QRScannerMobile(
-          onCarScanned: (car) {
-            pp('$mm ... on car scanned: ${car.vehicleReg}');
-            showToast(
-                textStyle: myTextStyleMediumBoldWithColor(
-                    context: context,
-                    color: Theme.of(context).primaryColorLight),
-                padding: 24,
-                duration: const Duration(seconds: 5),
-                message: 'Scanned ${car.vehicleReg}',
-                context: context);
-            onCarScanned(car);
-          },
-          onUserScanned: (user) {},
-          onError: () {
-            showToast(
-                textStyle: myTextStyleMediumBoldWithColor(
-                    context: context,
-                    color: Theme.of(context).primaryColorLight),
-                padding: 24,
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 5),
-                message: 'Scanner fucked!',
-                context: context);
-          },
-          quitAfterScan: false,
-        ),
+        widget: KasieAIScanner(onScanned: (json ) {
+          onCarScanned(lib.Vehicle.fromJson(json));
+        },),
         transitionType: PageTransitionType.leftToRight);
     if (mCar != null) {
       vehicle = lib.Vehicle.fromJson(mCar);

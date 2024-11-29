@@ -17,7 +17,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pretty_json/pretty_json.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:universal_io/io.dart';
-import 'package:video_thumbnail/video_thumbnail.dart' as vt;
+// import 'package:video_thumbnail/video_thumbnail.dart' as vt;
 import '../data/data_schemas.dart';
 import 'emojis.dart';
 
@@ -321,28 +321,28 @@ Uint8List _dataUrlToBytes(String dataUrl) {
   return base64Decode(encodedData);
 }
 
-Future<File> getVideoThumbnail(File file) async {
-  final Directory directory = await getApplicationDocumentsDirectory();
-  var path = 'possibleVideoThumb_${DateTime.now().toIso8601String()}.jpg';
-  const slash = '/';
-  final thumbFile = File('${directory.path}$slash$path');
-
-  try {
-    final data = await vt.VideoThumbnail.thumbnailData(
-      video: file.path,
-      imageFormat: vt.ImageFormat.JPEG,
-      maxWidth: 128,
-      quality: 100,
-    );
-    await thumbFile.writeAsBytes(data!);
-    pp('🔷🔷Video thumbnail created. length: ${await thumbFile.length()} 🔷🔷🔷');
-    return thumbFile;
-  } catch (e) {
-    pp('ERROR: $e');
-    var m = await getImageFileFromAssets('assets/intro/small.jpg');
-    return m;
-  }
-}
+// Future<File> getVideoThumbnail(File file) async {
+//   final Directory directory = await getApplicationDocumentsDirectory();
+//   var path = 'possibleVideoThumb_${DateTime.now().toIso8601String()}.jpg';
+//   const slash = '/';
+//   final thumbFile = File('${directory.path}$slash$path');
+//
+//   // try {
+//   //   final data = await vt.VideoThumbnail.thumbnailData(
+//   //     video: file.path,
+//   //     imageFormat: vt.ImageFormat.JPEG,
+//   //     maxWidth: 128,
+//   //     quality: 100,
+//   //   );
+//   //   await thumbFile.writeAsBytes(data!);
+//   //   pp('🔷🔷Video thumbnail created. length: ${await thumbFile.length()} 🔷🔷🔷');
+//   //   return thumbFile;
+//   // } catch (e) {
+//   //   pp('ERROR: $e');
+//   //   var m = await getImageFileFromAssets('assets/intro/small.jpg');
+//   //   return m;
+//   // }
+// }
 
 Future<File> getImageFileFromAssets(String path) async {
   final byteData = await rootBundle.load('assets/$path');

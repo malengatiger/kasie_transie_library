@@ -48,22 +48,22 @@ class _QRCodeGeneratorState extends State<QRCodeGenerator> {
 
   Future<void> _generateQrCode() async {
     if (widget.user != null) {
-      fileBytes = await generateQrCode(widget.user!.toJson());
+      fileBytes = await generateQrCode(data: widget.user!.toJson());
       data = jsonEncode(widget.user!.toJson());
     } else if (widget.vehicle != null) {
-      fileBytes = await generateQrCode(widget.vehicle!.toJson());
+      fileBytes = await generateQrCode(data: widget.vehicle!.toJson());
       data = jsonEncode(widget.vehicle!.toJson());
 
     } else if (widget.route != null) {
-      fileBytes = await generateQrCode(widget.route!.toJson());
+      fileBytes = await generateQrCode(data: widget.route!.toJson());
       data = jsonEncode(widget.route!.toJson());
 
     } else if (widget.routeLandmark != null) {
-      fileBytes = await generateQrCode(widget.routeLandmark!.toJson());
+      fileBytes = await generateQrCode(data: widget.routeLandmark!.toJson());
       data = jsonEncode(widget.routeLandmark!.toJson());
 
     } else if (widget.ticket != null) {
-      fileBytes = await generateQrCode(widget.ticket!.toJson());
+      fileBytes = await generateQrCode(data: widget.ticket!.toJson());
       data = jsonEncode(widget.ticket!.toJson());
 
     }

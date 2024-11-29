@@ -10,7 +10,7 @@ import 'dart:ui' as ui;
 
 import '../../utils/functions.dart';
 
-Future<Uint8List> generateQrCode(Map<String, dynamic> data) async {
+Future<Uint8List> generateQrCode({ required Map<String, dynamic> data, double? height, double? width}) async {
   var dataToGenerate = jsonEncode(data);
   final qrPainter = QrPainter(
     data: dataToGenerate,
@@ -21,10 +21,11 @@ Future<Uint8List> generateQrCode(Map<String, dynamic> data) async {
     ),
   );
 
-  const imageSize = Size(200, 200);
+  var imageSize = Size(width?? 200, height?? 200);
   final image = await qrPainter.toImage(imageSize.shortestSide);
   final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
   var fileBytes = byteData!.buffer.asUint8List();
+
   pp('generateQrCode: 🌶🌶🌶 image fileBytes: ${fileBytes.length} bytes');
 
   return fileBytes;

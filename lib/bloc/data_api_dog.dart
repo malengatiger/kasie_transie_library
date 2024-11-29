@@ -444,6 +444,23 @@ class DataApiDog {
         ' \n${car.toJson()}');
     return car;
   }
+  Future<int> updateVehicle(Vehicle vehicle) async {
+    final bag = vehicle.toJson();
+    final cmd = '${url}vehicle/updateVehicle';
+
+    final res = await _callPost(cmd, bag);
+
+    ListApiDog dog = GetIt.instance<ListApiDog>();
+    var photos = await dog.getVehiclePhotos(vehicle, true);
+    var videos = await dog.getVehicleVideos(vehicle, true);
+    vehicle.photos = photos;
+    vehicle.videos = videos;
+
+    semCache.saveVehicles([vehicle]);
+    pp('$mm vehicle added or updated on Atlas database and local cache : 🥬 🥬 🥬 '
+        ' \n${vehicle.toJson()}');
+    return res;
+  }
 
   Future<User> addUser(User user) async {
     final bag = user.toJson();
@@ -636,21 +653,7 @@ class DataApiDog {
     return r;
   }
 
-  Future<Vehicle> updateVehicle(Vehicle car) async {
-    pp('$mm .................................'
-        'car to be updated on mongo database ${E.redDot} '
-        'check that car is passed ...');
-    myPrettyJsonPrint(car.toJson());
 
-    final cmd = '${url}updateVehicle';
-    final res = await _callPost(cmd, car.toJson());
-    pp('$mm car updated on mongo database ... ${E.redDot} '
-        'check if owner fields present');
-    myPrettyJsonPrint(res);
-    final r = Vehicle.fromJson(res);
-
-    return r;
-  }
 
   Future<City> addCity(City city) async {
     final bag = city.toJson();

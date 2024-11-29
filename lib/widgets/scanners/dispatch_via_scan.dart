@@ -10,13 +10,14 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/widgets/passenger_count.dart';
-import 'package:kasie_transie_library/widgets/qr_scanner.dart';
 import 'package:kasie_transie_library/widgets/route_widget.dart';
 import 'package:badges/badges.dart' as bd;
 
 import '../../isolates/local_finder.dart';
 import '../media_reminder.dart';
 import 'dispatch_helper.dart';
+import 'kasie/kasie_ai_scanner.dart';
+import 'kasie/scanner_starter.dart';
 
 
 class DispatchViaScan extends StatefulWidget {
@@ -84,14 +85,14 @@ class DispatchViaScanState extends State<DispatchViaScan>
   }
 
   Future _getAssociationVehicleMediaRequests(bool refresh) async {
-    user = prefs.getUser();
-    final startDate = DateTime.now()
-        .toUtc()
-        .subtract(const Duration(days: 30))
-        .toIso8601String();
-
-    requests = await listApiDog.getAssociationVehicleMediaRequests(
-        user!.associationId!, startDate, refresh);
+    // user = prefs.getUser();
+    // final startDate = DateTime.now()
+    //     .toUtc()
+    //     .subtract(const Duration(days: 30))
+    //     .toIso8601String();
+    //
+    // requests = await listApiDog.getAssociationVehicleMediaRequests(
+    //     '2f3faebd-6159-4b03-9857-9dad6d9a82ac', startDate, refresh);
   }
 
   Future _getRoutes() async {
@@ -102,6 +103,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
     //     longitude: loc.longitude,
     //     radiusInMetres: 500.0);
 
+    routes = await listApiDog.getAssociationRoutes('2f3faebd-6159-4b03-9857-9dad6d9a82ac', false);
     //check ... selected ...
     final prevRoute = prefs.getRoute();
     bool found = false;
@@ -427,17 +429,12 @@ class DispatchViaScanState extends State<DispatchViaScan>
                             child: Card(
                               shape: getDefaultRoundedBorder(),
                               elevation: 12,
-                              child: QRScanner(
-                                  onCarScanned: onCarScanned,
-                                  onUserScanned: (user) {},
-                                  onError: onError,
-                                  quitAfterScan: quitAfterScan, onClear: (){
-                                setState(() {
-                                  scannedVehicle = null;
-                                });
-                              },),
+                              child:  KasieAIScanner(onScanned: (json ) {
+                                onCarScanned(lib.Vehicle.fromJson(json));
+                              },)
+                              ),
                             ),
-                          ),
+
                     Expanded(
                       child: Stack(
                         children: [

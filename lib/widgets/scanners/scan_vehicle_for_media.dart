@@ -3,11 +3,11 @@ import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:kasie_transie_library/widgets/qr_scanner.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/widgets/vehicle_media_handler.dart';
 
 import '../../bloc/list_api_dog.dart';
+import 'kasie/kasie_ai_scanner.dart';
 
 class ScanVehicleForMedia extends StatefulWidget {
   const ScanVehicleForMedia({super.key});
@@ -100,21 +100,9 @@ class ScanVehicleForMediaState extends State<ScanVehicleForMedia>
                   onTap: (){
                     pp('$mm .... will try to restart a scan ...');
                   },
-                  child: QRScanner(
-                    onCarScanned: (car) {
-                      setState(() {
-                        vehicle = car;
-                      });
-                      onCarScanned(car);
-                    },
-                    onClear: (){
-                      setState(() {
-                        vehicle = null;
-                      });
-                    },
-                    onUserScanned: (u) {},
-                    onError: onError, quitAfterScan: true,
-                  ),
+                  child: KasieAIScanner(onScanned: (json ) {
+                    onCarScanned(lib.Vehicle.fromJson(json));
+                  },),
                 ),
                 const SizedBox(
                   height: 8,

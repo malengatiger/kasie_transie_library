@@ -28,7 +28,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
   final mm = '💦💦💦💦💦💦 EmailAuthSignin 🔷🔷';
   late AnimationController _controller;
   TextEditingController emailController =
-      TextEditingController(text: "admin15@sowertech.com");
+      TextEditingController(text: "peterj_admin@sowertech.com");
   TextEditingController pswdController = TextEditingController(text: "pass123");
 
   var formKey = GlobalKey<FormState>();

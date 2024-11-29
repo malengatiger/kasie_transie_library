@@ -18,6 +18,7 @@ Ticket _$TicketFromJson(Map<String, dynamic> json) => Ticket(
       numberOfTrips: (json['numberOfTrips'] as num?)?.toInt(),
       created: json['created'] as String?,
       qrCodeUrl: json['qrCodeUrl'] as String?,
+      validOnAllRoutes: json['validOnAllRoutes'] as bool?,
       ticketType: $enumDecodeNullable(_$TicketTypeEnumMap, json['ticketType']),
     );
 
@@ -32,6 +33,7 @@ Map<String, dynamic> _$TicketToJson(Ticket instance) => <String, dynamic>{
       'ticketRoutes': instance.ticketRoutes?.map((e) => e.toJson()).toList(),
       'created': instance.created,
       'qrCodeUrl': instance.qrCodeUrl,
+      'validOnAllRoutes': instance.validOnAllRoutes,
     };
 
 const _$TicketTypeEnumMap = {
@@ -102,12 +104,14 @@ Map<String, dynamic> _$CommuterTicketPunchedToJson(
 
 TicketRoute _$TicketRouteFromJson(Map<String, dynamic> json) => TicketRoute(
       routeName: json['routeName'] as String?,
+      routeId: json['routeId'] as String?,
       startCityName: json['startCityName'] as String?,
       endCityName: json['endCityName'] as String?,
     );
 
 Map<String, dynamic> _$TicketRouteToJson(TicketRoute instance) =>
     <String, dynamic>{
+      'routeId': instance.routeId,
       'routeName': instance.routeName,
       'startCityName': instance.startCityName,
       'endCityName': instance.endCityName,

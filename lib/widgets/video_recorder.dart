@@ -303,14 +303,15 @@ class VideoRecorderState extends State<VideoRecorder>
     await mImageFile.copy(mFile.path);
     pp('$mm _processFile 🔵🔵🔵 video file to upload: ${mFile.path}'
         ' size: ${await mFile.length()} bytes 🔵');
-
-    final thumbnailFile0 = await getVideoThumbnail(mImageFile);
-    await thumbnailFile0.copy(tFile.path);
-
-    pp('$mm.......... _danceWithTheVideo ... Take Me To Church!!');
-
-    widget.onVideoMade(mFile,tFile);
-    cloudStorageBloc.uploadVehicleVideo(car: widget.vehicle, file: mFile, thumbnailFile: tFile);
+    //
+    // final thumbnailFile0 = await getVideoThumbnail(mImageFile);
+    // await thumbnailFile0.copy(tFile.path);
+    //
+    // pp('$mm.......... _danceWithTheVideo ... Take Me To Church!!');
+    //
+    // widget.onVideoMade(mFile,tFile);
+    // cloudStorageBloc.uploadVehicleVideo(car: widget.vehicle, file: mFile,
+    //     thumbnailFile: tFile);
 
     if (mounted) {
       showToast(

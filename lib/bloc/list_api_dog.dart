@@ -1235,16 +1235,14 @@ class ListApiDog {
   Future _sendHttpGET(String mUrl) async {
     pp('$xz _sendHttpGET: 🔆 🔆 🔆 ...... calling : 💙 $mUrl  💙');
     var start = DateTime.now();
-    token ??= await getAuthToken();
-    if (token == null) {
-      throw Exception('Firebase auth token is null');
-    }
-    headers['Authorization'] = 'Bearer $token';
+    // token ??= await getAuthToken();
+    // token ??= '';
+    // headers['Authorization'] = 'Bearer $token';
     try {
       var resp = await client
           .get(
             Uri.parse(mUrl),
-            headers: headers,
+            // headers: headers,
           )
           .timeout(const Duration(seconds: timeOutInSeconds));
 

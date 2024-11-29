@@ -570,6 +570,7 @@ class RouteAssignment {
 //
 @JsonSerializable(explicitToJson: true)
 class Vehicle {
+  String? _id;
   String? vehicleId;
   String? countryId, ownerName, ownerId, ownerCellphone;
   String? created, dateInstalled;
@@ -583,7 +584,8 @@ class Vehicle {
   List<VehiclePhoto>? photos = [];
   List<VehicleVideo>? videos = [];
 
-  Vehicle({this.vehicleId,
+  Vehicle({
+    this.vehicleId,
     required this.countryId,
     this.ownerName,
     this.ownerId,

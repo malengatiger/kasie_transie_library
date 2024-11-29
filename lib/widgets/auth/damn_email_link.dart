@@ -11,7 +11,7 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/navigator_utils_old.dart';
 import 'package:kasie_transie_library/widgets/language_and_color_chooser.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
-import 'package:open_mail_app/open_mail_app.dart' as mail;
+// import 'package:open_mail_app/open_mail_app.dart' as mail;
 
 import '../../bloc/data_api_dog.dart';
 import '../../bloc/list_api_dog.dart';
@@ -459,23 +459,23 @@ class DamnEmailLinkState extends State<DamnEmailLink>
         message: pleaseCheckEmail,
         context: context);
 
-    var result = await mail.OpenMailApp.openMailApp();
-    pp('$mm ... OpenMailApp ... result, didOpen: ${result.didOpen}');
-    // If no mail apps found, show error
-    if (mounted) {
-      if (!result.didOpen && !result.canOpen) {
-        showNoMailAppsDialog(context);
-      } else if (!result.didOpen && result.canOpen) {
-        showDialog(
-          context: context,
-          builder: (_) {
-            return mail.MailAppPickerDialog(
-              mailApps: result.options,
-            );
-          },
-        );
-      }
-    }
+    // var result = await mail.OpenMailApp.openMailApp();
+    // pp('$mm ... OpenMailApp ... result, didOpen: ${result.didOpen}');
+    // // If no mail apps found, show error
+    // if (mounted) {
+    //   if (!result.didOpen && !result.canOpen) {
+    //     showNoMailAppsDialog(context);
+    //   } else if (!result.didOpen && result.canOpen) {
+    //     // showDialog(
+    //     //   context: context,
+    //     //   builder: (_) {
+    //     //     return mail.MailAppPickerDialog(
+    //     //       mailApps: result.options,
+    //     //     );
+    //     //   },
+    //     // );
+    //   }
+    // }
   }
 
   void showNoMailAppsDialog(BuildContext context) {

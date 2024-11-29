@@ -6,12 +6,12 @@ import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/navigator_utils_old.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:kasie_transie_library/widgets/qr_scanner.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/widgets/vehicle_media_handler.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../utils/emojis.dart';
+import 'kasie/kasie_ai_scanner.dart';
 
 class ScanVehicleForOwner extends StatefulWidget {
   const ScanVehicleForOwner({super.key});
@@ -96,7 +96,7 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
         );
         pp('$mm updated owner vehicle ${E.redDot}');
         myPrettyJsonPrint(updatedVehicle.toJson());
-        vehicle = await dataApiDog.updateVehicle(updatedVehicle);
+        var num = await dataApiDog.updateVehicle(updatedVehicle);
         listApiDog.getOwnerVehicles(user.userId!, true);
         pp('$mm ... updatedCar ... vehicle: ${vehicle!.vehicleReg!}');
       }
@@ -188,22 +188,9 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
                   onTap: () {
                     pp('$mm .... will try to restart a scan ...');
                   },
-                  child: QRScanner(
-                    onCarScanned: (car) {
-                      setState(() {
-                        vehicle = car;
-                      });
-                      onCarScanned(car);
-                    },
-                    onClear: (){
-                      setState(() {
-                        vehicle = null;
-                      });
-                    },
-                    onUserScanned: (u) {},
-                    onError: onError,
-                    quitAfterScan: true,
-                  ),
+                  child: KasieAIScanner(onScanned: (json ) {
+                    onCarScanned(lib.Vehicle.fromJson(json));
+                  },),
                 ),
                 const SizedBox(
                   height: 8,

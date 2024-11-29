@@ -11,6 +11,7 @@ class Ticket {
   TicketType? ticketType;
   List<TicketRoute>? ticketRoutes = [];
   String? created, qrCodeUrl;
+  bool? validOnAllRoutes = false;
 
   Ticket(
       {required this.associationId,
@@ -21,7 +22,7 @@ class Ticket {
       required this.ticketRoutes,
       this.numberOfTrips,
       this.created,
-      this.qrCodeUrl,
+      this.qrCodeUrl, this.validOnAllRoutes,
       required this.ticketType});
 
   factory Ticket.fromJson(Map<String, dynamic> json) => _$TicketFromJson(json);
@@ -82,11 +83,11 @@ class CommuterTicketPunched {
 
 @JsonSerializable(explicitToJson: true)
 class TicketRoute {
-  String? routeName, startCityName, endCityName;
+  String? routeId, routeName, startCityName, endCityName;
 
   TicketRoute(
-      {
-      required this.routeName,
+      {required this.routeName,
+      required this.routeId,
       required this.startCityName,
       required this.endCityName});
 

@@ -17,16 +17,16 @@ import '../l10n/translation_handler.dart';
 import '../utils/prefs.dart';
 import '../widgets/searching_cities_busy.dart';
 
-class CityCreatorMap extends ConsumerStatefulWidget {
+class CityCreatorMap extends StatefulWidget {
   const CityCreatorMap({required this.onCityAdded,
     super.key,
   });
   final Function (lib.City) onCityAdded;
   @override
-  ConsumerState createState() => CityCreatorMapState();
+  State createState() => CityCreatorMapState();
 }
 
-class CityCreatorMapState extends ConsumerState<CityCreatorMap> {
+class CityCreatorMapState extends State<CityCreatorMap> {
   static const defaultZoom = 16.0;
   final Completer<GoogleMapController> _mapController = Completer();
   Prefs prefs = GetIt.instance<Prefs>();
