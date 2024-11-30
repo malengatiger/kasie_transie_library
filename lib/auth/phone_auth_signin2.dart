@@ -20,14 +20,12 @@ import 'package:intl_phone_field/countries.dart' as cnt;
 class PhoneAuthSignin extends StatefulWidget {
   const PhoneAuthSignin({
     super.key,
-    required this.dataApiDog,
     required this.onGoodSignIn,
     required this.onSignInError,
   });
 
   final Function onGoodSignIn;
   final Function onSignInError;
-  final DataApiDog dataApiDog;
 
   @override
   PhoneAuthSigninState createState() => PhoneAuthSigninState();
@@ -45,6 +43,7 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
   String? code;
   final phoneController = TextEditingController(text: "+19095550008");
   final codeController = TextEditingController(text: '123456');
+  final DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
 
   String? currentText;
   bool verificationFailed = false;

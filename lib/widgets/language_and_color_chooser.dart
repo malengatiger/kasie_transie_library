@@ -176,7 +176,7 @@ class LanguageAndColorChooserState extends State<LanguageAndColorChooser>
   }
 
   ColorFromTheme? colorFromTheme;
-  ThemeBloc themeBloc = GetIt.instance<ThemeBloc>();
+  KasieThemeManager themeBloc = GetIt.instance<KasieThemeManager>();
 
   void onColorChosen(ColorFromTheme colorFromTheme) async {
     pp('$mm ... onColorChosen, index: ${colorFromTheme.themeIndex}');

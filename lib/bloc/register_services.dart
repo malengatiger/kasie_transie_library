@@ -50,9 +50,11 @@ class RegisterServices {
     //
     pp('$mm ..... 🦠🦠🦠🦠🦠registerLazySingletons ...');
 
+    GetIt.instance.registerLazySingleton<KasieThemeManager>(() => KasieThemeManager(prefs));
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... KasieThemeManager');
+
     GetIt.instance.registerLazySingleton<RouteUpdateListener>(() => RouteUpdateListener());
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... RouteUpdateListener');
-
 
     GetIt.instance.registerLazySingleton<DeviceLocationBloc>(() => DeviceLocationBloc());
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... DeviceLocationBloc');
@@ -76,7 +78,7 @@ class RegisterServices {
         () => TheGreatGeofencer(dataApi, listApi, prefs));
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... TheGreatGeofencer');
 
-    GetIt.instance.registerLazySingleton<ThemeBloc>(() => ThemeBloc(prefs));
+    GetIt.instance.registerLazySingleton<KasieThemeManager>(() => KasieThemeManager(prefs));
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... ThemeBloc');
 
     GetIt.instance.registerLazySingleton<ListApiDog>(() => listApi);

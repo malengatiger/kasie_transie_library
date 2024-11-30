@@ -3,19 +3,16 @@ import 'dart:math';
 
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
-
-import 'package:google_fonts/google_fonts.dart';
 import 'package:kasie_transie_library/data/color_and_locale.dart';
-
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
 
 
-class ThemeBloc {
-  final mm = '🍎🍎🍎ThemeBloc 🍎🍎🍎: ';
+class KasieThemeManager {
+  final mm = '🍎🍎🍎KasieThemeManager 🍎🍎🍎: ';
   final Prefs prefs;
 
-  ThemeBloc(this.prefs) {
+  KasieThemeManager(this.prefs) {
     pp('$mm ... ThemeBloc initializing ....');
     _initialize();
   }
