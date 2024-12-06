@@ -7,12 +7,14 @@ import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
+import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/utils/navigator_utils_old.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/photo_handler.dart';
 import 'package:kasie_transie_library/widgets/vehicle_photo_widget.dart';
 import 'package:kasie_transie_library/widgets/video_recorder.dart';
 import 'package:badges/badges.dart' as bd;
+import 'package:page_transition/page_transition.dart';
 
 class VehicleMediaHandler extends StatefulWidget {
   const VehicleMediaHandler({super.key, required this.vehicle});
@@ -32,9 +34,9 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
   var vehiclePhotos = <lib.VehiclePhoto>[];
   final videoFiles = <File>[];
 
-  final photoThumbFiles = <File>[];
+  final photoFiles = <File>[];
   bool busy = false;
-  bool showAllPhotos = false;
+  bool _showPriorPhotos = true;
   String? vehicleMedia,
       allPhotosVideos,
       photosAndVideosNow,
@@ -85,25 +87,23 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
     }
     setState(() {
       busy = false;
-      showAllPhotos = true;
+      _showPriorPhotos = true;
     });
   }
 
   Future<void> _navigateToPhotoHandler() async {
-    await navigateWithScale(
-        PhotoHandler(
-            vehicle: widget.vehicle,
-            onPhotoTaken: (file, tFile) {
-              pp('$mm photo files received ${tFile.path}');
+    await NavigationUtils.navigateTo(context: context, widget: PhotoHandler(
+        vehicle: widget.vehicle,
+        onPhotoTaken: (file, tFile) {
+          pp('$mm photo files received ${file.path} ${tFile.path}');
+          setState(() {
+            photoFiles.insert(0, file);
+          });
+        }), transitionType: PageTransitionType.leftToRight);
 
-              setState(() {
-                photoThumbFiles.insert(0, tFile);
-              });
-            }),
-        context);
     pp('$mm back from PhotoHandler ... set state ...');
     setState(() {
-      showAllPhotos = false;
+      _showPriorPhotos = false;
     });
   }
 
@@ -115,7 +115,7 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
               pp('$mm video files received ${tFile.path}');
               setState(() {
                 videoFiles.add(file);
-                photoThumbFiles.add(tFile);
+                photoFiles.add(tFile);
               });
             }),
         context);
@@ -131,8 +131,6 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
     navigateWithScale(VehiclePhotoWidget(vehiclePhoto: photo), context);
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -144,13 +142,13 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
           IconButton(
               onPressed: () {
                 setState(() {
-                  showAllPhotos = !showAllPhotos;
+                  _showPriorPhotos = !_showPriorPhotos;
                 });
-                if (showAllPhotos) {
+                if (_showPriorPhotos) {
                   _getVehiclePhotos(true);
                 }
               },
-              icon: const Icon(Icons.list)),
+              icon: const Icon(Icons.settings)),
           IconButton(
               onPressed: () {
                 _getVehiclePhotos(true);
@@ -179,7 +177,7 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
                 const SizedBox(
                   height: 4,
                 ),
-                showAllPhotos
+                _showPriorPhotos
                     ? Text(
                         allPhotosVideos == null
                             ? 'All Vehicle Photos and Videos'
@@ -202,12 +200,12 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
                   height: 12,
                 ),
                 Expanded(
-                  child: showAllPhotos
+                  child: _showPriorPhotos
                       ? bd.Badge(
                           onTap: () {
                             pp('$mm badge tapped ... toggle?');
                             setState(() {
-                              showAllPhotos = !showAllPhotos;
+                              _showPriorPhotos = !_showPriorPhotos;
                             });
                           },
                           badgeContent: Text('${vehiclePhotos.length}'),
@@ -234,7 +232,7 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
                                     child: Padding(
                                       padding: const EdgeInsets.all(0.0),
                                       child: Image.network(
-                                        photo.thumbNailUrl!,
+                                        photo.url!,
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -246,10 +244,10 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
                           onTap: () {
                             pp('$mm badge tapped ... show more ...?');
                             setState(() {
-                              showAllPhotos = !showAllPhotos;
+                              _showPriorPhotos = !_showPriorPhotos;
                             });
                           },
-                          badgeContent: Text('${photoThumbFiles.length}'),
+                          badgeContent: Text('${photoFiles.length}'),
                           badgeStyle: bd.BadgeStyle(
                             badgeColor: Colors.red.shade700,
                             padding: const EdgeInsets.all(12.0),
@@ -258,9 +256,9 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: 2),
-                              itemCount: photoThumbFiles.length,
+                              itemCount: photoFiles.length,
                               itemBuilder: (ctx, index) {
-                                var file = photoThumbFiles.elementAt(index);
+                                var file = photoFiles.elementAt(index);
                                 return GestureDetector(
                                   onTap: () async {
                                     final mod = await file.lastModified();
@@ -268,7 +266,6 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
                                   },
                                   child: Card(
                                     elevation: 8,
-                                    shape: getRoundedBorder(radius: 12),
                                     child: Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Image.file(

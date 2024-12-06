@@ -69,14 +69,15 @@ class FCMBloc {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('app_icon');
 
-    final DarwinInitializationSettings initializationSettingsDarwin =
+    const DarwinInitializationSettings initializationSettingsDarwin =
         DarwinInitializationSettings(
-            onDidReceiveLocalNotification: onDidReceiveLocalNotification);
+          defaultPresentSound: true,
+            );
 
     const LinuxInitializationSettings initializationSettingsLinux =
         LinuxInitializationSettings(defaultActionName: 'Open notification');
 
-    final InitializationSettings initializationSettings =
+    const InitializationSettings initializationSettings =
         InitializationSettings(
             android: initializationSettingsAndroid,
             iOS: initializationSettingsDarwin,

@@ -30,7 +30,7 @@ class Prefs {
     }
     var jx = json.decode(string);
     var user = User.fromJson(jx);
-    pp("🌽 🌽 🌽 Prefs: getUser 🧩  ${user.firstName} retrieved");
+    pp("🌽 🌽 🌽 Prefs: getUser 🧩  ${user.toJson()} retrieved");
     return user;
   }
 

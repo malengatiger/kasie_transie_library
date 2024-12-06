@@ -37,7 +37,7 @@ class DeviceLocationBloc {
     // When we reach here, permissions are granted and we can
     // continue accessing the position of the device.
     var loc = await Geolocator.getCurrentPosition();
-    pp('$mm location determined: ${loc.latitude} ${loc.longitude}');
+    pp('$mm location determined, returning loc: ${loc.latitude} ${loc.longitude}');
     return loc;
   }
   Future<double> getDistanceFromCurrentPosition(
@@ -71,5 +71,3 @@ class DeviceLocationBloc {
     return m;
   }
 }
-
-

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:json_annotation/json_annotation.dart';
 
 part 'ticket.g.dart';
@@ -10,7 +12,8 @@ class Ticket {
   int? numberOfTrips;
   TicketType? ticketType;
   List<TicketRoute>? ticketRoutes = [];
-  String? created, qrCodeUrl;
+  String? created, qrCodeUrl, bucketFileName;
+  String? qrCodeBytes;
   bool? validOnAllRoutes = false;
 
   Ticket(
@@ -22,7 +25,10 @@ class Ticket {
       required this.ticketRoutes,
       this.numberOfTrips,
       this.created,
-      this.qrCodeUrl, this.validOnAllRoutes,
+      this.bucketFileName,
+      this.qrCodeUrl,
+      this.qrCodeBytes,
+      this.validOnAllRoutes,
       required this.ticketType});
 
   factory Ticket.fromJson(Map<String, dynamic> json) => _$TicketFromJson(json);
@@ -41,7 +47,8 @@ class CommuterTicket {
       commuterCellphone;
   double? value;
   int? numberOfTrips;
-  String? validFromDate, validToDate;
+  String? validFromDate, validToDate, bucketFileName;
+  String? qrCodeBytes;
 
   TicketType? ticketType;
   List<TicketRoute> ticketRoutes = [];
@@ -56,6 +63,8 @@ class CommuterTicket {
       this.commuterCellphone,
       this.commuterTicketId,
       this.value,
+      this.qrCodeBytes,
+      this.bucketFileName,
       this.validFromDate,
       this.numberOfTrips,
       this.validToDate,

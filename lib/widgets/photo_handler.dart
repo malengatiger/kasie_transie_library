@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
@@ -12,6 +11,7 @@ import 'package:native_device_orientation/native_device_orientation.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../bloc/cloud_storage_bloc.dart';
+import '../isolates/isolate_manager.dart';
 import '../l10n/translation_handler.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
@@ -39,19 +39,20 @@ class PhotoHandlerState extends State<PhotoHandler>
   Prefs prefs = GetIt.instance<Prefs>();
   CloudStorageBloc cloudStorageBloc = GetIt.instance<CloudStorageBloc>();
 
-
   late AnimationController _controller;
   final ImagePicker _picker = ImagePicker();
   late StreamSubscription orientStreamSubscription;
   late StreamSubscription<String> killSubscription;
 
   NativeDeviceOrientation? _deviceOrientation;
+
   // var polygons = <mrm.ProjectPolygon>[];
   // var positions = <mrm.ProjectPosition>[];
   lib.User? user;
   String? fileSavedWillUpload;
   String? totalByteCount, bytesTransferred;
   String? fileUrl, thumbnailUrl, takePicture;
+
   // late mrm.SettingsModel sett;
 
   @override
@@ -83,92 +84,131 @@ class PhotoHandlerState extends State<PhotoHandler>
   }
 
   void _startPhoto() async {
-    pp('$mm photo taking started ....');
-    var settings = prefs.getSettings();
+    pp('\n\n$mm .....photo taking started ....');
     var height = 640.0, width = 480.0;
 
-    final XFile? file = await _picker.pickImage(
+    final XFile? xFile = await _picker.pickImage(
         source: ImageSource.camera,
         maxHeight: height,
         maxWidth: width,
         imageQuality: 100,
         preferredCameraDevice: CameraDevice.front);
 
-    if (file != null) {
-      await _processFile(file);
+    if (xFile != null) {
+      await _processFile(xFile);
       setState(() {});
     }
-    // file.saveTo(path);
+    // xFile.saveTo(path);
   }
 
-  File? finalFile;
-  Future<void> _processFile(XFile file) async {
-    PlatformFile mImageFile = PlatformFile(name: file.name, size: await file.length());
-    pp('$mm _processFile 🔵🔵🔵 file to upload, '
-        'size: ${await mImageFile.bytes?.length} bytes🔵');
+  File? imageFile, thumbFile;
 
-    var thumbnailFile = await getPhotoThumbnail(file: File(mImageFile.path!));
+  Future<void> _processFile(XFile file) async {
+    pp('$mm _processFile 🔵🔵🔵 file to upload, '
+        'size: ${await file.length()} bytes 🔵');
+    //
     bool isLandscape = false;
-    if (_deviceOrientation != null) {
-      switch (_deviceOrientation!.name) {
-        case 'landscapeLeft':
-          isLandscape = true;
-          break;
-        case 'landscapeRight':
-          isLandscape = true;
-          break;
-      }
-    } else {
-      pp('_deviceOrientation is null, wtf?? means that user did not change device orientation ..........');
-    }
+
     pp('$mm ... isLandscape: $isLandscape - check if true!  🍎');
     final suffix =
         '${user!.userId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
 
-    final Directory directory = await getApplicationDocumentsDirectory();
-    var x = '/photo_$suffix';
-    final File mFile = File('${directory.path}$x');
-    var z = '/photo_thumbnail_$suffix';
-    // final File tFile =
-    //     File('${directory.path}$z${DateTime.now().millisecondsSinceEpoch}.jpg');
-    // await thumbnailFile?.copy(tFile.path);
-    // //can i force
-    // if (_deviceOrientation != null) {
-    //   final finalFile =
-    //       await _processOrientation(mImageFile, _deviceOrientation!);
-    //   await finalFile.copy(mFile.path);
-    // } else {
-    //   await mImageFile.copy(mFile.path);
-    // }
-    setState(() {
-      finalFile = mFile;
-    });
+    try {
+      final Directory directory = await getApplicationDocumentsDirectory();
+      var x = '/photo_$suffix';
+      final File mFile =
+          File('${directory.path}$x'); // Create a new File in app directory
+      await file.saveTo(
+          mFile.path); // Copy contents of original file to the app's directory
 
-    // widget.onPhotoTaken(mFile, tFile);
-    //
-    // cloudStorageBloc.uploadPhoto(
-    //     car: widget.vehicle, file: mFile, thumbnailFile: tFile);
+      if (_deviceOrientation != null) {
+        switch (_deviceOrientation!.name) {
+          case 'landscapeLeft':
+            isLandscape = true;
+            _processOrientation(mFile, _deviceOrientation!);
+            break;
+          case 'landscapeRight':
+            isLandscape = true;
+            _processOrientation(mFile, _deviceOrientation!);
+            break;
+        }
+      } else {
+        pp('😈😈😈😈😈_deviceOrientation is null, wtf?? 😈 means that user did not change device orientation? ..........');
+      }
+      var thumb = await _getThumbnail(mFile);
 
-    var size = await mFile.length();
-    var m = (size / 1024 / 1024).toStringAsFixed(2);
-    pp('$mm Picture taken is $m MB in size');
-    if (mounted) {
-      showToast(
-          context: context,
-          message: fileSavedWillUpload == null
-              ? 'Picture file saved on device, size: $m MB'
-              : fileSavedWillUpload!,
-          backgroundColor: Theme.of(context).primaryColor,
-          textStyle: myTextStyleSmall(context),
-          toastGravity: ToastGravity.TOP,
-          duration: const Duration(seconds: 2));
+      pp('$mm ... mFile: ${await mFile.length()} bytes,  🍎');
+      pp('$mm ... thumb: ${await thumb?.length()} bytes,  🍎');
+
+      setState(() {
+        imageFile = mFile;
+        thumbFile = thumb;
+        _showUploadPhoto = true;
+        _showNextPhoto = true;
+      });
+
+      widget.onPhotoTaken(mFile, thumb!);
+
+      var size = await mFile.length();
+      var m = (size / 1024 / 1024).toStringAsFixed(2);
+      pp('$mm Picture taken is $m MB in size');
+
+      if (mounted) {
+        showToast(
+            context: context,
+            message: fileSavedWillUpload == null
+                ? 'Picture file saved on device, size: $m MB'
+                : fileSavedWillUpload!,
+            backgroundColor: Theme.of(context).primaryColor,
+            textStyle: myTextStyleSmall(context),
+            toastGravity: ToastGravity.TOP,
+            duration: const Duration(seconds: 5));
+      }
+    } catch (e, s) {
+      pp('$e $s');
     }
+  }
+
+  Future<File?> _getThumbnail(File mFile) async {
+    final appDocumentDirectory = await getApplicationDocumentsDirectory();
+    final File tFile = File(
+        '${appDocumentDirectory.path}/thumbnails${DateTime.now().millisecondsSinceEpoch}.jpg');
+
+
+    final imageCommand = img.Command();
+    imageCommand.decodeImageFile(mFile.path);
+    imageCommand.copyResize(width: 100, height: 100);
+    imageCommand.writeToFile(tFile.path);
+    var cmdRes = await imageCommand.executeThread();
+    return tFile;
   }
 
   void _startNextPhoto() {
     pp('$mm _startNextPhoto');
     _startPhoto();
   }
+
+  Future _uploadFiles() async {
+    pp('$mm _uploadFiles');
+    setState(() {
+      _busy = true;
+    });
+    await cloudStorageBloc.uploadVehiclePhoto(
+        car: widget.vehicle, file: imageFile!, thumbnailFile: thumbFile!);
+    photos.add(imageFile!);
+    thumbNails.add(thumbFile!);
+    setState(() {
+      _showUploadPhoto = false;
+      _showNextPhoto = true;
+      _busy = false;
+    });
+  }
+
+  List<File> photos = [];
+  List<File> thumbNails = [];
+  bool _showUploadPhoto = false;
+  bool _showNextPhoto = false;
+  bool _busy = false;
 
   @override
   void dispose() {
@@ -210,8 +250,8 @@ class PhotoHandlerState extends State<PhotoHandler>
         'original file size: height: $heightOrig width: $widthOrig');
     return mFile;
   }
-  String? takePhoto;
 
+  String? takePhoto;
 
   @override
   Widget build(BuildContext context) {
@@ -234,18 +274,10 @@ class PhotoHandlerState extends State<PhotoHandler>
             '${widget.vehicle.vehicleReg}',
             style: myTextStyleMediumWithColor(context, color),
           ),
-          // actions: [
-          //   IconButton(
-          //       onPressed: _navigateTimeline,
-          //       icon: Icon(
-          //         Icons.list,
-          //         color: Theme.of(context).primaryColor,
-          //       )),
-          // ],
         ),
         body: Stack(
           children: [
-            finalFile == null
+            imageFile == null
                 ? Container(
                     width: double.infinity,
                     height: double.infinity,
@@ -261,7 +293,7 @@ class PhotoHandlerState extends State<PhotoHandler>
                     height: double.infinity,
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: FileImage(finalFile!), fit: BoxFit.cover),
+                          image: FileImage(imageFile!), fit: BoxFit.cover),
                     ),
                   ),
             Positioned(
@@ -270,32 +302,54 @@ class PhotoHandlerState extends State<PhotoHandler>
               bottom: 20,
               child: SizedBox(
                 width: 240,
-                height: 80,
+                height: 120,
                 child: Card(
                   elevation: 4,
-                  color: Colors.black38,
-                  shape: getDefaultRoundedBorder(),
+                  color: Colors.black26,
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const SizedBox(
-                        height: 8,
-                      ),
-                      TextButton(
-                          onPressed: _startNextPhoto,
-                          child: Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Text(
-                              takePicture == null
-                                  ? 'Take Picture'
-                                  : takePicture!,
-                              style: myTextStyleMediumWithColor(context, color),
-                            ),
-                          )),
+                      _showUploadPhoto
+                          ? TextButton(
+                              onPressed: () {
+                                _uploadFiles();
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: Text(
+                                  'Upload Photo',
+                                  style: myTextStyleMediumWithColor(
+                                      context, Colors.white),
+                                ),
+                              ))
+                          : gapW4,
+                      _showNextPhoto
+                          ? TextButton(
+                              onPressed: _startNextPhoto,
+                              child: Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: Text(
+                                  takePicture == null
+                                      ? 'Take Picture'
+                                      : takePicture!,
+                                  style: myTextStyleMediumWithColor(
+                                      context, color),
+                                ),
+                              ))
+                          : gapH32,
                     ],
                   ),
                 ),
               ),
             ),
+            _busy
+                ? const Positioned(
+                    child: Center(
+                        child: CircularProgressIndicator(
+                    strokeWidth: 4,
+                  )))
+                : gapW32,
           ],
         ),
       ),

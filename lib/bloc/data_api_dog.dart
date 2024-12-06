@@ -62,15 +62,20 @@ class DataApiDog {
   }
 
   Future getAuthToken() async {
-    var m = await appAuth.getAuthToken();
-    if (m == null) {
-      pp('$mm Unable to get Firebase token');
-      token = 'NoToken';
-    } else {
-      pp('$mm getAuthToken: Firebase token retrieved OK');
-      token = m;
+    try {
+      var m = await appAuth.getAuthToken();
+      if (m == null) {
+            pp('$mm Unable to get Firebase token');
+            token = 'NoToken';
+          } else {
+            pp('$mm getAuthToken: Firebase token retrieved OK');
+            token = m;
+          }
+      return token;
+    } catch (e,s) {
+      pp('$mm $e $s');
+      rethrow;
     }
-    return token;
   }
 
   Future uploadProfilePicture(
@@ -164,7 +169,7 @@ class DataApiDog {
       final responseBody = await response.stream.bytesToString();
       return responseBody;
     } else {
-      pp('$mm 😈😈File upload failed with status code: 😈${response.statusCode} 😈 ${response.reasonPhrase}');
+      pp('\n\n$mm 😈😈😈😈😈😈File upload failed with status code: 😈${response.statusCode} 😈 ${response.stream.first.toString()} 😈😈');
     }
 
     throw Exception('QRCode File upload failed');
@@ -427,6 +432,7 @@ class DataApiDog {
   }
 
   Future<Vehicle> addVehicle(Vehicle vehicle) async {
+    pp('$mm a......... adding vehicle: ${vehicle.toJson()}');
     final bag = vehicle.toJson();
     final cmd = '${url}vehicle/addVehicle';
 
@@ -470,7 +476,14 @@ class DataApiDog {
     pp('$mm user added to database: 🥬 🥬 $res');
     return User.fromJson(res);
   }
-
+  Future<User> addOwner(User user) async {
+    final bag = user.toJson();
+    final cmd = '${url}user/createOwner';
+    final res = await _callPost(cmd, bag);
+    // semCache.saveUsers([user]);
+    pp('$mm owner added to database: 🥬 🥬 $res');
+    return User.fromJson(res);
+  }
   Future addUserGeofenceEvent(UserGeofenceEvent event) async {
     final bag = event.toJson();
     final cmd = '${url}addUserGeofenceEvent';
@@ -481,11 +494,11 @@ class DataApiDog {
   Future addDispatchRecord(DispatchRecord dispatchRecord) async {
     try {
       final bag = dispatchRecord.toJson();
-      final cmd = '${url}addDispatchRecord';
+      final cmd = '${url}dispatch/addDispatchRecord';
       final res = await _callPost(cmd, bag);
       final r = DispatchRecord.fromJson(res);
 
-      pp('$mm DispatchRecord added to database');
+      pp('$mm DispatchRecord added to database: ${r.toJson()}');
       return r;
     } catch (e) {
       await cacheManager.saveDispatchRecord(dispatchRecord);
@@ -819,7 +832,7 @@ class DataApiDog {
 
   Future<VehiclePhoto> addVehiclePhoto(VehiclePhoto vehiclePhoto) async {
     final bag = vehiclePhoto.toJson();
-    final cmd = '${url}addVehiclePhoto';
+    final cmd = '${url}vehicle/addVehiclePhoto';
 
     final res = await _callPost(cmd, bag);
     final r = VehiclePhoto.fromJson(res);

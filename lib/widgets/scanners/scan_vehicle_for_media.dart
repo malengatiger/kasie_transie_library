@@ -5,8 +5,10 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/widgets/vehicle_media_handler.dart';
+import 'package:page_transition/page_transition.dart';
 
 import '../../bloc/list_api_dog.dart';
+import '../../utils/navigator_utils.dart';
 import 'kasie/kasie_ai_scanner.dart';
 
 class ScanVehicleForMedia extends StatefulWidget {
@@ -39,18 +41,17 @@ class ScanVehicleForMediaState extends State<ScanVehicleForMedia>
 
   void navigateToMediaHandler() async {
     pp('$mm ... navigate to VehicleMediaHandler ... for car: ${vehicle!.vehicleReg}');
-    Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-      return VehicleMediaHandler(
-        vehicle: vehicle!,
-      );
-    }));
+
+    NavigationUtils.navigateTo(context: context, widget: VehicleMediaHandler(vehicle: vehicle!,),
+        transitionType: PageTransitionType.leftToRight);
   }
 
   void onCarScanned(lib.Vehicle car) async {
+    vehicle = car;
     pp('$mm ... onCarScanned; scanner returned ${vehicle!.vehicleReg} ...');
     setState(() {
-      vehicle = car;
     });
+    navigateToMediaHandler();
   }
 
   void onError() {}
@@ -72,95 +73,103 @@ class ScanVehicleForMediaState extends State<ScanVehicleForMedia>
   }
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title:  Text(vehicleMedia == null?
             'Vehicle Media':vehicleMedia!),
-        bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(420),
-            child: Column(
-              children: [
-                const SizedBox(
-                  height: 8,
-                ),
-                Text(scanVehicle == null?
-                  'Scan Vehicle':scanVehicle!,
-                  style: myTextStyleMediumLargeWithColor(
-                      context, Theme.of(context).primaryColor, 28),
-                ),
-                Text(scanTheVehicle == null?
-                  'Scan the vehicle that you want to work with': scanTheVehicle!,
-                  style: myTextStyleSmall(context),
-                ),
-                const SizedBox(
-                  height: 32,
-                ),
-                GestureDetector(
-                  onTap: (){
-                    pp('$mm .... will try to restart a scan ...');
-                  },
-                  child: KasieAIScanner(onScanned: (json ) {
-                    onCarScanned(lib.Vehicle.fromJson(json));
-                  },),
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-              ],
-            )),
+        // bottom: PreferredSize(
+        //     preferredSize: const Size.fromHeight(420),
+        //     child: Column(
+        //       children: [
+        //         const SizedBox(
+        //           height: 8,
+        //         ),
+        //         Text(scanVehicle == null?
+        //           'Scan Vehicle':scanVehicle!,
+        //           style: myTextStyleMediumLargeWithColor(
+        //               context, Theme.of(context).primaryColor, 28),
+        //         ),
+        //         Text(scanTheVehicle == null?
+        //           'Scan the vehicle that you want to work with': scanTheVehicle!,
+        //           style: myTextStyleSmall(context),
+        //         ),
+        //         const SizedBox(
+        //           height: 32,
+        //         ),
+        //         GestureDetector(
+        //           onTap: (){
+        //             pp('$mm .... will try to restart a scan ...');
+        //           },
+        //           child: KasieAIScanner(onScanned: (json ) {
+        //             onCarScanned(lib.Vehicle.fromJson(json));
+        //           },),
+        //         ),
+        //         const SizedBox(
+        //           height: 8,
+        //         ),
+        //       ],
+        //     )),
       ),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                const SizedBox(
-                  height: 8,
-                ),
-                vehicle != null
-                    ? Column(mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const SizedBox(
-                            height: 48,
-                          ),
-                          Row(mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                '${vehicle!.vehicleReg}',
-                                style: myTextStyleMediumLargeWithColor(
-                                    context, Theme.of(context).primaryColor, 40),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 24,
-                          ),
-                          ElevatedButton(
-                            style: const ButtonStyle(
-                              elevation: WidgetStatePropertyAll(8.0)
-                            ),
-                              onPressed: () {
-                                navigateToMediaHandler();
-                              },
-                              child:  Padding(
-                                padding: const EdgeInsets.all(24.0),
-                                child: Text(startPhotoVideo == null?
-                                    'Start Photo & Video Capture': startPhotoVideo!),
-                              )),
-                        ],
-                      )
-                    : Text(noVehicleScanned == null?
-                        'No Vehicle Scanned yet':noVehicleScanned!,
-                        style: myTextStyleMediumLargeWithColor(
-                            context, Colors.grey.shade700, 20),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  vehicle == null? KasieAIScanner(onScanned: (json){
+                    pp('$mm car scanned: $json');
+                   onCarScanned(lib.Vehicle.fromJson(json));
+                   
+                  }) : gapW4,
+                  gapH32,
+                  vehicle != null
+                      ? Column(mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        height: 48,
                       ),
-              ],
-            ),
-          )
-        ],
+                      Row(mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '${vehicle!.vehicleReg}',
+                            style: myTextStyleMediumLargeWithColor(
+                                context, Theme.of(context).primaryColor, 40),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 24,
+                      ),
+
+                      ElevatedButton(
+                          style: const ButtonStyle(
+                              elevation: WidgetStatePropertyAll(8.0)
+                          ),
+                          onPressed: () {
+                            navigateToMediaHandler();
+                          },
+                          child:  Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Text(startPhotoVideo == null?
+                            'Start Photo & Video Capture': startPhotoVideo!),
+                          )),
+                    ],
+                  )
+                      : Text(noVehicleScanned == null?
+                  'No Vehicle Scanned yet':noVehicleScanned!,
+                    style: myTextStyleMediumLargeWithColor(
+                        context, Colors.grey.shade700, 20),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
-    ));
+    );
   }
 }

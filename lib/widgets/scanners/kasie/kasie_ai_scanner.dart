@@ -35,33 +35,22 @@ class _KasieAIScannerState extends State<KasieAIScanner> {
     pp('$mm ...  widget.onScanned ... ');
     pp('\n\n$mm ${pretty.prettyJson(json)}\n\n');
     widget.onScanned(json);
-    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
     final height = MediaQuery.sizeOf(context).height;
-
     final Rect scanWindow = Rect.fromCenter(
       center: Offset(width / 2, height / 2),
       width: width,
       height: height,
     );
-    return Scaffold(
-      appBar: AppBar(
-          title: const Row(
-        children: [
-          Icon(Icons.document_scanner_sharp),
-          SizedBox(width: 16),
-          Text(
-            'KasieTransie AI Scanner',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
-          ),
-        ],
-      )),
-      body: Stack(children: [
-        Center(
+    return Stack(children: [
+      Center(
+        child: SizedBox(
+          height: 440,
+          width: 440,
           child: AiBarcodeScanner(
             onDispose: () {
               pp("\n🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎Barcode scanner disposed!");
@@ -71,7 +60,6 @@ class _KasieAIScannerState extends State<KasieAIScanner> {
             controller: scannerController,
             hideSheetDragHandler: true,
             hideSheetTitle: true,
-            scanWindow: scanWindow,
             cutOutSize: width,
             validator: (value) {
               if (value.barcodes.isEmpty) {
@@ -91,7 +79,8 @@ class _KasieAIScannerState extends State<KasieAIScanner> {
               pp("$mm Barcode list: ${barcodes.length}");
               if (barcodes.isNotEmpty) {
                 final String? scannedValue = capture.barcodes.first.rawValue;
-                if (scannedValue != null && scannedValue.runtimeType == String) {
+                if (scannedValue != null &&
+                    scannedValue.runtimeType == String) {
                   pp("$mm Barcode scannedValue runtimeType: ${scannedValue.runtimeType}");
                   pp("$mm 🥦🥦 Barcode scanned: $scannedValue 🥦🥦");
                   Map<String, dynamic> map = jsonDecode(scannedValue);
@@ -102,9 +91,10 @@ class _KasieAIScannerState extends State<KasieAIScanner> {
                 }
               }
             },
+
           ),
         ),
-      ]),
-    );
+      ),
+    ]);
   }
 }

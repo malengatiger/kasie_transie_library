@@ -1,27 +1,29 @@
+import 'package:badges/badges.dart' as bd;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
+import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
+import 'package:kasie_transie_library/widgets/drop_down_widgets.dart';
 import 'package:kasie_transie_library/widgets/passenger_count.dart';
-import 'package:kasie_transie_library/widgets/route_widget.dart';
-import 'package:badges/badges.dart' as bd;
 
+import '../../bloc/data_api_dog.dart';
 import '../../isolates/local_finder.dart';
-import '../media_reminder.dart';
 import 'dispatch_helper.dart';
 import 'kasie/kasie_ai_scanner.dart';
-import 'kasie/scanner_starter.dart';
-
 
 class DispatchViaScan extends StatefulWidget {
-  const DispatchViaScan({super.key});
+  const DispatchViaScan(
+      {super.key, required this.route, required this.onDispatched});
+
+  final lib.Route route;
+  final Function(lib.DispatchRecord) onDispatched;
 
   @override
   DispatchViaScanState createState() => DispatchViaScanState();
@@ -33,7 +35,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
   DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
   final mm = '${E.heartOrange}${E.heartOrange}${E.heartOrange}${E.heartOrange}'
       ' ScanDispatch: ${E.heartOrange}${E.heartOrange} ';
-  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  DataApiDog _dataApiDog = GetIt.instance<DataApiDog>();
   Prefs prefs = GetIt.instance<Prefs>();
 
   String? dispatchText,
@@ -48,17 +50,11 @@ class DispatchViaScanState extends State<DispatchViaScan>
       dispatchFailed,
       allPhotosVideos;
   lib.Vehicle? scannedVehicle;
-  lib.Route? selectedRoute;
   bool quitAfterScan = false;
-  var cars = <lib.Vehicle>[];
-  var dispatches = <lib.DispatchRecord>[];
   lib.User? user;
-  var requests = <lib.VehicleMediaRequest>[];
 
-  // var routeLandmarks = <lib.RouteLandmark>[];
-  var routes = <lib.Route>[];
-  bool _showRoutes = true, busy = false;
-  bool _showDispatches = false, _showDispatchButton = false;
+  bool busy = false;
+
   Future _setTexts() async {
     final c = prefs.getColorAndLocale();
     final loc = c.locale;
@@ -80,201 +76,12 @@ class DispatchViaScanState extends State<DispatchViaScan>
     _controller = AnimationController(vsync: this);
     super.initState();
     _setTexts();
-    _getRoutes();
-    _getAssociationVehicleMediaRequests(false);
   }
 
-  Future _getAssociationVehicleMediaRequests(bool refresh) async {
-    // user = prefs.getUser();
-    // final startDate = DateTime.now()
-    //     .toUtc()
-    //     .subtract(const Duration(days: 30))
-    //     .toIso8601String();
-    //
-    // requests = await listApiDog.getAssociationVehicleMediaRequests(
-    //     '2f3faebd-6159-4b03-9857-9dad6d9a82ac', startDate, refresh);
-  }
-
-  Future _getRoutes() async {
-    final loc = await locationBloc.getLocation();
-    //
-    // const liist  = await localFinder.findNearestRoutes(
-    //     latitude: loc.latitude,
-    //     longitude: loc.longitude,
-    //     radiusInMetres: 500.0);
-
-    routes = await listApiDog.getAssociationRoutes('2f3faebd-6159-4b03-9857-9dad6d9a82ac', false);
-    //check ... selected ...
-    final prevRoute = prefs.getRoute();
-    bool found = false;
-    if (selectedRoute != null) {
-      for (var value in routes) {
-        if (value.routeId == selectedRoute!.routeId) {
-          found = true;
-          break;
-        }
-      }
-    }
-    if (prevRoute != null) {
-      for (var value in routes) {
-        if (value.routeId == prevRoute.routeId) {
-          found = true;
-          selectedRoute = value;
-          break;
-        }
-      }
-    }
-    if (!found) {
-      selectedRoute = null;
-      _showRoutes = true;
-      _showDispatches = false;
-    } else {
-      pp('$mm ... previous route found: ${selectedRoute!.name}');
-      _showRoutes = false;
-      _showDispatches = true;
-    }
-    setState(() {});
-    pp('$mm ... routes found around here: ${routes.length} ... _showRoutes: $_showRoutes');
-  }
-
-  lib.RouteLandmark? selectedRouteLandmark;
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-
-  onCarScanned(lib.Vehicle car) {
-    scannedVehicle = car;
-    if (selectedRoute == null) {
-      showSnackBar(message: 'Please select route', context: context);
-      return;
-    }
-    _confirmPassengerCount();
-  }
-
-  void onRoutePicked(lib.Route route) async {
-    selectedRoute = route;
-     prefs.saveRoute(route);
-    setState(() {
-      _showRoutes = false;
-      _showDispatches = true;
-    });
-  }
-
-  bool _checkIfVehicleMediaRequested() {
-    if (scannedVehicle == null) {
-      return false;
-    }
-    for (var value in requests) {
-      if (value.vehicleId == scannedVehicle!.vehicleId) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  onError() {}
-  Future _doDispatch() async {
-    pp('$mm ... start dispatch for .... ${scannedVehicle!.vehicleReg}');
-    _confirmPassengerCount();
-    //await _sendTheDispatchRecord();
-    setState(() {
-      busy = false;
-    });
-  }
-
-  void _confirmPassengerCount() {
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) {
-          return AlertDialog(
-            elevation: 16.0,
-            shape: getDefaultRoundedBorder(),
-            title: Text(
-              dispatchTaxi == null ? 'Dispatch Taxi?' : dispatchTaxi!,
-              style: myTextStyleMediumLargeWithColor(
-                  context, Theme.of(context).primaryColor, 24),
-            ),
-            content: Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: SizedBox(
-                height: 420,
-                child: Column(
-                  children: [
-                    const SizedBox(
-                      height: 24,
-                    ),
-                    Text(confirmDispatch == null
-                        ? 'Please confirm YES to dispatch this taxi'
-                        : confirmDispatch!),
-                    const SizedBox(
-                      height: 48,
-                    ),
-                    scannedVehicle == null?gapH16: Text(
-                      '${scannedVehicle!.vehicleReg}',
-                      style: myNumberStyleLargest(context),
-                    ),
-                    const SizedBox(
-                      height: 24,
-                    ),
-                    Row(
-                      children: [
-                        PassengerCount(
-                          onCountPicked: (n) {
-                            setState(() {
-                              passengerCount = n;
-                            });
-                            Navigator.of(context).pop();
-                            _confirmPassengerCount();
-                          },
-                        ),
-                        const SizedBox(
-                          width: 24,
-                        ),
-                        Text(
-                          '$passengerCount',
-                          style: myNumberStyleLargest(context),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 12,
-                    ),
-                    const MediaReminder(),
-                    const SizedBox(
-                      height: 12,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    _clearFields();
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(no == null ? 'No' : no!)),
-
-              SizedBox(width: 300,
-                child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _showRoutes = false;
-                      });
-                      _sendTheDispatchRecord();
-
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(yes == null ? 'Yes' : yes!),
-                    )),
-              ),
-            ],
-          );
-        });
   }
 
   Future<lib.RouteLandmark?> findNearestLandmark(Position loc) async {
@@ -287,19 +94,23 @@ class DispatchViaScanState extends State<DispatchViaScan>
   }
 
   int passengerCount = 0;
+
   Future<void> _sendTheDispatchRecord() async {
-    late lib.DispatchRecord m;
-    Navigator.of(context).pop();
+    pp('$mm ... _sendTheDispatchRecord ...');
+    late lib.DispatchRecord dispatchRecord;
     try {
       setState(() {
         busy = true;
       });
+      user = prefs.getUser();
       final loc = await locationBloc.getLocation();
+      pp('$mm ... _sendTheDispatchRecord ... ${loc.latitude} ${loc.longitude}');
+
       lib.RouteLandmark? mark = await findNearestLandmark(loc);
-      m = lib.DispatchRecord(
+      dispatchRecord = lib.DispatchRecord(
           dispatchRecordId: DateTime.now().toIso8601String(),
-          routeName: selectedRoute!.name,
-          routeId: selectedRoute!.routeId,
+          routeName: widget.route.name,
+          routeId: widget.route.routeId,
           created: DateTime.now().toUtc().toIso8601String(),
           vehicleId: scannedVehicle!.vehicleId,
           vehicleReg: scannedVehicle!.vehicleReg,
@@ -319,39 +130,31 @@ class DispatchViaScanState extends State<DispatchViaScan>
           landmarkName: mark?.landmarkName,
           routeLandmarkId: mark?.landmarkId);
       //
-      dispatches.insert(0, m);
-      dispatchHelper.sendDispatch(m);
-      _clearFields();
-      //dispatchIsolate.addDispatchRecord(m);
-      //Navigator.of(context).pop();
+      _dataApiDog.addDispatchRecord(dispatchRecord);
+      pp('$mm ... _sendTheDispatchRecord ... sent ..... ${dispatchRecord.toJson()}');
+
+      dispatchHelper.putDispatchOnStream(dispatchRecord);
+      widget.onDispatched(dispatchRecord);
+
       if (mounted) {
         showToast(
-                  padding: 24,
-                  backgroundColor: Colors.green.shade900,
-                  duration: const Duration(seconds: 5),
-                  textStyle: const TextStyle(color: Colors.white),
-                  message: 'Dispatch sent OK', context: context);
+            padding: 24,
+            backgroundColor: Colors.green.shade900,
+            duration: const Duration(seconds: 5),
+            textStyle: const TextStyle(color: Colors.white),
+            message: '${scannedVehicle!.vehicleReg} - Dispatch sent OK with $passengerCount passengers',
+            context: context);
+        Navigator.of(context).pop();
       }
-    } catch (e) {
-      pp(e);
+    } catch (e, s) {
+      pp('$e $s');
     }
     setState(() {
       busy = false;
     });
   }
 
-  bool showMediaRequestMessage = true;
-
-  void _clearFields() {
-    setState(() {
-      selectedRouteLandmark = null;
-      scannedVehicle = null;
-      passengerCount = 0;
-      _showDispatches = true;
-      _showRoutes = false;
-      showMediaRequestMessage = false;
-    });
-  }
+  bool showScanner = true;
 
   @override
   Widget build(BuildContext context) {
@@ -361,7 +164,7 @@ class DispatchViaScanState extends State<DispatchViaScan>
       appBar: AppBar(
         title: Text(
           dispatchText == null ? 'Dispatch' : dispatchText!,
-          style: myTextStyleLarge(context),
+          style: myTextStyleMedium(context),
         ),
       ),
       body: SizedBox(
@@ -371,166 +174,78 @@ class DispatchViaScanState extends State<DispatchViaScan>
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Card(
-                shape: getDefaultRoundedBorder(),
                 elevation: 4,
                 child: Column(
                   children: [
-                   gapH32,
-                    selectedRoute == null
-                        ? Text(
-                            selectRouteText == null
-                                ? 'Please select route'
-                                : selectRouteText!,
-                            style: myTextStyleMediumLargeWithColor(context,
-                                Theme.of(context).primaryColorLight, 20),
-                          )
-                        : TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _showRoutes = !_showRoutes;
-                                _showDispatches = false;
-                              });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                '${selectedRoute!.name}',
-                                style: myTextStyleMediumLargeWithColor(context,
-                                    Theme.of(context).primaryColorLight, 16),
-                              ),
-                            )),
+                    Text(
+                      '${widget.route.name}',
+                      style: myTextStyleMediumLarge(context, 24),
+                    ),
                     gapH32,
                     scannedVehicle == null
-                        ? gapH32
+                        ? const Text('Vehicle Not Scanned Yet')
                         : Text(
                             '${scannedVehicle!.vehicleReg}',
                             style: myTextStyleMediumLargeWithColor(
-                                context, Theme.of(context).primaryColor, 32),
+                                context, Colors.yellow, 32),
                           ),
-                    busy
-                        ? const Row(mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            SizedBox(
-                                height: 16,
-                                width: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  backgroundColor: Colors.pink,
-                                ),
-                              ),
-                            SizedBox(width: 24,),
-                          ],
-                        )
-                        : const SizedBox(),
-                    selectedRoute == null
-                        ? const SizedBox()
-                        : Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Card(
-                              shape: getDefaultRoundedBorder(),
-                              elevation: 12,
-                              child:  KasieAIScanner(onScanned: (json ) {
-                                onCarScanned(lib.Vehicle.fromJson(json));
-                              },)
+                    Expanded(
+                      child: KasieAIScanner(
+                        onScanned: (json) {
+                          setState(() {
+                            scannedVehicle = lib.Vehicle.fromJson(json);
+                          });
+                        },
+                      ),
+                    ),
+                    scannedVehicle == null? gapW4: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                     children: [
+                       const Text('Passengers'),
+                       NumberDropDown(onNumberPicked: (number){
+                         setState(() {
+                           passengerCount = number;
+                         });
+                       }, color: Colors.black, count: 24, fontSize: 20),
+                       Text('$passengerCount', style: myTextStyle(color: Colors.yellow, fontSize: 24, weight: FontWeight.w900)),
+                     ],
+                   ),
+                    gapH32,
+                    scannedVehicle == null
+                        ? gapW4
+                        : ElevatedButton(
+                            style: const ButtonStyle(
+                                backgroundColor:
+                                    WidgetStatePropertyAll(Colors.blue),
+                                elevation: WidgetStatePropertyAll(8.0)),
+                            onPressed: () {
+                              _sendTheDispatchRecord();
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(
+                                dispatchTaxi == null
+                                    ? 'Dispatch Taxi'
+                                    : dispatchTaxi!,
+                                style: myTextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    weight: FontWeight.w900),
                               ),
                             ),
-
-                    Expanded(
-                      child: Stack(
-                        children: [
-                          _showRoutes
-                              ? Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: RouteWidgetList(
-                                    routes: routes,
-                                    onRouteSelected: (r) {
-                                      onRoutePicked(r);
-                                    },
-                                  ),
-                                )
-                              : const SizedBox(),
-                          _showDispatches
-                              ? Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: DispatchGrid(
-                                    dispatches: dispatches,
-                                    title: dispatchText!,
-                                  ),
-                              )
-                              : const SizedBox(),
-                        ],
-                      ),
-                    )
+                          ),
+                    gapH32,
                   ],
                 ),
               ),
             ),
-            _showDispatchButton
-                ? Positioned(
-                    bottom: 36,
-                    top: 200,
-                    left: 4,
-                    right: 4,
+            busy
+                ? const Positioned(
                     child: Center(
-                      child: Card(
-                        shape: getDefaultRoundedBorder(),
-                        elevation: 8,
                         child: SizedBox(
-                          height: 300,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 48.0, vertical: 48),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _showDispatchButton = false;
-                                      });
-                                    },
-                                    child: Text(
-                                      cancelText == null
-                                          ? 'Cancel'
-                                          : cancelText!,
-                                      style: myTextStyleSmall(context),
-                                    )),
-                                ElevatedButton(
-                                    style: const ButtonStyle(
-                                        elevation:
-                                            WidgetStatePropertyAll(8.0)),
-                                    onPressed: () {
-                                      setState(() {
-                                        _showDispatchButton = false;
-                                      });
-                                      _doDispatch();
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: Text(dispatchTaxi == null
-                                          ? 'Dispatch Taxi'
-                                          : dispatchTaxi!),
-                                    )),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                : const SizedBox(),
-            // busy
-            //     ? const Center(
-            //         child: SizedBox(
-            //           height: 32,
-            //           width: 32,
-            //           child: CircularProgressIndicator(
-            //             strokeWidth: 6,
-            //             backgroundColor: Colors.green,
-            //           ),
-            //         ),
-            //       )
-            //     : const SizedBox(),
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator())))
+                : gapH32,
           ],
         ),
       ),
@@ -539,9 +254,12 @@ class DispatchViaScanState extends State<DispatchViaScan>
 }
 
 class DispatchGrid extends StatelessWidget {
-  const DispatchGrid({super.key, required this.dispatches, required this.title});
+  const DispatchGrid(
+      {super.key, required this.dispatches, required this.title});
+
   final String title;
   final List<lib.DispatchRecord> dispatches;
+
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
@@ -558,6 +276,7 @@ class DispatchGrid extends StatelessWidget {
 //
 class DispatchCarPlate extends StatelessWidget {
   const DispatchCarPlate({super.key, required this.dispatchRecord});
+
   final lib.DispatchRecord dispatchRecord;
 
   @override

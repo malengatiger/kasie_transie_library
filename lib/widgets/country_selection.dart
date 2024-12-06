@@ -58,7 +58,6 @@ class CountryChooserState extends State<CountryChooser> {
   var list = <DropdownMenuItem>[];
 
   Future _buildDropDown() async {
-    var style = myTextStyleSmall(context);
     for (var entry in countries) {
 
       if (mounted) {

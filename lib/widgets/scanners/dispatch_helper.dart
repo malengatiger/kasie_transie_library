@@ -10,7 +10,7 @@ class DispatchHelper {
   final StreamController<AmbassadorPassengerCount> _passengerStreamController = StreamController.broadcast();
   Stream<AmbassadorPassengerCount> get passengerCountStream => _passengerStreamController.stream;
 
-  void sendDispatch(DispatchRecord dispatchRecord) {
+  void putDispatchOnStream(DispatchRecord dispatchRecord) {
     _streamController.sink.add(dispatchRecord);
   }
   void sendPassengerCount(AmbassadorPassengerCount passengerCount) {

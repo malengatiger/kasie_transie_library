@@ -5,15 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart';
-import 'package:kasie_transie_library/widgets/scanners/gen_code.dart';
+import 'package:kasie_transie_library/widgets/scanners/qr_code_generation.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:typed_data';
 import '../../data/ticket.dart';
 import '../../utils/functions.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 
-class QRCodeGenerator extends StatefulWidget {
-  const QRCodeGenerator(
+class QRCodeGeneratorWidget extends StatefulWidget {
+  const QRCodeGeneratorWidget(
       {super.key,
       required this.associationId,
       this.user,
@@ -31,10 +31,10 @@ class QRCodeGenerator extends StatefulWidget {
   final Function(String) onCodeGenerated;
 
   @override
-  State<QRCodeGenerator> createState() => _QRCodeGeneratorState();
+  State<QRCodeGeneratorWidget> createState() => _QRCodeGeneratorWidgetState();
 }
 
-class _QRCodeGeneratorState extends State<QRCodeGenerator> {
+class _QRCodeGeneratorWidgetState extends State<QRCodeGeneratorWidget> {
 
   @override
   void initState() {
@@ -45,25 +45,28 @@ class _QRCodeGeneratorState extends State<QRCodeGenerator> {
   static const mm = '🥦🥦🥦 QRCodeGenerator 🥦🥦';
 
   Uint8List? fileBytes;
+  QRBucket? qrBucket;
+  QRGenerationService qrGeneration = GetIt.instance<QRGenerationService>();
+
 
   Future<void> _generateQrCode() async {
     if (widget.user != null) {
-      fileBytes = await generateQrCode(data: widget.user!.toJson());
+      qrBucket = await qrGeneration.generateAndUploadQrCodeWithLogo(data: widget.user!.toJson(), associationId: widget.associationId);
       data = jsonEncode(widget.user!.toJson());
     } else if (widget.vehicle != null) {
-      fileBytes = await generateQrCode(data: widget.vehicle!.toJson());
+      qrBucket = await qrGeneration.generateAndUploadQrCodeWithLogo(data: widget.vehicle!.toJson(), associationId: widget.associationId);
       data = jsonEncode(widget.vehicle!.toJson());
 
     } else if (widget.route != null) {
-      fileBytes = await generateQrCode(data: widget.route!.toJson());
+      qrBucket = await qrGeneration.generateAndUploadQrCodeWithLogo(data: widget.route!.toJson(), associationId: widget.associationId);
       data = jsonEncode(widget.route!.toJson());
 
     } else if (widget.routeLandmark != null) {
-      fileBytes = await generateQrCode(data: widget.routeLandmark!.toJson());
+      qrBucket = await qrGeneration.generateAndUploadQrCodeWithLogo(data: widget.routeLandmark!.toJson(), associationId: widget.associationId);
       data = jsonEncode(widget.routeLandmark!.toJson());
 
     } else if (widget.ticket != null) {
-      fileBytes = await generateQrCode(data: widget.ticket!.toJson());
+      qrBucket = await qrGeneration.generateAndUploadQrCodeWithLogo(data: widget.ticket!.toJson(), associationId: widget.associationId);
       data = jsonEncode(widget.ticket!.toJson());
 
     }

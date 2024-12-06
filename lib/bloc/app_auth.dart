@@ -9,28 +9,49 @@ final AppAuth appAuth = AppAuth(FirebaseAuth.instance);
 String? fcmToken;
 
 class AppAuth {
-  static const locks = '🔐🔐🔐🔐🔐🔐🔐🔐 AppAuth: ';
-  final FirebaseAuth? firebaseAuth;
+  static const locks = '🔐🔐🔐🔐🔐🔐🔐🔐 AppAuth: 🔐🔐🔐';
+  final FirebaseAuth firebaseAuth;
 
-  AppAuth(this.firebaseAuth);
+  AppAuth(this.firebaseAuth) {
+    listen();
+  }
+
+  void listen() {
+    pp('$locks listen for  FirebaseAuth.instance idTokenChanges and authStateChanges ...');
+    firebaseAuth?.idTokenChanges().listen((User? user) {
+      if (user == null) {
+        pp('$locks idTokenChanges: User is currently signed out!');
+      } else {
+        pp('$locks User is signed in! ${user.displayName}');
+      }
+    });
+    firebaseAuth.authStateChanges().listen((User? user) {
+      if (user == null) {
+        pp('$locks authStateChanges: User is currently signed out!');
+      } else {
+        pp('$locks authStateChanges: User is signed in! ${user.displayName}');
+      }
+    });
+  }
 
   Future<String?> getAuthToken() async {
     try {
       String? token;
-      if (firebaseAuth!.currentUser != null) {
-        token = await firebaseAuth!.currentUser!.getIdToken();
+      if (firebaseAuth.currentUser != null) {
+        token = await firebaseAuth.currentUser!.getIdToken(true);
       }
       if (token != null) {
-        pp('$locks getAuthToken has a 🌸🌸 GOOD!! 🌸🌸 Firebase id token 🍎');
+        pp('$locks getAuthToken has a 🌸🌸 GOOD!! 🌸🌸 Firebase id token 🍎🍎🍎🍎');
       } else {
         pp('$locks getAuthToken has fallen down. ${E.redDot}${E.redDot}${E.redDot}  Firebase id token not found 🍎');
+        throw Exception('getAuthToken failed: token is null');
       }
       fcmToken = token;
       return token;
-    } catch (e) {
-      pp(e);
+    } catch (e, s) {
+      pp('$e $s');
+      throw Exception('getAuthToken failed: $e');
     }
-    return '';
   }
 
   Future signInVehicle() async {

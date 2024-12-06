@@ -264,54 +264,113 @@ Random random = Random(DateTime.now().millisecondsSinceEpoch);
 }
 
 
-Future<File?> getPhotoThumbnail({required File file}) async {
-  pp('.... getPhotoThumbnail ...');
+
+Future<File?> createThumbnail({required File file, int? width, int? height, int quality = 70}) async {
+
+  int targetWidth = width ?? 100; // Default width
+  int targetHeight = height ?? 100; // Default height
   if (kIsWeb) {
-    // For web, use the browser's built-in image resizing capabilities
+    // Handle web implementation - already fully implemented in getPhotoThumbnail method below
+    return getPhotoThumbnail(file: file, width: targetWidth, height: targetHeight);
+  } else {
+    var result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path, // Use absolute path
+      'thumb_${file.path}', // Generate a name for the thumbnail
+      minWidth: targetWidth,
+      minHeight: targetHeight,
+      quality: quality,
+    );
+    if (result != null){
+      return File(result.path);
+    } else {
+      return null; // Or throw an exception if thumbnail creation fails
+    }
+
+  }
+
+
+
+}
+
+Future<File?> getPhotoThumbnail({required File file, int? width, int? height}) async {
+  pp('🔷🔷getPhotoThumbnail. original length: ${await file.length()} bytes 🔷🔷🔷');
+
+
+if (kIsWeb) {
     final reader = html.FileReader();
     // Convert File to Blob
     final blob = html.Blob(
       [await file.readAsBytes()],
-      (file as html.File).type, // Access type from html.File
+      (file as html.File).type,
     );
-    reader.readAsDataUrl(blob); // Pass the Blob to readAsDataUrl
+    reader.readAsDataUrl(blob); // Use readAsDataUrl with Blob
     await reader.onLoadEnd.first;
     final dataUrl = reader.result as String;
 
-    // Create an image element to resize the image
     final image = html.ImageElement();
     image.src = dataUrl;
     await image.onLoad.first;
 
-    // Create a canvas element to draw the resized image
     final canvas = html.CanvasElement(
-      width: 100,
-      height: 100,
+      width: width ?? 100,
+      height: height ?? 100,
     );
     final ctx = canvas.context2D;
-    ctx.drawImageScaled(image, 0, 0, 100, 100);
 
-    // Get the resized image data as bytes
+    //Get the smaller of the two sizes to make the thumbnail square
+    int smallest = (width! < height!) ? width : height;
+    //Center the image inside the canvas
+    double x = ((width - smallest) / 2);
+    double y = ((height - smallest) / 2);
+
+    ctx.drawImageScaled(image, x, y, smallest, smallest);
     final resizedDataUrl = canvas.toDataUrl('image/jpeg');
     final bytes = _dataUrlToBytes(resizedDataUrl);
-
-    // Instead of creating a temporary file, return a File object
-    // with the bytes and a dummy path.
     return File.fromRawPath(bytes);
   } else {
-    // For mobile/desktop, use FlutterImageCompress
-    var result = await FlutterImageCompress.compressAndGetFile(
-      file.absolute.path,
-      'thumb_${file.path}',
-      minHeight: 100,
-      minWidth: 100,
-      quality: 100,
-    );
-    return File(result!.path);
+
+    try {
+      final imageBytes = await file.readAsBytes();
+      pp('🔷🔷getPhotoThumbnail. imageBytes length: ${imageBytes.length} bytes 🔷🔷🔷');
+
+      final decodedImage = await decodeImageFromList(imageBytes);
+      final recorder = ui.PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+
+      canvas.drawImage(decodedImage, const Offset(0, 0), Paint());
+
+      final picture = recorder.endRecording();
+      final img = await picture.toImage(width ?? 100, height ?? 100);
+      final pngBytes = await img.toByteData(format: ui.ImageByteFormat.png);
+      if (pngBytes == null) {
+            throw Exception('Failed to convert thumbnail image to byte data.');
+          }
+      pp('🔷🔷photo thumbnail pngBytes. length: ${pngBytes!.buffer.lengthInBytes} bytes 🔷🔷🔷');
+
+      final Directory tempDir = await getTemporaryDirectory();
+      final String tempPath = tempDir.path;
+
+
+      final File thumbnailFile = File('$tempPath/thumb_${DateTime.now().millisecondsSinceEpoch}.png');
+      // Write the bytes to the file. Use try-catch for error handling
+      try {
+        await thumbnailFile.writeAsBytes(pngBytes.buffer.asUint8List());
+        pp('Thumbnail saved to: ${thumbnailFile.path}');
+        pp('🔷🔷photo thumbnail created. length: ${await thumbnailFile.length()} bytes 🔷🔷🔷');
+        return thumbnailFile;
+      } catch (e) {
+        pp('Error saving thumbnail: $e');
+       throw Exception('Error saving thumbnail'); // Or throw the error if you want to handle it elsewhere.
+      }
+    } catch (e,s) {
+      pp('ERROR: 😈😈😈😈 $e $s');
+      throw Exception('Error saving thumbnail'); // Or throw the error if you want to handle it elsewhere.
+
+    }
   }
 }
 
-// Helper function to convert data URL to bytes
+
 Uint8List _dataUrlToBytes(String dataUrl) {
   final parts = dataUrl.split(',');
   if (parts.length != 2) {

@@ -65,15 +65,20 @@ class ListApiDog {
 
   Future getAuthToken() async {
     pp('$mm getAuthToken: ...... Getting Firebase token ......');
-    var m = await appAuth.getAuthToken();
-    if (m == null) {
-      pp('$mm Unable to get Firebase token');
-      token = 'NoToken';
-    } else {
-      pp('$mm Firebase token retrieved OK');
-      token = m;
+    try {
+      var m = await appAuth.getAuthToken();
+      if (m == null) {
+            pp('$mm Unable to get Firebase token');
+            token = 'NoToken';
+          } else {
+            pp('$mm Firebase token retrieved OK');
+            token = m;
+          }
+      return token;
+    } catch (e,s) {
+      pp('$mm $e $s');
+      rethrow;
     }
-    return token;
   }
 
   Future<User?> getUserById(String userId) async {
@@ -178,17 +183,18 @@ class ListApiDog {
   Future<List<ExampleFile>> getExampleFiles() async {
     List<ExampleFile> list1 = [];
 
-      final cmd = '${url}storage/getExampleFiles';
-      List resp = await _sendHttpGET(cmd);
-      list1.clear();
-      for (var value in resp) {
-        list1.add(ExampleFile.fromJson(value));
-        pp('$mm example: $value');
-      }
+    final cmd = '${url}storage/getExampleFiles';
+    List resp = await _sendHttpGET(cmd);
+    list1.clear();
+    for (var value in resp) {
+      list1.add(ExampleFile.fromJson(value));
+      pp('$mm example: $value');
+    }
 
     pp('$mm example files: ${list1.length}');
     return list1;
   }
+
   Future<List<SettingsModel>> getSettings(
       String associationId, bool refresh) async {
     List<SettingsModel> list1 = [];
@@ -300,7 +306,10 @@ class ListApiDog {
     for (var mJson in resp) {
       list.add(RouteLandmark.fromJson(mJson));
     }
-    await semCache.saveRouteLandmarks( associationId: associationId, landmarks: list, routeId: list[0].routeId!);
+    await semCache.saveRouteLandmarks(
+        associationId: associationId,
+        landmarks: list,
+        routeId: list[0].routeId!);
     return list;
   }
 
@@ -308,9 +317,15 @@ class ListApiDog {
       String associationId) async {
     return [];
   }
+
   Future<AssociationRouteData?> getAssociationRouteData(
-      String associationId) async {
+      String associationId, bool refresh) async {
     pp('\n\n$mm getAssociationRouteData: ... starting ...');
+    var dd = await semCache.getAssociationRouteData(associationId);
+    if (!refresh && dd != null && dd.routeDataList.isNotEmpty) {
+      return dd;
+    }
+
     var start = DateTime.now();
     final cmd =
         '${url}routes/getAssociationRouteData?associationId=$associationId';
@@ -322,7 +337,7 @@ class ListApiDog {
       var end = DateTime.now();
       pp('$mm getAssociationRouteData: elapsed seconds: 🍎${end.difference(start).inSeconds} 🍎');
       return data;
-    } catch (e,s) {
+    } catch (e, s) {
       pp('$mm ERROR in getAssociationRouteData: $e \n$s');
       throw Exception('ERROR loading Association Route Data: $e');
     }
@@ -420,7 +435,8 @@ class ListApiDog {
 
   Future<List<Association>> getAssociations(bool refresh) async {
     final cmd = '${url}association/getAssociations';
-    List<Association> list = await semCache.getAssociations();;
+    List<Association> list = await semCache.getAssociations();
+    ;
     if (refresh || list.isEmpty) {
       List resp = await _sendHttpGET(cmd);
       list.clear();
@@ -463,8 +479,8 @@ class ListApiDog {
 
   Future<List<RouteLandmark>> getRouteLandmarks(
       String routeId, bool refresh, String associationId) async {
-    List<RouteLandmark> localList =
-        await semCache.getRouteLandmarks(routeId: routeId, associationId: associationId);
+    List<RouteLandmark> localList = await semCache.getRouteLandmarks(
+        routeId: routeId, associationId: associationId);
 
     try {
       if (refresh || localList.isEmpty) {
@@ -863,7 +879,7 @@ class ListApiDog {
     var command = '';
     if (associationId != null) {
       command =
-          '${url}getAssociationVehicleMediaRequests?associationId=$associationId&startDate=$startDate';
+          '${url}vehicle/getAssociationVehicleMediaRequests?associationId=$associationId&startDate=$startDate';
     }
     if (vehicleId != null) {
       command = '${url}getVehicleMediaRequests?vehicleId=$vehicleId';
@@ -1074,6 +1090,20 @@ class ListApiDog {
     return list;
   }
 
+  Future<List<RouteLandmark>> _getRouteCitiesFromBackend(
+      {required String routeId}) async {
+    final list = <RouteLandmark>[];
+    final cmd = '${url}routes/getRouteCities?routeId=$routeId';
+    List resp = await _sendHttpGET(cmd);
+    for (var value in resp) {
+      var r = RouteLandmark.fromJson(value);
+      list.add(r);
+    }
+
+    pp('$mm Route Landmarks found: ${list.length}');
+    return list;
+  }
+
   Future<List<Route>> findRoutesByLocation(LocationFinderParameter p) async {
     var list = <Route>[];
     final user = prefs.getUser();
@@ -1177,8 +1207,7 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<Ticket>> getAssociationTickets(
-      String associationId) async {
+  Future<List<Ticket>> getAssociationTickets(String associationId) async {
     List<Ticket> list = [];
     final cmd =
         '${url}ticket/getAssociationTickets?associationId=$associationId';
@@ -1235,14 +1264,14 @@ class ListApiDog {
   Future _sendHttpGET(String mUrl) async {
     pp('$xz _sendHttpGET: 🔆 🔆 🔆 ...... calling : 💙 $mUrl  💙');
     var start = DateTime.now();
-    // token ??= await getAuthToken();
-    // token ??= '';
-    // headers['Authorization'] = 'Bearer $token';
+    token ??= await getAuthToken();
+    token ??= '';
+    headers['Authorization'] = 'Bearer $token';
     try {
       var resp = await client
           .get(
             Uri.parse(mUrl),
-            // headers: headers,
+            headers: headers,
           )
           .timeout(const Duration(seconds: timeOutInSeconds));
 
@@ -1257,6 +1286,18 @@ class ListApiDog {
       if (resp.statusCode == 403) {
         var msg =
             '😡 😡 status code: ${resp.statusCode}, Request Forbidden 🥪 🥙 🌮  😡 ${resp.body}';
+        pp(msg);
+        final gex = KasieException(
+            message: 'Forbidden call',
+            url: mUrl,
+            translationKey: 'serverProblem',
+            errorType: KasieException.httpException);
+        errorHandler.handleError(exception: gex);
+        throw Exception('The request is forbidden, sorry!');
+      }
+      if (resp.statusCode == 401) {
+        var msg =
+            '😡 😡 status code: ${resp.statusCode}, Request Forbidden?  🥪 🥙 🌮  😡 ${resp.body}';
         pp(msg);
         final gex = KasieException(
             message: 'Forbidden call',

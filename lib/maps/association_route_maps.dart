@@ -12,6 +12,7 @@ import 'package:kasie_transie_library/widgets/route_widgets/multi_route_chooser.
 
 import '../bloc/list_api_dog.dart';
 import '../bloc/sem_cache.dart';
+import '../data/route_data.dart';
 import '../isolates/local_finder.dart';
 import '../utils/device_location_bloc.dart';
 import '../utils/emojis.dart';
@@ -61,60 +62,40 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   int landmarkIndex = 0;
   var routes = <lib.Route>[];
 
+  AssociationRouteData? routeData;
   @override
   void initState() {
     super.initState();
-    _control();
-  }
-
-  void _control() async {
-    _getCurrentLocation();
-    _getUser();
   }
 
   Future _getRoutes(bool refresh) async {
     setState(() {
       busy = true;
     });
-    SemCache semCache = GetIt.instance<SemCache>();
 
     try {
       _user = prefs.getUser();
-      var mRoutes = <lib.Route>[];
-      if (widget.latitude != null && widget.longitude != null) {
-        pp('\n\n$mm .......... find Association Routes by location ...');
-        mRoutes = await localFinder.findNearestRoutes(
-            latitude: widget.latitude!,
-            longitude: widget.longitude!,
-            radiusInMetres: widget.radiusInMetres == null
-                ? distanceInKM * 1000
-                : widget.radiusInMetres!);
-        if (mRoutes.isEmpty) {
-          mRoutes = await semCache
-              .getRoutes(associationId: _user!.associationId!);
-        }
-        await _filter(mRoutes);
-      } else {
-        pp('\n\n$mm .......... get all Association Routes ... refresh: $refresh');
-        final mRoutes = await semCache
-            .getRoutes(associationId: _user!.associationId!);
-        _printy();
-        await _filter(mRoutes);
-        if (mounted) {
-          showToast(
-              backgroundColor: Colors.black,
-              textStyle: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16),
-              padding: 24.0,
-              duration: const Duration(seconds: 3),
-              message: 'Please select routes',
-              context: context);
+      routeData =
+          await listApiDog.getAssociationRouteData(_user!.associationId!, refresh);
+      if (routeData != null) {
+        for (var rd in routeData!.routeDataList) {
+          routes.add(rd.route!);
         }
       }
-        _showBottomSheet();
+      await _filter();
+      _printMe();
+      if (mounted) {
+        showToast(
+            backgroundColor: Colors.black,
+            textStyle: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+            padding: 24.0,
+            duration: const Duration(seconds: 3),
+            message: 'Please select routes',
+            context: context);
+      }
 
+      // _showBottomSheet();
     } catch (e) {
       pp(e);
       if (mounted) {
@@ -130,7 +111,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     });
   }
 
-  void _printy() {
+  void _printMe() {
     int cnt = 1;
     for (var r in routes) {
       pp('$mm route #:$cnt ${E.appleRed} ${r.name}');
@@ -138,22 +119,22 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     }
   }
 
-  Future<void> _filter(List<lib.Route> mRoutes) async {
-    routes.clear();
-    for (var route in mRoutes) {
-      var routesIsolate = GetIt.instance<SemCache>();
-      final marks = await routesIsolate.countRoutePoints(route.routeId!);
-      if (marks > 0) {
-        routes.add(route);
+  Future<void> _filter() async {
+    List<lib.Route> filtered = [];
+    var semCache = GetIt.instance<SemCache>();
+
+    for (var rd in routeData!.routeDataList) {
+      final marks = rd.landmarks;
+      if (marks.isNotEmpty) {
+        filtered.add(rd.route!);
       }
     }
-    pp('routes have been filtered .. where is SpruitView?');
-    _printy();
-    pp('$mm ... routes filtered: ${routes.length}');
+    pp('routes have been filtered .. ${filtered.length}');
+    routes = filtered;
+
   }
 
-  var routesPicked = <lib.Route>[];
-
+ List<lib.Route> routesPicked = [];
   void _showBottomSheet() async {
     final type = getThisDeviceType();
     showModalBottomSheet(
@@ -171,7 +152,8 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
                 Navigator.of(context).pop();
                 _buildHashMap();
               },
-              routes: routes, quitOnDone: false,
+              routes: routes,
+              quitOnDone: false,
             ),
           );
         });
@@ -185,10 +167,8 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   Color newColor = Colors.black;
   String? stringColor;
 
-  Future _getUser() async {
-    _user = prefs.getUser();
-  }
   DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
+
   Future _getCurrentLocation() async {
     pp('$mm .......... get current location ....');
     _currentPosition = await locationBloc.getLocation();
@@ -225,16 +205,16 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
     int landmarkIndex = 0;
     try {
       for (var routeLandmark in routeLandmarks) {
-            _markers.add(Marker(
-                markerId: MarkerId(routeLandmark.landmarkId!),
-                icon: icons.elementAt(landmarkIndex),
-                position: LatLng(routeLandmark.position!.coordinates[1],
-                    routeLandmark.position!.coordinates[0]),
-                infoWindow: InfoWindow(
-                    title: routeLandmark.landmarkName,
-                    snippet: '🍎Part of ${routeLandmark.routeName}')));
-            landmarkIndex++;
-          }
+        _markers.add(Marker(
+            markerId: MarkerId(routeLandmark.landmarkId!),
+            icon: icons.elementAt(landmarkIndex),
+            position: LatLng(routeLandmark.position!.coordinates[1],
+                routeLandmark.position!.coordinates[0]),
+            infoWindow: InfoWindow(
+                title: routeLandmark.landmarkName,
+                snippet: '🍎Part of ${routeLandmark.routeName}')));
+        landmarkIndex++;
+      }
     } catch (e, stack) {
       pp('$mm $e - $stack');
     }
@@ -278,20 +258,25 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
 
   void _buildHashMap() async {
     pp('$mm ... _buildHashMap: routesPicked: ${routesPicked.length}');
+
     for (var route in routesPicked) {
-      final points = await listApiDog.getRoutePoints(route.routeId!, false, route.associationId!);
-      final marks = await listApiDog.getRouteLandmarks(route.routeId!, false, route.associationId!);
-      final icons = <BitmapDescriptor>[];
-      for (var i = 0; i < marks.length; i++) {
-        final icon = await getMarkerBitmap(72,
-            text: '${i + 1}',
-            color: route.color!,
-            fontSize: 28,
-            fontWeight: FontWeight.w900);
-        icons.add(icon);
+      for (var rd in routeData!.routeDataList) {
+        if (rd.route!.routeId! == route.routeId) {
+          final points = rd.routePoints;
+          final marks =rd.landmarks;
+          final icons = <BitmapDescriptor>[];
+          for (var i = 0; i < marks.length; i++) {
+            final icon = await getMarkerBitmap(72,
+                text: '${i + 1}',
+                color: route.color!,
+                fontSize: 28,
+                fontWeight: FontWeight.w900);
+            icons.add(icon);
+          }
+          final bag = MapBag(route, points, marks, icons);
+          hashMap[route.routeId!] = bag;
+        }
       }
-      final bag = MapBag(route, points, marks, icons);
-      hashMap[route.routeId!] = bag;
     }
     pp('$mm ... _buildHashMap: hashMap built: ${hashMap.length}');
 
@@ -318,7 +303,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Route Map'),
+          title: const Text('Association Route Maps'),
           bottom: PreferredSize(
               preferredSize: const Size.fromHeight(64),
               child: Column(
@@ -334,11 +319,10 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
                             _showBottomSheet();
                           },
                           child: SizedBox(
-                            width: 160,
-                            child: Text('${routes.length} Routes'),
+                            width: 300,
+                            child: Text('Tap to select some of ${routes.length} Routes'),
                           )),
                       gapW8,
-
                     ],
                   ),
                   gapH16,
@@ -348,8 +332,8 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
         key: _key,
         body: _myCurrentCameraPosition == null
             ? const Center(
-          child: TimerWidget(title: 'Loading ...', isSmallSize: false),
-        )
+                child: TimerWidget(title: 'Loading ...', isSmallSize: false),
+              )
             : Stack(children: [
                 GoogleMap(
                   mapType: isHybrid ? MapType.hybrid : MapType.normal,
@@ -365,6 +349,7 @@ class AssociationRouteMapsState extends State<AssociationRouteMaps> {
                     pp('$mm .......... on onMapCreated .....');
                     _mapController.complete(controller);
                     showSheet = true;
+                    _getCurrentLocation();
                     _getRoutes(false);
                   },
                 ),

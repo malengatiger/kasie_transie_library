@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:json_annotation/json_annotation.dart';
 
 part 'data_schemas.g.dart';
@@ -20,7 +22,8 @@ class Country {
   Position? position;
   String? geoHash;
 
-  Country(this.countryId,
+  Country(
+      this.countryId,
       this.name,
       this.iso2,
       this.iso3,
@@ -50,11 +53,12 @@ class Position {
   double? latitude, longitude;
   String? geoHash;
 
-  Position({this.type,
-    required this.coordinates,
-    this.latitude,
-    this.longitude,
-    this.geoHash});
+  Position(
+      {this.type,
+      required this.coordinates,
+      this.latitude,
+      this.longitude,
+      this.geoHash});
 
   factory Position.fromJson(Map<String, dynamic> json) =>
       _$PositionFromJson(json);
@@ -75,18 +79,19 @@ class City {
   Position? position;
   String? geoHash, created;
 
-  City({this.cityId,
-    this.countryId,
-    this.name,
-    this.distance,
-    this.stateName,
-    this.latitude,
-    this.longitude,
-    this.countryName,
-    this.stateId,
-    this.position,
-    this.created,
-    this.geoHash});
+  City(
+      {this.cityId,
+      this.countryId,
+      this.name,
+      this.distance,
+      this.stateName,
+      this.latitude,
+      this.longitude,
+      this.countryName,
+      this.stateId,
+      this.position,
+      this.created,
+      this.geoHash});
 
   factory City.fromJson(Map<String, dynamic> json) => _$CityFromJson(json);
 
@@ -114,24 +119,25 @@ class DispatchRecord {
   String? routeLandmarkId;
   bool? dispatched;
 
-  DispatchRecord({this.dispatchRecordId,
-    this.marshalId,
-    this.passengers,
-    this.ownerId,
-    this.created,
-    this.position,
-    this.geoHash,
-    this.landmarkName,
-    this.marshalName,
-    this.routeName,
-    this.routeId,
-    this.vehicleId,
-    this.vehicleArrivalId,
-    this.vehicleReg,
-    this.associationId,
-    this.associationName,
-    this.routeLandmarkId,
-    this.dispatched});
+  DispatchRecord(
+      {this.dispatchRecordId,
+      this.marshalId,
+      this.passengers,
+      this.ownerId,
+      this.created,
+      this.position,
+      this.geoHash,
+      this.landmarkName,
+      this.marshalName,
+      this.routeName,
+      this.routeId,
+      this.vehicleId,
+      this.vehicleArrivalId,
+      this.vehicleReg,
+      this.associationId,
+      this.associationName,
+      this.routeLandmarkId,
+      this.dispatched});
 
   factory DispatchRecord.fromJson(Map<String, dynamic> json) =>
       _$DispatchRecordFromJson(json);
@@ -155,22 +161,23 @@ class Association {
   String? adminEmail;
   String? password;
 
-  Association({this.cityId,
-    this.countryId,
-    this.cityName,
-    this.associationName,
-    this.associationId,
-    this.active,
-    this.countryName,
-    this.dateRegistered,
-    this.position,
-    this.geoHash,
-    this.adminUserFirstName,
-    this.adminUserLastName,
-    this.userId,
-    this.password,
-    this.adminCellphone,
-    this.adminEmail});
+  Association(
+      {this.cityId,
+      this.countryId,
+      this.cityName,
+      this.associationName,
+      this.associationId,
+      this.active,
+      this.countryName,
+      this.dateRegistered,
+      this.position,
+      this.geoHash,
+      this.adminUserFirstName,
+      this.adminUserLastName,
+      this.userId,
+      this.password,
+      this.adminCellphone,
+      this.adminEmail});
 
   factory Association.fromJson(Map<String, dynamic> json) =>
       _$AssociationFromJson(json);
@@ -188,12 +195,13 @@ class RouteUpdateRequest {
   String? associationId;
   String? userName;
 
-  RouteUpdateRequest({this.routeId,
-    this.routeName,
-    this.userId,
-    this.created,
-    this.associationId,
-    this.userName});
+  RouteUpdateRequest(
+      {this.routeId,
+      this.routeName,
+      this.userId,
+      this.created,
+      this.associationId,
+      this.userName});
 
   factory RouteUpdateRequest.fromJson(Map<String, dynamic> json) =>
       _$RouteUpdateRequestFromJson(json);
@@ -214,14 +222,15 @@ class VehicleMediaRequest {
 
   bool? addVideo;
 
-  VehicleMediaRequest({this.userId,
-    this.vehicleId,
-    this.vehicleReg,
-    this.requesterId,
-    this.created,
-    this.associationId,
-    this.requesterName,
-    this.addVideo});
+  VehicleMediaRequest(
+      {this.userId,
+      this.vehicleId,
+      this.vehicleReg,
+      this.requesterId,
+      this.created,
+      this.associationId,
+      this.requesterName,
+      this.addVideo});
 
   factory VehicleMediaRequest.fromJson(Map<String, dynamic> json) =>
       _$VehicleMediaRequestFromJson(json);
@@ -247,21 +256,22 @@ class VehicleArrival {
   String? ownerId, ownerName;
   bool? dispatched;
 
-  VehicleArrival({this.vehicleArrivalId,
-    this.landmarkId,
-    this.landmarkName,
-    this.position,
-    this.geoHash,
-    this.created,
-    this.vehicleId,
-    this.associationId,
-    this.associationName,
-    this.vehicleReg,
-    this.make,
-    this.model,
-    this.ownerId,
-    this.ownerName,
-    this.dispatched});
+  VehicleArrival(
+      {this.vehicleArrivalId,
+      this.landmarkId,
+      this.landmarkName,
+      this.position,
+      this.geoHash,
+      this.created,
+      this.vehicleId,
+      this.associationId,
+      this.associationName,
+      this.vehicleReg,
+      this.make,
+      this.model,
+      this.ownerId,
+      this.ownerName,
+      this.dispatched});
 
   factory VehicleArrival.fromJson(Map<String, dynamic> json) =>
       _$VehicleArrivalFromJson(json);
@@ -284,19 +294,20 @@ class VehiclePhoto {
   String? url;
   String? userId, userName;
 
-  VehiclePhoto({this.vehiclePhotoId,
-    this.landmarkId,
-    this.landmarkName,
-    this.position,
-    this.geoHash,
-    this.created,
-    this.vehicleId,
-    this.associationId,
-    this.vehicleReg,
-    this.thumbNailUrl,
-    this.url,
-    this.userId,
-    this.userName});
+  VehiclePhoto(
+      {this.vehiclePhotoId,
+      this.landmarkId,
+      this.landmarkName,
+      this.position,
+      this.geoHash,
+      this.created,
+      this.vehicleId,
+      this.associationId,
+      this.vehicleReg,
+      this.thumbNailUrl,
+      this.url,
+      this.userId,
+      this.userName});
 
   factory VehiclePhoto.fromJson(Map<String, dynamic> json) =>
       _$VehiclePhotoFromJson(json);
@@ -313,10 +324,15 @@ class UserPhoto {
   String? thumbNailUrl;
   String? url;
 
-
   UserPhoto(
-      {required this.userPhotoId, required this.associationId, required this.associationName,
-        required this.userName, required this.userId, required this.created, required this.thumbNailUrl, required this.url});
+      {required this.userPhotoId,
+      required this.associationId,
+      required this.associationName,
+      required this.userName,
+      required this.userId,
+      required this.created,
+      required this.thumbNailUrl,
+      required this.url});
 
   factory UserPhoto.fromJson(Map<String, dynamic> json) =>
       _$UserPhotoFromJson(json);
@@ -339,19 +355,20 @@ class VehicleVideo {
   String? url;
   String? userId, userName;
 
-  VehicleVideo({this.vehicleVideoId,
-    this.landmarkId,
-    this.landmarkName,
-    this.position,
-    this.geoHash,
-    this.created,
-    this.vehicleId,
-    this.associationId,
-    this.vehicleReg,
-    this.thumbNailUrl,
-    this.url,
-    this.userId,
-    this.userName});
+  VehicleVideo(
+      {this.vehicleVideoId,
+      this.landmarkId,
+      this.landmarkName,
+      this.position,
+      this.geoHash,
+      this.created,
+      this.vehicleId,
+      this.associationId,
+      this.vehicleReg,
+      this.thumbNailUrl,
+      this.url,
+      this.userId,
+      this.userName});
 
   factory VehicleVideo.fromJson(Map<String, dynamic> json) =>
       _$VehicleVideoFromJson(json);
@@ -376,21 +393,22 @@ class VehicleDeparture {
   String? ownerId, ownerName;
   bool? dispatched;
 
-  VehicleDeparture({this.vehicleDepartureId,
-    this.landmarkId,
-    this.landmarkName,
-    this.position,
-    this.geoHash,
-    this.created,
-    this.vehicleId,
-    this.associationId,
-    this.associationName,
-    this.vehicleReg,
-    this.make,
-    this.model,
-    this.ownerId,
-    this.ownerName,
-    this.dispatched});
+  VehicleDeparture(
+      {this.vehicleDepartureId,
+      this.landmarkId,
+      this.landmarkName,
+      this.position,
+      this.geoHash,
+      this.created,
+      this.vehicleId,
+      this.associationId,
+      this.associationName,
+      this.vehicleReg,
+      this.make,
+      this.model,
+      this.ownerId,
+      this.ownerName,
+      this.dispatched});
 
   factory VehicleDeparture.fromJson(Map<String, dynamic> json) =>
       _$VehicleDepartureFromJson(json);
@@ -414,19 +432,20 @@ class UserGeofenceEvent {
   int? confidence;
   double? odometer;
 
-  UserGeofenceEvent({this.userGeofenceId,
-    this.activityType,
-    this.landmarkId,
-    this.landmarkName,
-    this.position,
-    this.geoHash,
-    this.created,
-    this.action,
-    this.associationId,
-    this.associationName,
-    this.userId,
-    this.confidence,
-    this.odometer});
+  UserGeofenceEvent(
+      {this.userGeofenceId,
+      this.activityType,
+      this.landmarkId,
+      this.landmarkName,
+      this.position,
+      this.geoHash,
+      this.created,
+      this.action,
+      this.associationId,
+      this.associationName,
+      this.userId,
+      this.confidence,
+      this.odometer});
 
   factory UserGeofenceEvent.fromJson(Map<String, dynamic> json) =>
       _$UserGeofenceEventFromJson(json);
@@ -450,19 +469,20 @@ class VehicleHeartbeat {
   int? longDate;
   bool? appToBackground = false;
 
-  VehicleHeartbeat({this.vehicleHeartbeatId,
-    this.position,
-    this.geoHash,
-    this.created,
-    this.vehicleId,
-    this.associationId,
-    this.vehicleReg,
-    this.make,
-    this.model,
-    this.ownerId,
-    this.ownerName,
-    this.longDate,
-    this.appToBackground});
+  VehicleHeartbeat(
+      {this.vehicleHeartbeatId,
+      this.position,
+      this.geoHash,
+      this.created,
+      this.vehicleId,
+      this.associationId,
+      this.vehicleReg,
+      this.make,
+      this.model,
+      this.ownerId,
+      this.ownerName,
+      this.longDate,
+      this.appToBackground});
 
   factory VehicleHeartbeat.fromJson(Map<String, dynamic> json) =>
       _$VehicleHeartbeatFromJson(json);
@@ -484,17 +504,18 @@ class RoutePoint {
   Position? position;
   String? geoHash;
 
-  RoutePoint({this.routePointId,
-    this.associationId,
-    this.latitude,
-    this.longitude,
-    this.heading,
-    this.index,
-    this.created,
-    this.routeId,
-    this.routeName,
-    this.position,
-    this.geoHash});
+  RoutePoint(
+      {this.routePointId,
+      this.associationId,
+      this.latitude,
+      this.longitude,
+      this.heading,
+      this.index,
+      this.created,
+      this.routeId,
+      this.routeName,
+      this.position,
+      this.geoHash});
 
   factory RoutePoint.fromJson(Map<String, dynamic> json) =>
       _$RoutePointFromJson(json);
@@ -518,24 +539,25 @@ class Route {
   String? userUrl;
   RouteStartEnd? routeStartEnd;
 
-  Route({this.routeId,
-    this.countryId,
-    this.countryName,
-    this.name,
-    this.routeNumber,
-    this.created,
-    this.updated,
-    this.color,
-    this.isActive,
-    this.activationDate,
-    this.associationId,
-    this.associationName,
-    this.heading,
-    this.lengthInMetres,
-    this.userId,
-    this.userName,
-    this.userUrl,
-    this.routeStartEnd});
+  Route(
+      {this.routeId,
+      this.countryId,
+      this.countryName,
+      this.name,
+      this.routeNumber,
+      this.created,
+      this.updated,
+      this.color,
+      this.isActive,
+      this.activationDate,
+      this.associationId,
+      this.associationName,
+      this.heading,
+      this.lengthInMetres,
+      this.userId,
+      this.userName,
+      this.userUrl,
+      this.routeStartEnd});
 
   factory Route.fromJson(Map<String, dynamic> json) => _$RouteFromJson(json);
 
@@ -552,14 +574,15 @@ class RouteAssignment {
   int? active;
   String? associationId, associationName;
 
-  RouteAssignment({this.vehicleId,
-    this.routeId,
-    this.routeName,
-    this.created,
-    this.vehicleReg,
-    this.active,
-    this.associationId,
-    this.associationName});
+  RouteAssignment(
+      {this.vehicleId,
+      this.routeId,
+      this.routeName,
+      this.created,
+      this.vehicleReg,
+      this.active,
+      this.associationId,
+      this.associationName});
 
   factory RouteAssignment.fromJson(Map<String, dynamic> json) =>
       _$RouteAssignmentFromJson(json);
@@ -572,36 +595,42 @@ class RouteAssignment {
 class Vehicle {
   String? _id;
   String? vehicleId;
-  String? countryId, ownerName, ownerId, ownerCellphone;
+  String? countryId, ownerName, ownerId, cellphone;
   String? created, dateInstalled;
   String? vehicleReg;
   String? make;
   String? model;
   String? year;
-  String? qrCodeUrl;
+  String? qrCodeUrl, bucketFileName;
   int? passengerCapacity;
+  int? active;
+  String? qrCodeBytes;
+
   String? associationId, associationName;
   List<VehiclePhoto>? photos = [];
   List<VehicleVideo>? videos = [];
 
-  Vehicle({
-    this.vehicleId,
-    required this.countryId,
-    this.ownerName,
-    this.ownerId,
-    this.created,
-    this.dateInstalled,
-    required this.vehicleReg,
-    required this.make,
-    required this.model,
-    required this.year,
-    this.qrCodeUrl,
-    this.ownerCellphone,
-    required this.passengerCapacity,
-    required this.associationId,
-    this.photos,
-    this.videos,
-    required this.associationName});
+  Vehicle(
+      {this.vehicleId,
+      required this.countryId,
+      this.ownerName,
+      this.ownerId,
+      this.created,
+      this.qrCodeBytes,
+      this.dateInstalled,
+      required this.vehicleReg,
+      required this.make,
+      required this.model,
+      required this.year,
+      this.qrCodeUrl,
+      this.cellphone,
+      this.active,
+      required this.passengerCapacity,
+      required this.associationId,
+      this.photos,
+      this.bucketFileName,
+      this.videos,
+      required this.associationName});
 
   factory Vehicle.fromJson(Map<String, dynamic> json) =>
       _$VehicleFromJson(json);
@@ -616,18 +645,19 @@ class CalculatedDistance {
   int? distanceInMetres, distanceFromStart;
   int? fromRoutePointIndex, toRoutePointIndex, index;
 
-  CalculatedDistance({this.routeName,
-    this.routeId,
-    this.fromLandmark,
-    this.toLandmark,
-    this.fromLandmarkId,
-    this.toLandmarkId,
-    this.associationId,
-    this.distanceInMetres,
-    this.distanceFromStart,
-    this.fromRoutePointIndex,
-    this.toRoutePointIndex,
-    this.index});
+  CalculatedDistance(
+      {this.routeName,
+      this.routeId,
+      this.fromLandmark,
+      this.toLandmark,
+      this.fromLandmarkId,
+      this.toLandmarkId,
+      this.associationId,
+      this.distanceInMetres,
+      this.distanceFromStart,
+      this.fromRoutePointIndex,
+      this.toRoutePointIndex,
+      this.index});
 
   factory CalculatedDistance.fromJson(Map<String, dynamic> json) =>
       _$CalculatedDistanceFromJson(json);
@@ -658,26 +688,27 @@ class AppError {
   String? vehicleId;
   String? vehicleReg;
 
-  AppError({this.appErrorId,
-    this.errorMessage,
-    this.manufacturer,
-    this.model,
-    this.created,
-    this.brand,
-    this.userId,
-    this.associationId,
-    this.userName,
-    this.errorPosition,
-    this.geoHash,
-    this.iosName,
-    this.versionCodeName,
-    this.baseOS,
-    this.deviceType,
-    this.iosSystemName,
-    this.userUrl,
-    this.uploadedDate,
-    this.vehicleId,
-    this.vehicleReg});
+  AppError(
+      {this.appErrorId,
+      this.errorMessage,
+      this.manufacturer,
+      this.model,
+      this.created,
+      this.brand,
+      this.userId,
+      this.associationId,
+      this.userName,
+      this.errorPosition,
+      this.geoHash,
+      this.iosName,
+      this.versionCodeName,
+      this.baseOS,
+      this.deviceType,
+      this.iosSystemName,
+      this.userUrl,
+      this.uploadedDate,
+      this.vehicleId,
+      this.vehicleReg});
 
   factory AppError.fromJson(Map<String, dynamic> json) =>
       _$AppErrorFromJson(json);
@@ -701,7 +732,8 @@ class CommuterRequest {
   int? routePointIndex, numberOfPassengers;
   double? distanceToRouteLandmarkInMetres, distanceToRoutePointInMetres;
 
-  CommuterRequest(this.commuterId,
+  CommuterRequest(
+      this.commuterId,
       this.commuterRequestId,
       this.routeId,
       this.routeName,
@@ -736,7 +768,8 @@ class Commuter {
   String? email;
   String? cellphone, profileThumbnailUrl;
 
-  Commuter(this.commuterId,
+  Commuter(
+      this.commuterId,
       this.name,
       this.gender,
       this.countryId,
@@ -764,24 +797,30 @@ class User {
   String? associationName;
   String? fcmToken;
   String? password;
-  String? email;
+  String? email, bucketFileName;
+  String? qrCodeBytes;
+
   String? cellphone, profileThumbnail, profileUrl, created, qrCodeUrl;
 
-  User({required this.userType,
-    this.userId,
-    required this.firstName,
-    required this.lastName,
-    this.gender,
-    required this.countryId,
-    required this.associationId,
-    required this.associationName,
-    this.fcmToken,
-    this.password,
-    required this.email,
-    required this.cellphone,
-    this.profileThumbnail,
-    this.created, this.qrCodeUrl,
-    this.profileUrl});
+  User(
+      {required this.userType,
+      this.userId,
+      required this.firstName,
+      required this.lastName,
+      this.gender,
+      required this.countryId,
+      required this.associationId,
+      required this.associationName,
+      this.fcmToken,
+      this.password,
+      this.bucketFileName,
+      required this.email,
+      required this.cellphone,
+      this.qrCodeBytes,
+      this.profileThumbnail,
+      this.created,
+      this.qrCodeUrl,
+      this.profileUrl});
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
@@ -831,20 +870,21 @@ class AmbassadorPassengerCount {
   int? currentPassengers;
   Position? position;
 
-  AmbassadorPassengerCount({this.vehicleId,
-    this.vehicleReg,
-    this.userId,
-    this.userName,
-    this.created,
-    this.associationId,
-    this.routeId,
-    this.routeName,
-    this.ownerId,
-    this.ownerName,
-    this.passengersIn,
-    this.passengersOut,
-    this.currentPassengers,
-    this.position});
+  AmbassadorPassengerCount(
+      {this.vehicleId,
+      this.vehicleReg,
+      this.userId,
+      this.userName,
+      this.created,
+      this.associationId,
+      this.routeId,
+      this.routeName,
+      this.ownerId,
+      this.ownerName,
+      this.passengersIn,
+      this.passengersOut,
+      this.currentPassengers,
+      this.position});
 
   factory AmbassadorPassengerCount.fromJson(Map<String, dynamic> json) =>
       _$AmbassadorPassengerCountFromJson(json);
@@ -878,12 +918,13 @@ class LocationRequest {
   String? created;
   String? associationId;
 
-  LocationRequest({this.vehicleId,
-    this.vehicleReg,
-    this.userId,
-    this.userName,
-    this.created,
-    this.associationId});
+  LocationRequest(
+      {this.vehicleId,
+      this.vehicleReg,
+      this.userId,
+      this.userName,
+      this.created,
+      this.associationId});
 
   factory LocationRequest.fromJson(Map<String, dynamic> json) =>
       _$LocationRequestFromJson(json);
@@ -901,14 +942,15 @@ class LocationResponse {
   String? associationId;
   Position? position;
 
-  LocationResponse({this.userId,
-    this.vehicleId,
-    this.vehicleReg,
-    this.geoHash,
-    this.userName,
-    this.created,
-    this.associationId,
-    this.position});
+  LocationResponse(
+      {this.userId,
+      this.vehicleId,
+      this.vehicleReg,
+      this.geoHash,
+      this.userName,
+      this.created,
+      this.associationId,
+      this.position});
 
   factory LocationResponse.fromJson(Map<String, dynamic> json) =>
       _$LocationResponseFromJson(json);
@@ -929,17 +971,18 @@ class RouteLandmark {
   int? index;
   Position? position;
 
-  RouteLandmark({this.routeId,
-    this.routeName,
-    this.landmarkId,
-    this.landmarkName,
-    this.created,
-    this.associationId,
-    this.routePointId,
-    this.routePointIndex,
-    this.index,
-    this.routeLandmarkId,
-    this.position});
+  RouteLandmark(
+      {this.routeId,
+      this.routeName,
+      this.landmarkId,
+      this.landmarkName,
+      this.created,
+      this.associationId,
+      this.routePointId,
+      this.routePointIndex,
+      this.index,
+      this.routeLandmarkId,
+      this.position});
 
   factory RouteLandmark.fromJson(Map<String, dynamic> json) =>
       _$RouteLandmarkFromJson(json);
@@ -1016,7 +1059,8 @@ class SettingsModel {
       numberOfLandmarksToScan;
   int? distanceFilter;
 
-  SettingsModel(this.associationId,
+  SettingsModel(
+      this.associationId,
       this.locale,
       this.created,
       this.refreshRateInSeconds,
@@ -1048,12 +1092,13 @@ class RouteStartEnd {
   Position? startCityPosition;
   Position? endCityPosition;
 
-  RouteStartEnd({this.startCityId,
-    this.startCityName,
-    this.endCityId,
-    this.endCityName,
-    this.startCityPosition,
-    this.endCityPosition});
+  RouteStartEnd(
+      {this.startCityId,
+      this.startCityName,
+      this.endCityId,
+      this.endCityName,
+      this.startCityPosition,
+      this.endCityPosition});
 
   factory RouteStartEnd.fromJson(Map<String, dynamic> json) =>
       _$RouteStartEndFromJson(json);

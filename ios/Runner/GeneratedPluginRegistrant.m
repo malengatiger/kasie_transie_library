@@ -120,6 +120,12 @@
 @import geolocator_apple;
 #endif
 
+#if __has_include(<get_thumbnail_video/VideoThumbnailPlugin.h>)
+#import <get_thumbnail_video/VideoThumbnailPlugin.h>
+#else
+@import get_thumbnail_video;
+#endif
+
 #if __has_include(<google_maps_flutter_ios/FLTGoogleMapsPlugin.h>)
 #import <google_maps_flutter_ios/FLTGoogleMapsPlugin.h>
 #else
@@ -214,6 +220,7 @@
   [GeocodingPlugin registerWithRegistrar:[registry registrarForPlugin:@"GeocodingPlugin"]];
   [GeofenceServicePlugin registerWithRegistrar:[registry registrarForPlugin:@"GeofenceServicePlugin"]];
   [GeolocatorPlugin registerWithRegistrar:[registry registrarForPlugin:@"GeolocatorPlugin"]];
+  [VideoThumbnailPlugin registerWithRegistrar:[registry registrarForPlugin:@"VideoThumbnailPlugin"]];
   [FLTGoogleMapsPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTGoogleMapsPlugin"]];
   [FLTImagePickerPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTImagePickerPlugin"]];
   [MobileScannerPlugin registerWithRegistrar:[registry registrarForPlugin:@"MobileScannerPlugin"]];

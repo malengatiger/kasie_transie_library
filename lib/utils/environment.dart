@@ -4,8 +4,11 @@ class KasieEnvironment {
   //Service URL: https://kasie-backend-3-167113439249.europe-west1.run.app
 
   static const useNodeJSBackend = true;
-  static const _devUrlNode = 'http://192.168.64.1:8080/api/v1/';
-  static const _prodUrlNode = 'https://kasie-transie-backend-3-854189510560.europe-west1.run.app/api/v1/';
+  //192.168.88.253
+  // static const _devUrlNode = 'http://192.168.88.253:8080/api/v1/';
+  static const _devUrlNode = 'http://169.254.190.11:8080/api/v1/';
+
+  static const _prodUrlNode = 'https://kasie-transie-3-backend-854189510560.europe-west1.run.app/api/v1/';
   static const aubs = 'aubreym';
   static const aubs2 = 'kkTiger23';
   static const aubs3 = 'mon';
@@ -20,8 +23,8 @@ class KasieEnvironment {
 
     } else {
         return _prodUrlNode;
-
     }
+    throw Exception('wtf?');
   }
   static String getDatabaseString() {
     if (kDebugMode) {

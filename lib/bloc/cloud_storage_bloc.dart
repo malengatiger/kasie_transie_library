@@ -21,20 +21,25 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart' as fb;
 import 'package:universal_io/io.dart' as io;
 import 'package:firebase_storage/firebase_storage.dart' as store;
+
 // import 'package:firebase/firebase.dart' as fb;
 const photoStorageName = 'kasieTransiePhotos';
 const videoStorageName = 'kasieTransieVideos';
 
 class CloudStorageBloc {
-  final FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
+  final FirebaseStorage firebaseStorage;
   Random rand = Random(DateTime.now().millisecondsSinceEpoch);
   static const mm = '☕️☕️☕️☕️☕️☕️ CloudStorageBloc: 💚💚 ';
 
- final DataApiDog dataApiDog;
- final Prefs prefs;
+  final DataApiDog dataApiDog;
+  final Prefs prefs;
+  final DeviceLocationBloc locationBloc;
 
-
-  CloudStorageBloc(this.dataApiDog, this.prefs);
+  CloudStorageBloc(
+      {required this.dataApiDog,
+      required this.prefs,
+      required this.locationBloc,
+      required this.firebaseStorage});
 
   final StreamController<lib.VehiclePhoto> _photoStreamController =
       StreamController.broadcast();
@@ -48,35 +53,48 @@ class CloudStorageBloc {
   Stream<lib.VehicleVideo> get videoStream => _videoStreamController.stream;
 
   Stream<String> get errorStream => _errorStreamController.stream;
-  DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
 
-  // Future<String> uploadFile(Uint8List fileBytes,
-  //     {required String associationName, required String fileName}) async {
-  //   final storageRef = FirebaseStorage.instance.ref()
-  //   .child('/kasie2025_data/$associationName/$fileName');
-  //   // Create file metadata to update
-  //   final newMetadata = SettableMetadata(
-  //     cacheControl: "public,max-age=300",
-  //     contentType: "image/png",
-  //     customMetadata: <String, String>{'public': 'true'},
-  //   );
-  //   final metadata = await storageRef.updateMetadata(newMetadata);
-  //   pp('$mm metadata: 🍎 contentType ${metadata.contentType} 🍎 fullPath: ${metadata.fullPath}');
-  //   pp('$mm storageRef name: 🍎 ${storageRef.name}');
-  //   try {
-  //     await storageRef.putData(fileBytes);
-  //     var url = await storageRef.getDownloadURL();
-  //     pp('$mm url: $url');
-  //     return url;
-  //   } catch (e,s) {
-  //     pp('$mm 😈😈😈ERROR: 😈😈😈$e \n$s');
-  //     throw Exception('File upload failed: $e');
-  //   }
-  // }
+  Future<String> uploadQRCodeBytes(Uint8List fileBytes,
+      {required String associationName}) async {
+    pp('$mm upload file .........');
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      pp('$mm User is not signed in!  Cannot upload.');
+      throw Exception("User not signed in"); // Or handle appropriately
+    } else {
+      pp('\n$mm 🔵🔵🔵🔵 User is signed in! ${user.displayName} 🔵🔵🔵🔵');
+
+    }
+    var ref = firebaseStorage.ref();
+    pp('$mm upload bucket: ${ref.bucket}');
+    pp('$mm upload fullPath: ${ref.fullPath}');
+    pp('$mm upload storage: ${ref.storage.toString()}');
+
+    final storageRef = firebaseStorage.ref().child(
+        '/kasie-transie-3_data/$associationName/qrcodes/qr_${DateTime.now().toIso8601String()}.png');
+
+    pp('$mm upload storageRef: ${storageRef.toString()}');
+    final newMetadata = SettableMetadata(
+      cacheControl: "public,max-age=300",
+      contentType: "image/png",
+      customMetadata: <String, String>{'public': 'true'},
+    );
+    pp('$mm storageRef name: 🍎 ${storageRef.name}');
+    try {
+      await storageRef.putData(fileBytes,newMetadata as SettableMetadata?);
+      var url = await storageRef.getDownloadURL();
+      pp('$mm url: $url');
+      return url;
+    } catch (e, s) {
+      pp('$mm 😈😈😈ERROR: 😈😈😈$e \n$s');
+      throw Exception('File upload failed: $e');
+    }
+  }
+
   Future<int> uploadUserPhoto(
       {required lib.User mUser,
-        required File file,
-        required File thumbnailFile}) async {
+      required File file,
+      required File thumbnailFile}) async {
     pp('\n\n\n$mm️ uploadUserPhoto ☕️☕️☕️☕️☕️☕️☕️️ ... ${mUser.email}');
 
     pp('\n$mm adding photo data to the database ...');
@@ -91,14 +109,19 @@ class CloudStorageBloc {
 
       pp('$mm adding photo ..... 😡😡 😡😡');
 
-      var userPhoto = lib.UserPhoto(userPhotoId: 'userPhotoId',
-          associationId: mUser.associationId, associationName: mUser.associationName, userName: '${mUser.firstName} ${mUser.lastName}',
-          userId: mUser.userId, created: DateTime.now().toIso8601String(),
-          thumbNailUrl: urls.$2, url: urls.$1);
+      var userPhoto = lib.UserPhoto(
+          userPhotoId: 'userPhotoId',
+          associationId: mUser.associationId,
+          associationName: mUser.associationName,
+          userName: '${mUser.firstName} ${mUser.lastName}',
+          userId: mUser.userId,
+          created: DateTime.now().toIso8601String(),
+          thumbNailUrl: urls.$2,
+          url: urls.$1);
 
       await dataApiDog.addUserPhoto(userPhoto);
       return uploadFinished;
-    } catch (e,s) {
+    } catch (e, s) {
       pp('\n\n$mm 👿👿👿👿 Photo write to database failed, We may have a database problem: 🔴🔴🔴 $e');
       return uploadError;
     }
@@ -122,17 +145,18 @@ class CloudStorageBloc {
           isVideo: false);
       final loc = await locationBloc.getLocation();
       final position = lib.Position(
-         type: 'Point',
+          type: 'Point',
           coordinates: [loc.longitude, loc.latitude],
           latitude: loc.latitude,
-          longitude: loc.longitude, geoHash: null);
+          longitude: loc.longitude,
+          geoHash: null);
 
       var vehiclePhoto = lib.VehiclePhoto(
-        vehiclePhotoId:  const Uuid().v4().toString(),
-       vehicleId:  car.vehicleId,
+        vehiclePhotoId: const Uuid().v4().toString(),
+        vehicleId: car.vehicleId,
         vehicleReg: car.vehicleReg,
         userName: user!.name,
-        userId: user.name,
+        userId: user.userId,
         url: urls.$1,
         thumbNailUrl: urls.$2,
         created: DateTime.now().toUtc().toIso8601String(),
@@ -145,6 +169,25 @@ class CloudStorageBloc {
     } catch (e) {
       pp('\n\n$mm 👿👿👿👿 Photo write to database failed, We may have a database problem: 🔴🔴🔴 $e');
       return uploadError;
+    }
+  }
+
+  Future<String> uploadQRCode({
+    required String id,
+    required File file,
+  }) async {
+    pp('\n\n\n$mm️ uploadQRCode ☕️☕️☕️☕️☕️☕️☕️️ ... ${file.path}');
+
+    pp('\n$mm adding qrcode to cloud ...o');
+    try {
+      final url = await _doFileUpload(file: file, id: id);
+
+      pp('\n$mm  🌿🌿🌿 qrcode url: $url 🌿🌿🌿');
+
+      return url;
+    } catch (e) {
+      pp('\n\n$mm 👿👿👿👿 qrcode upload failed: 🔴🔴🔴 $e');
+      rethrow;
     }
   }
 
@@ -192,7 +235,6 @@ class CloudStorageBloc {
     }
   }
 
-
   Future<(String, String)> _doTheUpload({
     required File file,
     required File thumbnailFile,
@@ -212,7 +254,7 @@ class CloudStorageBloc {
 
     var fileName = 'photo_$suffix';
     var firebaseStorageRef =
-    FirebaseStorage.instance.ref().child(photoStorageName).child(fileName);
+        FirebaseStorage.instance.ref().child(photoStorageName).child(fileName);
 
     if (kIsWeb) {
       // For web, use putData instead of putFile
@@ -232,7 +274,7 @@ class CloudStorageBloc {
     // Upload thumbnail
     final thumbName = 'thumbnail_$suffix';
     final firebaseStorageRef2 =
-    FirebaseStorage.instance.ref().child(photoStorageName).child(thumbName);
+        FirebaseStorage.instance.ref().child(photoStorageName).child(thumbName);
 
     late UploadTask thumbUploadTask;
     if (kIsWeb) {
@@ -246,11 +288,42 @@ class CloudStorageBloc {
 
     final thumbTaskSnapshot = await thumbUploadTask.whenComplete(() {});
     final thumbUrl = await thumbTaskSnapshot.ref.getDownloadURL();
-    pp(
-        '$mm thumbnail file url is available, meaning that upload is complete: \n$thumbUrl');
+    pp('$mm thumbnail file url is available, meaning that upload is complete: \n$thumbUrl');
     _printSnapshot(thumbTaskSnapshot);
 
     return (url, thumbUrl);
+  }
+
+  Future<String> _doFileUpload({
+    required File file,
+    required String id,
+  }) async {
+    pp('$mm️ _doFileUpload ☕️☕️☕️☕️☕️☕️☕️ file path: \n${file.path}');
+
+    // Upload main file
+    late UploadTask uploadTask;
+    late TaskSnapshot taskSnapshot;
+    var type = 'png';
+    final suffix = '${id}__${DateTime.now().millisecondsSinceEpoch}.$type';
+
+    var fileName = 'qrcode_$suffix';
+    var firebaseStorageRef =
+        FirebaseStorage.instance.ref().child(photoStorageName).child(fileName);
+
+    if (kIsWeb) {
+      // For web, use putData instead of putFile
+      final bytes = await file.readAsBytes();
+      uploadTask = firebaseStorageRef.putData(bytes);
+    } else {
+      uploadTask = firebaseStorageRef.putFile(file);
+    }
+    _reportProgress(uploadTask);
+    taskSnapshot = await uploadTask.whenComplete(() {});
+    final url = await taskSnapshot.ref.getDownloadURL();
+    pp('$mm file url is available, meaning that upload is complete, url: \n$url');
+    _printSnapshot(taskSnapshot);
+
+    return (url);
   }
 
   void _printSnapshot(TaskSnapshot taskSnapshot) {
@@ -286,96 +359,26 @@ class CloudStorageBloc {
   }
 
   static const xz = '🌿🌿🌿🌿🌿🌿🌿 CloudStorageBloc: ';
-  Future<File> downloadFile(String mUrl) async {
-    pp('$xz : downloadFile: 😡😡😡 $mUrl ....');
+  Future<Uint8List?> downloadFile(String fileName) async {
+    pp('$xz : downloadFile from cloud storage: 😡😡😡 $fileName ....');
 
     try {
-      final http.Response response =
-          await http.get(Uri.parse(mUrl)).catchError((e) {
-        pp('😡😡😡 Download failed: 😡😡😡 $e');
-        throw Exception('😡😡😡 Download failed: $e');
-      });
-
-      pp('$xz : downloadFile: OK?? 💜💜💜💜'
-          '  statusCode: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        final Directory directory = await getApplicationDocumentsDirectory();
-        var type = 'jpg';
-        if (mUrl.contains('mp4')) {
-          type = 'mp4';
-        }
-        final File mFile = File(
-            '${directory.path}/download${DateTime.now().millisecondsSinceEpoch}.$type');
-        pp('$xz : downloadFile: 💜  .... new file: ${mFile.path}');
-        mFile.writeAsBytesSync(response.bodyBytes);
-        var len = await mFile.length();
-        pp('$xz : downloadFile: 💜  .... file downloaded length: 😡 '
-            '${(len / 1024).toStringAsFixed(1)} KB - path: ${mFile.path}');
-        return mFile;
-      } else {
-        pp('$xz : downloadFile: Download failed: 😡😡😡 statusCode ${response.statusCode} 😡 ${response.body} 😡');
-        throw Exception('Download failed: statusCode: ${response.statusCode}');
-      }
-    } on SocketException {
+      // Create a storage reference from our app
+      final storageRef = FirebaseStorage.instance.ref();
+      final pathReference = storageRef.child(fileName);
+      var bytes = await pathReference.getData();
+      return bytes;
+    } catch(e) {
       pp('$xz No Internet connection, really means that server cannot be reached 😑');
       throw KasieException(
-          message: 'No Internet connection',
-          url: mUrl,
+          message: 'cloud storage download failed',
+          url: 'downLoadFile',
           translationKey: 'networkProblem',
           errorType: KasieException.socketException);
-    } on HttpException {
-      pp("$xz HttpException occurred 😱");
-      throw KasieException(
-          message: 'Server not around',
-          url: mUrl,
-          translationKey: 'serverProblem',
-          errorType: KasieException.httpException);
-    } on FormatException {
-      pp("$xz Bad response format 👎");
-      throw KasieException(
-          message: 'Bad response format',
-          url: mUrl,
-          translationKey: 'serverProblem',
-          errorType: KasieException.formatException);
-    } on TimeoutException {
-      pp("$xz GET Request has timed out in $timeOutInSeconds seconds 👎");
-      throw KasieException(
-          message: 'Request timed out',
-          url: mUrl,
-          translationKey: 'networkProblem',
-          errorType: KasieException.timeoutException);
     }
   }
 
   static const timeOutInSeconds = 120;
-  // ignore: missing_return
-  Future<int> deleteFolder(String folderName) async {
-    pp('.deleteFolder ######## deleting $folderName');
-    var task = _firebaseStorage.ref().child(folderName).delete();
-    await task.then((f) {
-      pp('.deleteFolder $folderName deleted from FirebaseStorage');
-      return 0;
-    }).catchError((e) {
-      pp('.deleteFolder ERROR $e');
-      return 1;
-    });
-    return 0;
-  }
-
-  // ignore: missing_return
-  Future<int> deleteFile(String folderName, String name) async {
-    pp('.deleteFile ######## deleting $folderName : $name');
-    var task = _firebaseStorage.ref().child(folderName).child(name).delete();
-    task.then((f) {
-      pp('.deleteFile $folderName : $name deleted from FirebaseStorage');
-      return 0;
-    }).catchError((e) {
-      pp('.deleteFile ERROR $e');
-      return 1;
-    });
-    return 0;
-  }
 
 }
 

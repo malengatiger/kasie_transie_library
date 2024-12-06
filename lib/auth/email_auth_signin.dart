@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/auth/sign_in_strings.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:kasie_transie_library/utils/initialiazer_cover.dart';
-import 'package:kasie_transie_library/utils/navigator_utils.dart';
-import 'package:page_transition/page_transition.dart';
 
 import '../bloc/list_api_dog.dart';
 import '../data/data_schemas.dart';
@@ -23,16 +20,20 @@ class EmailAuthSignin extends StatefulWidget {
   EmailAuthSigninState createState() => EmailAuthSigninState();
 }
 
+//😎😎marshal: thabsnkuna@awesometaxi.com  - pass123
+//😎😎ambassador: smithmol@awesometaxi.com  - pass123
+//😎😎Internal Admin: peterj_admin@sowertech.com - pass123 - user belongs to sowertech and does not belong to association
+
 class EmailAuthSigninState extends State<EmailAuthSignin>
     with SingleTickerProviderStateMixin {
   final mm = '💦💦💦💦💦💦 EmailAuthSignin 🔷🔷';
   late AnimationController _controller;
-  TextEditingController emailController =
-      TextEditingController(text: "peterj_admin@sowertech.com");
-  TextEditingController pswdController = TextEditingController(text: "pass123");
+  TextEditingController emailController = TextEditingController();
+  TextEditingController pswdController = TextEditingController();
 
   var formKey = GlobalKey<FormState>();
   bool busy = false;
+
   // bool initializing = false;
   User? user;
   SignInStrings? signInStrings;
@@ -56,13 +57,20 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
       busy = true;
     });
     try {
+      pp('\n\n$mm ... sign in ....: ${emailController.text} ${pswdController.text} - ${E.leaf}');
+
       fb.UserCredential userCred = await fb.FirebaseAuth.instance
           .signInWithEmailAndPassword(
-              email: emailController.value.text,
-              password: pswdController.value.text);
+              email: emailController.text,
+              password: pswdController.text);
 
       pp('\n\n$mm ... Firebase user creds after sign in: ${userCred.user} - ${E.leaf}');
-      pp('\n\n\n$mm ... about to initialize KasieTransie data ..... ');
+      pp('\n\n$mm ... about to initialize KasieTransie data ..... uid: ${userCred.user!.uid}');
+      var asses = await listApiDog.getAssociations(true);
+      for (var element in asses) {
+        pp('$mm association: ${element.associationName}');
+      }
+      pp('$mm ... about to run listApiDog.getUserById ..... uid: ${userCred.user!.uid}');
 
       if (userCred.user != null) {
         user = await listApiDog.getUserById(userCred.user!.uid);
@@ -75,7 +83,6 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
     } catch (e) {
       pp(e);
       widget.onSignInError();
-
     }
     setState(() {
       busy = false;
@@ -83,20 +90,19 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
   }
 
   Future<void> _handleUser() async {
-     pp('$mm KasieTransie user found on database:  🍎 ${user!.toJson()} 🍎');
+    pp('$mm KasieTransie user found on database:  🍎 ${user!.toJson()} 🍎');
     user!.password = pswdController.text;
     prefs.saveUser(user!);
     pp('$mm KasieTransie user cached:  🍎 ${user!.toJson()} 🍎');
     Association? association;
     if (user!.associationId != null) {
       if (user!.associationId != 'ADMIN') {
-        association =
-            await listApiDog.getAssociationById(user!.associationId!);
+        association = await listApiDog.getAssociationById(user!.associationId!);
         if (association != null) {
           prefs.saveAssociation(association);
           pp('$mm KasieTransie association found on database:  🍎 ${association.toJson()} 🍎');
-          final users = await listApiDog.getAssociationUsers(
-              user!.associationId!, true);
+          final users =
+              await listApiDog.getAssociationUsers(user!.associationId!, true);
           pp('$mm users in association: ${users.length}');
         }
       }
@@ -110,7 +116,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
       }
     }
 
-             widget.onGoodSignIn();
+    widget.onGoodSignIn();
   }
 
   @override
@@ -131,32 +137,18 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
             Center(
               child: SizedBox(
                 width: 480,
-                height: 640,
+                height: 660,
                 child: Card(
-                  shape: getDefaultRoundedBorder(),
-                  elevation: 8,
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      children: [
-                        const SizedBox(
-                          height: 48,
-                        ),
-                        Text(
-                          'Email Authentication',
-                          style: myTextStyleMediumLarge(context, 24),
-                        ),
-                        const SizedBox(
-                          height: 48,
-                        ),
-                        Expanded(
-                            child: Form(
-                          key: formKey,
+                    elevation: 8,
+                    child: Form(
+                        key: formKey,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              const SizedBox(
-                                height: 48,
-                              ),
+                              gapH16,
                               SizedBox(
                                 width: 420,
                                 child: TextFormField(
@@ -214,14 +206,9 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
                                     )
                             ],
                           ),
-                        ))
-                      ],
-                    ),
-                  ),
-                ),
+                        ))),
               ),
             ),
-
           ],
         ),
       ),
