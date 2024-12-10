@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +9,7 @@ import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/data/vehicle_list.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
+import 'package:universal_html/html.dart' as html;
 import 'package:universal_io/io.dart' as io;
 import 'package:universal_io/io.dart';
 
@@ -24,8 +26,6 @@ import '../utils/prefs.dart';
 import 'app_auth.dart';
 import 'cache_manager.dart';
 import 'list_api_dog.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:universal_html/html.dart' as html;
 
 class DataApiDog {
   static const mm = '🌎🌎🌎🌎🌎🌎 DataApiDog: 🌎🌎';
@@ -588,7 +588,7 @@ class DataApiDog {
   }
 
   Future<Route> addRoute(Route route) async {
-    pp('$mm add route to database ...');
+    pp('$mm add route to database ... ${route.name}');
     myPrettyJsonPrint(route.toJson());
 
     final bag = route.toJson();
@@ -600,12 +600,11 @@ class DataApiDog {
       final newRoute = Route.fromJson(res);
 
       pp('$mm new route added to database ...  💙 💙 💙 check!');
-      myPrettyJsonPrint(newRoute.toJson());
-      pp('$mm add new route cache ...  💙 💙 💙 check!');
+      pp('$mm add new route to cache ...  💙 💙 💙 check!');
       var list = await semCache.saveRoute(route: newRoute);
 
       var dog = GetIt.instance<ListApiDog>();
-      pp('$mm putting routes on stream ... ${list.length} routes');
+      pp('$mm putting routes on stream ... $list routes');
       dog.putRouteInStream(list);
 
       return route;
@@ -746,19 +745,18 @@ class DataApiDog {
     return list;
   }
 
-  Future<RouteCity> addRouteCity(RouteCity routeCity) async {
+  Future<RouteCity?> addRouteCity(RouteCity routeCity) async {
     final bag = routeCity.toJson();
     final cmd = '${url}routes/addRouteCity';
     try {
       final res = await _callPost(cmd, bag);
-      pp('$mm RouteCity added to database ...');
-      myPrettyJsonPrint(res);
       final r = RouteCity.fromJson(res);
+      pp('$mm ... route city added, 🔵 ${r.routeName} 🔵 ${r.cityName}');
+
       return r;
     } catch (e) {
       pp('$mm error writing route city, probable dup key error; ignoring!');
-
-      return routeCity;
+      rethrow;
     }
   }
 
@@ -1037,7 +1035,10 @@ class DataApiDog {
   }
 
   static const dev = '👿👿👿';
+
   Future _callPost(String mUrl, dynamic bag) async {
+    pp('$mm  ......... _callWebAPIPost calling: $mUrl');
+
     String? mBag;
     mBag = json.encode(bag);
     const maxRetries = 3;
@@ -1058,9 +1059,9 @@ class DataApiDog {
               headers: headers,
             )
             .timeout(const Duration(seconds: timeOutInSeconds));
+        pp('$mm  _callWebAPIPost RESPONSE: 👌👌👌 statusCode: ${resp.statusCode} 👌👌👌 for $mUrl');
 
         if (resp.statusCode == 200 || resp.statusCode == 201) {
-          pp('$mm  _callWebAPIPost RESPONSE: 👌👌👌 statusCode: ${resp.statusCode} 👌👌👌 for $mUrl');
           try {
             var mJson = json.decode(resp.body);
             return mJson;
@@ -1074,12 +1075,19 @@ class DataApiDog {
             pp('$mm metadata: ${resp.body}');
             pp('$mm  $dev  _callWebAPIPost: 🔆 Firebase ID token may have expired, trying to refresh ... 🔴🔴🔴🔴🔴🔴 ');
             token = await getAuthToken();
-            if (token != null || token != 'NoToken') {
-              _callPost(mUrl, bag);
-            } else {
-              pp('$mm Throwing my toys!!! : 💙 statusCode: ${resp.statusCode} $dev  ');
+
+            pp('$mm Throwing my toys!!! : 💙 statusCode: ${resp.statusCode} $dev  ');
+            final gex = KasieException(
+                message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
+                url: mUrl,
+                translationKey: 'serverProblem',
+                errorType: KasieException.socketException);
+            errorHandler.handleError(exception: gex);
+            throw Exception('The status is BAD, Boss!');
+          } else {
+            if (resp.statusCode == 400 || resp.statusCode == 500) {
               final gex = KasieException(
-                  message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
+                  message: 'Bad status code: ${resp.statusCode} - ${resp.body}, please try again',
                   url: mUrl,
                   translationKey: 'serverProblem',
                   errorType: KasieException.socketException);
@@ -1089,7 +1097,7 @@ class DataApiDog {
           }
         }
         var end = DateTime.now();
-        pp('$mm  _callWebAPIPost: 🔆 elapsed time: ${end.difference(start).inSeconds} seconds 🔆');
+        pp('$mm  _callWebAPIPost: 🔆 elapsed time: ${end.difference(start).inSeconds} seconds 🔆 $mUrl');
       } on io.SocketException catch (e) {
         pp('$mm  SocketException: really means that server cannot be reached 😑');
         final gex = KasieException(

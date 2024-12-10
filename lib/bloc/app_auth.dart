@@ -110,7 +110,7 @@ class AppAuth {
         pp('$locks idTokenChanges: User is currently signed out!');
       } else {
         pp('$locks idTokenChanges: User is not null! ${user.displayName}, checking auth token state ');
-        await getAuthToken();
+        // await getAuthToken();
       }
     });
 
@@ -119,7 +119,7 @@ class AppAuth {
         pp('$locks authStateChanges: User is currently signed out!');
       } else {
         pp('$locks authStateChanges: User is signed in! ${user.displayName}, checking auth token state ...');
-        await getAuthToken();
+        // await getAuthToken();
       }
     });
   }
@@ -148,7 +148,7 @@ class AppAuth {
     String? token;
     if (user != null) {
       token = await user.getIdToken(true);
-      user.getIdTokenResult(true).then((idTokenResult) async {
+      await user.getIdTokenResult(true).then((idTokenResult) async {
         pp('$locks getIdTokenResult: 🍎 expirationTime: ${idTokenResult.expirationTime?.toIso8601String()} ');
 
         DateTime expirationTime = idTokenResult.expirationTime as DateTime;

@@ -115,7 +115,8 @@ class CitySearch extends StatefulWidget {
     required this.showScaffold,
     required this.onCitySelected,
     required this.cities,
-    required this.title, required this.onCityAdded,
+    required this.title,
+    required this.onCityAdded,
   });
 
   final bool showScaffold;
@@ -206,7 +207,7 @@ class _CitySearchState extends State<CitySearch> {
     if (isDarkMode) {
       color = Theme.of(context).primaryColor;
     }
-    var leftPadding = 16.0;
+    var leftPadding = 8.0;
     final type = getDeviceType();
     if (type == 'phone') {
       leftPadding = 2.0;
@@ -215,7 +216,7 @@ class _CitySearchState extends State<CitySearch> {
     return SizedBox(
         width: 460,
         child: Card(
-          shape: getDefaultRoundedBorder(),
+          color: Colors.blue.shade50,
           elevation: 12,
           child: Padding(
             padding: EdgeInsets.all(leftPadding),
@@ -232,9 +233,7 @@ class _CitySearchState extends State<CitySearch> {
                   ],
                 ),
               ),
-              const SizedBox(
-                height: 24,
-              ),
+              gapH4,
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -259,16 +258,7 @@ class _CitySearchState extends State<CitySearch> {
                   ),
                   IconButton(
                       onPressed: () {
-                        NavigationUtils.navigateTo(
-                            context: context,
-                            widget: CityCreatorMap(onCityAdded: (c ) {
-                              pp('$mm ... city added by CityCreatorMap: 🌀🌀${c.toJson()}');
-                              widget.onCityAdded(c);
-                              setState(() {
-                                _citiesToDisplay.insert(0, c);
-                              });
-                            },),
-                            transitionType: PageTransitionType.leftToRight);
+                        _navigateToCityCreatorMap();
                       },
                       tooltip: 'Create a new city, town or place ',
                       icon: Icon(
@@ -277,9 +267,7 @@ class _CitySearchState extends State<CitySearch> {
                       ))
                 ],
               ),
-              const SizedBox(
-                height: 24,
-              ),
+              gapH16,
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(type == 'phone' ? 8 : 48.0),
@@ -288,9 +276,12 @@ class _CitySearchState extends State<CitySearch> {
                       '${_citiesToDisplay.length}',
                       style: const TextStyle(color: Colors.white),
                     ),
-                    badgeStyle:
-                        const bd.BadgeStyle(padding: EdgeInsets.all(24.0), badgeColor: Colors.blue),
-                    child: ListView.builder(
+                    badgeStyle: const bd.BadgeStyle(
+                        padding: EdgeInsets.all(8.0), badgeColor: Colors.blue),
+                    child: GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 4, mainAxisExtent: 48),
                         itemCount: _citiesToDisplay.length,
                         itemBuilder: (ctx, index) {
                           var city = _citiesToDisplay.elementAt(index);
@@ -298,12 +289,14 @@ class _CitySearchState extends State<CitySearch> {
                             onTap: () {
                               _close(city);
                             },
-                            child: Card(
-                              elevation: 2,
-                              shape: getDefaultRoundedBorder(),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Text('${city.name}'),
+                            child: SizedBox(
+                              height: 20,
+                              child: Card(
+                                elevation: 2,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text('${city.name}'),
+                                ),
                               ),
                             ),
                           );
@@ -314,5 +307,20 @@ class _CitySearchState extends State<CitySearch> {
             ]),
           ),
         ));
+  }
+
+  _navigateToCityCreatorMap() {
+    NavigationUtils.navigateTo(
+        context: context,
+        widget: CityCreatorMap(
+          onCityAdded: (c) {
+            pp('$mm ... city added by CityCreatorMap: 🌀🌀${c.toJson()}');
+            widget.onCityAdded(c);
+            setState(() {
+              _citiesToDisplay.insert(0, c);
+            });
+          },
+        ),
+        transitionType: PageTransitionType.leftToRight);
   }
 }
