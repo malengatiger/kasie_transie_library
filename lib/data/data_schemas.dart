@@ -3,7 +3,55 @@ import 'dart:typed_data';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'data_schemas.g.dart';
+@JsonSerializable(explicitToJson: true)
+class VehicleTelemetry {
+  String? _id;
+  String? vehicleTelemetryId, vehicleId;
+  String? created;
+  String? vehicleReg;
+  String? make;
+  String? model;
+  String? year;
+  int? passengerCapacity;
+  Position? position;
+  String? nearestRouteName, routeId;
+  String? nearestRouteLandmarkName, routeLandmarkId;
+  String? associationId, associationName;
+  String? ownerId, ownerName;
+  double? accuracy, heading, altitude, altitudeAccuracy, speed, speedAccuracy;
 
+
+  VehicleTelemetry(
+      {
+      this.vehicleTelemetryId,
+      required this.vehicleId,
+      required this.created,
+      required this.vehicleReg,
+      required this.make,
+      required this.model,
+      required this.year,
+      required this.passengerCapacity,
+      required this.position,
+      required this.nearestRouteName,
+      required this.routeId,
+      required this.nearestRouteLandmarkName,
+      required this.routeLandmarkId,
+      required this.associationId,
+      required this.associationName,
+      required this.ownerId,
+      required this.ownerName,
+      required this.accuracy,
+      required this.heading,
+      required this.altitude,
+      required this.altitudeAccuracy,
+      required this.speed,
+      required this.speedAccuracy});
+
+  factory VehicleTelemetry.fromJson(Map<String, dynamic> json) =>
+      _$VehicleTelemetryFromJson(json);
+
+  Map<String, dynamic> toJson() => _$VehicleTelemetryToJson(this);
+}
 @JsonSerializable(explicitToJson: true)
 class Country {
   String? countryId;
@@ -469,6 +517,7 @@ class VehicleHeartbeat {
   int? longDate;
   bool? appToBackground = false;
 
+
   VehicleHeartbeat(
       {this.vehicleHeartbeatId,
       this.position,
@@ -832,9 +881,10 @@ class User {
 @JsonSerializable(explicitToJson: true)
 class RegistrationBag {
   Association? association;
-  User? user;
+  User? adminUser;
+  User? carUser;
 
-  RegistrationBag({this.association, this.user});
+  RegistrationBag({this.association, this.adminUser});
 
   factory RegistrationBag.fromJson(Map<String, dynamic> json) =>
       _$RegistrationBagFromJson(json);

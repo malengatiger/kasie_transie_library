@@ -6,6 +6,62 @@ part of 'data_schemas.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+VehicleTelemetry _$VehicleTelemetryFromJson(Map<String, dynamic> json) =>
+    VehicleTelemetry(
+      vehicleTelemetryId: json['vehicleTelemetryId'] as String?,
+      vehicleId: json['vehicleId'] as String?,
+      created: json['created'] as String?,
+      vehicleReg: json['vehicleReg'] as String?,
+      make: json['make'] as String?,
+      model: json['model'] as String?,
+      year: json['year'] as String?,
+      passengerCapacity: (json['passengerCapacity'] as num?)?.toInt(),
+      position: json['position'] == null
+          ? null
+          : Position.fromJson(json['position'] as Map<String, dynamic>),
+      nearestRouteName: json['nearestRouteName'] as String?,
+      routeId: json['routeId'] as String?,
+      nearestRouteLandmarkName: json['nearestRouteLandmarkName'] as String?,
+      routeLandmarkId: json['routeLandmarkId'] as String?,
+      associationId: json['associationId'] as String?,
+      associationName: json['associationName'] as String?,
+      ownerId: json['ownerId'] as String?,
+      ownerName: json['ownerName'] as String?,
+      accuracy: (json['accuracy'] as num?)?.toDouble(),
+      heading: (json['heading'] as num?)?.toDouble(),
+      altitude: (json['altitude'] as num?)?.toDouble(),
+      altitudeAccuracy: (json['altitudeAccuracy'] as num?)?.toDouble(),
+      speed: (json['speed'] as num?)?.toDouble(),
+      speedAccuracy: (json['speedAccuracy'] as num?)?.toDouble(),
+    );
+
+Map<String, dynamic> _$VehicleTelemetryToJson(VehicleTelemetry instance) =>
+    <String, dynamic>{
+      'vehicleTelemetryId': instance.vehicleTelemetryId,
+      'vehicleId': instance.vehicleId,
+      'created': instance.created,
+      'vehicleReg': instance.vehicleReg,
+      'make': instance.make,
+      'model': instance.model,
+      'year': instance.year,
+      'passengerCapacity': instance.passengerCapacity,
+      'position': instance.position?.toJson(),
+      'nearestRouteName': instance.nearestRouteName,
+      'routeId': instance.routeId,
+      'nearestRouteLandmarkName': instance.nearestRouteLandmarkName,
+      'routeLandmarkId': instance.routeLandmarkId,
+      'associationId': instance.associationId,
+      'associationName': instance.associationName,
+      'ownerId': instance.ownerId,
+      'ownerName': instance.ownerName,
+      'accuracy': instance.accuracy,
+      'heading': instance.heading,
+      'altitude': instance.altitude,
+      'altitudeAccuracy': instance.altitudeAccuracy,
+      'speed': instance.speed,
+      'speedAccuracy': instance.speedAccuracy,
+    };
+
 Country _$CountryFromJson(Map<String, dynamic> json) => Country(
       json['countryId'] as String?,
       json['name'] as String?,
@@ -818,15 +874,18 @@ RegistrationBag _$RegistrationBagFromJson(Map<String, dynamic> json) =>
       association: json['association'] == null
           ? null
           : Association.fromJson(json['association'] as Map<String, dynamic>),
-      user: json['user'] == null
+      adminUser: json['adminUser'] == null
           ? null
-          : User.fromJson(json['user'] as Map<String, dynamic>),
-    );
+          : User.fromJson(json['adminUser'] as Map<String, dynamic>),
+    )..carUser = json['carUser'] == null
+        ? null
+        : User.fromJson(json['carUser'] as Map<String, dynamic>);
 
 Map<String, dynamic> _$RegistrationBagToJson(RegistrationBag instance) =>
     <String, dynamic>{
       'association': instance.association?.toJson(),
-      'user': instance.user?.toJson(),
+      'adminUser': instance.adminUser?.toJson(),
+      'carUser': instance.carUser?.toJson(),
     };
 
 RouteInfo _$RouteInfoFromJson(Map<String, dynamic> json) => RouteInfo(

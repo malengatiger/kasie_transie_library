@@ -199,6 +199,7 @@ class DamnEmailLinkState extends State<DamnEmailLink>
         busy = true;
       });
     }
+    AppAuth appAuth = GetIt.instance<AppAuth>();
     //use admin user to get the basics set up
     final adminCreds = await fb_auth.FirebaseAuth.instance
         .signInWithEmailAndPassword(email: adminEmail, password: adminPassword);

@@ -35,5 +35,9 @@ class Constants {
    static const   qrcode_vehicle = 'vehicle';
    static const   qrcode_route = 'route';
 
+   static const associationEmailSuffix = '@kasie.com';
+   static const associationPasswordPrefix = 'pass';
+
+
 
 }

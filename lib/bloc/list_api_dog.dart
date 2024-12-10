@@ -25,7 +25,6 @@ import '../utils/error_handler.dart';
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
 import 'app_auth.dart';
-import 'cache_manager.dart';
 
 class ListApiDog {
   static const mm = '🔵🔵🔵🔵🔵🔵🔵🔵️ ListApiDog: ❤️: ';
@@ -63,22 +62,72 @@ class ListApiDog {
     databaseString = KasieEnvironment.getUrl();
   }
 
-  Future getAuthToken() async {
+  Future<String?> getAuthToken() async {
     pp('$mm getAuthToken: ...... Getting Firebase token ......');
     try {
       var m = await appAuth.getAuthToken();
       if (m == null) {
-            pp('$mm Unable to get Firebase token');
-            token = 'NoToken';
-          } else {
-            pp('$mm Firebase token retrieved OK');
-            token = m;
-          }
-      return token;
-    } catch (e,s) {
+        pp('$mm Unable to get Firebase token');
+        return null;
+      } else {
+        pp('$mm Firebase token retrieved OK  ✅ ');
+        return m;
+      }
+    } catch (e, s) {
       pp('$mm $e $s');
       rethrow;
     }
+  }
+
+  Future<bool> setupAssocuationData(String associationId) async {
+    pp('$mm setupAssocuationData .... ${E.redDot}${E.redDot}${E.redDot} 🍎');
+
+    try {
+      var routeData = await getAssociationRouteData(associationId, true);
+      if (routeData != null) {
+        await semCache.saveAssociationRouteData(routeData);
+      }
+      var users = await getAssociationUsers(associationId, true);
+      if (users.isNotEmpty) {
+        await semCache.saveUsers(users);
+      }
+      var cars = await getAssociationCars(associationId, true);
+      if (cars.isNotEmpty) {
+        await semCache.saveVehicles(cars);
+      }
+      pp('$mm setupAssocuationData looks cool! 🍎 returning true .... 🍎');
+      return true;
+    } catch (e, s) {
+      pp('$mm setupAssocuationData problem: $e $s 😈😈😈');
+      rethrow;
+    }
+    return false;
+  }
+
+  Future<Vehicle?> setUpVehicleData(String vehicleId) async {
+    pp('$mm setUpVehicleData .... ${E.redDot}${E.redDot}${E.redDot} 🍎');
+
+    final car = await getVehicle(vehicleId);
+    if (car != null) {
+      //todo - get data needed by car: routes, users, etc.
+      var routeData = await getAssociationRouteData(car.associationId!, true);
+      if (routeData != null) {
+        await semCache.saveAssociationRouteData(routeData);
+      }
+      var users = await getAssociationUsers(car.associationId!, true);
+      if (users.isNotEmpty) {
+        await semCache.saveUsers(users);
+      }
+      var cars = await getAssociationCars(car.associationId!, true);
+      if (cars.isNotEmpty) {
+        await semCache.saveVehicles(cars);
+      }
+      pp('$mm setUpVehicleData looks cool! 🍎 returning car: ${car.toJson()}.... 🍎');
+      return car;
+    }
+    pp('$mm setUpVehicleData: Car data setup failed '
+        ' ${E.redDot}${E.redDot}${E.redDot}');
+    throw Exception('Vehicle setup failed');
   }
 
   Future<User?> getUserById(String userId) async {
@@ -1041,15 +1090,15 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<Landmark>> findLandmarksByLocation(
+  Future<List<Landmark>> findRouteLandmarksByLocation(
       {required double latitude,
       required double longitude,
       required double radiusInKM}) async {
-    pp('$mm .................. findLandmarksByLocation; radius: $radiusInKM');
+    pp('$mm .................. findRouteLandmarksByLocation; radius: $radiusInKM');
 
     final list = <Landmark>[];
     final cmd =
-        '${url}findLandmarksByLocation?latitude=$latitude&longitude=$longitude&radiusInKM=$radiusInKM';
+        '${url}routes/findRouteLandmarksByLocation?latitude=$latitude&longitude=$longitude&radiusInKM=$radiusInKM';
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
       var r = Landmark.fromJson(value);
@@ -1125,7 +1174,7 @@ class ListApiDog {
     var list = <Route>[];
 
     final cmd =
-        '${url}findAssociationRoutesByLocation?associationId=${p.associationId}'
+        '${url}routes/findAssociationRoutesByLocation?associationId=${p.associationId}'
         '&latitude=${p.latitude}'
         '&longitude=${p.longitude}&radiusInKM=${p.radiusInKM}';
     List resp = await _sendHttpGET(cmd);
@@ -1156,19 +1205,19 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<RouteLandmark>> findRouteLandmarksByLocation(
-      LocationFinderParameter p) async {
-    var list = <RouteLandmark>[];
+  Future<List<RoutePoint>> findRoutePointsByLocation({
+      required double latitude, required double longitude, required double radiusInKM }) async {
+    var list = <RoutePoint>[];
 
-    final cmd = '${url}findRouteLandmarksByLocation?latitude=${p.latitude}'
-        '&longitude=${p.longitude}&radiusInKM=${p.radiusInKM}';
+    final cmd = '${url}routes/findRoutePointsByLocation?latitude=$latitude'
+        '&longitude=$longitude&radiusInKM=$radiusInKM';
     //
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
-      list.add(RouteLandmark.fromJson(value));
+      list.add(RoutePoint.fromJson(value));
     }
 
-    pp('$mm findRouteLandmarksByLocation;  ${E.appleRed} routeLandmarks found: ${list.length}');
+    pp('$mm findRoutePointsByLocation;  ${E.appleRed} routePoints found: ${list.length}');
 
     return list;
   }
@@ -1260,12 +1309,15 @@ class ListApiDog {
   }
 
   static const xz = '🌎🌎🌎🌎🌎🌎 ListApiDog: ';
+  static const dev = '👿👿👿';
 
   Future _sendHttpGET(String mUrl) async {
     pp('$xz _sendHttpGET: 🔆 🔆 🔆 ...... calling : 💙 $mUrl  💙');
     var start = DateTime.now();
     token ??= await getAuthToken();
-    token ??= '';
+    if (token == null) {
+      throw Exception('token not found');
+    }
     headers['Authorization'] = 'Bearer $token';
     try {
       var resp = await client
@@ -1275,54 +1327,37 @@ class ListApiDog {
           )
           .timeout(const Duration(seconds: timeOutInSeconds));
 
-      pp('$xz http GET call RESPONSE: .... : 💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
+      if (resp.statusCode == 200 || resp.statusCode == 201) {
+        pp('$mm  _sendHttpGET RESPONSE: 👌👌👌 statusCode: ${resp.statusCode} 👌👌👌 for $mUrl');
+        try {
+          var mJson = json.decode(resp.body);
+          return mJson;
+        } catch (e) {
+          pp("$mm $dev$dev👿 json.decode failed, returning response body");
+          return resp.body;
+        }
+      } else {
+        if (resp.statusCode == 401 || resp.statusCode == 403) {
+          pp('$mm  $dev _sendHttpGET: 🔆 Auth problem. statusCode:  ${resp.statusCode} for $mUrl $dev');
+          pp('$mm metadata: ${resp.body}');
+          pp('$mm  $dev _sendHttpGET: 🔆 Firebase ID token has expired, trying to refresh ... 🔴🔴🔴🔴🔴🔴 ');
+          token = await getAuthToken();
+          if (token != null || token != 'NoToken') {
+            _sendHttpGET(mUrl);
+          } else {
+            pp('$xz $dev Throwing my toys!!! : statusCode: ${resp.statusCode} $dev ');
+            final gex = KasieException(
+                message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
+                url: mUrl,
+                translationKey: 'serverProblem',
+                errorType: KasieException.socketException);
+            errorHandler.handleError(exception: gex);
+            throw Exception('The status is BAD, Boss!');
+          }
+        }
+      }
       var end = DateTime.now();
-      pp('$xz http GET call: 🔆 elapsed time for http: ${end.difference(start).inSeconds} seconds 🔆 \n\n');
-
-      if (resp.body.contains('not found')) {
-        return resp.body;
-      }
-
-      if (resp.statusCode == 403) {
-        var msg =
-            '😡 😡 status code: ${resp.statusCode}, Request Forbidden 🥪 🥙 🌮  😡 ${resp.body}';
-        pp(msg);
-        final gex = KasieException(
-            message: 'Forbidden call',
-            url: mUrl,
-            translationKey: 'serverProblem',
-            errorType: KasieException.httpException);
-        errorHandler.handleError(exception: gex);
-        throw Exception('The request is forbidden, sorry!');
-      }
-      if (resp.statusCode == 401) {
-        var msg =
-            '😡 😡 status code: ${resp.statusCode}, Request Forbidden?  🥪 🥙 🌮  😡 ${resp.body}';
-        pp(msg);
-        final gex = KasieException(
-            message: 'Forbidden call',
-            url: mUrl,
-            translationKey: 'serverProblem',
-            errorType: KasieException.httpException);
-        errorHandler.handleError(exception: gex);
-        throw Exception('The request is forbidden, sorry!');
-      }
-
-      if (resp.statusCode != 200) {
-        var msg =
-            '😡 😡 The response is not 200; it is ${resp.statusCode}, NOT GOOD, throwing up !! 🥪 🥙 🌮  😡 ${resp.body}';
-        pp(msg);
-        final gex = KasieException(
-            message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
-            url: mUrl,
-            translationKey: 'serverProblem',
-            errorType: KasieException.socketException);
-        errorHandler.handleError(exception: gex);
-        throw Exception('The status is BAD, Boss!');
-      }
-      // pp("$xz ........ response body: ${resp.body}");
-      var mJson = json.decode(resp.body);
-      return mJson;
+      pp('$xz _sendHttpGET: 🔆 elapsed time for http: ${end.difference(start).inSeconds} seconds 🔆 \n\n');
     } on SocketException {
       pp('$xz SocketException, really means that server cannot be reached 😑');
       final gex = KasieException(

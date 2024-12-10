@@ -5,20 +5,22 @@ import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart';
 import 'package:kasie_transie_library/messaging/fcm_bloc.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
+import 'package:geolocator/geolocator.dart' as locator;
 import '../bloc/data_api_dog.dart';
+import '../bloc/list_api_dog.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
 
-final HeartbeatManager heartbeatManager = HeartbeatManager();
 
-class HeartbeatManager {
+class TelemetryManager {
   final mm = '🔴🔴🔴🔴🔴🔴 HeartbeatManager: 🔴🔴🔴🔴🔴🔴';
 
   late Timer timer;
   DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
   Prefs prefs = GetIt.instance<Prefs>();
   DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
 
   void startHeartbeat() async {
     pp('\n\n$mm start Heartbeat ................... are we falling here? .........................');
@@ -32,7 +34,7 @@ class HeartbeatManager {
       }
     }
     //
-    await addHeartbeat();  //initial heartbeat
+    await addHeartbeat(); //initial heartbeat
     pp('$mm Heartbeat ......... initial heartbeat sent; ${E.nice} '
         'timer will start with tick of ${E.leaf} $seconds seconds  ${E.leaf}');
 
@@ -46,12 +48,12 @@ class HeartbeatManager {
 
     if (car == null) {
       try {
-        pp('$mm ......... heartbeat to be sent in the background ...');
-            await Firebase.initializeApp();
-            car = await getCarInBackground();
-          } catch (e) {
-            pp(e);
-          }
+        pp('$mm ......... telemetry to be sent in the background ...');
+        await Firebase.initializeApp();
+        car = await getCarInBackground();
+      } catch (e) {
+        pp(e);
+      }
     }
     //
     if (car == null) {
@@ -59,38 +61,69 @@ class HeartbeatManager {
     }
     final loc = await locationBloc.getLocation();
 
-    final heartbeat = getHeartbeat(car: car, latitude: loc.latitude, longitude: loc.longitude);
-
+    final telemetry = await _getTelemetry(
+        car: car, loc: loc, radiusInKM: 1);
     try {
-      await dataApiDog.addVehicleHeartbeat(heartbeat);
+      await dataApiDog.addVehicleTelemetry(telemetry);
       pp('\n\n$mm VehicleHeartbeat added to database, registration: ${car.vehicleReg} '
-              'at ${DateTime.now().toIso8601String()}');
+          'at ${DateTime.now().toIso8601String()}');
     } catch (e) {
       pp(e);
     }
   }
 
-  static VehicleHeartbeat getHeartbeat({required Vehicle car,
-    required double latitude, required double longitude}) {
+  Future<VehicleTelemetry> _getTelemetry(
+      {required Vehicle car,
+      required locator.Position loc,
+      required double radiusInKM}) async {
+    String? nearestRouteLandmarkName;
+    String? nearestRouteName;
+    String? routeLandmarkId;
+    String? routeId;
 
-    final heartbeat = VehicleHeartbeat(
-        ownerName: car.ownerName,
-        ownerId: car.ownerId,
-        associationId: car.associationId,
-        vehicleReg: car.vehicleReg,
+    var landmarks = await listApiDog.findRouteLandmarksByLocation(
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        radiusInKM: radiusInKM);
+    if (landmarks.isNotEmpty) {
+      nearestRouteLandmarkName = landmarks[0].landmarkName;
+      routeLandmarkId = landmarks[0].landmarkId;
+    }
+    var points = await listApiDog.findRoutePointsByLocation(
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        radiusInKM: radiusInKM);
+    if (points.isNotEmpty) {
+      routeId = points.first.routeId;
+      nearestRouteName = points.first.routeName;
+    }
+    Position pos = Position(coordinates: [loc.longitude, loc.latitude]);
+    final heartbeat = VehicleTelemetry(
         vehicleId: car.vehicleId,
-        model: car.model,
-        make: car.make,
         created: DateTime.now().toUtc().toIso8601String(),
-        longDate: DateTime.now().toUtc().millisecondsSinceEpoch,
-        vehicleHeartbeatId:DateTime.now().toIso8601String(),
-        position: Position(
-          type: 'Point',
-          coordinates: [longitude, latitude],
-          latitude: latitude,
-          longitude: longitude,
-        ));
+        vehicleReg: car.vehicleReg,
+        make: car.make,
+        model: car.model,
+        year: car.year,
+        passengerCapacity: 0,
+        position: pos,
+        nearestRouteName: nearestRouteName,
+        routeId: routeId,
+        nearestRouteLandmarkName: nearestRouteLandmarkName,
+        routeLandmarkId: routeLandmarkId,
+        associationId: car.associationId,
+        associationName: car.associationName,
+        ownerId: car.ownerId,
+        ownerName: car.ownerName,
+        accuracy: loc.accuracy,
+        heading: loc.heading,
+        altitude: loc.altitude,
+        altitudeAccuracy: loc.altitudeAccuracy,
+        speed: loc.speed,
+        speedAccuracy: loc.speedAccuracy);
 
     return heartbeat;
   }
+
+  Future findNearestRoute(Position position) async {}
 }

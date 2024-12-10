@@ -32,7 +32,7 @@ class RegisterServices {
     pp('$mm .... QRGeneration: 🦠qrgGeneration initialized');
     final http.Client client = http.Client();
     pp('$mm .... http.Client: 🦠client initialized');
-    final AppAuth appAuth = AppAuth(FirebaseAuth.instance);
+    final AppAuth appAuth = AppAuth( firebaseAuth: FirebaseAuth.instance);
     pp('$mm .... AppAuth: 🦠auth initialized');
     final DeviceLocationBloc deviceLocationBloc = DeviceLocationBloc();
     pp('$mm .... DeviceLocationBloc: 🦠deviceLocationBloc initialized');

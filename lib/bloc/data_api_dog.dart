@@ -61,18 +61,18 @@ class DataApiDog {
     // getAuthToken();
   }
 
-  Future getAuthToken() async {
+  Future<String?> getAuthToken() async {
+    pp('$mm getAuthToken: ...... Getting Firebase token ......');
     try {
       var m = await appAuth.getAuthToken();
       if (m == null) {
-            pp('$mm Unable to get Firebase token');
-            token = 'NoToken';
-          } else {
-            pp('$mm getAuthToken: Firebase token retrieved OK');
-            token = m;
-          }
-      return token;
-    } catch (e,s) {
+        pp('$mm Unable to get Firebase token');
+        return null;
+      } else {
+        pp('$mm Firebase token retrieved OK ✅ ');
+        return m;
+      }
+    } catch (e, s) {
       pp('$mm $e $s');
       rethrow;
     }
@@ -150,8 +150,7 @@ class DataApiDog {
 
     headers['Authorization'] = 'Bearer $token';
 
-    var request = http.MultipartRequest('POST',
-        Uri.parse(mUrl));
+    var request = http.MultipartRequest('POST', Uri.parse(mUrl));
 
     request.files.add(
       http.MultipartFile.fromBytes(
@@ -412,6 +411,16 @@ class DataApiDog {
     return lr;
   }
 
+  Future addVehicleTelemetry(VehicleTelemetry telemetry) async {
+    final bag = telemetry.toJson();
+    final cmd = '${url}vehicle/addVehicleTelemetry';
+    final res = await _callPost(cmd, bag);
+    final lr = VehicleTelemetry.fromJson(res);
+
+    pp('$mm VehicleTelemetry added to database: $res');
+    return lr;
+  }
+
   Future<LocationRequest> addLocationRequest(LocationRequest request) async {
     final bag = request.toJson();
     final cmd = '${url}addLocationRequest';
@@ -450,6 +459,7 @@ class DataApiDog {
         ' \n${car.toJson()}');
     return car;
   }
+
   Future<int> updateVehicle(Vehicle vehicle) async {
     final bag = vehicle.toJson();
     final cmd = '${url}vehicle/updateVehicle';
@@ -476,6 +486,7 @@ class DataApiDog {
     pp('$mm user added to database: 🥬 🥬 $res');
     return User.fromJson(res);
   }
+
   Future<User> addOwner(User user) async {
     final bag = user.toJson();
     final cmd = '${url}user/createOwner';
@@ -484,6 +495,7 @@ class DataApiDog {
     pp('$mm owner added to database: 🥬 🥬 $res');
     return User.fromJson(res);
   }
+
   Future addUserGeofenceEvent(UserGeofenceEvent event) async {
     final bag = event.toJson();
     final cmd = '${url}addUserGeofenceEvent';
@@ -602,6 +614,7 @@ class DataApiDog {
       rethrow;
     }
   }
+
   Future<Ticket> addTicket(Ticket ticket) async {
     pp('$mm add ticket to database ...');
 
@@ -614,7 +627,7 @@ class DataApiDog {
       myPrettyJsonPrint(newTicket.toJson());
       return newTicket;
     } catch (e, s) {
-      pp("WTF? - $e - \n$s");
+      pp("$mm WTF? - $e - \n$s");
       throw Exception('Failed to add ticket to database.\n$e');
     }
   }
@@ -665,8 +678,6 @@ class DataApiDog {
 
     return r;
   }
-
-
 
   Future<City> addCity(City city) async {
     final bag = city.toJson();
@@ -810,10 +821,10 @@ class DataApiDog {
     final res = await _callPost(cmd, bag);
     RegistrationBag rBag = RegistrationBag.fromJson(res);
     prefs.saveAssociation(rBag.association!);
-    prefs.saveUser(rBag.user!);
+    prefs.saveUser(rBag.adminUser!);
     await semCache.saveRegistrationBag(rBag);
     pp('$mm association registered! added to cache: 🍎${rBag.association!.toJson()}');
-    pp('$mm administrator registered! added to cache: 🍎${rBag.user!.toJson()}');
+    pp('$mm administrator registered! added to cache: 🍎${rBag.adminUser!.toJson()}');
     return rBag;
   }
 
@@ -1025,6 +1036,7 @@ class DataApiDog {
     return res;
   }
 
+  static const dev = '👿👿👿';
   Future _callPost(String mUrl, dynamic bag) async {
     String? mBag;
     mBag = json.encode(bag);
@@ -1034,7 +1046,7 @@ class DataApiDog {
     var start = DateTime.now();
     token ??= await getAuthToken();
     if (token == null) {
-      throw Exception('Token missing');
+      throw Exception('token not found');
     }
     headers['Authorization'] = 'Bearer $token';
     while (retryCount < maxRetries) {
@@ -1046,26 +1058,38 @@ class DataApiDog {
               headers: headers,
             )
             .timeout(const Duration(seconds: timeOutInSeconds));
+
         if (resp.statusCode == 200 || resp.statusCode == 201) {
-          pp('$mm  _callWebAPIPost RESPONSE: 💙💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
+          pp('$mm  _callWebAPIPost RESPONSE: 👌👌👌 statusCode: ${resp.statusCode} 👌👌👌 for $mUrl');
+          try {
+            var mJson = json.decode(resp.body);
+            return mJson;
+          } catch (e) {
+            pp("$mm $dev  $dev  json.decode failed, returning response body");
+            return resp.body;
+          }
         } else {
-          pp('$mm  👿👿👿_callWebAPIPost: 🔆 statusCode: 👿👿👿 ${resp.statusCode} 🔆🔆🔆 for $mUrl');
-          pp(resp.body);
-          throw KasieException(
-              message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
-              url: mUrl,
-              translationKey: 'serverProblem',
-              errorType: KasieException.socketException);
+          if (resp.statusCode == 401 || resp.statusCode == 403) {
+            pp('$mm  $dev  _callWebAPIPost: 🔆 statusCode:  ${resp.statusCode} $dev for $mUrl');
+            pp('$mm metadata: ${resp.body}');
+            pp('$mm  $dev  _callWebAPIPost: 🔆 Firebase ID token may have expired, trying to refresh ... 🔴🔴🔴🔴🔴🔴 ');
+            token = await getAuthToken();
+            if (token != null || token != 'NoToken') {
+              _callPost(mUrl, bag);
+            } else {
+              pp('$mm Throwing my toys!!! : 💙 statusCode: ${resp.statusCode} $dev  ');
+              final gex = KasieException(
+                  message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
+                  url: mUrl,
+                  translationKey: 'serverProblem',
+                  errorType: KasieException.socketException);
+              errorHandler.handleError(exception: gex);
+              throw Exception('The status is BAD, Boss!');
+            }
+          }
         }
         var end = DateTime.now();
         pp('$mm  _callWebAPIPost: 🔆 elapsed time: ${end.difference(start).inSeconds} seconds 🔆');
-        try {
-          var mJson = json.decode(resp.body);
-          return mJson;
-        } catch (e) {
-          pp("$mm 👿👿👿👿👿👿👿 json.decode failed, returning response body");
-          return resp.body;
-        }
       } on io.SocketException catch (e) {
         pp('$mm  SocketException: really means that server cannot be reached 😑');
         final gex = KasieException(

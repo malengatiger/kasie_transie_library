@@ -13,7 +13,7 @@ class KasieThemeManager {
   final Prefs prefs;
 
   KasieThemeManager(this.prefs) {
-    pp('$mm ... ThemeBloc initializing ....');
+    pp('$mm ... KasieThemeManager initializing ....');
     _initialize();
   }
 
@@ -28,11 +28,11 @@ class KasieThemeManager {
   _initialize() async {
     colorAndLocale = prefs.getColorAndLocale();
     colorAndLocale ??= ColorAndLocale(themeIndex: 0, locale: 'en');
-    pp('\n$mm initialize: theme index: ${colorAndLocale!.themeIndex}');
+    pp('$mm initialize: theme index: ${colorAndLocale!.themeIndex}');
     pp('$mm initialize: locale = ${colorAndLocale!.locale} ... '
         'themeIndex: ${colorAndLocale!.themeIndex} in the stream');
     themeStreamController.sink.add(colorAndLocale!);
-    pp('\n$mm initialize: things should be done - settings sent to themeStreamController');
+    pp('$mm initialize: things should be done - settings sent to themeStreamController');
   }
 
   ThemeBag getTheme(int index) {
@@ -40,7 +40,7 @@ class KasieThemeManager {
   }
 
   Future<void> changeColorAndLocale(ColorAndLocale colorAndLocale) async {
-    pp('\n\n$mm changing to theme index: ${colorAndLocale.themeIndex} ${colorAndLocale.locale}, adding to stream');
+    pp('$mm changing to theme index: ${colorAndLocale.themeIndex} ${colorAndLocale.locale}, adding to stream');
     themeStreamController.sink.add(colorAndLocale);
 
     pp('$mm changeToTheme has put a colorAndLocale on the themeStreamController');
@@ -59,7 +59,7 @@ class SchemeUtil {
   static final List<ThemeBag> _themeBags = [];
   static final _rand = Random(DateTime.now().millisecondsSinceEpoch);
   static int index = 0;
-  static const mm = '💚ThemeBloc 💚💚💚💚💚';
+  static const mm = '💚SchemeUtil 💚💚💚💚💚';
 
   static int getThemeCount() {
     _setThemes();

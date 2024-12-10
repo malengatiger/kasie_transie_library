@@ -1,9 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/auth/sign_in_strings.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 
+import '../bloc/app_auth.dart';
 import '../bloc/list_api_dog.dart';
 import '../data/data_schemas.dart';
 import '../utils/emojis.dart';
@@ -39,6 +39,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
   SignInStrings? signInStrings;
   ListApiDog listApiDog = GetIt.instance<ListApiDog>();
   Prefs prefs = GetIt.instance<Prefs>();
+  AppAuth appAuth = GetIt.instance<AppAuth>();
 
   @override
   void initState() {
@@ -58,25 +59,10 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
     });
     try {
       pp('\n\n$mm ... sign in ....: ${emailController.text} ${pswdController.text} - ${E.leaf}');
-
-      fb.UserCredential userCred = await fb.FirebaseAuth.instance
-          .signInWithEmailAndPassword(
-              email: emailController.text,
-              password: pswdController.text);
-
-      pp('\n\n$mm ... Firebase user creds after sign in: ${userCred.user} - ${E.leaf}');
-      pp('\n\n$mm ... about to initialize KasieTransie data ..... uid: ${userCred.user!.uid}');
-      var asses = await listApiDog.getAssociations(true);
-      for (var element in asses) {
-        pp('$mm association: ${element.associationName}');
-      }
-      pp('$mm ... about to run listApiDog.getUserById ..... uid: ${userCred.user!.uid}');
-
-      if (userCred.user != null) {
-        user = await listApiDog.getUserById(userCred.user!.uid);
-        if (user != null) {
-          await _handleUser();
-        }
+      user = await appAuth.signInWithEmailAndPassword(
+          emailController.text, pswdController.text);
+      if (user != null) {
+        widget.onGoodSignIn();
       } else {
         widget.onSignInError();
       }
@@ -89,35 +75,6 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
     });
   }
 
-  Future<void> _handleUser() async {
-    pp('$mm KasieTransie user found on database:  🍎 ${user!.toJson()} 🍎');
-    user!.password = pswdController.text;
-    prefs.saveUser(user!);
-    pp('$mm KasieTransie user cached:  🍎 ${user!.toJson()} 🍎');
-    Association? association;
-    if (user!.associationId != null) {
-      if (user!.associationId != 'ADMIN') {
-        association = await listApiDog.getAssociationById(user!.associationId!);
-        if (association != null) {
-          prefs.saveAssociation(association);
-          pp('$mm KasieTransie association found on database:  🍎 ${association.toJson()} 🍎');
-          final users =
-              await listApiDog.getAssociationUsers(user!.associationId!, true);
-          pp('$mm users in association: ${users.length}');
-        }
-      }
-    }
-    final countries = await listApiDog.getCountries();
-    for (var country in countries) {
-      if (country.countryId == user?.countryId!) {
-        prefs.saveCountry(country);
-        pp('$mm KasieTransie user country: 🍎 ${country.name} 🍎');
-        break;
-      }
-    }
-
-    widget.onGoodSignIn();
-  }
 
   @override
   Widget build(BuildContext context) {
