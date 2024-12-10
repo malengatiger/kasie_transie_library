@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/sem_cache.dart';
+import 'package:kasie_transie_library/data/commuter_cash_check_in.dart';
+import 'package:kasie_transie_library/data/commuter_cash_payment.dart';
 import 'package:kasie_transie_library/data/vehicle_list.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
@@ -14,8 +16,12 @@ import 'package:universal_io/io.dart' as io;
 import 'package:universal_io/io.dart';
 
 import '../data/calculated_distance_list.dart';
+import '../data/commuter_provider_payment.dart';
 import '../data/data_schemas.dart';
 import '../data/generation_request.dart';
+import '../data/rank_fee_cash_check_in.dart';
+import '../data/rank_fee_cash_payment.dart';
+import '../data/rank_fee_provider_payment.dart';
 import '../data/route_assignment_list.dart';
 import '../data/route_point_list.dart';
 import '../data/ticket.dart';
@@ -399,6 +405,62 @@ class DataApiDog {
 
     pp('$mm RouteAssignments added to database and cached on realm: ${list.length}');
     return list;
+  }
+
+  Future<CommuterCashPayment> addCommuterCashPayment(CommuterCashPayment payment) async {
+    final bag = payment.toJson();
+    final cmd = '${url}payment/addCommuterCashPayment';
+    final res = await _callPost(cmd, bag);
+    final lr = CommuterCashPayment.fromJson(res);
+
+    pp('$mm CommuterCashPayment added to database: $res');
+    return lr;
+  }
+  Future<CommuterProviderPayment> addCommuterProviderPayment(CommuterProviderPayment payment) async {
+    final bag = payment.toJson();
+    final cmd = '${url}payment/addCommuterProviderPayment';
+    final res = await _callPost(cmd, bag);
+    final lr = CommuterProviderPayment.fromJson(res);
+
+    pp('$mm CommuterProviderPayment added to database: $res');
+    return lr;
+  }
+  Future<CommuterCashCheckIn> addCommuterCashCheckIn(CommuterCashCheckIn cashCheckIn) async {
+    final bag = cashCheckIn.toJson();
+    final cmd = '${url}payment/addCommuterCashCheckIn';
+    final res = await _callPost(cmd, bag);
+    final lr = CommuterCashCheckIn.fromJson(res);
+
+    pp('$mm CommuterCashCheckIn added to database: $res');
+    return lr;
+  }
+
+  Future<RankFeeCashPayment> addRankFeeCashPayment(RankFeeCashPayment payment) async {
+    final bag = payment.toJson();
+    final cmd = '${url}payment/addRankFeeCashPayment';
+    final res = await _callPost(cmd, bag);
+    final lr = RankFeeCashPayment.fromJson(res);
+
+    pp('$mm RankFeeCashPayment added to database: $res');
+    return lr;
+  }
+  Future<RankFeeProviderPayment> addRankFeeProviderPayment(RankFeeProviderPayment payment) async {
+    final bag = payment.toJson();
+    final cmd = '${url}payment/addRankFeeProviderPayment';
+    final res = await _callPost(cmd, bag);
+    final lr = RankFeeProviderPayment.fromJson(res);
+
+    pp('$mm RankFeeProviderPayment added to database: $res');
+    return lr;
+  }
+  Future<RankFeeCashCheckIn> addRankFeeCashCheckIn(RankFeeCashCheckIn cashCheckIn) async {
+    final bag = cashCheckIn.toJson();
+    final cmd = '${url}payment/addRankFeeCashCheckIn';
+    final res = await _callPost(cmd, bag);
+    final lr = RankFeeCashCheckIn.fromJson(res);
+
+    pp('$mm RankFeeCashCheckIn added to database: $res');
+    return lr;
   }
 
   Future<CommuterRequest> addCommuterRequest(CommuterRequest request) async {
