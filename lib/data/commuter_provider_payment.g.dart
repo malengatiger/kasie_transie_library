@@ -25,8 +25,8 @@ CommuterProviderPayment _$CommuterProviderPaymentFromJson(
           : Position.fromJson(json['position'] as Map<String, dynamic>),
       routeName: json['routeName'] as String?,
       routeId: json['routeId'] as String?,
-      providerName: json['providerName'] as String?,
-      providerId: json['providerId'] as String?,
+      paymentProvider: PaymentProvider.fromJson(
+          json['paymentProvider'] as Map<String, dynamic>),
       created: json['created'] as String?,
     );
 
@@ -47,7 +47,6 @@ Map<String, dynamic> _$CommuterProviderPaymentToJson(
       'routeName': instance.routeName,
       'routeLandmarkId': instance.routeLandmarkId,
       'landmarkName': instance.landmarkName,
-      'providerId': instance.providerId,
-      'providerName': instance.providerName,
+      'paymentProvider': instance.paymentProvider,
       'position': instance.position,
     };

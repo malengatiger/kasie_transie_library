@@ -18,6 +18,7 @@ import 'package:kasie_transie_library/utils/zip_handler.dart';
 import '../data/big_bag.dart';
 import '../data/data_schemas.dart';
 import '../data/example_file.dart';
+import '../data/payment_provider.dart';
 import '../data/route_bag.dart';
 import '../isolates/local_finder.dart';
 import '../utils/emojis.dart';
@@ -79,7 +80,7 @@ class ListApiDog {
     }
   }
 
-  Future<bool> setupAssocuationData(String associationId) async {
+  Future<bool> setUpAssociationData(String associationId) async {
     pp('$mm setupAssocuationData .... ${E.redDot}${E.redDot}${E.redDot} 🍎');
 
     try {
@@ -229,6 +230,18 @@ class ListApiDog {
     return mList;
   }
 
+  Future<List<PaymentProvider>> getPaymentProviders() async {
+    final cmd = '${url}payment/getPaymentProviders';
+    List<PaymentProvider> providers = [];
+    final List list = await _sendHttpGET(cmd);
+    for (var value in list) {
+      var p = PaymentProvider.fromJson(value);
+      providers.add(p);
+    }
+
+    pp('$mm PaymentProviders retrieved from database: ${providers.length}');
+    return providers;
+  }
   Future<List<ExampleFile>> getExampleFiles() async {
     List<ExampleFile> list1 = [];
 

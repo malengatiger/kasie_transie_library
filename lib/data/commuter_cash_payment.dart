@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'data_schemas.dart';
+
 part 'commuter_cash_payment.g.dart';
 
 @JsonSerializable()
@@ -19,6 +20,7 @@ class CommuterCashPayment {
       routeName,
       routeLandmarkId,
       landmarkName;
+  Position? position;
 
   CommuterCashPayment(
       {required this.commuterCashPaymentId,
@@ -32,6 +34,7 @@ class CommuterCashPayment {
       required this.userName,
       this.routeLandmarkId,
       this.landmarkName,
+      required this.position,
       required this.routeName,
       required this.routeId,
       required this.created});

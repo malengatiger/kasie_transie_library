@@ -20,8 +20,13 @@ RankFeeProviderPayment _$RankFeeProviderPaymentFromJson(
       userName: json['userName'] as String?,
       routeLandmarkId: json['routeLandmarkId'] as String?,
       landmarkName: json['landmarkName'] as String?,
-      providerId: json['providerId'] as String?,
-      providerName: json['providerName'] as String?,
+      paymentProvider: json['paymentProvider'] == null
+          ? null
+          : PaymentProvider.fromJson(
+              json['paymentProvider'] as Map<String, dynamic>),
+      position: json['position'] == null
+          ? null
+          : Position.fromJson(json['position'] as Map<String, dynamic>),
       created: json['created'] as String?,
     );
 
@@ -32,8 +37,6 @@ Map<String, dynamic> _$RankFeeProviderPaymentToJson(
       'vehicleId': instance.vehicleId,
       'vehicleReg': instance.vehicleReg,
       'associationId': instance.associationId,
-      'providerId': instance.providerId,
-      'providerName': instance.providerName,
       'associationName': instance.associationName,
       'amount': instance.amount,
       'numberOfPassengers': instance.numberOfPassengers,
@@ -42,4 +45,6 @@ Map<String, dynamic> _$RankFeeProviderPaymentToJson(
       'created': instance.created,
       'routeLandmarkId': instance.routeLandmarkId,
       'landmarkName': instance.landmarkName,
+      'paymentProvider': instance.paymentProvider,
+      'position': instance.position,
     };

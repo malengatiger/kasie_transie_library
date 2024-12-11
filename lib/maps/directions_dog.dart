@@ -39,6 +39,7 @@ class DirectionsDog {
       'Accept': 'application/json',
     };
     var start = DateTime.now();
+    AppAuth appAuth = GetIt.instance<AppAuth>();
     var token = await appAuth.getAuthToken();
     if (token != null) {
       // pp('$mm _sendHttpGET: 😡😡😡 Firebase Auth Token: 💙️ Token is GOOD! 💙 ');

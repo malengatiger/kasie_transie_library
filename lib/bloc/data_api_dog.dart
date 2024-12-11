@@ -19,6 +19,7 @@ import '../data/calculated_distance_list.dart';
 import '../data/commuter_provider_payment.dart';
 import '../data/data_schemas.dart';
 import '../data/generation_request.dart';
+import '../data/payment_provider.dart';
 import '../data/rank_fee_cash_check_in.dart';
 import '../data/rank_fee_cash_payment.dart';
 import '../data/rank_fee_provider_payment.dart';
@@ -435,6 +436,24 @@ class DataApiDog {
     return lr;
   }
 
+  Future<PaymentProvider> addPaymentProvider(PaymentProvider provider) async {
+    final bag = provider.toJson();
+    final cmd = '${url}payment/addPaymentProvider';
+    final res = await _callPost(cmd, bag);
+    final lr = PaymentProvider.fromJson(res);
+
+    pp('$mm PaymentProvider added to database: $res');
+    return lr;
+  }
+  Future<PaymentProvider> updatePaymentProvider(PaymentProvider provider) async {
+    final bag = provider.toJson();
+    final cmd = '${url}payment/updatePaymentProvider';
+    final res = await _callPost(cmd, bag);
+    final lr = PaymentProvider.fromJson(res);
+
+    pp('$mm PaymentProvider updated on database: $res');
+    return lr;
+  }
   Future<RankFeeCashPayment> addRankFeeCashPayment(RankFeeCashPayment payment) async {
     final bag = payment.toJson();
     final cmd = '${url}payment/addRankFeeCashPayment';

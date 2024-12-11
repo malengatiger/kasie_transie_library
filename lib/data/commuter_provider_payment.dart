@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:kasie_transie_library/data/payment_provider.dart';
 
 import 'data_schemas.dart';
 part 'commuter_provider_payment.g.dart';
@@ -18,9 +19,8 @@ class CommuterProviderPayment {
       routeId,
       routeName,
       routeLandmarkId,
-      landmarkName,
-      providerId,
-      providerName;
+      landmarkName;
+  PaymentProvider paymentProvider;
   Position? position;
 
   CommuterProviderPayment(
@@ -38,8 +38,7 @@ class CommuterProviderPayment {
       required this.position,
       required this.routeName,
       required this.routeId,
-      required this.providerName,
-      required this.providerId,
+      required this.paymentProvider,
       required this.created});
 
   factory CommuterProviderPayment.fromJson(Map<String, dynamic> json) =>
