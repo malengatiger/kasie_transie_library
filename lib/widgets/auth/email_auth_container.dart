@@ -60,7 +60,7 @@ class EmailAuthContainer extends StatelessWidget {
                         pp('on good sign in');
                         Navigator.of(context).pop(true);
                       }, onSignInError: () {
-                        pp('${mm} Sign in error');
+                        pp('$mm Sign in error');
                         Navigator.of(context).pop(false);
                         showErrorToast(message: 'Sign in failed', context: context);
 

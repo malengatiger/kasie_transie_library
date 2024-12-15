@@ -13,7 +13,6 @@ import 'package:kasie_transie_library/widgets/route_widgets/multi_route_chooser.
 import '../bloc/list_api_dog.dart';
 import '../bloc/sem_cache.dart';
 import '../data/route_data.dart';
-import '../isolates/local_finder.dart';
 import '../utils/device_location_bloc.dart';
 import '../utils/emojis.dart';
 import '../utils/prefs.dart';

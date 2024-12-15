@@ -159,7 +159,7 @@ class CarListState extends State<CarList>
     NavigationUtils.navigateTo(
         context: context,
         widget: const ScanVehicleForOwner(),
-        transitionType: PageTransitionType.leftToRight);
+        );
   }
 
   @override
@@ -398,7 +398,7 @@ class CarListState extends State<CarList>
             });
           },
         ),
-        transitionType: PageTransitionType.leftToRight);
+        );
   }
 
   @override

@@ -20,8 +20,8 @@ class KasieEnvironment {
 
   static String getUrl() {
     if (kDebugMode) {
-        return _devUrlNode;
-      // return _prodUrlNode;
+        // return _devUrlNode;
+      return _prodUrlNode;
 
     } else {
         return _prodUrlNode;

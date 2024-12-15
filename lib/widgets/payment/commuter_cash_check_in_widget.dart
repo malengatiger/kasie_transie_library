@@ -10,7 +10,6 @@ import '../../data/commuter_cash_check_in.dart';
 import '../../data/data_schemas.dart' as lib;
 import '../../utils/device_location_bloc.dart';
 import '../../utils/prefs.dart';
-import 'package:kasie_transie_library/utils/functions.dart';
 
 class CommuterCashCheckInWidget extends StatefulWidget {
   const CommuterCashCheckInWidget(

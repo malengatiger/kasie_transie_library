@@ -1,6 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import 'data_schemas.dart';
 part 'payment_provider.g.dart';
 
 @JsonSerializable()

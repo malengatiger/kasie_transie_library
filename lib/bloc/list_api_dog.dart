@@ -242,6 +242,7 @@ class ListApiDog {
     pp('$mm PaymentProviders retrieved from database: ${providers.length}');
     return providers;
   }
+
   Future<List<ExampleFile>> getExampleFiles() async {
     List<ExampleFile> list1 = [];
 
@@ -382,10 +383,10 @@ class ListApiDog {
 
   Future<AssociationRouteData?> getAssociationRouteData(
       String associationId, bool refresh) async {
-    pp('\n\n$mm getAssociationRouteData: ... starting ...');
-    var dd = await semCache.getAssociationRouteData(associationId);
-    if (!refresh && dd != null && dd.routeDataList.isNotEmpty) {
-      return dd;
+    pp('\n\n$mm ...... getAssociationRouteData: ... starting ...');
+    var routeData = await semCache.getAssociationRouteData(associationId);
+    if (!refresh && routeData != null && routeData.routeDataList.isNotEmpty) {
+      return routeData;
     }
 
     var start = DateTime.now();
@@ -498,7 +499,6 @@ class ListApiDog {
   Future<List<Association>> getAssociations(bool refresh) async {
     final cmd = '${url}association/getAssociations';
     List<Association> list = await semCache.getAssociations();
-    ;
     if (refresh || list.isEmpty) {
       List resp = await _sendHttpGET(cmd);
       list.clear();
@@ -1170,7 +1170,7 @@ class ListApiDog {
     var list = <Route>[];
     final user = prefs.getUser();
 
-    final cmd = '${url}findRoutesByLocation?latitude=${p.latitude}'
+    final cmd = '${url}routes/findRoutesByLocation?latitude=${p.latitude}'
         '&longitude=${p.longitude}&radiusInKM=${p.radiusInKM}';
 
     List resp = await _sendHttpGET(cmd);

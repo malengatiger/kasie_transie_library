@@ -1,15 +1,17 @@
+import 'package:badges/badges.dart' as bd;
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
+import 'package:kasie_transie_library/utils/device_location_bloc.dart';
+import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import 'package:page_transition/page_transition.dart';
 
 import '../../data/route_data.dart';
 import '../../utils/functions.dart';
 import '../../utils/navigator_utils.dart';
 import '../../utils/prefs.dart';
-import '../scanners/dispatch_via_scan.dart';
-import 'package:badges/badges.dart' as bd;
+import 'cars_for_dispatch.dart';
 
 class RoutesForDispatch extends StatefulWidget {
   const RoutesForDispatch({super.key});
@@ -25,10 +27,11 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
   AssociationRouteData? routeData;
   ListApiDog listApiDog = GetIt.instance<ListApiDog>();
   Prefs prefs = GetIt.instance<Prefs>();
-
+  DeviceLocationBloc devLoc = GetIt.instance<DeviceLocationBloc>();
   List<lib.Route> routes = [];
   lib.Route? route;
   bool busy = false;
+  lib.User? user;
 
   @override
   void initState() {
@@ -37,21 +40,22 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
     _getRouteData();
   }
 
+  List<DistanceBag> distanceBags = [];
+  static const mm = '🧡🧡🧡🧡RoutesForDispatch 🧡';
+
   _getRouteData() async {
     setState(() {
       busy = true;
     });
-    var user = prefs.getUser();
+    user = prefs.getUser();
     try {
       if (user != null) {
-        routeData = await listApiDog.getAssociationRouteData(
+        var routeData = await listApiDog.getAssociationRouteData(
             user!.associationId!, false);
-        for (var rd in routeData!.routeDataList) {
-          if (rd.route != null && rd.routePoints.isNotEmpty) {
-            routes.add(rd.route!);
-          }
-        }
-        routes.sort((a,b) => a.name!.compareTo(b.name!));
+        routes = await devLoc.getRouteDistances(routeData: routeData!);
+        routes.sort((a, b) => a.name!.compareTo(b.name!));
+
+        pp('$mm nearest routes: ${routes.length}');
       }
     } catch (e, s) {
       pp('$e $s');
@@ -72,24 +76,20 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
 
   List<lib.DispatchRecord> dispatches = [];
 
-  _navigateToDispatchScan() async {
+  _navigateToCarForDispatch() async {
     NavigationUtils.navigateTo(
         context: context,
-        widget: DispatchViaScan(
+        widget: CarForDispatch(
           route: route!,
-          onDispatched: (dr) {
-            dispatches.add(dr);
-            setState(() {});
-          },
         ),
-        transitionType: PageTransitionType.leftToRight);
+        );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title:  Text('Routes For Dispatch', style: myTextStyleMedium(context)),
+          title: Text('Routes For Dispatch', style: myTextStyleMedium(context)),
         ),
         body: SafeArea(
           child: Stack(
@@ -97,18 +97,40 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
               Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(route == null ? 'Select Route' : route!.name!,
-                          style: myTextStyleMediumLarge(context, 24)),
+                      gapH32,
+                      gapH32,
+                      InkWell(
+                        onTap: () {
+                          if (route != null) {
+                            _navigateToCarForDispatch();
+                          }
+                        },
+                        child: Text(
+                            route == null ? 'Select Route' : route!.name!,
+                            style: myTextStyleMediumLarge(context, 20)),
+                      ),
+                      gapH32,
                       gapH32,
                       routes.isEmpty
-                          ? gapW32
+                          ? Center(
+                              child: Text(
+                              'No routes yet',
+                              style: myTextStyleLarge(context),
+                            ))
                           : Expanded(
                               child: bd.Badge(
-                                badgeContent: Text('${routes.length}'),
+                                badgeContent: Text(
+                                  '${routes.length}',
+                                  style: myTextStyle(color: Colors.white),
+                                ),
                                 badgeStyle: const bd.BadgeStyle(
-                                    padding: EdgeInsets.all(8),
+                                    padding: EdgeInsets.all(16),
                                     badgeColor: Colors.red),
+                                position:
+                                    bd.BadgePosition.topEnd(top: -48, end: 6),
                                 child: ListView.builder(
                                     itemCount: routes.length,
                                     itemBuilder: (ctx, index) {
@@ -118,15 +140,20 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
                                           setState(() {
                                             route = r;
                                           });
-                                          _navigateToDispatchScan();
+                                          _navigateToCarForDispatch();
                                         },
-                                        child: Card(
-                                          elevation: 8,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8),
-                                            child: Text(
-                                              r.name!,
-                                              style: myTextStyle(fontSize: 18),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 4),
+                                          child: Card(
+                                            elevation: 8,
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(16),
+                                              child: Text(
+                                                r.name!,
+                                                style:
+                                                    myTextStyle(fontSize: 18),
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -134,8 +161,17 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
                                     }),
                               ),
                             ),
+                      gapH32,
                     ],
                   )),
+              busy
+                  ? const Positioned(
+                      child: Center(
+                          child: TimerWidget(
+                              title: 'Loading Route data ...',
+                              isSmallSize: true)),
+                    )
+                  : gapW32,
             ],
           ),
         ));

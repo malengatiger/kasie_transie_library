@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
-import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/l10n/translation_handler.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
@@ -11,31 +10,34 @@ import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/drop_down_widgets.dart';
-import 'package:kasie_transie_library/widgets/passenger_count.dart';
+import 'package:kasie_transie_library/widgets/timer_widget.dart';
 
 import '../../bloc/data_api_dog.dart';
 import '../../isolates/local_finder.dart';
-import 'dispatch_helper.dart';
-import 'kasie/kasie_ai_scanner.dart';
+import '../scanners/dispatch_helper.dart';
 
-class DispatchViaScan extends StatefulWidget {
-  const DispatchViaScan(
-      {super.key, required this.route, required this.onDispatched});
+class DispatchTaxi extends StatefulWidget {
+  const DispatchTaxi(
+      {super.key,
+      required this.route,
+      required this.onDispatched,
+      required this.vehicle});
 
   final lib.Route route;
+  final lib.Vehicle vehicle;
   final Function(lib.DispatchRecord) onDispatched;
 
   @override
-  DispatchViaScanState createState() => DispatchViaScanState();
+  DispatchTaxiState createState() => DispatchTaxiState();
 }
 
-class DispatchViaScanState extends State<DispatchViaScan>
+class DispatchTaxiState extends State<DispatchTaxi>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
-  final mm = '${E.heartOrange}${E.heartOrange}${E.heartOrange}${E.heartOrange}'
-      ' ScanDispatch: ${E.heartOrange}${E.heartOrange} ';
-  DataApiDog _dataApiDog = GetIt.instance<DataApiDog>();
+  static const mm = '☘️☘️☘️☘️☘️DispatchTaxi ☘️';
+
+  final DataApiDog _dataApiDog = GetIt.instance<DataApiDog>();
   Prefs prefs = GetIt.instance<Prefs>();
 
   String? dispatchText,
@@ -49,8 +51,6 @@ class DispatchViaScanState extends State<DispatchViaScan>
       yes,
       dispatchFailed,
       allPhotosVideos;
-  lib.Vehicle? scannedVehicle;
-  bool quitAfterScan = false;
   lib.User? user;
 
   bool busy = false;
@@ -112,15 +112,15 @@ class DispatchViaScanState extends State<DispatchViaScan>
           routeName: widget.route.name,
           routeId: widget.route.routeId,
           created: DateTime.now().toUtc().toIso8601String(),
-          vehicleId: scannedVehicle!.vehicleId,
-          vehicleReg: scannedVehicle!.vehicleReg,
-          associationId: scannedVehicle!.associationId,
-          ownerId: scannedVehicle!.ownerId,
+          vehicleId: widget.vehicle!.vehicleId,
+          vehicleReg: widget.vehicle!.vehicleReg,
+          associationId: widget.vehicle!.associationId,
+          ownerId: widget.vehicle!.ownerId,
           marshalId: user!.userId,
           marshalName: user!.name,
           dispatched: true,
           passengers: passengerCount,
-          associationName: scannedVehicle!.associationName,
+          associationName: widget.vehicle!.associationName,
           position: lib.Position(
             type: 'Point',
             coordinates: [loc.longitude, loc.latitude],
@@ -142,7 +142,8 @@ class DispatchViaScanState extends State<DispatchViaScan>
             backgroundColor: Colors.green.shade900,
             duration: const Duration(seconds: 5),
             textStyle: const TextStyle(color: Colors.white),
-            message: '${scannedVehicle!.vehicleReg} - Dispatch sent OK with $passengerCount passengers',
+            message:
+                '${widget.vehicle!.vehicleReg} - Dispatch sent OK with $passengerCount passengers',
             context: context);
         Navigator.of(context).pop();
       }
@@ -153,8 +154,6 @@ class DispatchViaScanState extends State<DispatchViaScan>
       busy = false;
     });
   }
-
-  bool showScanner = true;
 
   @override
   Widget build(BuildContext context) {
@@ -176,63 +175,66 @@ class DispatchViaScanState extends State<DispatchViaScan>
               child: Card(
                 elevation: 4,
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      '${widget.route.name}',
-                      style: myTextStyleMediumLarge(context, 24),
-                    ),
-                    gapH32,
-                    scannedVehicle == null
-                        ? const Text('Vehicle Not Scanned Yet')
-                        : Text(
-                            '${scannedVehicle!.vehicleReg}',
-                            style: myTextStyleMediumLargeWithColor(
-                                context, Colors.yellow, 32),
-                          ),
-                    Expanded(
-                      child: KasieAIScanner(
-                        onScanned: (json) {
-                          setState(() {
-                            scannedVehicle = lib.Vehicle.fromJson(json);
-                          });
-                        },
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        '${widget.route.name}',
+                        style: myTextStyleMediumLarge(context, 28),
                       ),
                     ),
-                    scannedVehicle == null? gapW4: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                     children: [
-                       const Text('Passengers'),
-                       NumberDropDown(onNumberPicked: (number){
-                         setState(() {
-                           passengerCount = number;
-                         });
-                       }, color: Colors.black, count: 24, fontSize: 20),
-                       Text('$passengerCount', style: myTextStyle(color: Colors.yellow, fontSize: 24, weight: FontWeight.w900)),
-                     ],
-                   ),
                     gapH32,
-                    scannedVehicle == null
-                        ? gapW4
-                        : ElevatedButton(
-                            style: const ButtonStyle(
-                                backgroundColor:
-                                    WidgetStatePropertyAll(Colors.blue),
-                                elevation: WidgetStatePropertyAll(8.0)),
-                            onPressed: () {
-                              _sendTheDispatchRecord();
+                    Text(
+                      '${widget.vehicle!.vehicleReg}',
+                      style: myTextStyle(
+                          color: Colors.pink, fontSize: 48, weight: FontWeight.w900),
+                    ),
+                    gapH32,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        const Text('Number of Passengers'),
+                        NumberDropDown(
+                            onNumberPicked: (number) {
+                              setState(() {
+                                passengerCount = number;
+                              });
                             },
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Text(
-                                dispatchTaxi == null
-                                    ? 'Dispatch Taxi'
-                                    : dispatchTaxi!,
-                                style: myTextStyle(
-                                    color: Colors.white,
-                                    fontSize: 24,
-                                    weight: FontWeight.w900),
-                              ),
-                            ),
-                          ),
+                            color: Colors.black,
+                            count: 36,
+                            fontSize: 20),
+                        Text('$passengerCount',
+                            style: myTextStyle(
+                                color: Colors.blue,
+                                fontSize: 28,
+                                weight: FontWeight.w900)),
+                      ],
+                    ),
+                    gapH32,
+                    gapH32,
+                    gapH32,
+                    ElevatedButton(
+                      style: const ButtonStyle(
+                          backgroundColor: WidgetStatePropertyAll(Colors.blue),
+                          elevation: WidgetStatePropertyAll(8.0)),
+                      onPressed: () {
+                        _sendTheDispatchRecord();
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          dispatchTaxi == null
+                              ? 'Dispatch Taxi'
+                              : dispatchTaxi!,
+                          style: myTextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              weight: FontWeight.w900),
+                        ),
+                      ),
+                    ),
                     gapH32,
                   ],
                 ),
@@ -241,10 +243,10 @@ class DispatchViaScanState extends State<DispatchViaScan>
             busy
                 ? const Positioned(
                     child: Center(
-                        child: SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator())))
+                      child: TimerWidget(
+                          title: 'Dispatching Taxi', isSmallSize: true),
+                    ),
+                  )
                 : gapH32,
           ],
         ),

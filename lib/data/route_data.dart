@@ -1,6 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import '../utils/functions.dart';
 import 'data_schemas.dart';
 part 'route_data.g.dart';
 

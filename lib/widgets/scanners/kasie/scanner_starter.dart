@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'barcode_display.dart';
 import 'kasie_ai_scanner.dart';
 
 class ScannerStarter extends StatefulWidget {

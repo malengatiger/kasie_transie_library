@@ -4,7 +4,6 @@ import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
-import '../../../l10n/translation_handler.dart';
 import '../data/data_schemas.dart' as lib;
 import '../utils/functions.dart';
 import '../utils/prefs.dart';

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 import 'package:badges/badges.dart' as bd;
@@ -98,7 +99,9 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
       total = await routeDistanceCalculator.calculateRouteLengthInKM(
           widget.routeId, widget.associationId);
       if (mounted) {
-        showOKToast(message: 'Route distances calculated', context: context);
+        showOKToast(message: 'Route distances calculated',
+            duration: const Duration(seconds: 2),
+            context: context);
       }
     } catch (e, stack) {
       pp('$mm $e - $stack');
@@ -117,7 +120,8 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
     final type = getThisDeviceType();
     return busy
         ? const Center(
-            child: TimerWidget(title: 'Calculating ...', isSmallSize: true))
+            child: TimerWidget(
+                title: 'Calculating distances ...', isSmallSize: true))
         : Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -132,13 +136,13 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
                     _getData(true);
                   },
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Text(
                         routeLength,
                         style: myTextStyleMediumLarge(context, 20),
                       ),
-                     gapW32,
+                      gapW32,
                       Text(
                         fmt.format(total),
                         style: myTextStyleMediumLargeWithColor(
@@ -150,10 +154,18 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
                         width: 8,
                       ),
                       const Text('km'),
+                      gapW32,
+                      gapW32,
+                      IconButton(
+                          onPressed: () {
+                            _getData(true);
+                          },
+                          tooltip:
+                              'Recalculate the distances between landmarks',
+                          icon: const FaIcon(FontAwesomeIcons.recycle, color: Colors.green, size: 20,)),
                     ],
                   ),
                 ),
-                gapH32,
                 gapH32,
                 Expanded(
                   child: GestureDetector(
@@ -163,7 +175,7 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
                     child: bd.Badge(
                       badgeContent: Text('${calculatedDistances.length}',
                           style: const TextStyle(color: Colors.white)),
-                      position: bd.BadgePosition.topEnd(top: 8, end: -8),
+                      position: bd.BadgePosition.topEnd(top: 2, end: -8),
                       badgeStyle: const bd.BadgeStyle(
                           padding: EdgeInsets.all(8.0),
                           badgeColor: Colors.indigo),
@@ -192,7 +204,7 @@ class CalculatedDistancesWidgetState extends State<CalculatedDistancesWidget>
                                         child: Text(
                                       '${d.fromLandmark} - ${d.toLandmark}',
                                       style: myTextStyle(
-                                          fontSize: 20,
+                                          fontSize: 16,
                                           color: Theme.of(context).primaryColor,
                                           weight: FontWeight.w900),
                                     )),

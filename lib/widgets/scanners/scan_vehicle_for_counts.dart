@@ -96,7 +96,7 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
           vehicle: vehicle!,
           route: selectedRoute!,
         ),
-        transitionType: PageTransitionType.leftToRight);
+        );
 
     setState(() {
       showStartButton = false;
@@ -172,7 +172,7 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
         widget: KasieAIScanner(onScanned: (json ) {
           onCarScanned(lib.Vehicle.fromJson(json));
         },),
-        transitionType: PageTransitionType.leftToRight);
+        );
     if (mCar != null) {
       vehicle = lib.Vehicle.fromJson(mCar);
       pp('$mm ... back from on car scanned: ${vehicle!.vehicleReg}');

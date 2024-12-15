@@ -1,6 +1,10 @@
-import 'package:maps_toolkit/maps_toolkit.dart';
-import 'package:geolocator/geolocator.dart';
+import 'dart:collection';
 
+import 'package:maps_toolkit/maps_toolkit.dart';
+import 'package:geolocator/geolocator.dart' as locator;
+
+import '../data/data_schemas.dart';
+import '../data/route_data.dart';
 import 'functions.dart';
 
 // final DeviceLocationBloc locationBloc = DeviceLocationBloc();
@@ -8,27 +12,25 @@ import 'functions.dart';
 class DeviceLocationBloc {
   final mm = '🍐🍐🍐🍐🍐🍐🍐 DeviceLocationBloc: ';
 
-  Future<Position> getLocation() async {
+  Future<locator.Position> getLocation() async {
     bool serviceEnabled;
-    LocationPermission permission;
-
-    pp('$mm ... getting location ....');
+    locator.LocationPermission permission;
 
     // Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    serviceEnabled = await locator.Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       return Future.error('Location services are disabled.');
     }
 
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
+    permission = await locator.Geolocator.checkPermission();
+    if (permission == locator.LocationPermission.denied) {
+      permission = await locator.Geolocator.requestPermission();
+      if (permission == locator.LocationPermission.denied) {
         return Future.error('Location permissions are denied');
       }
     }
 
-    if (permission == LocationPermission.deniedForever) {
+    if (permission == locator.LocationPermission.deniedForever) {
       // Permissions are denied forever, handle appropriately.
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
@@ -36,10 +38,10 @@ class DeviceLocationBloc {
 
     // When we reach here, permissions are granted and we can
     // continue accessing the position of the device.
-    var loc = await Geolocator.getCurrentPosition();
-    pp('$mm location determined, returning loc: ${loc.latitude} ${loc.longitude}');
+    var loc = await locator.Geolocator.getCurrentPosition();
     return loc;
   }
+
   Future<double> getDistanceFromCurrentPosition(
       {required double latitude, required double longitude}) async {
     var pos = await getLocation();
@@ -66,8 +68,64 @@ class DeviceLocationBloc {
     var distanceBetweenPoints =
         SphericalUtil.computeDistanceBetween(latLngFrom, latLngTo);
     var m = distanceBetweenPoints.toDouble();
-    //pp('$mm getDistance between 2 points calculated: $m metres');
-
     return m;
   }
+
+  Future<List<Route>> getRouteDistances({
+    required AssociationRouteData routeData,
+
+  }) async {
+    List<DistanceBag> bags = [];
+    List<RoutePoint> routePoints = [];
+    for (var rd in routeData.routeDataList) {
+      routePoints.addAll(rd.routePoints);
+    }
+    pp('$mm getRouteDistances: total routePoints: ${routePoints.length}');
+    var loc = await getLocation();
+    for (var r in routePoints) {
+      var dist = getDistance(
+          latitude: r.position!.coordinates[1],
+          longitude: r.position!.coordinates[0],
+          toLatitude: loc.latitude,
+          toLongitude: loc.longitude);
+      bags.add(DistanceBag(r, dist));
+    }
+    pp('$mm getRouteDistances: total bags: ${bags.length}');
+    bags.sort((a, b) => a.distance.compareTo(b.distance));
+
+    HashMap<String, DistanceBag> hash = HashMap();
+    for (var bag in bags) {
+      if (hash[bag.routePoint.routeId!] == null) {
+        hash[bag.routePoint.routeId!] = bag;
+      }
+    }
+    pp('$mm total hash values: ${hash.values.length}');
+    var result = hash.values.toList();
+    for (var r in result) {
+      pp('$mm getRouteDistances: route distance: ${r.distance} \t - ${r.routePoint.routeName}');
+    }
+    List<DistanceBag> finalDistanceBags = [];
+    for (var r in result) {
+      if (r.distance < 500) {
+        finalDistanceBags.add(r);
+        pp('$mm getRouteDistances: route within 1500 meters: ${r.distance} \t - ${r.routePoint.routeName}');
+      }
+    }
+    List<Route> routes = [];
+    for (var bag in finalDistanceBags) {
+      for (var rd in routeData.routeDataList) {
+        if (rd.routeId == bag.routePoint.routeId) {
+          routes.add(rd.route!);
+        }
+      }
+    }
+    return routes;
+  }
+}
+
+class DistanceBag {
+  final RoutePoint routePoint;
+  final double distance;
+
+  DistanceBag(this.routePoint, this.distance);
 }

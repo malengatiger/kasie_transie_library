@@ -321,6 +321,6 @@ class _CitySearchState extends State<CitySearch> {
             });
           },
         ),
-        transitionType: PageTransitionType.leftToRight);
+        );
   }
 }

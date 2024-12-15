@@ -19,6 +19,9 @@ CommuterCashPayment _$CommuterCashPaymentFromJson(Map<String, dynamic> json) =>
       userName: json['userName'] as String?,
       routeLandmarkId: json['routeLandmarkId'] as String?,
       landmarkName: json['landmarkName'] as String?,
+      position: json['position'] == null
+          ? null
+          : Position.fromJson(json['position'] as Map<String, dynamic>),
       routeName: json['routeName'] as String?,
       routeId: json['routeId'] as String?,
       created: json['created'] as String?,
@@ -41,4 +44,5 @@ Map<String, dynamic> _$CommuterCashPaymentToJson(
       'routeName': instance.routeName,
       'routeLandmarkId': instance.routeLandmarkId,
       'landmarkName': instance.landmarkName,
+      'position': instance.position,
     };

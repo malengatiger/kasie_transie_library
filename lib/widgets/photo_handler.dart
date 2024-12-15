@@ -11,7 +11,6 @@ import 'package:native_device_orientation/native_device_orientation.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../bloc/cloud_storage_bloc.dart';
-import '../isolates/isolate_manager.dart';
 import '../l10n/translation_handler.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';

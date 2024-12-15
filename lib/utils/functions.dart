@@ -22,9 +22,7 @@ import '../data/data_schemas.dart';
 import 'emojis.dart';
 
 // import 'dart:html' as html;
-import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 pp(dynamic msg) {
   var time = getFormattedDateHour(DateTime.now().toIso8601String());
@@ -345,7 +343,7 @@ if (kIsWeb) {
       if (pngBytes == null) {
             throw Exception('Failed to convert thumbnail image to byte data.');
           }
-      pp('🔷🔷photo thumbnail pngBytes. length: ${pngBytes!.buffer.lengthInBytes} bytes 🔷🔷🔷');
+      pp('🔷🔷photo thumbnail pngBytes. length: ${pngBytes.buffer.lengthInBytes} bytes 🔷🔷🔷');
 
       final Directory tempDir = await getTemporaryDirectory();
       final String tempPath = tempDir.path;

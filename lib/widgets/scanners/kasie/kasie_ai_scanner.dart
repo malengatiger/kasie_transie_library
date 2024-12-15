@@ -1,26 +1,22 @@
 import 'dart:convert';
 
-import 'package:ai_barcode_scanner/ai_barcode_scanner.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:pretty_print_json/pretty_print_json.dart' as pretty;
-
 import '../../../utils/functions.dart';
-import 'barcode_display.dart';
-
+import 'mlkit/mobile_scanner_one.dart';
 class KasieAIScanner extends StatefulWidget {
   const KasieAIScanner({super.key, required this.onScanned});
 
   final Function(Map<String, dynamic>) onScanned;
+
   @override
   State<KasieAIScanner> createState() => _KasieAIScannerState();
 }
 
 class _KasieAIScannerState extends State<KasieAIScanner> {
   String barcode = 'Tap  to scan';
-  final MobileScannerController scannerController = MobileScannerController(
-    detectionSpeed: DetectionSpeed.noDuplicates,
-  );
+
   static const mm = '🍐🍐🍐🍐KasieAIScanner 🍎';
 
   @override
@@ -28,73 +24,54 @@ class _KasieAIScannerState extends State<KasieAIScanner> {
     super.initState();
   }
 
-  Future _handleScanResult(Map<String, dynamic> json) async {
-    if (json['vehicleId'] != null) {
-      pp('\n\n$mm  🥬 Seems a vehicle has been scanned  🥬 🥬 ${json['vehicleReg']}  🥬 🥬');
-    }
+  bool cameraPermissionOK = false;
+
+  Future _handleScanResult(BarcodeCapture capture) async {
+    pp('\n\n$mm  🥬 Seems something has been scanned  🥬 🥬 $json  🥬 🥬');
+
     pp('$mm ...  widget.onScanned ... ');
     pp('\n\n$mm ${pretty.prettyJson(json)}\n\n');
-    widget.onScanned(json);
+    widget.onScanned(jsonDecode(capture.barcodes.first.rawValue!));
   }
+
+  String? barcodeString;
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
     final height = MediaQuery.sizeOf(context).height;
+    final center = MediaQuery.sizeOf(context).center(Offset.zero);
+
+    final double scanWindowWidth = width / 3;
+    final double scanWindowHeight = height / 2;
+
     final Rect scanWindow = Rect.fromCenter(
-      center: Offset(width / 2, height / 2),
-      width: width,
-      height: height,
+      center: center,
+      width: scanWindowWidth,
+      height: scanWindowHeight,
     );
     return Stack(children: [
       Center(
         child: SizedBox(
-          height: 440,
-          width: 440,
-          child: AiBarcodeScanner(
-            onDispose: () {
-              pp("\n🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎Barcode scanner disposed!");
-            },
-            hideGalleryButton: true,
-            fit: BoxFit.cover,
-            controller: scannerController,
-            hideSheetDragHandler: true,
-            hideSheetTitle: true,
-            cutOutSize: width,
-            validator: (value) {
-              if (value.barcodes.isEmpty) {
-                return false;
-              }
-              if (!(value.barcodes.first.rawValue?.contains('flutter.dev') ??
-                  false)) {
-                return false;
-              }
-              return true;
-            },
-            onDetect: (BarcodeCapture capture) async {
-              /// The row string scanned barcode value
-              pp("$mm Barcode onDetect ...");
+            height: height,
+            width: width,
+            child: MobileScannerOne(
+              // scanWindow: scanWindow,
+              fit: BoxFit.cover,
 
-              final List<Barcode> barcodes = capture.barcodes;
-              pp("$mm Barcode list: ${barcodes.length}");
-              if (barcodes.isNotEmpty) {
-                final String? scannedValue = capture.barcodes.first.rawValue;
-                if (scannedValue != null &&
-                    scannedValue.runtimeType == String) {
-                  pp("$mm Barcode scannedValue runtimeType: ${scannedValue.runtimeType}");
-                  pp("$mm 🥦🥦 Barcode scanned: $scannedValue 🥦🥦");
-                  Map<String, dynamic> map = jsonDecode(scannedValue);
-                  pp("$mm Barcode map runtimeType: ${map.runtimeType}");
-                  pp("$mm 🥦🥦 Barcode json: $map 🥦🥦");
-                  await scannerController.stop();
-                  _handleScanResult(map);
-                }
-              }
-            },
-
-          ),
-        ),
-      ),
+              onDetectError: (error, stackTrace){
+                pp('$mm error: $error');
+                pp('$mm stackTrace: $stackTrace');
+              },
+              onDetect: (capture){
+                pp('\n\n$mm ... MobileScannerOne 🥬🥬🥬 onDetect: 🥬 ${capture.barcodes.first.rawValue} 🥬');
+              },
+              onScanned: (capture) {
+                pp('\n\n$mm ... MobileScannerOne 🥬🥬🥬 onScanned: 🥬  ${capture.barcodes.first.rawValue} 🥬');
+                _handleScanResult(capture);
+              },
+            )),
+      )
     ]);
   }
 }

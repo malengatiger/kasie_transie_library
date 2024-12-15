@@ -216,7 +216,7 @@ class _RouteAssignerState extends State<RouteAssigner>
             quitOnDone: true,
             onRoutesPicked: (r) {},
             routes: routes),
-        transitionType: PageTransitionType.leftToRight);
+        );
 
     pp('$mm back from MultiRouteChooser: routes picked: ${routesPicked.length}');
     setState(() {});

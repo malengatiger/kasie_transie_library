@@ -99,7 +99,7 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
           setState(() {
             photoFiles.insert(0, file);
           });
-        }), transitionType: PageTransitionType.leftToRight);
+        }), );
 
     pp('$mm back from PhotoHandler ... set state ...');
     setState(() {

@@ -15,7 +15,7 @@ final LocalFinder localFinder = LocalFinder();
 class LocalFinder {
   final mm = '😎😎😎😎😎😎😎 LocalFinder 😎😎';
   final ListApiDog listApiDog = GetIt.instance<ListApiDog>();
-final   Prefs prefs = GetIt.instance<Prefs>();
+  final Prefs prefs = GetIt.instance<Prefs>();
 
   Future<RouteLandmark?> findNearestRouteLandmark(
       {required double latitude,
@@ -169,7 +169,8 @@ final   Prefs prefs = GetIt.instance<Prefs>();
       final user = prefs.getUser();
       if (user != null) {
         var routesIsolate = GetIt.instance<SemCache>();
-        rList = await routesIsolate.getRoutes(associationId:user.associationId!);
+        rList =
+            await routesIsolate.getRoutes(associationId: user.associationId!);
       }
       final comm = prefs.getCommuter();
       if (comm != null) {
@@ -177,7 +178,8 @@ final   Prefs prefs = GetIt.instance<Prefs>();
             latitude: latitude,
             limit: 2000,
             longitude: longitude,
-            radiusInKM: radiusInMetres / 1000, associationId: user!.associationId!));
+            radiusInKM: radiusInMetres / 1000,
+            associationId: user!.associationId!));
       }
     }
     return rList;
@@ -244,6 +246,10 @@ class LocationFinderParameter {
   late double radiusInKM;
   late String associationId;
 
-  LocationFinderParameter({required this.associationId,
-      required this.latitude, required this.limit, required this.longitude, required this.radiusInKM});
+  LocationFinderParameter(
+      {required this.associationId,
+      required this.latitude,
+      required this.limit,
+      required this.longitude,
+      required this.radiusInKM});
 }

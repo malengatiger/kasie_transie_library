@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
-import 'package:kasie_transie_library/data/commuter_cash_payment.dart';
-import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/country_selection.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import 'package:uuid/v4.dart';
 
 import '../../bloc/list_api_dog.dart';
-import '../../data/commuter_cash_check_in.dart';
-import '../../data/data_schemas.dart' as lib;
 import '../../data/data_schemas.dart';
 import '../../data/payment_provider.dart';
-import '../../utils/device_location_bloc.dart';
 import '../../utils/prefs.dart';
 
 class PaymentProviderWidget extends StatefulWidget {
@@ -108,15 +103,14 @@ class PaymentProviderWidgetState extends State<PaymentProviderWidget>
       countryName: country!.name,
     );
 
-    if (widget.paymentProvider != null) {
-      var res = await dataApiDog.updatePaymentProvider(ccp);
-      pp('$mm $title submitted OK: ${res.toJson()}');
-    } else {
-
-    }
     try {
-      var res = await dataApiDog.addPaymentProvider(ccp);
-      pp('$mm $title submitted OK: ${res.toJson()}');
+      if (widget.paymentProvider != null) {
+        var res = await dataApiDog.updatePaymentProvider(paymentProvider);
+        pp('$mm $title submitted OK: ${res.toJson()}');
+      } else {
+        var res = await dataApiDog.addPaymentProvider(paymentProvider);
+        pp('$mm $title submitted OK: ${res.toJson()}');
+      }
       if (mounted) {
         showToast(message: '$title submitted OK', context: context);
       }

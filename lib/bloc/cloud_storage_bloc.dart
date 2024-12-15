@@ -3,24 +3,15 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
-import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/kasie_exception.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 import '../utils/device_location_bloc.dart';
 import '../utils/functions.dart';
 import 'data_api_dog.dart';
-import 'dart:async';
-import 'package:firebase_core/firebase_core.dart' as fb;
-import 'package:universal_io/io.dart' as io;
-import 'package:firebase_storage/firebase_storage.dart' as store;
 
 // import 'package:firebase/firebase.dart' as fb;
 const photoStorageName = 'kasieTransiePhotos';
@@ -63,6 +54,7 @@ class CloudStorageBloc {
       throw Exception("User not signed in"); // Or handle appropriately
     } else {
       pp('\n$mm 🔵🔵🔵🔵 User is signed in! ${user.displayName} 🔵🔵🔵🔵');
+      await user.getIdToken(true); // Force refresh of the token if needed
 
     }
     var ref = firebaseStorage.ref();
@@ -82,15 +74,30 @@ class CloudStorageBloc {
     pp('$mm storageRef name: 🍎 ${storageRef.name}');
     try {
       await storageRef.putData(fileBytes,newMetadata as SettableMetadata?);
-      var url = await storageRef.getDownloadURL();
-      pp('$mm url: $url');
-      return url;
+      // var url = await getPublicDownloadUrl(storageRef.toString());
+      // pp('$mm url: $url');
+      return 'url';
     } catch (e, s) {
       pp('$mm 😈😈😈ERROR: 😈😈😈$e \n$s');
       throw Exception('File upload failed: $e');
     }
   }
 
+  Future<String?> getPublicDownloadUrl(String bucketFileName) async {
+    try {
+      final storageRef = FirebaseStorage.instance.refFromURL(bucketFileName);
+      pp('$mm getPublicDownloadUrl: storageRef: $storageRef');
+      pp('$mm getPublicDownloadUrl: storageRef.bucket: ${storageRef.bucket}');
+      pp('$mm getPublicDownloadUrl: storageRef.fullPath: ${storageRef.fullPath}');
+
+      final downloadUrl = await storageRef.getDownloadURL();
+      pp('$mm getPublicDownloadUrl: downloadUrl: $downloadUrl');
+      return downloadUrl;
+    } catch (e) {
+      pp('Error getting download URL: $e');
+      return null; // Or throw an exception if you prefer
+    }
+  }
   Future<int> uploadUserPhoto(
       {required lib.User mUser,
       required File file,
@@ -121,7 +128,7 @@ class CloudStorageBloc {
 
       await dataApiDog.addUserPhoto(userPhoto);
       return uploadFinished;
-    } catch (e, s) {
+    } catch (e) {
       pp('\n\n$mm 👿👿👿👿 Photo write to database failed, We may have a database problem: 🔴🔴🔴 $e');
       return uploadError;
     }

@@ -27,6 +27,9 @@ class AppAuth {
 
   late Timer timer;
 
+  auth.User? getUser()  {
+    return firebaseAuth.currentUser;
+  }
   Future signInAssociation(String associationId) async {
     pp('$locks signInAssociation .... ${E.redDot}${E.redDot}${E.redDot}');
     listApiDog = GetIt.instance<ListApiDog>();
@@ -87,7 +90,7 @@ class AppAuth {
       }
       pp('$locks 😈😈 No go with sign in: $email; 😈 wtf?');
       throw Exception('No success signing in with $email');
-    } catch (e, s) {
+    } catch (e) {
       pp('😈😈Bad moon rising! $e');
       rethrow;
     }
@@ -109,7 +112,7 @@ class AppAuth {
       if (user == null) {
         pp('$locks idTokenChanges: User is currently signed out!');
       } else {
-        pp('$locks idTokenChanges: User is not null! ${user.displayName}, checking auth token state ');
+        // pp('$locks idTokenChanges: User is not null! ${user.displayName}, checking auth token state ');
         // await getAuthToken();
       }
     });

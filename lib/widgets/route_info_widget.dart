@@ -143,7 +143,6 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
                     ),
                     Expanded(
                       child: Card(
-                          shape: getDefaultRoundedBorder(),
                           elevation: 12,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
@@ -239,6 +238,9 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
                                     routeDetails: routeDetails,
                                     onColorChanged: (color, string) {
                                       widget.onColorChanged(color, string);
+                                      setState(() {
+                                        routeColor = string;
+                                      });
                                     },
                                   )),
                             ],
@@ -349,43 +351,37 @@ class DetailsWidget extends StatelessWidget {
     BuildContext context,
   ) {
     pp('show dialog ...');
-    showModalBottomSheet(
-        context: context,
-        builder: (ctx) {
-          return ColorPad(
-            onColorPicked: (color, stringColor) {
-              onColorChanged(color, stringColor);
-            },
-            onClose: () {
-              Navigator.of(context).pop();
-            },
-          );
-        });
+    showDialog(context: context, builder: (ctx){
+      return AlertDialog(
+        title: const Text('Change Route Colour'),
+        content: ColorPad(
+          onColorPicked: (color, stringColor) {
+            Navigator.of(context).pop();
+            onColorChanged(color, stringColor);
+          },
+          onClose: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      );
+    });
+
   }
 
   @override
   Widget build(BuildContext context) {
     final type = getThisDeviceType();
     var fmt = NumberFormat('###,###,###,###');
-    return Column(
+    return Column(mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        gapH32,
+        gapH16,
         Icon(
           Icons.roundabout_right,
-          size: 100,
+          size: 48,
           color: getColor(route.color!),
         ),
-        gapH32,gapH32,
-        Header(
-          onClose: onClose,
-          routeName: route.name!,
-          fontSize: fontSize,
-          routeDetails: routeDetails,
-          onNavigateToMapViewer: () {
-            onNavigateToMapViewer();
-          },
-        ),
-        gapH32,
+        Text(route.name!, style: myTextStyleMediumLarge(context, 24),),
+        gapH16,
         Row(mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text('Date Created:', style: myTextStyle(fontSize: 10),),
@@ -395,11 +391,8 @@ class DetailsWidget extends StatelessWidget {
         ),
        gapH32,
         Text(
-          '${route.userName}',
+          route.userName?? '',
           style: myTextStyleMediumBoldGrey(context),
-        ),
-        SizedBox(
-          height: type == 'phone' ? 24 : 80,
         ),
         gapH32,
         Row(
@@ -407,7 +400,7 @@ class DetailsWidget extends StatelessWidget {
           children: [
             Text(
               routeColor,
-              style: myTextStyleMediumLarge(context, 24),
+              style: myTextStyleMedium(context, ),
             ),
             const SizedBox(
               width: 8,
@@ -418,15 +411,14 @@ class DetailsWidget extends StatelessWidget {
                 _showColorDialog(context);
               },
               child: Card(
-                shape: getRoundedBorder(radius: 8),
                 elevation: 8,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
                     children: [
                       Container(
-                        width: 64,
-                        height: 64,
+                        width: 80,
+                        height: 80,
                         color: getColor(route.color!),
                       ),
                     ],
@@ -436,9 +428,7 @@ class DetailsWidget extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(
-          height: 64,
-        ),
+       gapH32, gapH32,
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -449,7 +439,7 @@ class DetailsWidget extends StatelessWidget {
                   children: [
                     Text(
                       numberOfLandmarks.toString(),
-                      style: myTextStyleMediumLarge(context, 48),
+                      style: myTextStyleMediumLarge(context, 32),
                     ),
                     Text(
                       routeLandmarks,
@@ -457,9 +447,7 @@ class DetailsWidget extends StatelessWidget {
                     ),
                   ],
                 )),
-            SizedBox(
-              width: type == 'phone' ? 12 : 24,
-            ),
+           gapH16,
             SizedBox(
                 height: 80,
                 width: type == 'phone' ? 140 : 160,
@@ -467,7 +455,7 @@ class DetailsWidget extends StatelessWidget {
                   children: [
                     Text(
                       fmt.format(numberOfPoints),
-                      style: myTextStyleMediumLarge(context, 48),
+                      style: myTextStyleMediumLarge(context, 32),
                     ),
                     Text(
                       routePointsMapped,

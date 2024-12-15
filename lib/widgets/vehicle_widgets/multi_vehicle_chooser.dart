@@ -74,11 +74,11 @@ class MultiVehicleChooserState extends State<MultiVehicleChooser> with Automatic
       children: [
         gapH16,
 
-       widget.vehicles.length < 25? gapH32: VehicleSearch(cars: widget.vehicles, carsFound: (carsFound){
-         setState(() {
-           list = carsFound;
-         });
-       }),
+       // widget.vehicles.length < 25? gapH32: VehicleSearch(cars: widget.vehicles, carsFound: (carsFound){
+       //   setState(() {
+       //     list = carsFound;
+       //   });
+       // }),
         const SizedBox(
           height: 8,
         ),
@@ -134,4 +134,3 @@ class MultiVehicleChooserState extends State<MultiVehicleChooser> with Automatic
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 }
-

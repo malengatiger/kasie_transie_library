@@ -16,7 +16,6 @@ import '../utils/error_handler.dart';
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
 import '../utils/route_distance_calculator.dart';
-import '../widgets/scanners/qr_code_generation.dart';
 import 'app_auth.dart';
 import 'cache_manager.dart';
 import 'data_api_dog.dart';
@@ -46,19 +45,16 @@ class RegisterServices {
     pp('$mm .... SemCache: 🦠cache initialized');
     final ZipHandler zipHandler = ZipHandler(appAuth, semCache);
     pp('$mm .... ZipHandler: 🦠handler initialized');
-    final dataApi = DataApiDog(
-        client, appAuth, cacheManager, prefs, errorHandler, semCache);
-    pp('$mm .... DataApiDog: 🦠dataApiDog initialized');
+
     final listApi =
         ListApiDog(client, appAuth, prefs, errorHandler, zipHandler, semCache);
     pp('$mm .... ListApiDog: 🦠listApiDog initialized');
     //
-    CloudStorageBloc csb = CloudStorageBloc(dataApiDog: dataApi,
+    CloudStorageBloc csb = CloudStorageBloc(dataApiDog: DataApiDog(),
         prefs: prefs, firebaseStorage: firebaseStorage,
       locationBloc: deviceLocationBloc, );
     pp('$mm .... CloudStorageBloc: 🦠csb initialized');
     pp('\n\n$mm ..... 🦠🦠🦠🦠🦠registerLazySingletons ...');
-    final QRGenerationService qrgGenerationService = QRGenerationService(csb);
 
     final GetIt instance = GetIt.instance;
 
@@ -85,17 +81,17 @@ class RegisterServices {
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... ZipHandler');
 
     instance.registerLazySingleton<RouteDistanceCalculator>(
-        () => RouteDistanceCalculator(prefs, listApi, dataApi));
+        () => RouteDistanceCalculator(prefs, listApi, DataApiDog()));
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... RouteDistanceCalculator');
 
     instance.registerLazySingleton<TheGreatGeofencer>(
-        () => TheGreatGeofencer(dataApi, listApi, prefs));
+        () => TheGreatGeofencer(DataApiDog(), listApi, prefs));
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... TheGreatGeofencer');
 
     instance.registerLazySingleton<ListApiDog>(() => listApi);
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... ListApiDog');
 
-    instance.registerLazySingleton<DataApiDog>(() => dataApi);
+    instance.registerLazySingleton<DataApiDog>(() => DataApiDog());
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... DataApiDog');
 
     instance.registerLazySingleton<CacheManager>(() => cacheManager);
@@ -107,8 +103,8 @@ class RegisterServices {
     instance.registerLazySingleton<ErrorHandler>(() => errorHandler);
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... ErrorHandler');
 
-    instance.registerLazySingleton<QRGenerationService>(() => qrgGenerationService);
-    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... QRGenerationService');
+    // instance.registerLazySingleton<QRGenerationService>(() => qrgGenerationService);
+    // pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... QRGenerationService');
 
 
     pp('\n\n$mm  returning message form RegisterService  🍎🍎🍎\n\n');

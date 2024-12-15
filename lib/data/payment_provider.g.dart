@@ -13,6 +13,7 @@ PaymentProvider _$PaymentProviderFromJson(Map<String, dynamic> json) =>
       created: json['created'] as String?,
       countryName: json['countryName'] as String?,
       countryId: json['countryId'] as String?,
+      sandboxUrl: json['sandboxUrl'] as String?,
       baseUrl: json['baseUrl'] as String?,
     );
 
@@ -21,6 +22,7 @@ Map<String, dynamic> _$PaymentProviderToJson(PaymentProvider instance) =>
       'paymentProviderId': instance.paymentProviderId,
       'paymentProviderName': instance.paymentProviderName,
       'baseUrl': instance.baseUrl,
+      'sandboxUrl': instance.sandboxUrl,
       'created': instance.created,
       'countryId': instance.countryId,
       'countryName': instance.countryName,

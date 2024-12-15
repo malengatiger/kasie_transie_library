@@ -70,9 +70,7 @@ dependencies:
   universal_io: ^2.2.2
   pinput: ^5.0.0
   intl_phone_field: ^3.2.0
-  file_picker: ^8.1.4
   scrollable_positioned_list: ^0.3.8
-#  mobile_scanner: ^6.0.2
   get_it: ^8.0.2
   getwidget: ^4.0.0
   json_annotation: ^4.9.0
@@ -86,13 +84,21 @@ dependencies:
   qr_flutter: ^4.1.0
   fast_csv: ^0.2.11
   sound_library: ^1.0.0
-  ai_barcode_scanner: ^6.0.1
+  barcode_scan2: ^4.3.3
+#  ai_barcode_scanner: ^6.0.1
   simple_barcode_scanner: ^0.2.5
   pretty_print_json: ^1.0.1
   widgets_to_image: ^1.0.0
   get_thumbnail_video: ^0.7.3
+  qr_mobile_vision: ^5.0.2
+  mobile_scanner: ^6.0.2
+  google_mlkit_barcode_scanning: ^0.13.0
+  currency_formatter: ^2.2.1
 
 
+
+  google_mlkit_commons: any
+  path: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

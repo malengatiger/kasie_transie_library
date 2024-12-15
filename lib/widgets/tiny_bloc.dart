@@ -119,7 +119,7 @@ class TinyBloc {
         point = p;
       } else {
       var distance = geo.GeolocatorPlatform.instance.distanceBetween(point!.position!.coordinates[1],
-          point!.position!.coordinates[0], p.position!.coordinates[1], p.position!.coordinates[0]);
+          point.position!.coordinates[0], p.position!.coordinates[1], p.position!.coordinates[0]);
       total += distance;
       point = p;
       }

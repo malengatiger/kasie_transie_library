@@ -2,9 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:geofence_service/geofence_service.dart' as geo;
-import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
-import 'package:kasie_transie_library/bloc/sem_cache.dart';
 
 import '../data/data_schemas.dart';
 import '../utils/emojis.dart';

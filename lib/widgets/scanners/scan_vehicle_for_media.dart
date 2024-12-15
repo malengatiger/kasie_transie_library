@@ -43,7 +43,7 @@ class ScanVehicleForMediaState extends State<ScanVehicleForMedia>
     pp('$mm ... navigate to VehicleMediaHandler ... for car: ${vehicle!.vehicleReg}');
 
     NavigationUtils.navigateTo(context: context, widget: VehicleMediaHandler(vehicle: vehicle!,),
-        transitionType: PageTransitionType.leftToRight);
+        );
   }
 
   void onCarScanned(lib.Vehicle car) async {

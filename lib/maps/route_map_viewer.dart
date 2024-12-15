@@ -18,8 +18,6 @@ import '../data/data_schemas.dart';
 import '../data/route_data.dart';
 import '../utils/prefs.dart';
 import '../widgets/timer_widget.dart';
-import '../widgets/tiny_bloc.dart';
-import 'mapping_toolbar.dart';
 
 class RouteMapViewer extends StatefulWidget {
   final lib.Route route;
@@ -156,7 +154,7 @@ class RouteMapViewerState extends State<RouteMapViewer> {
                     NavigationUtils.navigateTo(
                         context: context,
                         widget: RouteCreatorMap2(route: route!),
-                        transitionType: PageTransitionType.leftToRight);
+                        );
                   },
                   child: const Text('Yes')),
             ],
