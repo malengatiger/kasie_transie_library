@@ -13,8 +13,10 @@ import '../../utils/prefs.dart';
 class VehicleSearch extends StatefulWidget {
   const VehicleSearch({
     super.key,
+    required this.associationId,
   });
 
+  final String associationId;
   @override
   State<VehicleSearch> createState() => _VehicleSearchState();
 }
@@ -35,7 +37,6 @@ class _VehicleSearchState extends State<VehicleSearch> {
   @override
   void initState() {
     super.initState();
-
     _getCars(false);
   }
 
@@ -48,12 +49,11 @@ class _VehicleSearchState extends State<VehicleSearch> {
     });
 
     try {
-      user = prefs.getUser();
-      cars = await listApiDog.getAssociationCars(user!.associationId!, refresh);
+      cars = await listApiDog.getAssociationCars(widget.associationId!, refresh);
       cars.sort((a, b) => a.vehicleReg!.compareTo(b.vehicleReg!));
       _setCarPlates();
-    } catch (e) {
-      pp('$mm Error: $e');
+    } catch (e,s) {
+      pp('$mm Error: $e - $s');
       if (mounted) {
         showErrorToast(message: '$e', context: context);
       }

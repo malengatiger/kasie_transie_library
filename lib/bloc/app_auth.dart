@@ -49,7 +49,7 @@ class AppAuth {
 
   Future<User?> signInWithEmailAndPassword(
       String email, String password) async {
-    pp('$locks signInWithEmail .... ${E.redDot}${E.redDot}${E.redDot}');
+    pp('$locks signInWithEmail .... ${E.redDot}${E.redDot}${E.redDot} $email - $password');
     listApiDog = GetIt.instance<ListApiDog>();
     prefs = GetIt.instance<Prefs>();
 

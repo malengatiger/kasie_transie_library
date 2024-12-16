@@ -39,6 +39,7 @@ class DeviceLocationBloc {
     // When we reach here, permissions are granted and we can
     // continue accessing the position of the device.
     var loc = await locator.Geolocator.getCurrentPosition();
+    // pp('$mm ................. getLocation: ${loc.latitude} ${loc.longitude}');
     return loc;
   }
 
@@ -73,7 +74,6 @@ class DeviceLocationBloc {
 
   Future<List<Route>> getRouteDistances({
     required AssociationRouteData routeData,
-
   }) async {
     List<DistanceBag> bags = [];
     List<RoutePoint> routePoints = [];
@@ -106,11 +106,12 @@ class DeviceLocationBloc {
     }
     List<DistanceBag> finalDistanceBags = [];
     for (var r in result) {
-      if (r.distance < 500) {
+      if (r.distance < 1000) {
         finalDistanceBags.add(r);
-        pp('$mm getRouteDistances: route within 1500 meters: ${r.distance} \t - ${r.routePoint.routeName}');
+        pp('$mm getRouteDistances: route within 1000 meters: ${r.distance} \t - ${r.routePoint.routeName}');
       }
     }
+    finalDistanceBags.sort((a, b) => a.distance.compareTo(b.distance));
     List<Route> routes = [];
     for (var bag in finalDistanceBags) {
       for (var rd in routeData.routeDataList) {
@@ -121,6 +122,43 @@ class DeviceLocationBloc {
     }
     return routes;
   }
+
+  Future<List<LandmarkDistanceBag>> getRouteLandmarkDistances({
+    required AssociationRouteData routeData,
+  }) async {
+    List<LandmarkDistanceBag> bags = [];
+    List<RouteLandmark> routeLandmarks = [];
+    for (var rd in routeData.routeDataList) {
+      routeLandmarks.addAll(rd.landmarks);
+    }
+    pp('$mm getRouteLandmarkDistances: total routeLandmarks: ${routeLandmarks.length}');
+    var loc = await getLocation();
+    for (var r in routeLandmarks) {
+      var dist = getDistance(
+          latitude: r.position!.coordinates[1],
+          longitude: r.position!.coordinates[0],
+          toLatitude: loc.latitude,
+          toLongitude: loc.longitude);
+      bags.add(LandmarkDistanceBag(r, dist));
+    }
+    pp('$mm getRouteLandmarkDistances: total bags: ${bags.length}');
+    bags.sort((a, b) => a.distance.compareTo(b.distance));
+
+    HashMap<String, LandmarkDistanceBag> hash = HashMap();
+    for (var bag in bags) {
+      if (hash[bag.routeLandmark.landmarkId!] == null) {
+        hash[bag.routeLandmark.landmarkId!] = bag;
+      }
+    }
+    var filteredDistanceBags = hash.values.toList();
+    for (var r in filteredDistanceBags) {
+      pp('$mm getRouteLandmarkDistances: routeLandmark distance: ${r.distance} '
+          '\t - ${r.routeLandmark.landmarkName} oon route: ${r.routeLandmark.routeName}');
+    }
+
+    filteredDistanceBags.sort((a, b) => a.distance.compareTo(b.distance));
+    return filteredDistanceBags;
+  }
 }
 
 class DistanceBag {
@@ -128,4 +166,11 @@ class DistanceBag {
   final double distance;
 
   DistanceBag(this.routePoint, this.distance);
+}
+
+class LandmarkDistanceBag {
+  final RouteLandmark routeLandmark;
+  final double distance;
+
+  LandmarkDistanceBag(this.routeLandmark, this.distance);
 }

@@ -199,9 +199,7 @@ Map<String, dynamic> _$DispatchRecordToJson(DispatchRecord instance) =>
     };
 
 Association _$AssociationFromJson(Map<String, dynamic> json) => Association(
-      cityId: json['cityId'] as String?,
       countryId: json['countryId'] as String?,
-      cityName: json['cityName'] as String?,
       associationName: json['associationName'] as String?,
       associationId: json['associationId'] as String?,
       active: (json['active'] as num?)?.toInt(),
@@ -210,33 +208,25 @@ Association _$AssociationFromJson(Map<String, dynamic> json) => Association(
       position: json['position'] == null
           ? null
           : Position.fromJson(json['position'] as Map<String, dynamic>),
-      geoHash: json['geoHash'] as String?,
-      adminUserFirstName: json['adminUserFirstName'] as String?,
-      adminUserLastName: json['adminUserLastName'] as String?,
-      userId: json['userId'] as String?,
-      password: json['password'] as String?,
-      adminCellphone: json['adminCellphone'] as String?,
-      adminEmail: json['adminEmail'] as String?,
+      adminUser: json['adminUser'] == null
+          ? null
+          : User.fromJson(json['adminUser'] as Map<String, dynamic>),
+      carUser: json['carUser'] == null
+          ? null
+          : User.fromJson(json['carUser'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$AssociationToJson(Association instance) =>
     <String, dynamic>{
-      'cityId': instance.cityId,
       'countryId': instance.countryId,
-      'cityName': instance.cityName,
       'associationName': instance.associationName,
       'associationId': instance.associationId,
       'active': instance.active,
       'countryName': instance.countryName,
       'dateRegistered': instance.dateRegistered,
       'position': instance.position?.toJson(),
-      'geoHash': instance.geoHash,
-      'adminUserFirstName': instance.adminUserFirstName,
-      'adminUserLastName': instance.adminUserLastName,
-      'userId': instance.userId,
-      'adminCellphone': instance.adminCellphone,
-      'adminEmail': instance.adminEmail,
-      'password': instance.password,
+      'carUser': instance.carUser?.toJson(),
+      'adminUser': instance.adminUser?.toJson(),
     };
 
 RouteUpdateRequest _$RouteUpdateRequestFromJson(Map<String, dynamic> json) =>
@@ -1019,7 +1009,6 @@ RouteLandmark _$RouteLandmarkFromJson(Map<String, dynamic> json) =>
       routePointId: json['routePointId'] as String?,
       routePointIndex: (json['routePointIndex'] as num?)?.toInt(),
       index: (json['index'] as num?)?.toInt(),
-      routeLandmarkId: json['routeLandmarkId'] as String?,
       position: json['position'] == null
           ? null
           : Position.fromJson(json['position'] as Map<String, dynamic>),
@@ -1028,7 +1017,6 @@ RouteLandmark _$RouteLandmarkFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$RouteLandmarkToJson(RouteLandmark instance) =>
     <String, dynamic>{
       'routeId': instance.routeId,
-      'routeLandmarkId': instance.routeLandmarkId,
       'routeName': instance.routeName,
       'landmarkId': instance.landmarkId,
       'landmarkName': instance.landmarkName,

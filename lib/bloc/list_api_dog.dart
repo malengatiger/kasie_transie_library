@@ -503,7 +503,9 @@ class ListApiDog {
       List resp = await _sendHttpGET(cmd);
       list.clear();
       for (var m in resp) {
-        list.add(Association.fromJson(m));
+        var ass = Association.fromJson(m);
+        list.add(ass);
+        pp('$mm ass: ${ass.associationName} carUser: ${ass.carUser?.toJson()}');
       }
 
       pp('$mm associations from atlas: ${list.length} - refresh: $refresh');
@@ -1103,18 +1105,20 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<Landmark>> findRouteLandmarksByLocation(
+  Future<List<RouteLandmark>> findRouteLandmarksByLocation(
       {required double latitude,
       required double longitude,
       required double radiusInKM}) async {
     pp('$mm .................. findRouteLandmarksByLocation; radius: $radiusInKM');
 
-    final list = <Landmark>[];
+    final list = <RouteLandmark>[];
     final cmd =
-        '${url}routes/findRouteLandmarksByLocation?latitude=$latitude&longitude=$longitude&radiusInKM=$radiusInKM';
+        '${url}routes/findRouteLandmarksByLocation?latitude=$latitude'
+        '&longitude=$longitude'
+        '&radiusInKM=$radiusInKM';
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
-      var r = Landmark.fromJson(value);
+      var r = RouteLandmark.fromJson(value);
       list.add(r);
     }
 

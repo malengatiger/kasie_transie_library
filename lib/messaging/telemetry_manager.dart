@@ -11,27 +11,29 @@ import '../bloc/list_api_dog.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
-
+import 'package:uuid/uuid.dart';
 
 class TelemetryManager {
-  final mm = '🔴🔴🔴🔴🔴🔴 HeartbeatManager: 🔴🔴🔴🔴🔴🔴';
+  final mm = '🔴🔴🔴🔴🔴🔴 TelemetryManager: 🔴🔴🔴🔴🔴🔴';
 
   late Timer timer;
-  DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
-  Prefs prefs = GetIt.instance<Prefs>();
-  DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
-  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  late  DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
+  late Prefs prefs = GetIt.instance<Prefs>();
+  late DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
+  late ListApiDog listApiDog = GetIt.instance<ListApiDog>();
 
   void startHeartbeat() async {
     pp('\n\n$mm start Heartbeat ................... are we falling here? .........................');
     final sett = prefs.getSettings();
-    int seconds = 600; //3 minutes
+    int seconds = 120; //3 minutes
     if (sett != null) {
       seconds = sett.heartbeatIntervalSeconds!;
       //todo - remove after test - check default settings
-      if (seconds < 600) {
-        seconds = 600;
+      if (seconds < 300) {
+        seconds = 300;
       }
+    } else {
+      seconds = 180;
     }
     //
     await addHeartbeat(); //initial heartbeat
@@ -44,6 +46,9 @@ class TelemetryManager {
   }
 
   Future addHeartbeat() async {
+    prefs = GetIt.instance<Prefs>();
+    locationBloc = GetIt.instance<DeviceLocationBloc>();
+    dataApiDog = GetIt.instance<DataApiDog>();
     var car = prefs.getCar();
 
     if (car == null) {
@@ -80,6 +85,7 @@ class TelemetryManager {
     String? nearestRouteName;
     String? routeLandmarkId;
     String? routeId;
+    listApiDog = GetIt.instance<ListApiDog>();
 
     var landmarks = await listApiDog.findRouteLandmarksByLocation(
         latitude: loc.latitude,
@@ -119,6 +125,7 @@ class TelemetryManager {
         heading: loc.heading,
         altitude: loc.altitude,
         altitudeAccuracy: loc.altitudeAccuracy,
+        vehicleTelemetryId: Uuid().toString(),
         speed: loc.speed,
         speedAccuracy: loc.speedAccuracy);
 

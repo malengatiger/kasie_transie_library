@@ -235,7 +235,9 @@ class DataApiDog {
     return lr;
   }
 
-  Future addVehicleTelemetry(VehicleTelemetry telemetry) async {
+  Future<VehicleTelemetry> addVehicleTelemetry(VehicleTelemetry telemetry) async {
+    pp('$mm addVehicleTelemetry ...: ${telemetry.nearestRouteName}');
+
     final bag = telemetry.toJson();
     final cmd = '${url}vehicle/addVehicleTelemetry';
     final res = await _callPost(cmd, bag);
@@ -344,16 +346,16 @@ class DataApiDog {
 
   Future addVehicleArrival(VehicleArrival event) async {
     final bag = event.toJson();
-    final cmd = '${url}addVehicleArrival';
+    final cmd = '${url}dispatch/addVehicleArrival';
     final res = await _callPost(cmd, bag);
-    pp('$mm VehicleArrival added to database');
+    pp('$mm VehicleArrival added to database: ${res}');
   }
 
   Future addVehicleDeparture(VehicleDeparture event) async {
     final bag = event.toJson();
-    final cmd = '${url}addVehicleDeparture';
+    final cmd = '${url}dispatch/addVehicleDeparture';
     final res = await _callPost(cmd, bag);
-    pp('$mm VehicleDeparture added to database');
+    pp('$mm VehicleDeparture added to database: $res');
   }
 
   Future addVehicleHeartbeat(VehicleHeartbeat event) async {

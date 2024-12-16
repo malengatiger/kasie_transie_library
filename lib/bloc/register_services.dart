@@ -6,6 +6,9 @@ import 'package:kasie_transie_library/bloc/cloud_storage_bloc.dart';
 import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/bloc/the_great_geofencer.dart';
 import 'package:kasie_transie_library/bloc/theme_bloc.dart';
+import 'package:kasie_transie_library/bloc/vehicle_telemetry_service.dart';
+
+import 'package:kasie_transie_library/messaging/telemetry_manager.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/route_update_listener.dart';
 import 'package:kasie_transie_library/utils/zip_handler.dart';
@@ -46,6 +49,7 @@ class RegisterServices {
     final ZipHandler zipHandler = ZipHandler(appAuth, semCache);
     pp('$mm .... ZipHandler: 🦠handler initialized');
 
+    final VehicleTelemetryService telemetryService = VehicleTelemetryService();
     final listApi =
         ListApiDog(client, appAuth, prefs, errorHandler, zipHandler, semCache);
     pp('$mm .... ListApiDog: 🦠listApiDog initialized');
@@ -103,11 +107,15 @@ class RegisterServices {
     instance.registerLazySingleton<ErrorHandler>(() => errorHandler);
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... ErrorHandler');
 
+    instance.registerLazySingleton<TelemetryManager>(() => TelemetryManager());
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... TelemetryManager');
     // instance.registerLazySingleton<QRGenerationService>(() => qrgGenerationService);
     // pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... QRGenerationService');
 
+    instance.registerLazySingleton<VehicleTelemetryService>(() => telemetryService);
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... VehicleTelemetryService');
 
     pp('\n\n$mm  returning message form RegisterService  🍎🍎🍎\n\n');
-    return '\n🍎🍎🍎 RegisterServices: 15 Service singletons registered!';
+    return '\n🍎🍎🍎 RegisterServices: 16 Service singletons registered!';
   }
 }

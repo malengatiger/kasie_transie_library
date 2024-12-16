@@ -22,7 +22,7 @@ class VehicleTelemetry {
 
   VehicleTelemetry(
       {
-      this.vehicleTelemetryId,
+      required this.vehicleTelemetryId,
       required this.vehicleId,
       required this.created,
       required this.vehicleReg,
@@ -194,37 +194,25 @@ class DispatchRecord {
 
 @JsonSerializable(explicitToJson: true)
 class Association {
-  String? cityId;
   String? countryId;
-  String? cityName, associationName, associationId;
+  String? associationName, associationId;
   int? active;
   String? countryName;
   String? dateRegistered;
   Position? position;
-  String? geoHash;
-  String? adminUserFirstName, adminUserLastName;
-  String? userId;
-  String? adminCellphone;
-  String? adminEmail;
-  String? password;
+  User? carUser, adminUser;
 
   Association(
-      {this.cityId,
+      {
       this.countryId,
-      this.cityName,
       this.associationName,
       this.associationId,
       this.active,
       this.countryName,
       this.dateRegistered,
       this.position,
-      this.geoHash,
-      this.adminUserFirstName,
-      this.adminUserLastName,
-      this.userId,
-      this.password,
-      this.adminCellphone,
-      this.adminEmail});
+      this.adminUser,
+      this.carUser});
 
   factory Association.fromJson(Map<String, dynamic> json) =>
       _$AssociationFromJson(json);
@@ -289,8 +277,8 @@ class VehicleMediaRequest {
 @JsonSerializable(explicitToJson: true)
 class VehicleArrival {
   String? vehicleArrivalId;
-  String? landmarkId;
-  String? landmarkName;
+  String? landmarkId, routeId;
+  String? landmarkName, routeName;
   Position? position;
   String? geoHash;
   String? created;
@@ -313,7 +301,7 @@ class VehicleArrival {
       this.vehicleId,
       this.associationId,
       this.associationName,
-      this.vehicleReg,
+      this.vehicleReg, this.routeName, this.routeId,
       this.make,
       this.model,
       this.ownerId,
@@ -426,8 +414,8 @@ class VehicleVideo {
 @JsonSerializable(explicitToJson: true)
 class VehicleDeparture {
   String? vehicleDepartureId;
-  String? landmarkId;
-  String? landmarkName;
+  String? landmarkId, routeId;
+  String? landmarkName, routeName;
   Position? position;
   String? geoHash;
   String? created;
@@ -447,7 +435,7 @@ class VehicleDeparture {
       this.position,
       this.geoHash,
       this.created,
-      this.vehicleId,
+      this.vehicleId, this.routeId, this.routeName,
       this.associationId,
       this.associationName,
       this.vehicleReg,
@@ -1009,7 +997,7 @@ class LocationResponse {
 
 @JsonSerializable(explicitToJson: true)
 class RouteLandmark {
-  String? routeId, routeLandmarkId;
+  String? routeId;
   String? routeName;
   String? landmarkId;
   String? landmarkName;
@@ -1030,7 +1018,6 @@ class RouteLandmark {
       this.routePointId,
       this.routePointIndex,
       this.index,
-      this.routeLandmarkId,
       this.position});
 
   factory RouteLandmark.fromJson(Map<String, dynamic> json) =>

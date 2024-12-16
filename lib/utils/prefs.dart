@@ -158,7 +158,7 @@ class Prefs {
     }
     var jx = json.decode(string);
     var car = Vehicle.fromJson(jx);
-    pp("🌽 🌽 🌽 Prefs: getCar 🧩  ${car.vehicleReg} retrieved");
+    // pp("🌽 🌽 🌽 Prefs: getCar 🧩  ${car.vehicleReg} retrieved");
     return car;
   }
 

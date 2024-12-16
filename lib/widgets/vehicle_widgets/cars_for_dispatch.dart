@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
@@ -22,7 +23,7 @@ class _CarForDispatchState extends State<CarForDispatch> {
   _search() async {
     var vehicle = await NavigationUtils.navigateTo(
         context: context,
-        widget: const VehicleSearch(),
+        widget: VehicleSearch(associationId: widget.route.associationId!,),
         );
 
     if (vehicle != null) {
@@ -74,6 +75,9 @@ class _CarForDispatchState extends State<CarForDispatch> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Car For Dispatch'),
+          actions: [
+            IconButton(onPressed: (){}, icon: const FaIcon(FontAwesomeIcons.mapLocation))
+          ]
       ),
       body: SafeArea(
           child: Padding(
@@ -155,6 +159,9 @@ class _ScanTaxiState extends State<ScanTaxi> {
     return Scaffold(
         appBar: AppBar(
           title: const Text('Scan Taxi'),
+          actions: [
+            IconButton(onPressed: (){}, icon: const FaIcon(FontAwesomeIcons.mapLocation))
+          ]
         ),
         body: const SafeArea(child: Center(child: Text('Scanner to come'))));
   }

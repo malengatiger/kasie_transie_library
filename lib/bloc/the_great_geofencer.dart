@@ -2,13 +2,16 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:geofence_service/geofence_service.dart' as geo;
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
+import 'package:kasie_transie_library/utils/device_location_bloc.dart';
+import 'package:uuid/uuid.dart';
+import 'package:uuid/v4.dart';
 
 import '../data/data_schemas.dart';
 import '../utils/emojis.dart';
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
-
 import 'list_api_dog.dart';
 
 final geofenceService = geo.GeofenceService.instance.setup(
@@ -21,21 +24,28 @@ final geofenceService = geo.GeofenceService.instance.setup(
     printDevLog: false,
     geofenceRadiusSortType: geo.GeofenceRadiusSortType.DESC);
 
-
 class TheGreatGeofencer {
   final xx = '😡😡😡😡😡😡😡 TheGreatGeofencer:  🔱 🔱 ';
   final reds = '🔴🔴🔴🔴🔴🔴 TheGreatGeofencer: ';
   final ListApiDog listApiDog;
   final DataApiDog dataApiDog;
- final Prefs prefs;
+  final Prefs prefs;
 
-  TheGreatGeofencer(this.dataApiDog, this.listApiDog, this.prefs);
+  TheGreatGeofencer(this.dataApiDog, this.listApiDog, this.prefs) {
+    refreshFences();
+  }
 
   final StreamController<VehicleArrival> _vehicleArrivalController =
       StreamController.broadcast();
 
   Stream<VehicleArrival> get vehicleArrivalStream =>
       _vehicleArrivalController.stream;
+
+  final StreamController<VehicleTelemetry> _telemetryController =
+  StreamController.broadcast();
+
+  Stream<VehicleTelemetry> get telemetryStream =>
+      _telemetryController.stream;
 
   final StreamController<VehicleDeparture> _vehicleDepartureController =
       StreamController.broadcast();
@@ -50,23 +60,42 @@ class TheGreatGeofencer {
   var defaultRadiusInKM = 100.0;
   var defaultRadiusInMetres = 150.0;
   var defaultDwellInMilliSeconds = 30;
+  late Timer timer;
 
-  Future<List<RouteAssignment>> getRouteAssignments(String vehicleId) async {
-    return await listApiDog.getVehicleRouteAssignments(vehicleId, false);
+  refreshFences() {
+    pp('\n\n$xx initialize Timer for refreshing fences');
+    timer = Timer.periodic(Duration(minutes: 60), (timer) {
+      pp('\n\n$xx Timer tick ${timer.tick} - refresh geoFences');
+      buildGeofences();
+    });
+    pp('$xx  Geofence Timer initialized ');
   }
 
   Future buildGeofences() async {
-    pp('$xx buildGeofences .... build geofences for '
-        'the association started ... 🌀 ');
+    pp('\n\n$xx buildGeofences .... build geofences for '
+        'the association started ... 🌀🌀🌀🌀 ');
 
     _settingsModel = prefs.getSettings();
     _user = prefs.getUser();
     _vehicle = prefs.getCar();
+    _geofenceList.clear();
 
-    var landmarks = await _getLandmarksFromAssignments(_vehicle!.vehicleId!);
-    if (landmarks.isEmpty) {
-      // landmarks = await _getLandmarks();
+    var locationBloc = GetIt.instance<DeviceLocationBloc>();
+    var loc = await locationBloc.getLocation();
+    var routeData = await listApiDog.getAssociationRouteData(
+        _vehicle!.associationId!, false);
+
+    if (routeData == null) {
+      return;
     }
+    List<RouteLandmark> landmarks = [];
+    List<LandmarkDistanceBag> distanceBags =
+        await locationBloc.getRouteLandmarkDistances(routeData: routeData);
+
+    for (var bag in distanceBags) {
+      landmarks.add(bag.routeLandmark);
+    }
+    pp('$xx buildGeofences .... landmarks: ${landmarks.length} ');
 
     int cnt = 0;
     var radius = 200.0;
@@ -75,35 +104,25 @@ class TheGreatGeofencer {
     }
     pp('$xx buildGeofences .... radius in metres: $radius ');
 
-    //
     for (var landmark in landmarks) {
       await addGeofence(
           landmarkId: landmark.landmarkId!,
           landmarkName: landmark.landmarkName!,
           longitude: landmark.position!.coordinates[0],
           latitude: landmark.position!.coordinates[1],
+          routeId: landmark.routeId!,
+          routeName: landmark.routeName!,
           radius: radius);
       cnt++;
       if (cnt > 98) {
         break;
       }
     }
-    final xList = [];
-    for (var element in _geofenceList) {
-      xList.add(element.data['landmarkName']);
-    }
-    xList.sort();
-    pp('\n$xx geofences added to service in alphabetic order\n');
-
-    for (var element in xList) {
-      pp('$xx geofence added to service: ${E.peach} $element');
-    }
+    pp('$xx buildGeofences .... fences: $cnt ');
     geofenceService.addGeofenceList(_geofenceList);
 
     geofenceService.addGeofenceStatusChangeListener(
         (geofence, geofenceRadius, geofenceStatus, location) async {
-      pp('$xx ....... Geofence Listener 💠 FIRED!! '
-          '🔵🔵🔵 geofenceStatus: ${geofenceStatus.name}  at 🔶 ${geofence.data['landmarkName']}');
 
       await _processGeofenceEvent(
         geofence: geofence,
@@ -114,66 +133,28 @@ class TheGreatGeofencer {
 
     try {
       pp('$xx  🔶🔶🔶🔶🔶🔶 Starting GeofenceService ...... 🔶🔶🔶🔶🔶🔶 ');
-      await geofenceService.start().onError((error, stackTrace) {});
+      await geofenceService.start().onError((error, stackTrace) {
+        pp('\n\n$xx GeofenceService failed to start: 🔴 $error 🔴 }');
+      });
+      pp('$xx  🔶🔶🔶🔶🔶🔶 GeofenceService started 🌀🌀🌀🌀 ...... 🔶🔶🔶🔶🔶🔶 ');
     } catch (e) {
       pp('\n\n$xx GeofenceService failed to start: 🔴 $e 🔴 }');
     }
   }
 
-  Future<List<RouteLandmark>> _getLandmarksFromAssignments(String vehicleId) async {
-      final a = await listApiDog.getVehicleRouteAssignments(vehicleId, true);
-      pp('$xx _getLandmarksFromAssignments .... found: ${a.length} ');
-
-      final map = HashMap<String, String>();
-      for (var value in a) {
-        map[value.routeId!] = value.routeId!;
-      }
-      final List<RouteLandmark> list = [];
-      final routeIds = map.values.toList();
-      for (var routeId in routeIds) {
-        list.addAll(await listApiDog.getRouteLandmarks(routeId, false,'TBD'));
-      }
-      pp('$xx _getLandmarksFromAssignments .... found: ${list.length} ');
-
-      final map2 = HashMap<String, RouteLandmark>();
-      for (var rl in list) {
-        map2[rl.landmarkName!] = rl;
-      }
-      pp('$xx _getLandmarksFromAssignments .... filtered: ${map2.length} ');
-
-      return map2.values.toList();
-  }
-  // Future<List<RouteLandmark>> _getLandmarks() async {
-  //   var routesIsolate = GetIt.instance<SemCache>();
-  //   final marks2 = await routesIsolate.getAllRout();
-  //
-  //   pp('$xx _getLandmarks .... routeLandmarks, unfiltered: ${marks2.length} ');
-  //
-  //   final map = HashMap<String, RouteLandmark>();
-  //   for (var value in marks2) {
-  //     map[value.landmarkId!] = value;
-  //   }
-  //
-  //   final filteredLandmarks = map.values.toList();
-  //   pp('$xx _getLandmarks .... filteredLandmarks: ${filteredLandmarks.length} ');
-  //   final map2 = HashMap<String, RouteLandmark>();
-  //
-  //   for (var value in filteredLandmarks) {
-  //     map2[value.landmarkName!] = value;
-  //   }
-  //   pp('$xx _getLandmarks .... found: ${map2.length} ');
-  //
-  //   return map2.values.toList();
-  // }
   Future addGeofence(
       {required String landmarkName,
       required String landmarkId,
+      required String routeName,
+      required String routeId,
       required double latitude,
       required double longitude,
       required double radius}) async {
     final data = {
       'landmarkName': landmarkName,
       'landmarkId': landmarkId,
+      'routeId': routeId,
+      'routeName': routeName,
       'dateGeofenceAdded': DateTime.now().toUtc().toIso8601String(),
     };
 
@@ -192,13 +173,11 @@ class TheGreatGeofencer {
   }
 
   Vehicle? _vehicle;
+
   Future _processGeofenceEvent(
       {required geo.Geofence geofence,
       required geo.GeofenceRadius geofenceRadius,
       required geo.GeofenceStatus geofenceStatus}) async {
-
-    pp('\n\n$xx ....... _processing GeofenceEvent; 🔵 ${geofence.data['landmarkName']} '
-        '🔵🔵🔵🔵🔵 geofenceStatus: ${geofenceStatus.toString()}');
 
     _user = prefs.getUser();
     _vehicle = prefs.getCar();
@@ -206,8 +185,8 @@ class TheGreatGeofencer {
     String status = geofenceStatus.toString();
     switch (status) {
       case 'GeofenceStatus.ENTER':
-        pp('$xx .... IGNORING geofence ${E.redDot} ENTER ${E.redDot} '
-            'event for either user or vehicle ');
+        // pp('$xx .... IGNORING geofence ${E.redDot} ENTER ${E.redDot} '
+        //     'event for either user or vehicle ');
         return;
       case 'GeofenceStatus.DWELL':
         if (_user != null) {
@@ -216,16 +195,16 @@ class TheGreatGeofencer {
         if (_vehicle != null) {
           _addVehicleArrival(geofence);
         }
-
         break;
       case 'GeofenceStatus.EXIT':
         if (_user != null) {
-          _addUserGeofenceEvent(geofence, 'GeofenceStatus.EXIT');
+          // pp('$xx user Geofence EXIT fragile?');
+          // _addUserGeofenceEvent(geofence, 'GeofenceStatus.EXIT');
         }
         if (_vehicle != null) {
-          _addVehicleDeparture(geofence);
+          // pp('$xx vehicle Geofence EXIT fragile?');
+          // _addVehicleDeparture(geofence);
         }
-
 
         break;
     }
@@ -233,15 +212,18 @@ class TheGreatGeofencer {
   }
 
   void _addVehicleArrival(geo.Geofence geofence) async {
-    pp('\n\n$xx _adding VehicleArrival ... geofence status: ${geofence.status.toString()}');
-    final m = VehicleArrival(
+    pp('\n\n$xx _adding VehicleArrival ... 🔵 geofence status: ${geofence.status.toString()}');
+    pp('$xx _adding VehicleArrival ... 🔵 geofence data: ${geofence.data}');
 
-      vehicleArrivalId: DateTime.now().toIso8601String(),
+    final m = VehicleArrival(
+      vehicleArrivalId: const UuidV4().generate(),
       associationId: _vehicle!.associationId,
       associationName: _vehicle!.associationName,
       created: DateTime.now().toUtc().toIso8601String(),
       landmarkId: geofence.data['landmarkId'],
       landmarkName: geofence.data['landmarkName'],
+      routeId: geofence.data['routeId'],
+      routeName: geofence.data['routeName'],
       position: Position.fromJson({
         'type': 'Point',
         'coordinates': [geofence.longitude, geofence.latitude],
@@ -255,25 +237,29 @@ class TheGreatGeofencer {
       ownerId: _vehicle!.ownerId,
       ownerName: _vehicle!.ownerName,
     );
+
     await dataApiDog.addVehicleArrival(m);
-    pp('$xx ... VehicleArrival should be OK! ${_vehicle!.vehicleReg}');
+    _vehicleArrivalController.sink.add(m);
+    pp('$xx ... VehicleArrival should be OK! 🥬 🥬 ${_vehicle!.vehicleReg} 🥬 \n\n');
   }
 
   void _addVehicleDeparture(geo.Geofence geofence) async {
     pp('\n\n$xx _addVehicleDeparture ... geofence status: ${geofence.status.toString()}');
     var pos = Position.fromJson({
-      'type':"Point",
+      'type': "Point",
       'coordinates': [geofence.longitude, geofence.latitude],
       'latitude': geofence.latitude,
       'longitude': geofence.longitude,
     });
     final m = VehicleDeparture(
-      vehicleDepartureId: DateTime.now().toIso8601String(),
+      vehicleDepartureId: const UuidV4().generate(),
       associationId: _vehicle!.associationId,
       associationName: _vehicle!.associationName,
       created: DateTime.now().toUtc().toIso8601String(),
       landmarkId: geofence.data['landmarkId'],
       landmarkName: geofence.data['landmarkName'],
+      routeId: geofence.data['routeId'],
+      routeName: geofence.data['routeName'],
       position: pos,
       make: _vehicle!.make,
       model: _vehicle!.model,
@@ -283,7 +269,9 @@ class TheGreatGeofencer {
       ownerName: _vehicle!.ownerName,
     );
     await dataApiDog.addVehicleDeparture(m);
-    pp('$xx ... VehicleDeparture should be OK! ${_vehicle!.vehicleReg}');
+    _vehicleDepartureController.sink.add(m);
+
+    pp('$xx ... VehicleDeparture should be OK! 🥬🥬 ${_vehicle!.vehicleReg} 🥬 \n');
   }
 
   void _addUserGeofenceEvent(geo.Geofence geofence, String action) async {
@@ -295,7 +283,7 @@ class TheGreatGeofencer {
       'longitude': geofence.longitude,
     });
     final m = UserGeofenceEvent(
-      userGeofenceId:DateTime.now().toIso8601String(),
+      userGeofenceId: DateTime.now().toIso8601String(),
       associationId: _vehicle!.associationId,
       associationName: _vehicle!.associationName,
       created: DateTime.now().toUtc().toIso8601String(),

@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/rank_fee_widget.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/vehicle_search.dart';
-import 'package:page_transition/page_transition.dart';
 
-import 'dispatch_taxi.dart';
 
 class CarForRankFee extends StatefulWidget {
-  const CarForRankFee({super.key,});
+  const CarForRankFee({super.key, required this.associationId,});
 
+  final String associationId;
 
   @override
   State<CarForRankFee> createState() =>CarForRankFeeState();
@@ -22,7 +20,7 @@ class CarForRankFeeState extends State<CarForRankFee> {
   _search() async {
     var vehicle = await NavigationUtils.navigateTo(
         context: context,
-        widget: const VehicleSearch(),
+        widget:  VehicleSearch(associationId: widget.associationId,),
         );
 
     if (vehicle != null) {
