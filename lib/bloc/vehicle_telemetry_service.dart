@@ -25,7 +25,7 @@ class VehicleTelemetryService {
 
   Stream<lib.VehicleTelemetry> get telemetryStream =>
       _telemetryController.stream;
-  static const minutes = 1;
+  static const minutes = 3;
 
   static const mm = '🍎🍎🍎🍎 VehicleTelemetryService 🍎🍎';
 
@@ -36,7 +36,7 @@ class VehicleTelemetryService {
       pp('\n\n$mm Timer tick ${timer.tick} - create telemetry');
       createTelemetry();
     });
-    pp('$mm  Timer initialized ');
+    pp('$mm  Timer initialized for 🌀 $minutes minutes per tick🌀');
 
     //create initial telemetry record
     //createTelemetry();
@@ -63,6 +63,11 @@ class VehicleTelemetryService {
       route = routes.first;
       pp('$mm nearest route: ${route.toJson()}');
     }
+    var landmarkDistanceBags = await locationBloc.getRouteLandmarkDistances(routeData: routeData!);
+    lib.RouteLandmark? rLandmark;
+    if (landmarkDistanceBags.isNotEmpty) {
+      rLandmark = landmarkDistanceBags.first.routeLandmark;
+    }
     var car = prefs.getCar();
     var loc = await locationBloc.getLocation();
     var tm = lib.VehicleTelemetry(
@@ -81,8 +86,8 @@ class VehicleTelemetryService {
             longitude: loc.longitude),
         nearestRouteName: route?.name!,
         routeId: route?.routeId!,
-        nearestRouteLandmarkName: null,
-        routeLandmarkId: null,
+        nearestRouteLandmarkName: rLandmark?.landmarkName,
+        routeLandmarkId: rLandmark?.landmarkId,
         associationId: car.associationId,
         associationName: car.associationName,
         ownerId: car.ownerId,

@@ -24,15 +24,16 @@ import '../utils/functions.dart';
 import '../utils/kasie_exception.dart';
 import '../utils/prefs.dart';
 
-final FCMBloc fcmBloc = FCMBloc(fb.FirebaseMessaging.instance);
+final FCMService fcmBloc = FCMService(fb.FirebaseMessaging.instance);
 String? appName;
 
-class FCMBloc {
+class FCMService {
   final fb.FirebaseMessaging firebaseMessaging;
-  final mm = '🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎 FCMBloc: 🔵🔵 ';
-  DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
-  FCMBloc(this.firebaseMessaging) {
-    initialize();
+  final mm = '🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎 FCMService: 🔵🔵 ';
+  late DeviceLocationBloc locationBloc;
+
+  FCMService(this.firebaseMessaging) {
+    // initialize();
   }
 
   lib.User? user;
@@ -40,13 +41,19 @@ class FCMBloc {
   lib.Association? ass;
   bool demoFlag = false;
   //
-  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
-  Prefs prefs = GetIt.instance<Prefs>();
-  DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
-  ErrorHandler errorHandler = GetIt.instance<ErrorHandler>();
+  late ListApiDog listApiDog;
+  late Prefs prefs;
+  late DataApiDog dataApiDog;
+  late ErrorHandler errorHandler;
 
   Future initialize() async {
     pp('\n\n$mm ... FirebaseMessaging initialize starting ... ');
+     listApiDog = GetIt.instance<ListApiDog>();
+     prefs = GetIt.instance<Prefs>();
+     dataApiDog = GetIt.instance<DataApiDog>();
+     errorHandler = GetIt.instance<ErrorHandler>();
+     locationBloc = GetIt.instance<DeviceLocationBloc>();
+
     user = prefs.getUser();
     car = prefs.getCar();
     fb.NotificationSettings notificationSettings =
@@ -116,6 +123,7 @@ class FCMBloc {
     ];
 
   }
+
   Future<void> subscribeForBackendMonitor(String app) async {
     appName = app;
     if (!newMM.contains(app)) {
@@ -179,27 +187,7 @@ class FCMBloc {
     } else {
       return;
     }
-    //
-    await firebaseMessaging
-        .subscribeToTopic('${Constants.commuterRequest}$associationId');
-    pp('$newMM ..... FCM: subscribed to ${Constants.commuterRequest}$associationId');
-    //
-    await firebaseMessaging
-        .subscribeToTopic('${Constants.heartbeat}$associationId');
-    pp('$newMM ..... FCM: subscribed to ${Constants.heartbeat}$associationId');
-//
-    await firebaseMessaging
-        .subscribeToTopic('${Constants.dispatchRecord}$associationId');
-    pp('$newMM ..... FCM: subscribed to ${Constants.dispatchRecord}$associationId');
-    //
-    await firebaseMessaging
-        .subscribeToTopic('${Constants.passengerCount}$associationId');
-    pp('$newMM ..... FCM: subscribed to ${Constants.passengerCount}$associationId');
 
-    await firebaseMessaging
-        .subscribeToTopic('${Constants.vehicleArrival}$associationId');
-    pp('$newMM ..... FCM: subscribed to ${Constants.vehicleArrival}$associationId');
-    //
     await firebaseMessaging
         .subscribeToTopic('${Constants.routeUpdateRequest}$associationId');
     pp('$newMM ..... FCM: subscribed to ${Constants.routeUpdateRequest}$associationId');
@@ -207,15 +195,7 @@ class FCMBloc {
     await firebaseMessaging
         .subscribeToTopic('${Constants.locationRequest}$associationId');
     pp('$newMM ..... FCM: subscribed to ${Constants.locationRequest}$associationId');
-    //
-    await firebaseMessaging
-        .subscribeToTopic('${Constants.vehicleDeparture}$associationId');
-    pp('$newMM ..... FCM: subscribed to ${Constants.vehicleDeparture}$associationId');
-    //
-    await firebaseMessaging
-        .subscribeToTopic('${Constants.vehicleMediaRequest}$associationId');
-    pp('$newMM ..... FCM: subscribed to ${Constants.vehicleMediaRequest}$associationId');
-    //
+
     pp('$newMM .............................................'
         ' FCM: subscribed to all ${E.pear} Car FCM topics\n\n');
   }

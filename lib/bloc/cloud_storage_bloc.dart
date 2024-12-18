@@ -25,7 +25,6 @@ class CloudStorageBloc {
   final DataApiDog dataApiDog;
   final Prefs prefs;
   final DeviceLocationBloc locationBloc;
-
   CloudStorageBloc(
       {required this.dataApiDog,
       required this.prefs,
@@ -55,7 +54,6 @@ class CloudStorageBloc {
     } else {
       pp('\n$mm 🔵🔵🔵🔵 User is signed in! ${user.displayName} 🔵🔵🔵🔵');
       await user.getIdToken(true); // Force refresh of the token if needed
-
     }
     var ref = firebaseStorage.ref();
     pp('$mm upload bucket: ${ref.bucket}');
@@ -73,7 +71,7 @@ class CloudStorageBloc {
     );
     pp('$mm storageRef name: 🍎 ${storageRef.name}');
     try {
-      await storageRef.putData(fileBytes,newMetadata as SettableMetadata?);
+      await storageRef.putData(fileBytes, newMetadata as SettableMetadata?);
       // var url = await getPublicDownloadUrl(storageRef.toString());
       // pp('$mm url: $url');
       return 'url';
@@ -98,6 +96,7 @@ class CloudStorageBloc {
       return null; // Or throw an exception if you prefer
     }
   }
+
   Future<int> uploadUserPhoto(
       {required lib.User mUser,
       required File file,
@@ -138,12 +137,13 @@ class CloudStorageBloc {
       {required lib.Vehicle car,
       required File file,
       required File thumbnailFile}) async {
-    pp('\n\n\n$mm️ uploadPhoto ☕️☕️☕️☕️☕️☕️☕️️ ... ${car.vehicleReg}');
-
+    pp('\n\n\n$mm️ uploadVehiclePhoto ☕️☕️☕️☕️☕️☕️☕️️ ... ${car.vehicleReg}');
     pp('\n$mm adding photo data to the database ...o');
     try {
       pp('$mm adding photo ..... 😡😡 😡😡');
       final user = prefs.getUser();
+
+      // dataApiDog.upl
 
       final urls = await _doTheUpload(
           file: file,
@@ -171,6 +171,7 @@ class CloudStorageBloc {
         position: position,
       );
 
+      pp('$mm vehiclePhoto to be sent to db: ${vehiclePhoto.toJson()}');
       await dataApiDog.addVehiclePhoto(vehiclePhoto);
       return uploadFinished;
     } catch (e) {
@@ -248,7 +249,7 @@ class CloudStorageBloc {
     required String id,
     required bool isVideo,
   }) async {
-    pp('$mm️ uploadPhoto ☕️☕️☕️☕️☕️☕️☕️ file path: \n${file.path}');
+    pp('$mm️ _doTheUpload ☕️☕️☕️☕️☕️☕️☕️ file path: \n${file.path}');
 
     // Upload main file
     late UploadTask uploadTask;
@@ -261,7 +262,7 @@ class CloudStorageBloc {
 
     var fileName = 'photo_$suffix';
     var firebaseStorageRef =
-        FirebaseStorage.instance.ref().child(photoStorageName).child(fileName);
+        firebaseStorage.ref().child(photoStorageName).child(fileName);
 
     if (kIsWeb) {
       // For web, use putData instead of putFile
@@ -281,7 +282,7 @@ class CloudStorageBloc {
     // Upload thumbnail
     final thumbName = 'thumbnail_$suffix';
     final firebaseStorageRef2 =
-        FirebaseStorage.instance.ref().child(photoStorageName).child(thumbName);
+        firebaseStorage.ref().child(photoStorageName).child(thumbName);
 
     late UploadTask thumbUploadTask;
     if (kIsWeb) {
@@ -315,7 +316,7 @@ class CloudStorageBloc {
 
     var fileName = 'qrcode_$suffix';
     var firebaseStorageRef =
-        FirebaseStorage.instance.ref().child(photoStorageName).child(fileName);
+        firebaseStorage.ref().child(photoStorageName).child(fileName);
 
     if (kIsWeb) {
       // For web, use putData instead of putFile
@@ -371,11 +372,11 @@ class CloudStorageBloc {
 
     try {
       // Create a storage reference from our app
-      final storageRef = FirebaseStorage.instance.ref();
+      final storageRef = firebaseStorage.ref();
       final pathReference = storageRef.child(fileName);
       var bytes = await pathReference.getData();
       return bytes;
-    } catch(e) {
+    } catch (e) {
       pp('$xz No Internet connection, really means that server cannot be reached 😑');
       throw KasieException(
           message: 'cloud storage download failed',
@@ -386,7 +387,6 @@ class CloudStorageBloc {
   }
 
   static const timeOutInSeconds = 120;
-
 }
 
 const uploadBusy = 201;

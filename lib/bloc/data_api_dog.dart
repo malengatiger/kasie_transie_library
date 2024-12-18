@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
@@ -62,7 +63,6 @@ class DataApiDog {
   late ErrorHandler errorHandler;
   late SemCache semCache;
 
-
   DataApiDog() {
     init();
   }
@@ -72,12 +72,13 @@ class DataApiDog {
     var p = await SharedPreferences.getInstance();
     errorHandler = ErrorHandler(DeviceLocationBloc(), Prefs(p));
     url = KasieEnvironment.getUrl();
-    appAuth =AppAuth( firebaseAuth: auth.FirebaseAuth.instance);
+    appAuth = AppAuth(firebaseAuth: auth.FirebaseAuth.instance);
     cacheManager = CacheManager();
-    prefs =Prefs(await SharedPreferences.getInstance());
+    prefs = Prefs(await SharedPreferences.getInstance());
     semCache = SemCache();
     client = http.Client();
   }
+
   Future<String?> getAuthToken() async {
     pp('$mm getAuthToken: ...... Getting Firebase token ......');
     try {
@@ -95,7 +96,6 @@ class DataApiDog {
       rethrow;
     }
   }
-
 
   Future<String?> uploadQRCodeFile(
       {required Uint8List imageBytes, required String associationId}) async {
@@ -135,6 +135,92 @@ class DataApiDog {
     throw Exception('QRCode File upload failed');
   }
 
+  Future<VehiclePhoto> uploadVehiclePhoto(
+      {required PlatformFile file,
+      required PlatformFile thumb,
+      required String vehicleId,
+      required double latitude,
+      required double longitude}) async {
+    pp('$mm importVehicleProfile: 🌿........... userId: $vehicleId');
+
+    var url = KasieEnvironment.getUrl();
+    var mUrl =
+        '${url}storage/uploadVehiclePhoto?vehicleId=$vehicleId&latitude=$latitude&longitude=$longitude';
+    var request = http.MultipartRequest('POST', Uri.parse(mUrl));
+    if (kIsWeb) {
+      request.files.add(http.MultipartFile.fromBytes(
+        'imageFile',
+        file.bytes!,
+        filename: file.name,
+      ));
+      request.files.add(http.MultipartFile.fromBytes(
+        'thumbFile',
+        thumb.bytes!,
+        filename: thumb.name,
+      ));
+    } else {
+      // For mobile/desktop, use fromPath
+      request.files
+          .add(await http.MultipartFile.fromPath('imageFile', file.path!));
+      request.files
+          .add(await http.MultipartFile.fromPath('thumbFile', thumb.path!));
+    }
+
+    token = await getAuthToken();
+    if (token == null) {
+      throw Exception('Missing auth token');
+    }
+    request.headers['Authorization'] = 'Bearer $token';
+    var response = await request.send();
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      pp('\n\n$mm Yebo! Vehicle photo file uploaded successfully! 🥬🥬🥬🥬🥬\n');
+      final responseBody = await response.stream.bytesToString();
+      final mJson = jsonDecode(responseBody);
+      var result = VehiclePhoto.fromJson(mJson);
+      return result;
+    } else {
+      pp('$mm 😈😈File upload failed with status code: 😈${response.statusCode} 😈 ${response.reasonPhrase}');
+    }
+    throw Exception('Vehicle photo file upload failed');
+  }
+
+  Future<VehiclePhoto> uploadVehiclePhotoFromCamera(
+      {required io.File file,
+      required io.File thumb,
+      required String vehicleId,
+      required double latitude,
+      required double longitude}) async {
+    pp('$mm uploadVehiclePhoto2: 🌿........... file: ${file.path} - ${thumb.path}');
+
+    var url = KasieEnvironment.getUrl();
+    var mUrl =
+        '${url}storage/uploadVehiclePhoto?vehicleId=$vehicleId&latitude=$latitude&longitude=$longitude';
+    var request = http.MultipartRequest('POST', Uri.parse(mUrl));
+
+    // For mobile/desktop, use fromPath
+    request.files
+        .add(await http.MultipartFile.fromPath('imageFile', file.path!));
+    request.files
+        .add(await http.MultipartFile.fromPath('thumbFile', thumb.path!));
+
+    token = await getAuthToken();
+    if (token == null) {
+      throw Exception('Missing auth token');
+    }
+    request.headers['Authorization'] = 'Bearer $token';
+    var response = await request.send();
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      pp('\n\n$mm Yebo! Vehicle photo file uploaded successfully! 🥬🥬🥬🥬🥬\n');
+      final responseBody = await response.stream.bytesToString();
+      final mJson = jsonDecode(responseBody);
+      var result = VehiclePhoto.fromJson(mJson);
+      myPrettyJsonPrint(mJson);
+      return result;
+    } else {
+      pp('$mm 😈😈File upload failed with status code: 😈${response.statusCode} 😈 ${response.reasonPhrase}');
+    }
+    throw Exception('Vehicle photo file upload failed');
+  }
 
   Future<List<RouteAssignment>> addRouteAssignments(
       RouteAssignmentList assignments) async {
@@ -151,7 +237,8 @@ class DataApiDog {
     return list;
   }
 
-  Future<CommuterCashPayment> addCommuterCashPayment(CommuterCashPayment payment) async {
+  Future<CommuterCashPayment> addCommuterCashPayment(
+      CommuterCashPayment payment) async {
     final bag = payment.toJson();
     final cmd = '${url}payment/addCommuterCashPayment';
     final res = await _callPost(cmd, bag);
@@ -160,7 +247,9 @@ class DataApiDog {
     pp('$mm CommuterCashPayment added to database: $res');
     return lr;
   }
-  Future<CommuterProviderPayment> addCommuterProviderPayment(CommuterProviderPayment payment) async {
+
+  Future<CommuterProviderPayment> addCommuterProviderPayment(
+      CommuterProviderPayment payment) async {
     final bag = payment.toJson();
     final cmd = '${url}payment/addCommuterProviderPayment';
     final res = await _callPost(cmd, bag);
@@ -169,7 +258,9 @@ class DataApiDog {
     pp('$mm CommuterProviderPayment added to database: $res');
     return lr;
   }
-  Future<CommuterCashCheckIn> addCommuterCashCheckIn(CommuterCashCheckIn cashCheckIn) async {
+
+  Future<CommuterCashCheckIn> addCommuterCashCheckIn(
+      CommuterCashCheckIn cashCheckIn) async {
     final bag = cashCheckIn.toJson();
     final cmd = '${url}payment/addCommuterCashCheckIn';
     final res = await _callPost(cmd, bag);
@@ -188,7 +279,9 @@ class DataApiDog {
     pp('$mm PaymentProvider added to database: $res');
     return lr;
   }
-  Future<PaymentProvider> updatePaymentProvider(PaymentProvider provider) async {
+
+  Future<PaymentProvider> updatePaymentProvider(
+      PaymentProvider provider) async {
     final bag = provider.toJson();
     final cmd = '${url}payment/updatePaymentProvider';
     final res = await _callPost(cmd, bag);
@@ -197,7 +290,9 @@ class DataApiDog {
     pp('$mm PaymentProvider updated on database: $res');
     return lr;
   }
-  Future<RankFeeCashPayment> addRankFeeCashPayment(RankFeeCashPayment payment) async {
+
+  Future<RankFeeCashPayment> addRankFeeCashPayment(
+      RankFeeCashPayment payment) async {
     final bag = payment.toJson();
     final cmd = '${url}payment/addRankFeeCashPayment';
     final res = await _callPost(cmd, bag);
@@ -206,7 +301,9 @@ class DataApiDog {
     pp('$mm RankFeeCashPayment added to database: $res');
     return lr;
   }
-  Future<RankFeeProviderPayment> addRankFeeProviderPayment(RankFeeProviderPayment payment) async {
+
+  Future<RankFeeProviderPayment> addRankFeeProviderPayment(
+      RankFeeProviderPayment payment) async {
     final bag = payment.toJson();
     final cmd = '${url}payment/addRankFeeProviderPayment';
     final res = await _callPost(cmd, bag);
@@ -215,7 +312,9 @@ class DataApiDog {
     pp('$mm RankFeeProviderPayment added to database: $res');
     return lr;
   }
-  Future<RankFeeCashCheckIn> addRankFeeCashCheckIn(RankFeeCashCheckIn cashCheckIn) async {
+
+  Future<RankFeeCashCheckIn> addRankFeeCashCheckIn(
+      RankFeeCashCheckIn cashCheckIn) async {
     final bag = cashCheckIn.toJson();
     final cmd = '${url}payment/addRankFeeCashCheckIn';
     final res = await _callPost(cmd, bag);
@@ -235,7 +334,8 @@ class DataApiDog {
     return lr;
   }
 
-  Future<VehicleTelemetry> addVehicleTelemetry(VehicleTelemetry telemetry) async {
+  Future<VehicleTelemetry> addVehicleTelemetry(
+      VehicleTelemetry telemetry) async {
     pp('$mm addVehicleTelemetry ...: ${telemetry.nearestRouteName}');
 
     final bag = telemetry.toJson();
@@ -915,7 +1015,8 @@ class DataApiDog {
           } else {
             if (resp.statusCode == 400 || resp.statusCode == 500) {
               final gex = KasieException(
-                  message: 'Bad status code: ${resp.statusCode} - ${resp.body}, please try again',
+                  message:
+                      'Bad status code: ${resp.statusCode} - ${resp.body}, please try again',
                   url: mUrl,
                   translationKey: 'serverProblem',
                   errorType: KasieException.socketException);

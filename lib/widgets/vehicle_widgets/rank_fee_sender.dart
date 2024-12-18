@@ -1,5 +1,6 @@
 import 'package:currency_formatter/currency_formatter.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
@@ -20,6 +21,7 @@ import '../../bloc/list_api_dog.dart';
 import '../../data/payment_provider.dart';
 import '../../data/rank_fee_provider_payment.dart';
 import '../../isolates/local_finder.dart';
+import '../photo_handler.dart';
 
 class RankFeeSender extends StatefulWidget {
   const RankFeeSender({super.key, required this.vehicle});
@@ -155,12 +157,12 @@ class RankFeeSenderState extends State<RankFeeSender>
           created: DateTime.now().toUtc().toIso8601String());
       if (mounted) {
         var result = await NavigationUtils.navigateTo(
-            context: context,
-            widget: PaymentProviderHandler(
-              paymentProvider: paymentProvider!,
-              rankFeeProviderPayment: rfpp,
-            ),
-            );
+          context: context,
+          widget: PaymentProviderHandler(
+            paymentProvider: paymentProvider!,
+            rankFeeProviderPayment: rfpp,
+          ),
+        );
         if (result != null) {
           if (mounted) {
             showToast(
@@ -237,11 +239,22 @@ class RankFeeSenderState extends State<RankFeeSender>
     return SafeArea(
         child: Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Rank Fees',
-          style: myTextStyleMedium(context),
-        ),
-      ),
+          title: Text(
+            'Rank Fees',
+            style: myTextStyleMedium(context),
+          ),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  NavigationUtils.navigateTo(
+                      context: context,
+                      widget: PhotoHandler(
+                        vehicle: widget.vehicle,
+                        onPhotoTaken: (image, thumb) {},
+                      ));
+                },
+                icon: const FaIcon(FontAwesomeIcons.camera))
+          ]),
       body: SizedBox(
         width: width,
         child: Stack(
@@ -251,6 +264,7 @@ class RankFeeSenderState extends State<RankFeeSender>
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  gapH32, gapH32,
                   Text(
                     'Rank Fees',
                     style: myTextStyle(fontSize: 28, weight: FontWeight.w900),
@@ -360,7 +374,7 @@ class RankFeeSenderState extends State<RankFeeSender>
                     ),
                   ),
 
-                  // gapH32,
+                  gapH32,
                   formattedAmount == null
                       ? gapH4
                       : Text(formattedAmount!,

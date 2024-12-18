@@ -101,9 +101,9 @@ class DeviceLocationBloc {
     }
     pp('$mm total hash values: ${hash.values.length}');
     var result = hash.values.toList();
-    for (var r in result) {
-      pp('$mm getRouteDistances: route distance: ${r.distance} \t - ${r.routePoint.routeName}');
-    }
+    // for (var r in result) {
+    //   pp('$mm getRouteDistances: route distance: ${r.distance} \t - ${r.routePoint.routeName}');
+    // }
     List<DistanceBag> finalDistanceBags = [];
     for (var r in result) {
       if (r.distance < 1000) {
@@ -151,10 +151,10 @@ class DeviceLocationBloc {
       }
     }
     var filteredDistanceBags = hash.values.toList();
-    for (var r in filteredDistanceBags) {
-      pp('$mm getRouteLandmarkDistances: routeLandmark distance: ${r.distance} '
-          '\t - ${r.routeLandmark.landmarkName} oon route: ${r.routeLandmark.routeName}');
-    }
+    // for (var r in filteredDistanceBags) {
+    //   pp('$mm getRouteLandmarkDistances: routeLandmark distance: ${r.distance} '
+    //       '\t - ${r.routeLandmark.landmarkName} oon route: ${r.routeLandmark.routeName}');
+    // }
 
     filteredDistanceBags.sort((a, b) => a.distance.compareTo(b.distance));
     return filteredDistanceBags;

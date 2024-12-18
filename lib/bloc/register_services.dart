@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
@@ -7,6 +8,7 @@ import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/bloc/the_great_geofencer.dart';
 import 'package:kasie_transie_library/bloc/theme_bloc.dart';
 import 'package:kasie_transie_library/bloc/vehicle_telemetry_service.dart';
+import 'package:kasie_transie_library/messaging/fcm_bloc.dart';
 
 import 'package:kasie_transie_library/messaging/telemetry_manager.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
@@ -29,12 +31,13 @@ class RegisterServices {
   static String dbPath = 'kasie.db';
   static DatabaseFactory dbFactoryWeb = databaseFactoryWeb;
 
-  static Future<String> register( {required FirebaseStorage firebaseStorage}) async {
+  static Future<String> register(
+      {required FirebaseStorage firebaseStorage}) async {
     pp('\n\n$mm  ... initialize service singletons with GetIt .... 🍎🍎🍎');
     pp('$mm .... QRGeneration: 🦠qrgGeneration initialized');
     final http.Client client = http.Client();
     pp('$mm .... http.Client: 🦠client initialized');
-    final AppAuth appAuth = AppAuth( firebaseAuth: FirebaseAuth.instance);
+    final AppAuth appAuth = AppAuth(firebaseAuth: FirebaseAuth.instance);
     pp('$mm .... AppAuth: 🦠auth initialized');
     final DeviceLocationBloc deviceLocationBloc = DeviceLocationBloc();
     pp('$mm .... DeviceLocationBloc: 🦠deviceLocationBloc initialized');
@@ -49,14 +52,22 @@ class RegisterServices {
     final ZipHandler zipHandler = ZipHandler(appAuth, semCache);
     pp('$mm .... ZipHandler: 🦠handler initialized');
 
+    FCMService fcmService = FCMService(FirebaseMessaging.instance);
+    pp('$mm .... FCMService: 🦠 FCMService initialized');
+
     final VehicleTelemetryService telemetryService = VehicleTelemetryService();
+    pp('$mm .... VehicleTelemetryService: 🦠telemetryService initialized');
+
     final listApi =
         ListApiDog(client, appAuth, prefs, errorHandler, zipHandler, semCache);
     pp('$mm .... ListApiDog: 🦠listApiDog initialized');
     //
-    CloudStorageBloc csb = CloudStorageBloc(dataApiDog: DataApiDog(),
-        prefs: prefs, firebaseStorage: firebaseStorage,
-      locationBloc: deviceLocationBloc, );
+    CloudStorageBloc csb = CloudStorageBloc(
+      dataApiDog: DataApiDog(),
+      prefs: prefs,
+      firebaseStorage: firebaseStorage,
+      locationBloc: deviceLocationBloc,
+    );
     pp('$mm .... CloudStorageBloc: 🦠csb initialized');
     pp('\n\n$mm ..... 🦠🦠🦠🦠🦠registerLazySingletons ...');
 
@@ -65,16 +76,22 @@ class RegisterServices {
     instance.registerLazySingleton<Prefs>(() => prefs);
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... Prefs');
 
+    instance.registerLazySingleton<FCMService>(() => fcmService);
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... FCMService');
+
     instance.registerLazySingleton<CloudStorageBloc>(() => csb);
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... CloudStorageBloc');
 
-    instance.registerLazySingleton<KasieThemeManager>(() => KasieThemeManager(prefs));
+    instance.registerLazySingleton<KasieThemeManager>(
+        () => KasieThemeManager(prefs));
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... KasieThemeManager');
 
-    instance.registerLazySingleton<RouteUpdateListener>(() => RouteUpdateListener());
+    instance.registerLazySingleton<RouteUpdateListener>(
+        () => RouteUpdateListener());
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... RouteUpdateListener');
 
-    instance.registerLazySingleton<DeviceLocationBloc>(() => deviceLocationBloc);
+    instance
+        .registerLazySingleton<DeviceLocationBloc>(() => deviceLocationBloc);
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... DeviceLocationBloc');
 
     instance.registerLazySingleton<SemCache>(() => semCache);
@@ -112,7 +129,8 @@ class RegisterServices {
     // instance.registerLazySingleton<QRGenerationService>(() => qrgGenerationService);
     // pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... QRGenerationService');
 
-    instance.registerLazySingleton<VehicleTelemetryService>(() => telemetryService);
+    instance
+        .registerLazySingleton<VehicleTelemetryService>(() => telemetryService);
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... VehicleTelemetryService');
 
     pp('\n\n$mm  returning message form RegisterService  🍎🍎🍎\n\n');

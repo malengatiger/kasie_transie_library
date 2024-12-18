@@ -6,6 +6,7 @@ import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/vehicle_search.dart';
 import 'package:page_transition/page_transition.dart';
 
+import '../../maps/map_viewer.dart';
 import 'dispatch_taxi.dart';
 
 class CarForDispatch extends StatefulWidget {
@@ -22,9 +23,11 @@ class _CarForDispatchState extends State<CarForDispatch> {
 
   _search() async {
     var vehicle = await NavigationUtils.navigateTo(
-        context: context,
-        widget: VehicleSearch(associationId: widget.route.associationId!,),
-        );
+      context: context,
+      widget: VehicleSearch(
+        associationId: widget.route.associationId!,
+      ),
+    );
 
     if (vehicle != null) {
       pp('$mm vehicle found: ${vehicle!.vehicleReg}');
@@ -38,32 +41,32 @@ class _CarForDispatchState extends State<CarForDispatch> {
 
       if (mounted) {
         NavigationUtils.navigateTo(
-            context: context,
-            widget: DispatchTaxi(
-                route: widget.route,
-                onDispatched: (dr) {
-                  pp('Car dispatched: ${dr.toJson()}');
-                },
-                vehicle: vehicle),
-            );
+          context: context,
+          widget: DispatchTaxi(
+              route: widget.route,
+              onDispatched: (dr) {
+                pp('Car dispatched: ${dr.toJson()}');
+              },
+              vehicle: vehicle),
+        );
       }
     }
   }
 
   _scan() async {
-
     showToast(
         padding: 20,
-        duration: const Duration(seconds:   3),
+        duration: const Duration(seconds: 3),
         backgroundColor: Colors.amber.shade800,
         textStyle: myTextStyle(color: Colors.white),
-        message: 'Scanning feature under construction!', context: context);
+        message: 'Scanning feature under construction!',
+        context: context);
     return;
 
     var vehicle = await NavigationUtils.navigateTo(
-        context: context,
-        widget: const ScanTaxi(),
-        );
+      context: context,
+      widget: const ScanTaxi(),
+    );
     if (vehicle != null) {
       pp('$mm vehicle scanned for dispatch: ${vehicle!.vehicleReg} on ${widget.route.name}');
       _navigateToDispatch(vehicle);
@@ -73,12 +76,18 @@ class _CarForDispatchState extends State<CarForDispatch> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Car For Dispatch'),
-          actions: [
-            IconButton(onPressed: (){}, icon: const FaIcon(FontAwesomeIcons.mapLocation))
-          ]
-      ),
+      appBar:
+          AppBar(title: Text('Taxi Dispatch', style: myTextStyle()), actions: [
+        IconButton(
+            onPressed: () {
+              NavigationUtils.navigateTo(
+                  context: context,
+                  widget: MapViewer(
+                    route: widget.route,
+                  ));
+            },
+            icon: const FaIcon(FontAwesomeIcons.mapLocation))
+      ]),
       body: SafeArea(
           child: Padding(
         padding: const EdgeInsets.all(20),
@@ -88,21 +97,28 @@ class _CarForDispatchState extends State<CarForDispatch> {
           children: [
             const Text('Route'),
             gapH8,
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Flexible(
-                  child: Text(
-                    widget.route.name!,
-                    style: myTextStyle(
-                        fontSize: 28,
-                        weight: FontWeight.w900,
-                        color: Theme.of(context).primaryColor),
-                  ),
-                )
-              ],
+            Card(
+              elevation: 8,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        widget.route.name!,
+                        style: myTextStyle(
+                            fontSize: 28,
+                            weight: FontWeight.w900,
+                            color: Theme.of(context).primaryColor),
+                      ),
+                    )
+                  ],
+                ),
+              ),
             ),
-            gapH32, gapH32, gapH32,
+            gapH32,
+            gapH32,
             gapH32,
             const Text('Select a taxi using one or the other method'),
             gapH32,
@@ -111,14 +127,16 @@ class _CarForDispatchState extends State<CarForDispatch> {
               child: ElevatedButton(
                   style: const ButtonStyle(
                       elevation: WidgetStatePropertyAll(8),
-
                       backgroundColor: WidgetStatePropertyAll(Colors.blue)),
                   onPressed: _search,
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: Text(
                       'Search Taxi',
-                      style: myTextStyle(color: Colors.white, fontSize: 24, ),
+                      style: myTextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                      ),
                     ),
                   )),
             ),
@@ -129,13 +147,16 @@ class _CarForDispatchState extends State<CarForDispatch> {
               child: ElevatedButton(
                   onPressed: _scan,
                   style: const ButtonStyle(
-                     elevation: WidgetStatePropertyAll(8),
+                      elevation: WidgetStatePropertyAll(8),
                       backgroundColor: WidgetStatePropertyAll(Colors.green)),
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: Text(
                       'Scan Taxi',
-                      style: myTextStyle(color: Colors.white, fontSize: 24, ),
+                      style: myTextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                      ),
                     ),
                   )),
             ),
@@ -157,12 +178,11 @@ class _ScanTaxiState extends State<ScanTaxi> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Scan Taxi'),
-          actions: [
-            IconButton(onPressed: (){}, icon: const FaIcon(FontAwesomeIcons.mapLocation))
-          ]
-        ),
+        appBar: AppBar(title: const Text('Scan Taxi'), actions: [
+          IconButton(
+              onPressed: () {},
+              icon: const FaIcon(FontAwesomeIcons.mapLocation))
+        ]),
         body: const SafeArea(child: Center(child: Text('Scanner to come'))));
   }
 }

@@ -32,7 +32,7 @@ class TheGreatGeofencer {
   final Prefs prefs;
 
   TheGreatGeofencer(this.dataApiDog, this.listApiDog, this.prefs) {
-    refreshFences();
+    // setRefreshFencesTimer();
   }
 
   final StreamController<VehicleArrival> _vehicleArrivalController =
@@ -42,10 +42,9 @@ class TheGreatGeofencer {
       _vehicleArrivalController.stream;
 
   final StreamController<VehicleTelemetry> _telemetryController =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
-  Stream<VehicleTelemetry> get telemetryStream =>
-      _telemetryController.stream;
+  Stream<VehicleTelemetry> get telemetryStream => _telemetryController.stream;
 
   final StreamController<VehicleDeparture> _vehicleDepartureController =
       StreamController.broadcast();
@@ -61,10 +60,11 @@ class TheGreatGeofencer {
   var defaultRadiusInMetres = 150.0;
   var defaultDwellInMilliSeconds = 30;
   late Timer timer;
+  int refreshMinutes = 30;
 
-  refreshFences() {
-    pp('\n\n$xx initialize Timer for refreshing fences');
-    timer = Timer.periodic(Duration(minutes: 60), (timer) {
+  setRefreshFencesTimer() {
+    pp('$xx initialize Timer for refreshing fences');
+    timer = Timer.periodic(Duration(minutes: refreshMinutes), (timer) {
       pp('\n\n$xx Timer tick ${timer.tick} - refresh geoFences');
       buildGeofences();
     });
@@ -81,13 +81,17 @@ class TheGreatGeofencer {
     _geofenceList.clear();
 
     var locationBloc = GetIt.instance<DeviceLocationBloc>();
-    var loc = await locationBloc.getLocation();
+
     var routeData = await listApiDog.getAssociationRouteData(
         _vehicle!.associationId!, false);
 
     if (routeData == null) {
       return;
     }
+    if (routeData.routeDataList.isEmpty) {
+      return;
+    }
+
     List<RouteLandmark> landmarks = [];
     List<LandmarkDistanceBag> distanceBags =
         await locationBloc.getRouteLandmarkDistances(routeData: routeData);
@@ -123,7 +127,6 @@ class TheGreatGeofencer {
 
     geofenceService.addGeofenceStatusChangeListener(
         (geofence, geofenceRadius, geofenceStatus, location) async {
-
       await _processGeofenceEvent(
         geofence: geofence,
         geofenceRadius: geofenceRadius,
@@ -169,7 +172,7 @@ class TheGreatGeofencer {
     );
 
     _geofenceList.add(fence);
-    pp('$reds geofence added to geofenceList: ${E.broc} ${fence.data}');
+    pp('$reds geofence added to geofenceList: ${E.broc} ${fence.data['landmarkName']} - ${fence.data['routeName']}');
   }
 
   Vehicle? _vehicle;
@@ -178,7 +181,6 @@ class TheGreatGeofencer {
       {required geo.Geofence geofence,
       required geo.GeofenceRadius geofenceRadius,
       required geo.GeofenceStatus geofenceStatus}) async {
-
     _user = prefs.getUser();
     _vehicle = prefs.getCar();
 

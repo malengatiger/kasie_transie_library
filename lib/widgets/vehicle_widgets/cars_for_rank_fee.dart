@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
-import 'package:kasie_transie_library/widgets/vehicle_widgets/rank_fee_widget.dart';
+import 'package:kasie_transie_library/widgets/vehicle_widgets/rank_fee_sender.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/vehicle_search.dart';
 
 
@@ -67,7 +67,7 @@ class CarForRankFeeState extends State<CarForRankFee> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Car For Rank Fees'),
+        title:  Text('Taxi Rank Fees', style: myTextStyle(),),
       ),
       body: SafeArea(
           child: Padding(

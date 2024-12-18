@@ -102,7 +102,7 @@ class RankFeeCashPaymentWidgetState extends State<RankFeeCashPaymentWidget>
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Commuter Cash Payment'),
+          title: const Text('Rank Fees Cash Payment'),
         ),
         body: SafeArea(
           child: Stack(
@@ -120,7 +120,7 @@ class RankFeeCashPaymentWidgetState extends State<RankFeeCashPaymentWidget>
               busy
                   ? const Positioned(
                       child: TimerWidget(
-                          title: 'Saving Commuter cash payment',
+                          title: 'Saving Rank Fees cash payment',
                           isSmallSize: true),
                     )
                   : gapH32,
