@@ -8,7 +8,8 @@ class DistanceDropDown extends StatelessWidget {
       required this.onDistancePicked,
       required this.color,
       required this.count,
-      required this.fontSize, required this.multiplier});
+      required this.fontSize,
+      required this.multiplier});
 
   final Function(int) onDistancePicked;
   final Color color;
@@ -20,7 +21,7 @@ class DistanceDropDown extends StatelessWidget {
     List<DropdownMenuItem<int>> items = [];
     for (var i = 0; i < count; i++) {
       var m = i * multiplier;
-      if (m ==  0) {
+      if (m == 0) {
         m = 10;
       }
       items.add(DropdownMenuItem(
@@ -61,10 +62,11 @@ class NumberDropDown extends StatelessWidget {
           value: i,
           child: Text(
             '$i',
-            style: myTextStyleMediumLargeWithColor(context, color, fontSize),
+            style: myTextStyle(color: color, fontSize: fontSize),
           )));
     }
     return DropdownButton<int>(
+        dropdownColor: Colors.white,
         items: items,
         onChanged: (number) {
           if (number != null) {

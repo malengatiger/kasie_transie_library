@@ -848,7 +848,7 @@ class DataApiDog {
   Future<AmbassadorPassengerCount> addAmbassadorPassengerCount(
       AmbassadorPassengerCount count) async {
     final bag = count.toJson();
-    final cmd = '${url}addAmbassadorPassengerCount';
+    final cmd = '${url}ambassador/addAmbassadorPassengerCount';
 
     try {
       final res = await _callPost(cmd, bag);

@@ -136,6 +136,16 @@ class RankFeeSenderState extends State<RankFeeSender>
     if (!formKey.currentState!.validate()) {
       return;
     }
+    if (paymentProvider != null) {
+      showToast(
+          backgroundColor: Colors.amber.shade900,
+          textStyle: myTextStyle(color: Colors.white),
+          message: 'Payment provider feature under construction. Use Cash Payment', context: context);
+      setState(() {
+        paymentProvider = null;
+      });
+      return;
+    }
     user = prefs.getUser();
     final loc = await locationBloc.getLocation();
     pp('$mm ... _sendRankFee ... ${loc.latitude} ${loc.longitude}');

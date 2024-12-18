@@ -30,27 +30,10 @@ class _CarForAmbassadorState extends State<CarForAmbassador> {
 
     if (vehicle != null) {
       pp('$mm vehicle found: ${vehicle!.vehicleReg}');
-      _navigateToPassengerCounter(vehicle);
+      Navigator.of(context).pop(vehicle);
     }
   }
 
-  void _navigateToPassengerCounter(vehicle) {
-    if (vehicle != null) {
-      pp('$mm vehicle to count passengers: ${vehicle!.vehicleReg} ');
-
-      // if (mounted) {
-      //   NavigationUtils.navigateTo(
-      //     context: context,
-      //     widget: Passenger(
-      //         route: widget.route,
-      //         onDispatched: (dr) {
-      //           pp('Car dispatched: ${dr.toJson()}');
-      //         },
-      //         vehicle: vehicle),
-      //   );
-      // }
-    }
-  }
 
   _scan() async {
     showToast(
@@ -77,7 +60,7 @@ class _CarForAmbassadorState extends State<CarForAmbassador> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text('Taxi Dispatch', style: myTextStyle()),
+          title: Text('Ambassador', style: myTextStyle()),
           actions: [
         IconButton(
             onPressed: () {
@@ -96,9 +79,6 @@ class _CarForAmbassadorState extends State<CarForAmbassador> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text('Route'),
-                gapH8,
-
                 gapH32,
                 gapH32,
                 gapH32,
