@@ -18,13 +18,13 @@ import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import '../../bloc/data_api_dog.dart';
 import '../../isolates/local_finder.dart';
 import '../scanners/dispatch_helper.dart';
-import 'package:file_picker/file_picker.dart';
 
 class DispatchTaxi extends StatefulWidget {
-  const DispatchTaxi({super.key,
-    required this.route,
-    required this.onDispatched,
-    required this.vehicle});
+  const DispatchTaxi(
+      {super.key,
+      required this.route,
+      required this.onDispatched,
+      required this.vehicle});
 
   final lib.Route route;
   final lib.Vehicle vehicle;
@@ -91,8 +91,7 @@ class DispatchTaxiState extends State<DispatchTaxi>
     final m = await localFinder.findNearestRouteLandmark(
         latitude: loc.latitude, longitude: loc.longitude, radiusInMetres: 200);
     if (m != null) {
-      pp('$mm ... findNearestLandmark found: ${m.landmarkName} ${E
-          .pear}  route: ${m.routeName}');
+      pp('$mm ... findNearestLandmark found: ${m.landmarkName} ${E.pear}  route: ${m.routeName}');
     }
     return m;
   }
@@ -101,31 +100,36 @@ class DispatchTaxiState extends State<DispatchTaxi>
   bool zeroPassengersConfirmed = false;
 
   _confirmZeroPassengers() {
-    showDialog(barrierDismissible: false,
-        context: context, builder: (ctx) {
-      return AlertDialog(
-        title: const Text('Confirm'),
-
-        content: const Text(
-            'Please confirm that you want to dispatch this taxi with 0 passengers'),
-        actions: [
-          TextButton(onPressed: () {
-            setState(() {
-              zeroPassengersConfirmed = false;
-            });
-            Navigator.of(context).pop();
-          }, child: const Text('Cancel')),
-          TextButton(onPressed: () {
-            setState(() {
-              zeroPassengersConfirmed = true;
-            });
-            pp('$mm send dispatch with zero passengers');
-            Navigator.of(context).pop();
-            _sendTheDispatchRecord();
-          }, child: const Text('Confirm 0 Passengers')),
-        ],
-      );
-    });
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            title: const Text('Confirm'),
+            content: const Text(
+                'Please confirm that you want to dispatch this taxi with 0 passengers'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    setState(() {
+                      zeroPassengersConfirmed = false;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancel')),
+              TextButton(
+                  onPressed: () {
+                    setState(() {
+                      zeroPassengersConfirmed = true;
+                    });
+                    pp('$mm send dispatch with zero passengers');
+                    Navigator.of(context).pop();
+                    _sendTheDispatchRecord();
+                  },
+                  child: const Text('Confirm 0 Passengers')),
+            ],
+          );
+        });
   }
 
   Future<void> _sendTheDispatchRecord() async {
@@ -171,8 +175,7 @@ class DispatchTaxiState extends State<DispatchTaxi>
           routeLandmarkId: mark?.landmarkId);
       //
       _dataApiDog.addDispatchRecord(dispatchRecord);
-      pp('$mm ... _sendTheDispatchRecord ... sent ..... ${dispatchRecord
-          .toJson()}');
+      pp('$mm ... _sendTheDispatchRecord ... sent ..... ${dispatchRecord.toJson()}');
 
       dispatchHelper.putDispatchOnStream(dispatchRecord);
       widget.onDispatched(dispatchRecord);
@@ -184,8 +187,7 @@ class DispatchTaxiState extends State<DispatchTaxi>
             duration: const Duration(seconds: 5),
             textStyle: const TextStyle(color: Colors.white),
             message:
-            '${widget.vehicle!
-                .vehicleReg} - Dispatch sent OK with $passengerCount passengers',
+                '${widget.vehicle!.vehicleReg} - Dispatch sent OK with $passengerCount passengers',
             context: context);
         Navigator.of(context).pop();
       }
@@ -212,114 +214,116 @@ class DispatchTaxiState extends State<DispatchTaxi>
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery
-        .of(context)
-        .size
-        .width;
+    final width = MediaQuery.of(context).size.width;
     return SafeArea(
         child: Scaffold(
-          appBar: AppBar(
-            title: Text(
-              dispatchText == null ? 'Dispatch' : dispatchText!,
-              style: myTextStyleMedium(context),
-            ),
-            actions: [
-              IconButton(
-                  onPressed: () {
-                    _navigateToCamera();
-                  },
-                  icon: const FaIcon(FontAwesomeIcons.camera)),
-            ],
-          ),
-          body: SizedBox(
-            width: width,
-            child: Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Card(
-                    elevation: 4,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Padding(
+      appBar: AppBar(
+        title: Text(
+          dispatchText == null ? 'Dispatch' : dispatchText!,
+          style: myTextStyleMedium(context),
+        ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                _navigateToCamera();
+              },
+              icon: const FaIcon(FontAwesomeIcons.camera)),
+        ],
+      ),
+      body: SizedBox(
+        width: width,
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Card(
+                elevation: 4,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Card(
+                        elevation: 8,
+                        child: Padding(
                           padding: const EdgeInsets.all(16),
                           child: Text(
                             '${widget.route.name}',
-                            style: myTextStyleMediumLarge(context, 28),
+                            style: myTextStyleMediumLarge(context, 24),
                           ),
                         ),
-                        gapH32,
-                        Text(
-                          '${widget.vehicle!.vehicleReg}',
-                          style: myTextStyle(
-                              color: Colors.pink,
-                              fontSize: 48,
-                              weight: FontWeight.w900),
-                        ),
-                        gapH32,
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            const Text('Number of Passengers'),
-                            NumberDropDown(
-                                onNumberPicked: (number) {
-                                  setState(() {
-                                    passengerCount = number;
-                                  });
-                                },
-                                color: Colors.black,
-                                count: 36,
-                                fontSize: 20),
-                            Text('$passengerCount',
-                                style: myTextStyle(
-                                    color: Colors.blue,
-                                    fontSize: 28,
-                                    weight: FontWeight.w900)),
-                          ],
-                        ),
-                        gapH32,
-                        gapH32,
-                        gapH32,
-                        ElevatedButton(
-                          style: const ButtonStyle(
-                              backgroundColor: WidgetStatePropertyAll(Colors
-                                  .blue),
-                              elevation: WidgetStatePropertyAll(8.0)),
-                          onPressed: () {
-                            _sendTheDispatchRecord();
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text(
-                              dispatchTaxi == null
-                                  ? 'Dispatch Taxi'
-                                  : dispatchTaxi!,
-                              style: myTextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  weight: FontWeight.normal),
-                            ),
-                          ),
-                        ),
-                        gapH32,
+                      ),
+                    ),
+                    gapH32,
+                    Text(
+                      '${widget.vehicle!.vehicleReg}',
+                      style: myTextStyle(
+                          color: Colors.pink,
+                          fontSize: 48,
+                          weight: FontWeight.w900),
+                    ),
+                    gapH32,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        const Text('Number of Passengers'),
+                        NumberDropDown(
+                            onNumberPicked: (number) {
+                              setState(() {
+                                passengerCount = number;
+                              });
+                            },
+                            color: Colors.black,
+                            count: 36,
+                            fontSize: 20),
+                        Text('$passengerCount',
+                            style: myTextStyle(
+                                color: Colors.blue,
+                                fontSize: 28,
+                                weight: FontWeight.w900)),
                       ],
                     ),
-                  ),
+                    gapH32,
+                    gapH32,
+                    gapH32,
+                    ElevatedButton(
+                      style: const ButtonStyle(
+                          backgroundColor: WidgetStatePropertyAll(Colors.blue),
+                          elevation: WidgetStatePropertyAll(8.0)),
+                      onPressed: () {
+                        _sendTheDispatchRecord();
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          dispatchTaxi == null
+                              ? 'Dispatch Taxi'
+                              : dispatchTaxi!,
+                          style: myTextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              weight: FontWeight.normal),
+                        ),
+                      ),
+                    ),
+                    gapH32,
+                  ],
                 ),
-                busy
-                    ? const Positioned(
-                  child: Center(
-                    child: TimerWidget(
-                        title: 'Dispatching Taxi', isSmallSize: true),
-                  ),
-                )
-                    : gapH32,
-              ],
+              ),
             ),
-          ),
-        ));
+            busy
+                ? const Positioned(
+                    child: Center(
+                      child: TimerWidget(
+                          title: 'Dispatching Taxi', isSmallSize: true),
+                    ),
+                  )
+                : gapH32,
+          ],
+        ),
+      ),
+    ));
   }
 }
 
