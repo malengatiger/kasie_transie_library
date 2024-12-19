@@ -11,6 +11,7 @@ import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
+import 'package:kasie_transie_library/widgets/payment/commuter_cash_payment_widget.dart';
 import 'package:kasie_transie_library/widgets/photo_handler.dart';
 import 'package:kasie_transie_library/widgets/scanners/dispatch_helper.dart';
 
@@ -165,7 +166,8 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                 : passengerCountsaved!,
             context: context);
       }
-    } catch (e,s) {
+      _navigateToCashPayment();
+    } catch (e, s) {
       pp('$e $s');
       if (mounted) {
         showErrorToast(message: '$e', context: context);
@@ -175,6 +177,13 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
       busy = false;
       showSubmit = false;
     });
+  }
+
+  void _navigateToCashPayment() async {
+    NavigationUtils.navigateTo(
+        context: context,
+        widget: CommuterCashPaymentWidget(
+            vehicle: widget.vehicle, route: widget.route, onError: (err) {}));
   }
 
   void _navigateToPhotoHandler() {
@@ -225,6 +234,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
 
     Navigator.of(context).pop();
   }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -249,7 +259,6 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                 _navigateToRouteMap();
               },
               icon: Icon(Icons.map, color: Theme.of(context).primaryColor)),
-
         ],
       ),
       body: Stack(
@@ -266,7 +275,10 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     '${widget.route.name}',
-                    style: myTextStyle(fontSize: 16, weight: FontWeight.w400, color: Colors.grey),
+                    style: myTextStyle(
+                        fontSize: 16,
+                        weight: FontWeight.w400,
+                        color: Colors.grey),
                   ),
                 ),
                 gapH16,
@@ -310,16 +322,17 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                 SizedBox(
                   width: 300,
                   child: ElevatedButton(
-                    style:
-                        const ButtonStyle(
-                            backgroundColor: WidgetStatePropertyAll(Colors.blue),
-                            elevation: WidgetStatePropertyAll(8)),
+                    style: const ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(Colors.blue),
+                        elevation: WidgetStatePropertyAll(8)),
                     onPressed: () {
                       _submitCounts();
                     },
-                    child:  Padding(
+                    child: Padding(
                       padding: const EdgeInsets.all(16),
-                      child: Text('Submit',  style: myTextStyle(color: Colors.white, fontSize: 24)),
+                      child: Text('Submit',
+                          style:
+                              myTextStyle(color: Colors.white, fontSize: 24)),
                     ),
                   ),
                 ),
@@ -327,17 +340,18 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                 SizedBox(
                   width: 300,
                   child: ElevatedButton(
-                    style:
-                        const ButtonStyle(
-                            backgroundColor: WidgetStatePropertyAll(Colors.red),
-
-                            elevation: WidgetStatePropertyAll(2)),
+                    style: const ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(Colors.red),
+                        elevation: WidgetStatePropertyAll(2)),
                     onPressed: () {
                       _tripHasEnded();
                     },
-                    child:  Padding(
+                    child: Padding(
                       padding: const EdgeInsets.all(16),
-                      child: Text('Trip has Ended', style: myTextStyle(color: Colors.white),),
+                      child: Text(
+                        'Trip has Ended',
+                        style: myTextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                 ),
