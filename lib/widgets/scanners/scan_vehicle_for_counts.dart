@@ -14,8 +14,9 @@ import '../../utils/emojis.dart';
 import 'kasie/kasie_ai_scanner.dart';
 
 class ScanVehicleForCounts extends StatefulWidget {
-  const ScanVehicleForCounts({super.key});
+  const ScanVehicleForCounts({super.key, required this.trip});
 
+  final lib.Trip trip;
   @override
   ScanVehicleForCountsState createState() => ScanVehicleForCountsState();
 }
@@ -94,7 +95,7 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
         context: context,
         widget: VehiclePassengerCount(
           vehicle: vehicle!,
-          route: selectedRoute!,
+          route: selectedRoute!, trip: widget.trip,
         ),
         );
 

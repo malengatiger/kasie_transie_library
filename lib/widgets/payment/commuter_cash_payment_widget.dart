@@ -15,10 +15,12 @@ class CommuterCashPaymentWidget extends StatefulWidget {
       {super.key,
       required this.vehicle,
       required this.route,
-      required this.onError});
+      required this.onError, required this.trip, required this.numberOfPassengers});
 
   final lib.Vehicle vehicle;
   final lib.Route route;
+  final lib.Trip trip;
+  final int numberOfPassengers;
   final Function(String) onError;
 
   @override
@@ -31,7 +33,7 @@ class CommuterCashPaymentWidgetState extends State<CommuterCashPaymentWidget>
   late AnimationController _controller;
   static const mm = '💙💙💙💙CommuterCashPaymentWidget 💙';
   final TextEditingController amountController = TextEditingController();
-  final TextEditingController passengersController = TextEditingController();
+  TextEditingController passengersController = TextEditingController();
 
   DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
   Prefs prefs = GetIt.instance<Prefs>();
@@ -40,6 +42,7 @@ class CommuterCashPaymentWidgetState extends State<CommuterCashPaymentWidget>
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
+    passengersController = TextEditingController(text: '${widget.numberOfPassengers}');
   }
 
   GlobalKey<FormState> mKey = GlobalKey();
@@ -65,6 +68,7 @@ class CommuterCashPaymentWidgetState extends State<CommuterCashPaymentWidget>
       var loc = await bloc.getLocation();
       var payment = CommuterCashPayment(
           commuterCashPaymentId: const UuidV4().generate(),
+          tripId: widget.trip.tripId,
           vehicleId: widget.vehicle.vehicleId,
           vehicleReg: widget.vehicle.vehicleReg,
           associationId: widget.vehicle.associationId,
@@ -135,15 +139,13 @@ class CommuterCashPaymentWidgetState extends State<CommuterCashPaymentWidget>
                       style: myTextStyle(fontSize: 20, color: Colors.grey),
                     ),
                     gapH32,
-                    Expanded(
-                      child: CommuterCashPaymentForm(
-                          globalKey: mKey,
-                          amountController: amountController,
-                          passengersController: passengersController,
-                          onSubmit: () {
-                            _onSubmit();
-                          }),
-                    ),
+                    CommuterCashPaymentForm(
+                        globalKey: mKey,
+                        amountController: amountController,
+                        passengersController: passengersController,
+                        onSubmit: () {
+                          _onSubmit();
+                        }),
                     gapH32,
                   ],
                 ),
@@ -194,71 +196,69 @@ class CommuterCashPaymentForm extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Form(
         key: globalKey,
-        child: Expanded(
-          child: Column(
-            children: [
-              TextFormField(
-                controller: amountController,
-                keyboardType: const TextInputType.numberWithOptions(
-                    signed: false, decimal: true),
-                style: myTextStyle(fontSize: 28, weight: FontWeight.w900),
-                decoration: const InputDecoration(
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(width: 2),
+        child: Column(
+          children: [
+            TextFormField(
+              controller: amountController,
+              keyboardType: const TextInputType.numberWithOptions(
+                  signed: false, decimal: true),
+              style: myTextStyle(fontSize: 28, weight: FontWeight.w900),
+              decoration: const InputDecoration(
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(width: 2),
+                ),
+                hintText: "Please enter amount",
+                label: Text('Amount'),
+              ),
+              validator: (value) {
+                if (value == null) {
+                  return 'Enter proper amount';
+                }
+                return null;
+              },
+            ),
+            gapH16,
+            TextFormField(
+              controller: passengersController,
+              keyboardType: const TextInputType.numberWithOptions(
+                  signed: false, decimal: true),
+              style: myTextStyle(fontSize: 28, weight: FontWeight.w900),
+              decoration: const InputDecoration(
+                hintText: "EnterNumber of Passengers",
+                enabledBorder:
+                OutlineInputBorder(borderSide: BorderSide(width: 2)),
+                label: Text('Number of Passengers'),
+              ),
+              validator: (value) {
+                if (value == null) {
+                  return 'Please enter number of passengers';
+                }
+                return null;
+              },
+            ),
+            gapH32,
+            gapH32,
+            gapH32,
+            gapH32,
+            SizedBox(
+              width: 300,
+              child: ElevatedButton(
+                  style: const ButtonStyle(
+                    elevation: WidgetStatePropertyAll(8),
+                    backgroundColor: WidgetStatePropertyAll(Colors.blue),
+                    padding: WidgetStatePropertyAll(EdgeInsets.all(16)),
                   ),
-                  hintText: "Please enter amount",
-                  label: Text('Amount'),
-                ),
-                validator: (value) {
-                  if (value == null) {
-                    return 'Enter proper amount';
-                  }
-                  return null;
-                },
-              ),
-              gapH16,
-              TextFormField(
-                controller: passengersController,
-                keyboardType: const TextInputType.numberWithOptions(
-                    signed: false, decimal: true),
-                style: myTextStyle(fontSize: 28, weight: FontWeight.w900),
-                decoration: const InputDecoration(
-                  hintText: "EnterNumber of Passengers",
-                  enabledBorder:
-                      OutlineInputBorder(borderSide: BorderSide(width: 2)),
-                  label: Text('Number of Passengers'),
-                ),
-                validator: (value) {
-                  if (value == null) {
-                    return 'Please enter number of passengers';
-                  }
-                  return null;
-                },
-              ),
-              gapH32,
-              gapH32,
-              gapH32,
-              gapH32,
-              SizedBox(
-                width: 300,
-                child: ElevatedButton(
-                    style: const ButtonStyle(
-                      elevation: WidgetStatePropertyAll(8),
-                      backgroundColor: WidgetStatePropertyAll(Colors.blue),
-                      padding: WidgetStatePropertyAll(EdgeInsets.all(16)),
-                    ),
-                    onPressed: () {
-                      onSubmit();
-                    },
-                    child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Text('Submit Payment',
-                            style: myTextStyle(
-                                fontSize: 20, color: Colors.white)))),
-              ),
-              gapH32,
-            ],
-          ),
+                  onPressed: () {
+                    onSubmit();
+                  },
+                  child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Text('Submit Payment',
+                          style: myTextStyle(
+                              fontSize: 20, color: Colors.white)))),
+            ),
+            gapH32,
+          ],
         ),
       ),
     );

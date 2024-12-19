@@ -1,7 +1,7 @@
-
 import 'package:json_annotation/json_annotation.dart';
 
 part 'data_schemas.g.dart';
+
 @JsonSerializable(explicitToJson: true)
 class VehicleTelemetry {
   String? _id;
@@ -19,10 +19,8 @@ class VehicleTelemetry {
   String? ownerId, ownerName;
   double? accuracy, heading, altitude, altitudeAccuracy, speed, speedAccuracy;
 
-
   VehicleTelemetry(
-      {
-      required this.vehicleTelemetryId,
+      {required this.vehicleTelemetryId,
       required this.vehicleId,
       required this.created,
       required this.vehicleReg,
@@ -51,6 +49,7 @@ class VehicleTelemetry {
 
   Map<String, dynamic> toJson() => _$VehicleTelemetryToJson(this);
 }
+
 @JsonSerializable(explicitToJson: true)
 class Country {
   String? countryId;
@@ -146,6 +145,39 @@ class City {
 }
 
 @JsonSerializable(explicitToJson: true)
+class Trip {
+  String? tripId, userId, userName;
+  String? dateStarted, dateEnded;
+  String? routeId,
+      routeName,
+      vehicleId,
+      vehicleReg,
+      associationId,
+      associationName;
+  Position? position;
+  String? created;
+
+  Trip(
+      {required this.tripId,
+      required this.dateStarted,
+      required this.dateEnded,
+      required this.routeId,
+      required this.routeName,
+      required this.vehicleId,
+      required this.vehicleReg,
+      required this.associationId,
+      required this.associationName,
+      required this.position,
+      required this.userId,
+      required this.userName,
+      required this.created});
+
+  factory Trip.fromJson(Map<String, dynamic> json) => _$TripFromJson(json);
+
+  Map<String, dynamic> toJson() => _$TripToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class DispatchRecord {
   String? dispatchRecordId;
   String? marshalId;
@@ -203,8 +235,7 @@ class Association {
   User? carUser, adminUser;
 
   Association(
-      {
-      this.countryId,
+      {this.countryId,
       this.associationName,
       this.associationId,
       this.active,
@@ -301,7 +332,9 @@ class VehicleArrival {
       this.vehicleId,
       this.associationId,
       this.associationName,
-      this.vehicleReg, this.routeName, this.routeId,
+      this.vehicleReg,
+      this.routeName,
+      this.routeId,
       this.make,
       this.model,
       this.ownerId,
@@ -435,7 +468,9 @@ class VehicleDeparture {
       this.position,
       this.geoHash,
       this.created,
-      this.vehicleId, this.routeId, this.routeName,
+      this.vehicleId,
+      this.routeId,
+      this.routeName,
       this.associationId,
       this.associationName,
       this.vehicleReg,
@@ -503,7 +538,6 @@ class VehicleHeartbeat {
   String? ownerId, ownerName;
   int? longDate;
   bool? appToBackground = false;
-
 
   VehicleHeartbeat(
       {this.vehicleHeartbeatId,
@@ -893,7 +927,7 @@ class RouteInfo {
 
 @JsonSerializable(explicitToJson: true)
 class AmbassadorPassengerCount {
-  String? vehicleId, vehicleReg;
+  String? vehicleId, vehicleReg, tripId, passengerCountId;
   String? userId;
   String? userName;
   String? created;
@@ -908,20 +942,21 @@ class AmbassadorPassengerCount {
   Position? position;
 
   AmbassadorPassengerCount(
-      {this.vehicleId,
-      this.vehicleReg,
-      this.userId,
-      this.userName,
-      this.created,
-      this.associationId,
-      this.routeId,
-      this.routeName,
-      this.ownerId,
-      this.ownerName,
-      this.passengersIn,
-      this.passengersOut,
-      this.currentPassengers,
-      this.position});
+      {required this.vehicleId,
+      required this.vehicleReg,
+      required this.userId,
+      required this.userName,
+      required this.created,
+      required this.associationId,
+      required this.routeId,
+      required this.routeName,
+      required this.ownerId,
+      required this.tripId,
+      required this.ownerName,
+      required this.passengersIn,
+      required this.passengersOut,
+      required this.currentPassengers,
+      required this.position});
 
   factory AmbassadorPassengerCount.fromJson(Map<String, dynamic> json) =>
       _$AmbassadorPassengerCountFromJson(json);

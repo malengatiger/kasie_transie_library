@@ -14,6 +14,7 @@ class CommuterCashPayment {
   double? amount;
   int? numberOfPassengers;
   String? userId,
+      tripId,
       userName,
       created,
       routeId,
@@ -32,6 +33,7 @@ class CommuterCashPayment {
       required this.numberOfPassengers,
       required this.userId,
       required this.userName,
+      required this.tripId,
       this.routeLandmarkId,
       this.landmarkName,
       required this.position,

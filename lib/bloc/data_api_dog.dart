@@ -259,6 +259,25 @@ class DataApiDog {
     return lr;
   }
 
+  Future<Trip> addTrip(
+      Trip trip) async {
+    final bag = trip.toJson();
+    final cmd = '${url}dispatch/addTrip';
+    final res = await _callPost(cmd, bag);
+    final lr = Trip.fromJson(res);
+
+    pp('$mm Trip added to database: ${lr.toJson()}');
+    return lr;
+  }
+  Future<Trip> updateTrip(
+      Trip trip) async {
+    final bag = trip.toJson();
+    final cmd = '${url}dispatch/updateTrip';
+    final res = await _callPost(cmd, bag);
+
+    pp('$mm Trip updated on database: $res');
+    return res;
+  }
   Future<CommuterCashCheckIn> addCommuterCashCheckIn(
       CommuterCashCheckIn cashCheckIn) async {
     final bag = cashCheckIn.toJson();

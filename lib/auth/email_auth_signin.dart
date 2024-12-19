@@ -62,6 +62,10 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
       user = await appAuth.signInWithEmailAndPassword(
           emailController.text, pswdController.text);
       if (user != null) {
+        var ass = await listApiDog.getAssociationById(user!.associationId!);
+        if (ass != null) {
+          prefs.saveAssociation(ass);
+        }
         widget.onGoodSignIn();
       } else {
         widget.onSignInError();

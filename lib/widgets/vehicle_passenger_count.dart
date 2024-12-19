@@ -19,10 +19,14 @@ import 'ambassador/counter.dart';
 
 class VehiclePassengerCount extends StatefulWidget {
   const VehiclePassengerCount(
-      {super.key, required this.vehicle, required this.route});
+      {super.key,
+      required this.vehicle,
+      required this.route,
+      required this.trip});
 
   final lib.Vehicle vehicle;
   final lib.Route route;
+  final lib.Trip trip;
 
   @override
   VehiclePassengerCountState createState() => VehiclePassengerCountState();
@@ -116,7 +120,8 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
   }
 
   String? lastDate;
-
+  int previousPassengersIn = 0;
+  late lib.AmbassadorPassengerCount passengerCount;
   void _submitCounts() async {
     pp('$mm .. _submitCounts ...');
     setState(() {
@@ -124,9 +129,11 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
     });
 
     try {
+      previousPassengersIn = passengersIn;
       final loc = await locationBloc.getLocation();
-      final passengerCount = lib.AmbassadorPassengerCount(
+       passengerCount = lib.AmbassadorPassengerCount(
         associationId: user!.associationId,
+        tripId: widget.trip.tripId,
         created: DateTime.now().toUtc().toIso8601String(),
         userId: user!.userId,
         vehicleId: widget.vehicle.vehicleId,
@@ -166,7 +173,9 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                 : passengerCountsaved!,
             context: context);
       }
-      _navigateToCashPayment();
+      if (passengerCount.passengersIn! > 0) {
+        _navigateToCashPayment();
+      }
     } catch (e, s) {
       pp('$e $s');
       if (mounted) {
@@ -183,7 +192,11 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
     NavigationUtils.navigateTo(
         context: context,
         widget: CommuterCashPaymentWidget(
-            vehicle: widget.vehicle, route: widget.route, onError: (err) {}));
+          vehicle: widget.vehicle,
+          route: widget.route,
+          onError: (err) {},
+          trip: widget.trip, numberOfPassengers: passengerCount.passengersIn!,
+        ));
   }
 
   void _navigateToPhotoHandler() {
@@ -232,6 +245,8 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
   _tripHasEnded() {
     pp('\n\n$mm ... _tripHasEnded ... room for a new data model? TripEnd anyone?');
 
+    widget.trip.dateEnded = DateTime.now().toUtc().toIso8601String();
+    dataApiDog.updateTrip(widget.trip);
     Navigator.of(context).pop();
   }
 

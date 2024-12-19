@@ -152,6 +152,40 @@ Map<String, dynamic> _$CityToJson(City instance) => <String, dynamic>{
       'created': instance.created,
     };
 
+Trip _$TripFromJson(Map<String, dynamic> json) => Trip(
+      tripId: json['tripId'] as String?,
+      dateStarted: json['dateStarted'] as String?,
+      dateEnded: json['dateEnded'] as String?,
+      routeId: json['routeId'] as String?,
+      routeName: json['routeName'] as String?,
+      vehicleId: json['vehicleId'] as String?,
+      vehicleReg: json['vehicleReg'] as String?,
+      associationId: json['associationId'] as String?,
+      associationName: json['associationName'] as String?,
+      position: json['position'] == null
+          ? null
+          : Position.fromJson(json['position'] as Map<String, dynamic>),
+      userId: json['userId'] as String?,
+      userName: json['userName'] as String?,
+      created: json['created'] as String?,
+    );
+
+Map<String, dynamic> _$TripToJson(Trip instance) => <String, dynamic>{
+      'tripId': instance.tripId,
+      'userId': instance.userId,
+      'userName': instance.userName,
+      'dateStarted': instance.dateStarted,
+      'dateEnded': instance.dateEnded,
+      'routeId': instance.routeId,
+      'routeName': instance.routeName,
+      'vehicleId': instance.vehicleId,
+      'vehicleReg': instance.vehicleReg,
+      'associationId': instance.associationId,
+      'associationName': instance.associationName,
+      'position': instance.position?.toJson(),
+      'created': instance.created,
+    };
+
 DispatchRecord _$DispatchRecordFromJson(Map<String, dynamic> json) =>
     DispatchRecord(
       dispatchRecordId: json['dispatchRecordId'] as String?,
@@ -288,6 +322,8 @@ VehicleArrival _$VehicleArrivalFromJson(Map<String, dynamic> json) =>
       associationId: json['associationId'] as String?,
       associationName: json['associationName'] as String?,
       vehicleReg: json['vehicleReg'] as String?,
+      routeName: json['routeName'] as String?,
+      routeId: json['routeId'] as String?,
       make: json['make'] as String?,
       model: json['model'] as String?,
       ownerId: json['ownerId'] as String?,
@@ -299,7 +335,9 @@ Map<String, dynamic> _$VehicleArrivalToJson(VehicleArrival instance) =>
     <String, dynamic>{
       'vehicleArrivalId': instance.vehicleArrivalId,
       'landmarkId': instance.landmarkId,
+      'routeId': instance.routeId,
       'landmarkName': instance.landmarkName,
+      'routeName': instance.routeName,
       'position': instance.position?.toJson(),
       'geoHash': instance.geoHash,
       'created': instance.created,
@@ -417,6 +455,8 @@ VehicleDeparture _$VehicleDepartureFromJson(Map<String, dynamic> json) =>
       geoHash: json['geoHash'] as String?,
       created: json['created'] as String?,
       vehicleId: json['vehicleId'] as String?,
+      routeId: json['routeId'] as String?,
+      routeName: json['routeName'] as String?,
       associationId: json['associationId'] as String?,
       associationName: json['associationName'] as String?,
       vehicleReg: json['vehicleReg'] as String?,
@@ -431,7 +471,9 @@ Map<String, dynamic> _$VehicleDepartureToJson(VehicleDeparture instance) =>
     <String, dynamic>{
       'vehicleDepartureId': instance.vehicleDepartureId,
       'landmarkId': instance.landmarkId,
+      'routeId': instance.routeId,
       'landmarkName': instance.landmarkName,
+      'routeName': instance.routeName,
       'position': instance.position?.toJson(),
       'geoHash': instance.geoHash,
       'created': instance.created,
@@ -900,6 +942,7 @@ AmbassadorPassengerCount _$AmbassadorPassengerCountFromJson(
       routeId: json['routeId'] as String?,
       routeName: json['routeName'] as String?,
       ownerId: json['ownerId'] as String?,
+      tripId: json['tripId'] as String?,
       ownerName: json['ownerName'] as String?,
       passengersIn: (json['passengersIn'] as num?)?.toInt(),
       passengersOut: (json['passengersOut'] as num?)?.toInt(),
@@ -907,13 +950,15 @@ AmbassadorPassengerCount _$AmbassadorPassengerCountFromJson(
       position: json['position'] == null
           ? null
           : Position.fromJson(json['position'] as Map<String, dynamic>),
-    );
+    )..passengerCountId = json['passengerCountId'] as String?;
 
 Map<String, dynamic> _$AmbassadorPassengerCountToJson(
         AmbassadorPassengerCount instance) =>
     <String, dynamic>{
       'vehicleId': instance.vehicleId,
       'vehicleReg': instance.vehicleReg,
+      'tripId': instance.tripId,
+      'passengerCountId': instance.passengerCountId,
       'userId': instance.userId,
       'userName': instance.userName,
       'created': instance.created,
