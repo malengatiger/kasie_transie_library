@@ -73,7 +73,7 @@ class DeviceLocationBloc {
   }
 
   Future<List<Route>> getRouteDistances({
-    required AssociationRouteData routeData,
+    required AssociationRouteData routeData, required limitMetres
   }) async {
     List<DistanceBag> bags = [];
     List<RoutePoint> routePoints = [];
@@ -106,7 +106,7 @@ class DeviceLocationBloc {
     // }
     List<DistanceBag> finalDistanceBags = [];
     for (var r in result) {
-      if (r.distance < 1000) {
+      if (r.distance <= limitMetres) {
         finalDistanceBags.add(r);
         pp('$mm getRouteDistances: route within 1000 meters: ${r.distance} \t - ${r.routePoint.routeName}');
       }
@@ -151,11 +151,6 @@ class DeviceLocationBloc {
       }
     }
     var filteredDistanceBags = hash.values.toList();
-    // for (var r in filteredDistanceBags) {
-    //   pp('$mm getRouteLandmarkDistances: routeLandmark distance: ${r.distance} '
-    //       '\t - ${r.routeLandmark.landmarkName} oon route: ${r.routeLandmark.routeName}');
-    // }
-
     filteredDistanceBags.sort((a, b) => a.distance.compareTo(b.distance));
     return filteredDistanceBags;
   }

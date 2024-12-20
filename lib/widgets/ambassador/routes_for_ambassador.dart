@@ -51,7 +51,7 @@ class NearestRoutesListState extends State<NearestRoutesList>
         var routeData = await listApiDog.getAssociationRouteData(
             widget.associationId, false);
 
-        routes = await devLoc.getRouteDistances(routeData: routeData!);
+        routes = await devLoc.getRouteDistances(routeData: routeData!, limitMetres: 2000);
         routes.sort((a, b) => a.name!.compareTo(b.name!));
 
         pp('$mm nearest routes: ${routes.length}');

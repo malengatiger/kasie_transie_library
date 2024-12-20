@@ -52,7 +52,7 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
       if (user != null) {
         var routeData = await listApiDog.getAssociationRouteData(
             user!.associationId!, false);
-        routes = await devLoc.getRouteDistances(routeData: routeData!);
+        routes = await devLoc.getRouteDistances(routeData: routeData!, limitMetres: 2000);
         routes.sort((a, b) => a.name!.compareTo(b.name!));
 
         pp('$mm nearest routes: ${routes.length}');

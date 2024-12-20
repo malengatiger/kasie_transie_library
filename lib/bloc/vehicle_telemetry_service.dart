@@ -58,7 +58,7 @@ class VehicleTelemetryService {
       }
     }
     lib.Route? route;
-    routes = await locationBloc.getRouteDistances(routeData: routeData!);
+    routes = await locationBloc.getRouteDistances(routeData: routeData!, limitMetres: 1000);
     if (routes.isNotEmpty) {
       route = routes.first;
       pp('$mm nearest route: ${route.toJson()}');
