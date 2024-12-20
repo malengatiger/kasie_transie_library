@@ -286,6 +286,10 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                   '${widget.vehicle.vehicleReg}',
                   style: myTextStyle(fontSize: 36, weight: FontWeight.w900),
                 ),
+                Text(
+                  '${widget.vehicle.make} ${widget.vehicle.model} ${widget.vehicle.year}',
+                  style: myTextStyle(fontSize: 12, weight: FontWeight.normal, color: Colors.grey),
+                ),
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
@@ -305,7 +309,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                       _onPassengersIn(number);
                     },
                     color: Colors.blue),
-                gapH16,
+                gapH8,
                 PassengerCounter(
                     title: 'Passengers Out',
                     count: 50,
@@ -314,7 +318,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                       _onPassengersOut(number);
                     },
                     color: Colors.red),
-                gapH32,
+                gapH16,
                 Card(
                     elevation: 8,
                     child: Padding(
@@ -333,7 +337,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                             )
                           ],
                         ))),
-                gapH16,
+                gapH32,
                 SizedBox(
                   width: 300,
                   child: ElevatedButton(

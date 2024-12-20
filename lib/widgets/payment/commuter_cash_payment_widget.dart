@@ -139,13 +139,13 @@ class CommuterCashPaymentWidgetState extends State<CommuterCashPaymentWidget>
                       style: myTextStyle(fontSize: 20, color: Colors.grey),
                     ),
                     gapH32,
-                    CommuterCashPaymentForm(
+                    Expanded(child: CommuterCashPaymentForm(
                         globalKey: mKey,
                         amountController: amountController,
                         passengersController: passengersController,
                         onSubmit: () {
                           _onSubmit();
-                        }),
+                        }),),
                     gapH32,
                   ],
                 ),

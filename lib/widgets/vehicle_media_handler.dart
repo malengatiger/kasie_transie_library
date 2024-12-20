@@ -42,6 +42,7 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
       photosAndVideosNow,
       takePhotos,
       makeVideos;
+
   Future _setTexts() async {
     final c = prefs.getColorAndLocale();
     final loc = c.locale;
@@ -66,6 +67,7 @@ class VehicleMediaHandlerState extends State<VehicleMediaHandler>
       _getVehiclePhotos(false);
     });
   }
+
   @override
   void dispose() {
     _controller.dispose();

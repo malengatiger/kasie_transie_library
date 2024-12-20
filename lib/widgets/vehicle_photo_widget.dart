@@ -10,6 +10,7 @@ class VehiclePhotoWidget extends StatefulWidget {
   const VehiclePhotoWidget({super.key, required this.vehiclePhoto});
 
   final lib.VehiclePhoto vehiclePhoto;
+
   @override
   VehiclePhotoWidgetState createState() => VehiclePhotoWidgetState();
 }

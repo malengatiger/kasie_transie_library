@@ -5,22 +5,21 @@ import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
-import 'package:page_transition/page_transition.dart';
 
 import '../../data/route_data.dart';
 import '../../utils/functions.dart';
 import '../../utils/navigator_utils.dart';
 import '../../utils/prefs.dart';
 
-class RoutesForAmbassador extends StatefulWidget {
-  const RoutesForAmbassador({super.key, required this.associationId});
-  final String associationId;
+class NearestRoutesList extends StatefulWidget {
+  const NearestRoutesList({super.key, required this.associationId, required this.title});
+  final String associationId, title;
 
   @override
-  RoutesForAmbassadorState createState() => RoutesForAmbassadorState();
+  NearestRoutesListState createState() => NearestRoutesListState();
 }
 
-class RoutesForAmbassadorState extends State<RoutesForAmbassador>
+class NearestRoutesListState extends State<NearestRoutesList>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
@@ -41,7 +40,7 @@ class RoutesForAmbassadorState extends State<RoutesForAmbassador>
   }
 
   List<DistanceBag> distanceBags = [];
-  static const mm = '🧡🧡🧡🧡RoutesForAmbassador 🧡';
+  static const mm = '🧡🧡🧡🧡NearestRoutesList 🧡';
 
   _getRouteData() async {
     setState(() {
@@ -51,6 +50,7 @@ class RoutesForAmbassadorState extends State<RoutesForAmbassador>
 
         var routeData = await listApiDog.getAssociationRouteData(
             widget.associationId, false);
+
         routes = await devLoc.getRouteDistances(routeData: routeData!);
         routes.sort((a, b) => a.name!.compareTo(b.name!));
 
@@ -79,7 +79,7 @@ class RoutesForAmbassadorState extends State<RoutesForAmbassador>
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Routes For Ambassador', style: myTextStyleMedium(context)),
+          title: Text(widget.title, style: myTextStyleMedium(context)),
         ),
         body: SafeArea(
           child: Stack(
@@ -107,7 +107,7 @@ class RoutesForAmbassadorState extends State<RoutesForAmbassador>
                       routes.isEmpty
                           ? Center(
                           child: Text(
-                            'No routes yet',
+                            'No routes found within your current vicinity',
                             style: myTextStyleLarge(context),
                           ))
                           : Expanded(

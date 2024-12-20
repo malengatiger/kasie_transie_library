@@ -269,7 +269,7 @@ class DataApiDog {
     pp('$mm Trip added to database: ${lr.toJson()}');
     return lr;
   }
-  Future<Trip> updateTrip(
+  Future<dynamic> updateTrip(
       Trip trip) async {
     final bag = trip.toJson();
     final cmd = '${url}dispatch/updateTrip';
