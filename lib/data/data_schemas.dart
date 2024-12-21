@@ -795,7 +795,7 @@ class CommuterRequest {
   String? routeLandmarkId;
   String? routeLandmarkName;
   String? associationId;
-  String? dateNeeded;
+  String? dateNeeded, fcmToken;
   bool? scanned;
 
   Position? currentPosition;
@@ -803,21 +803,22 @@ class CommuterRequest {
   double? distanceToRouteLandmarkInMetres, distanceToRoutePointInMetres;
 
   CommuterRequest(
-      this.commuterId,
-      this.commuterRequestId,
-      this.routeId,
-      this.routeName,
-      this.dateRequested,
+      {required this.commuterId,
+      required this.commuterRequestId,
+      required this.routeId,
+      required this.routeName,
+      required this.dateRequested,
       this.routeLandmarkId,
       this.routeLandmarkName,
-      this.associationId,
-      this.dateNeeded,
+      required this.associationId,
+      required this.dateNeeded,
       this.scanned,
-      this.currentPosition,
+      required this.fcmToken,
+      required this.currentPosition,
       this.routePointIndex,
-      this.numberOfPassengers,
+      required this.numberOfPassengers,
       this.distanceToRouteLandmarkInMetres,
-      this.distanceToRoutePointInMetres);
+      this.distanceToRoutePointInMetres});
 
   factory CommuterRequest.fromJson(Map<String, dynamic> json) =>
       _$CommuterRequestFromJson(json);
@@ -835,21 +836,22 @@ class Commuter {
   String? qrCodeUrl;
   String? profileUrl;
   String? password;
-  String? email;
+  String? email, fcmToken;
   String? cellphone, profileThumbnailUrl;
 
   Commuter(
-      this.commuterId,
-      this.name,
+      {required this.commuterId,
+      required this.name,
       this.gender,
-      this.countryId,
-      this.dateRegistered,
-      this.qrCodeUrl,
+      required this.countryId,
+      required this.dateRegistered,
+      required this.qrCodeUrl,
       this.profileUrl,
       this.password,
-      this.email,
+      required this.email,
+      required this.fcmToken,
       this.cellphone,
-      this.profileThumbnailUrl);
+      this.profileThumbnailUrl});
 
   factory Commuter.fromJson(Map<String, dynamic> json) =>
       _$CommuterFromJson(json);

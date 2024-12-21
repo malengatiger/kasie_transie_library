@@ -30,6 +30,7 @@ class AppAuth {
   auth.User? getUser()  {
     return firebaseAuth.currentUser;
   }
+
   Future signInAssociation(String associationId) async {
     pp('$locks signInAssociation .... ${E.redDot}${E.redDot}${E.redDot}');
     listApiDog = GetIt.instance<ListApiDog>();
@@ -109,21 +110,21 @@ class AppAuth {
   void listen() {
     pp('$locks listen for  FirebaseAuth.instance idTokenChanges and authStateChanges ...');
     firebaseAuth.idTokenChanges().listen((auth.User? user) async {
-      if (user == null) {
-        pp('$locks idTokenChanges: User is currently signed out!');
-      } else {
-        // pp('$locks idTokenChanges: User is not null! ${user.displayName}, checking auth token state ');
-        // await getAuthToken();
-      }
+      // if (user == null) {
+      //   pp('$locks idTokenChanges: User is currently signed out!');
+      // } else {
+      //   // pp('$locks idTokenChanges: User is not null! ${user.displayName}, checking auth token state ');
+      //   // await getAuthToken();
+      // }
     });
 
     firebaseAuth.authStateChanges().listen((auth.User? user) async {
-      if (user == null) {
-        pp('$locks authStateChanges: User is currently signed out!');
-      } else {
-        pp('$locks authStateChanges: User is signed in! ${user.displayName}, checking auth token state ...');
-        // await getAuthToken();
-      }
+      // if (user == null) {
+      //   pp('$locks authStateChanges: User is currently signed out!');
+      // } else {
+      //   pp('$locks authStateChanges: User is signed in! ${user.displayName}, checking auth token state ...');
+      //   // await getAuthToken();
+      // }
     });
   }
 

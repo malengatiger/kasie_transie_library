@@ -792,23 +792,26 @@ Map<String, dynamic> _$AppErrorToJson(AppError instance) => <String, dynamic>{
 
 CommuterRequest _$CommuterRequestFromJson(Map<String, dynamic> json) =>
     CommuterRequest(
-      json['commuterId'] as String?,
-      json['commuterRequestId'] as String?,
-      json['routeId'] as String?,
-      json['routeName'] as String?,
-      json['dateRequested'] as String?,
-      json['routeLandmarkId'] as String?,
-      json['routeLandmarkName'] as String?,
-      json['associationId'] as String?,
-      json['dateNeeded'] as String?,
-      json['scanned'] as bool?,
-      json['currentPosition'] == null
+      commuterId: json['commuterId'] as String?,
+      commuterRequestId: json['commuterRequestId'] as String?,
+      routeId: json['routeId'] as String?,
+      routeName: json['routeName'] as String?,
+      dateRequested: json['dateRequested'] as String?,
+      routeLandmarkId: json['routeLandmarkId'] as String?,
+      routeLandmarkName: json['routeLandmarkName'] as String?,
+      associationId: json['associationId'] as String?,
+      dateNeeded: json['dateNeeded'] as String?,
+      scanned: json['scanned'] as bool?,
+      fcmToken: json['fcmToken'] as String?,
+      currentPosition: json['currentPosition'] == null
           ? null
           : Position.fromJson(json['currentPosition'] as Map<String, dynamic>),
-      (json['routePointIndex'] as num?)?.toInt(),
-      (json['numberOfPassengers'] as num?)?.toInt(),
-      (json['distanceToRouteLandmarkInMetres'] as num?)?.toDouble(),
-      (json['distanceToRoutePointInMetres'] as num?)?.toDouble(),
+      routePointIndex: (json['routePointIndex'] as num?)?.toInt(),
+      numberOfPassengers: (json['numberOfPassengers'] as num?)?.toInt(),
+      distanceToRouteLandmarkInMetres:
+          (json['distanceToRouteLandmarkInMetres'] as num?)?.toDouble(),
+      distanceToRoutePointInMetres:
+          (json['distanceToRoutePointInMetres'] as num?)?.toDouble(),
     );
 
 Map<String, dynamic> _$CommuterRequestToJson(CommuterRequest instance) =>
@@ -822,6 +825,7 @@ Map<String, dynamic> _$CommuterRequestToJson(CommuterRequest instance) =>
       'routeLandmarkName': instance.routeLandmarkName,
       'associationId': instance.associationId,
       'dateNeeded': instance.dateNeeded,
+      'fcmToken': instance.fcmToken,
       'scanned': instance.scanned,
       'currentPosition': instance.currentPosition?.toJson(),
       'routePointIndex': instance.routePointIndex,
@@ -832,17 +836,18 @@ Map<String, dynamic> _$CommuterRequestToJson(CommuterRequest instance) =>
     };
 
 Commuter _$CommuterFromJson(Map<String, dynamic> json) => Commuter(
-      json['commuterId'] as String?,
-      json['name'] as String?,
-      json['gender'] as String?,
-      json['countryId'] as String?,
-      json['dateRegistered'] as String?,
-      json['qrCodeUrl'] as String?,
-      json['profileUrl'] as String?,
-      json['password'] as String?,
-      json['email'] as String?,
-      json['cellphone'] as String?,
-      json['profileThumbnailUrl'] as String?,
+      commuterId: json['commuterId'] as String?,
+      name: json['name'] as String?,
+      gender: json['gender'] as String?,
+      countryId: json['countryId'] as String?,
+      dateRegistered: json['dateRegistered'] as String?,
+      qrCodeUrl: json['qrCodeUrl'] as String?,
+      profileUrl: json['profileUrl'] as String?,
+      password: json['password'] as String?,
+      email: json['email'] as String?,
+      fcmToken: json['fcmToken'] as String?,
+      cellphone: json['cellphone'] as String?,
+      profileThumbnailUrl: json['profileThumbnailUrl'] as String?,
     );
 
 Map<String, dynamic> _$CommuterToJson(Commuter instance) => <String, dynamic>{
@@ -855,6 +860,7 @@ Map<String, dynamic> _$CommuterToJson(Commuter instance) => <String, dynamic>{
       'profileUrl': instance.profileUrl,
       'password': instance.password,
       'email': instance.email,
+      'fcmToken': instance.fcmToken,
       'cellphone': instance.cellphone,
       'profileThumbnailUrl': instance.profileThumbnailUrl,
     };

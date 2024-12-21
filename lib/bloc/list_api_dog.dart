@@ -1019,9 +1019,11 @@ class ListApiDog {
   }
 
   Future<Route?> getRoute(String routeId) async {
-    var localList = <Route>[];
-
-    return null;
+    pp('$mm .................. getRoute routeId: $routeId');
+    final cmd = '${url}routes/getRouteById?routeId=$routeId';
+    final res = await _sendHttpGET(cmd);
+    pp('$mm response: $res');
+    return Route.fromJson(res);
   }
 
   Future<List<CalculatedDistance>> getCalculatedDistances(

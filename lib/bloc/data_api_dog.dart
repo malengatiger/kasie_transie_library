@@ -345,7 +345,7 @@ class DataApiDog {
 
   Future<CommuterRequest> addCommuterRequest(CommuterRequest request) async {
     final bag = request.toJson();
-    final cmd = '${url}addCommuterRequest';
+    final cmd = '${url}commuter/addCommuterRequest';
     final res = await _callPost(cmd, bag);
     final lr = CommuterRequest.fromJson(res);
 
@@ -597,7 +597,7 @@ class DataApiDog {
 
   Future<Commuter> addCommuter(Commuter commuter) async {
     final bag = commuter.toJson();
-    final cmd = '${url}addCommuter';
+    final cmd = '${url}commuter/addCommuter';
     final res = await _callPost(cmd, bag);
     pp('$mm Commuter added to database ...');
     myPrettyJsonPrint(res);

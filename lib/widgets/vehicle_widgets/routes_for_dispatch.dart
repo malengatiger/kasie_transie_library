@@ -48,14 +48,19 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
       busy = true;
     });
     user = prefs.getUser();
+    route = prefs.getRoute();
     try {
       if (user != null) {
         var routeData = await listApiDog.getAssociationRouteData(
             user!.associationId!, false);
-        routes = await devLoc.getRouteDistances(routeData: routeData!, limitMetres: 2000);
+        routes = await devLoc.getRouteDistances(
+            routeData: routeData!, limitMetres: 2000);
         routes.sort((a, b) => a.name!.compareTo(b.name!));
 
         pp('$mm nearest routes: ${routes.length}');
+      }
+      if (route != null) {
+        _showConfirmDialog();
       }
     } catch (e, s) {
       pp('$e $s');
@@ -68,6 +73,38 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
     });
   }
 
+  _showConfirmDialog() {
+    showDialog(
+        context: context,
+        builder: (_) {
+          return AlertDialog(
+            content: SizedBox(
+                height: 120,
+                child: Column(children: [
+                  const Text(
+                      'Do you want to keep using the route that you used previously?'),
+                  gapH8,
+                  Text('${route!.name}'),
+                ])),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    setState(() {
+                      route = null;
+                    });
+                  },
+                  child: const Text('No')),
+
+              TextButton(onPressed: () {
+                Navigator.of(context).pop(route!);
+                _navigateToCarForDispatch();
+              }, child: const Text('Yes')),
+            ],
+          );
+        });
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -77,12 +114,13 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
   List<lib.DispatchRecord> dispatches = [];
 
   _navigateToCarForDispatch() async {
+    prefs.saveRoute(route!);
     NavigationUtils.navigateTo(
-        context: context,
-        widget: CarForDispatch(
-          route: route!,
-        ),
-        );
+      context: context,
+      widget: CarForDispatch(
+        route: route!,
+      ),
+    );
   }
 
   @override

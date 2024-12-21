@@ -14,6 +14,8 @@ import 'package:kasie_transie_library/messaging/telemetry_manager.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/route_update_listener.dart';
 import 'package:kasie_transie_library/utils/zip_handler.dart';
+import 'package:kasie_transie_library/widgets/qrcodes/qr_code_generation.dart';
+
 import 'package:sembast_web/sembast_web.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -69,9 +71,14 @@ class RegisterServices {
       locationBloc: deviceLocationBloc,
     );
     pp('$mm .... CloudStorageBloc: 🦠csb initialized');
+    QRGenerationService qrGenerationService = QRGenerationService(csb);
+
     pp('\n\n$mm ..... 🦠🦠🦠🦠🦠registerLazySingletons ...');
 
     final GetIt instance = GetIt.instance;
+
+    instance.registerLazySingleton<QRGenerationService>(() => qrGenerationService);
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... QRGenerationService');
 
     instance.registerLazySingleton<Prefs>(() => prefs);
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... Prefs');

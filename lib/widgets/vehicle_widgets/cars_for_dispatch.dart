@@ -135,7 +135,7 @@ class _CarForDispatchState extends State<CarForDispatch> {
                       'Search Taxi',
                       style: myTextStyle(
                         color: Colors.white,
-                        fontSize: 24,
+                        fontSize: 20,
                       ),
                     ),
                   )),
@@ -155,7 +155,7 @@ class _CarForDispatchState extends State<CarForDispatch> {
                       'Scan Taxi',
                       style: myTextStyle(
                         color: Colors.white,
-                        fontSize: 24,
+                        fontSize: 20,
                       ),
                     ),
                   )),

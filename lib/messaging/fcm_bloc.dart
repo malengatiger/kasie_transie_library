@@ -23,6 +23,7 @@ import '../utils/error_handler.dart';
 import '../utils/functions.dart';
 import '../utils/kasie_exception.dart';
 import '../utils/prefs.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 final FCMService fcmBloc = FCMService(fb.FirebaseMessaging.instance);
 String? appName;
@@ -256,6 +257,33 @@ class FCMService {
         ' FCM: subscribed to all ${E.pear} 9 OwnerMarshalOfficialAmbassador FCM topics\n\n');
   }
 
+  Future<void> subscribeForCommuter(String app) async {
+    String? associationId;
+    appName = app;
+    newMM = '$newMM$app 🔷🔷';
+    user = prefs.getUser();
+    final association = prefs.getAssociation();
+    if (association != null) {
+      associationId = association.associationId!;
+    }
+    demoFlag = prefs.getDemoFlag();
+    if (user != null) {
+      associationId = user!.associationId!;
+    }
+
+    if (associationId == null) {
+      pp('$newMM ... association is null. ${E.redDot}${E.redDot}${E.redDot}'
+          ' cannot subscribe');
+      return;
+    }
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.routeUpdateRequest}$associationId');
+    pp('$newMM ..... FCM: subscribed to ${Constants.routeUpdateRequest}$associationId');
+    //
+
+    pp('$newMM ........................................'
+        ' FCM: subscribed to all ${E.pear} 1 RouteBuilder FCM topics\n\n');
+  }
   Future<void> subscribeForRouteBuilder(String app) async {
     String? associationId;
     appName = app;
@@ -367,6 +395,7 @@ class FCMService {
       int id, String? title, String? body, String? payload) {
     pp("$newMM onDidReceiveLocalNotification: $red processing message title: $title body: $body ");
   }
+
 
   Future<void> processFCMMessage(fb.RemoteMessage message, String type) async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
@@ -714,6 +743,9 @@ class FCMService {
   Stream<lib.CommuterRequest> get commuterRequestStreamStream =>
       _commuterRequestStreamController.stream;
 
+  addCommuterRequest(CommuterRequest request) {
+    _commuterRequestStreamController.sink.add(request);
+  }
   final StreamController<lib.VehicleHeartbeat> _heartbeatStreamController =
       StreamController.broadcast();
 

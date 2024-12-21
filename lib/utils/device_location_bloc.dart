@@ -154,6 +154,34 @@ class DeviceLocationBloc {
     filteredDistanceBags.sort((a, b) => a.distance.compareTo(b.distance));
     return filteredDistanceBags;
   }
+
+Future<List<RoutePointDistanceBag>> getRoutePointDistances({
+  required List<RoutePoint> routePoints,
+}) async {
+  List<RoutePointDistanceBag> bags = [];
+  pp('$mm getRoutePointDistances: total routePoints: ${routePoints.length}');
+  var loc = await getLocation();
+  for (var r in routePoints) {
+    var dist = getDistance(
+        latitude: r.position!.coordinates[1],
+        longitude: r.position!.coordinates[0],
+        toLatitude: loc.latitude,
+        toLongitude: loc.longitude);
+    bags.add(RoutePointDistanceBag(r, dist));
+  }
+  pp('$mm getRoutePointDistances: total bags: ${bags.length}');
+  bags.sort((a, b) => a.distance.compareTo(b.distance));
+
+  HashMap<String, RoutePointDistanceBag> hash = HashMap();
+  for (var bag in bags) {
+    if (hash[bag.routePoint.routeId!] == null) {
+      hash[bag.routePoint.routeId!] = bag;
+    }
+  }
+  var filteredDistanceBags = hash.values.toList();
+  filteredDistanceBags.sort((a, b) => a.distance.compareTo(b.distance));
+  return filteredDistanceBags;
+}
 }
 
 class DistanceBag {
@@ -168,4 +196,11 @@ class LandmarkDistanceBag {
   final double distance;
 
   LandmarkDistanceBag(this.routeLandmark, this.distance);
+}
+class RoutePointDistanceBag {
+  final RoutePoint routePoint;
+  final double distance;
+
+  RoutePointDistanceBag(this.routePoint, this.distance);
+
 }
