@@ -444,6 +444,11 @@ class FCMService {
         _processCommuterRequest(kk);
         break;
 
+      case Constants.commuterResponse:
+        final kk = CommuterResponse.fromJson(data);
+        _processCommuterResponse(kk);
+        break;
+
       case Constants.locationRequest:
         final locReq = LocationRequest.fromJson(data);
         _processLocationRequest(locReq);
@@ -625,6 +630,16 @@ class FCMService {
       return;
     }
   }
+  void _processCommuterResponse(lib.CommuterResponse commuterResponse) {
+    pp('$newMM _processCommuterResponse ... ${commuterResponse.routeName}');
+
+    if (demoFlag) {
+      // _commuterRequestStreamController.sink.add(commuterRequest);
+      return;
+    }
+    _commuterResponseStreamController.sink.add(commuterResponse);
+
+  }
 
   void _processHeartbeat(lib.VehicleHeartbeat heartbeat) {
     pp('$newMM _processHeartbeat ... ${heartbeat.vehicleReg} - owner: ${heartbeat.ownerName}');
@@ -742,6 +757,13 @@ class FCMService {
 
   Stream<lib.CommuterRequest> get commuterRequestStreamStream =>
       _commuterRequestStreamController.stream;
+
+  final StreamController<lib.CommuterResponse> _commuterResponseStreamController =
+  StreamController.broadcast();
+
+  Stream<lib.CommuterResponse> get commuterResponseStreamStream =>
+      _commuterResponseStreamController.stream;
+
 
   addCommuterRequest(CommuterRequest request) {
     _commuterRequestStreamController.sink.add(request);

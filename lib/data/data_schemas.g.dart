@@ -797,8 +797,6 @@ CommuterRequest _$CommuterRequestFromJson(Map<String, dynamic> json) =>
       routeId: json['routeId'] as String?,
       routeName: json['routeName'] as String?,
       dateRequested: json['dateRequested'] as String?,
-      routeLandmarkId: json['routeLandmarkId'] as String?,
-      routeLandmarkName: json['routeLandmarkName'] as String?,
       associationId: json['associationId'] as String?,
       dateNeeded: json['dateNeeded'] as String?,
       scanned: json['scanned'] as bool?,
@@ -806,12 +804,7 @@ CommuterRequest _$CommuterRequestFromJson(Map<String, dynamic> json) =>
       currentPosition: json['currentPosition'] == null
           ? null
           : Position.fromJson(json['currentPosition'] as Map<String, dynamic>),
-      routePointIndex: (json['routePointIndex'] as num?)?.toInt(),
       numberOfPassengers: (json['numberOfPassengers'] as num?)?.toInt(),
-      distanceToRouteLandmarkInMetres:
-          (json['distanceToRouteLandmarkInMetres'] as num?)?.toDouble(),
-      distanceToRoutePointInMetres:
-          (json['distanceToRoutePointInMetres'] as num?)?.toDouble(),
     );
 
 Map<String, dynamic> _$CommuterRequestToJson(CommuterRequest instance) =>
@@ -821,18 +814,36 @@ Map<String, dynamic> _$CommuterRequestToJson(CommuterRequest instance) =>
       'routeId': instance.routeId,
       'routeName': instance.routeName,
       'dateRequested': instance.dateRequested,
-      'routeLandmarkId': instance.routeLandmarkId,
-      'routeLandmarkName': instance.routeLandmarkName,
       'associationId': instance.associationId,
       'dateNeeded': instance.dateNeeded,
       'fcmToken': instance.fcmToken,
       'scanned': instance.scanned,
       'currentPosition': instance.currentPosition?.toJson(),
-      'routePointIndex': instance.routePointIndex,
       'numberOfPassengers': instance.numberOfPassengers,
-      'distanceToRouteLandmarkInMetres':
-          instance.distanceToRouteLandmarkInMetres,
-      'distanceToRoutePointInMetres': instance.distanceToRoutePointInMetres,
+    };
+
+CommuterResponse _$CommuterResponseFromJson(Map<String, dynamic> json) =>
+    CommuterResponse(
+      json['commuterId'] as String?,
+      json['commuterResponseId'] as String?,
+      json['commuterRequestId'] as String?,
+      json['routeId'] as String?,
+      json['routeName'] as String?,
+      json['message'] as String?,
+      json['associationId'] as String?,
+      json['fcmToken'] as String?,
+    );
+
+Map<String, dynamic> _$CommuterResponseToJson(CommuterResponse instance) =>
+    <String, dynamic>{
+      'commuterId': instance.commuterId,
+      'commuterResponseId': instance.commuterResponseId,
+      'commuterRequestId': instance.commuterRequestId,
+      'routeId': instance.routeId,
+      'routeName': instance.routeName,
+      'message': instance.message,
+      'associationId': instance.associationId,
+      'fcmToken': instance.fcmToken,
     };
 
 Commuter _$CommuterFromJson(Map<String, dynamic> json) => Commuter(

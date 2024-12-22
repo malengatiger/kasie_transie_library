@@ -792,15 +792,12 @@ class CommuterRequest {
   String? commuterRequestId, routeId;
   String? routeName;
   String? dateRequested;
-  String? routeLandmarkId;
-  String? routeLandmarkName;
   String? associationId;
   String? dateNeeded, fcmToken;
   bool? scanned;
 
   Position? currentPosition;
-  int? routePointIndex, numberOfPassengers;
-  double? distanceToRouteLandmarkInMetres, distanceToRoutePointInMetres;
+  int? numberOfPassengers;
 
   CommuterRequest(
       {required this.commuterId,
@@ -808,22 +805,43 @@ class CommuterRequest {
       required this.routeId,
       required this.routeName,
       required this.dateRequested,
-      this.routeLandmarkId,
-      this.routeLandmarkName,
       required this.associationId,
       required this.dateNeeded,
       this.scanned,
       required this.fcmToken,
       required this.currentPosition,
-      this.routePointIndex,
-      required this.numberOfPassengers,
-      this.distanceToRouteLandmarkInMetres,
-      this.distanceToRoutePointInMetres});
+      required this.numberOfPassengers});
 
   factory CommuterRequest.fromJson(Map<String, dynamic> json) =>
       _$CommuterRequestFromJson(json);
 
   Map<String, dynamic> toJson() => _$CommuterRequestToJson(this);
+}
+@JsonSerializable(explicitToJson: true)
+class CommuterResponse {
+  String? commuterId;
+  String? commuterResponseId;
+  String? commuterRequestId, routeId;
+  String? routeName;
+  String? message;
+  String? associationId;
+  String? fcmToken;
+
+
+  CommuterResponse(
+      this.commuterId,
+      this.commuterResponseId,
+      this.commuterRequestId,
+      this.routeId,
+      this.routeName,
+      this.message,
+      this.associationId,
+      this.fcmToken);
+
+  factory CommuterResponse.fromJson(Map<String, dynamic> json) =>
+      _$CommuterResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CommuterResponseToJson(this);
 }
 
 //
