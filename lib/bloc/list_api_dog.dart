@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
@@ -403,6 +402,30 @@ class ListApiDog {
     } catch (e, s) {
       pp('$mm ERROR in getAssociationRouteData: $e \n$s');
       throw Exception('ERROR loading Association Route Data: $e');
+    }
+  }
+  Future<AssociationRouteData?> getSingleRouteData(
+      String routeId, bool? refresh) async {
+    pp('\n\n$mm ...... getSingleRouteData: ... starting ...');
+    // var routeData = await semCache.getrAssociationRouteData(associationId);
+    // if (!refresh && routeData != null && routeData.routeDataList.isNotEmpty) {
+    //   return routeData;
+    // }
+
+    var start = DateTime.now();
+    final cmd =
+        '${url}routes/getSingleRouteData?routeId=$routeId';
+    try {
+      var resp = await _sendHttpGET(cmd);
+      var data = AssociationRouteData.fromJson(resp);
+      pp('$mm getSingleRouteData: ... routes: ${data.routeDataList.length}');
+      await semCache.saveAssociationRouteData(data);
+      var end = DateTime.now();
+      pp('$mm getSingleRouteData: elapsed seconds: 🍎${end.difference(start).inSeconds} 🍎');
+      return data;
+    } catch (e, s) {
+      pp('$mm ERROR in getSingleRouteData: $e \n$s');
+      throw Exception('ERROR loading  Route Data: $e');
     }
   }
 
@@ -1018,12 +1041,25 @@ class ListApiDog {
     return list;
   }
 
-  Future<Route?> getRoute(String routeId) async {
+  Future<Route?> getRoute(
+      {required String routeId,
+      required bool refresh,
+      String? associationId}) async {
     pp('$mm .................. getRoute routeId: $routeId');
+
+    if (associationId != null) {
+      var r = await semCache.getRoute(routeId, associationId);
+      if (!refresh && r != null) {
+        return r;
+      }
+    }
+
     final cmd = '${url}routes/getRouteById?routeId=$routeId';
     final res = await _sendHttpGET(cmd);
     pp('$mm response: $res');
-    return Route.fromJson(res);
+    var mRoute = Route.fromJson(res);
+    await semCache.saveRoute(route: mRoute);
+    return mRoute;
   }
 
   Future<List<CalculatedDistance>> getCalculatedDistances(
@@ -1067,30 +1103,30 @@ class ListApiDog {
     return bag;
   }
 
-  Future<List<Route>> getRoutesFilteredByAssignments(
-      {required String associationId, required String vehicleId}) async {
-    final assignments = await getVehicleRouteAssignments(vehicleId, false);
-
-    pp('$mm ... getRoutesFilteredByAssignments found ${assignments.length} assignments');
-
-    var hash = HashMap<String, String>();
-    var routes = <Route>[];
-    if (assignments.isNotEmpty) {
-      for (var a in assignments) {
-        hash[a.routeId!] = a.routeId!;
-      }
-      final list = hash.keys.toList();
-      pp('$mm ... getRoutesFilteredByAssignments found ${list.length} route ids from route assignments');
-
-      for (var routeId in list) {
-        final route = await getRoute(routeId);
-        if (route != null) {
-          routes.add(route);
-        }
-      }
-    }
-    return routes;
-  }
+  // Future<List<Route>> getRoutesFilteredByAssignments(
+  //     {required String associationId, required String vehicleId}) async {
+  //   final assignments = await getVehicleRouteAssignments(vehicleId, false);
+  //
+  //   pp('$mm ... getRoutesFilteredByAssignments found ${assignments.length} assignments');
+  //
+  //   var hash = HashMap<String, String>();
+  //   var routes = <Route>[];
+  //   if (assignments.isNotEmpty) {
+  //     for (var a in assignments) {
+  //       hash[a.routeId!] = a.routeId!;
+  //     }
+  //     final list = hash.keys.toList();
+  //     pp('$mm ... getRoutesFilteredByAssignments found ${list.length} route ids from route assignments');
+  //
+  //     for (var routeId in list) {
+  //       final route = await getRoute(routeId);
+  //       if (route != null) {
+  //         routes.add(route);
+  //       }
+  //     }
+  //   }
+  //   return routes;
+  // }
 
   Future<List<Route>> getAssociationRoutes(
       String associationId, bool refresh) async {
@@ -1114,8 +1150,7 @@ class ListApiDog {
     pp('$mm .................. findRouteLandmarksByLocation; radius: $radiusInKM');
 
     final list = <RouteLandmark>[];
-    final cmd =
-        '${url}routes/findRouteLandmarksByLocation?latitude=$latitude'
+    final cmd = '${url}routes/findRouteLandmarksByLocation?latitude=$latitude'
         '&longitude=$longitude'
         '&radiusInKM=$radiusInKM';
     List resp = await _sendHttpGET(cmd);
@@ -1224,8 +1259,10 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<RoutePoint>> findRoutePointsByLocation({
-      required double latitude, required double longitude, required double radiusInKM }) async {
+  Future<List<RoutePoint>> findRoutePointsByLocation(
+      {required double latitude,
+      required double longitude,
+      required double radiusInKM}) async {
     var list = <RoutePoint>[];
 
     final cmd = '${url}routes/findRoutePointsByLocation?latitude=$latitude'

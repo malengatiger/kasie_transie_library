@@ -68,7 +68,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
       pp('$mm ... _filterRoutes found ${list.length} route ids from route assignments');
 
       for (var routeId in list) {
-        final route = await listApiDog.getRoute(routeId);
+        final route = await listApiDog.getRoute(routeId: routeId, refresh: false);
         if (route != null) {
           routes.add(route);
         }

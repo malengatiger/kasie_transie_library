@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
@@ -21,10 +21,10 @@ import 'package:uuid/uuid.dart';
 
 class MapViewer extends StatefulWidget {
   final lib.Route route;
-
+  final bool? refresh;
   const MapViewer({
     super.key,
-    required this.route,
+    required this.route, this.refresh,
   });
 
   @override
@@ -59,6 +59,7 @@ class MapViewerState extends State<MapViewer> {
   String routeMapViewer = 'Viewer', changeColor = '';
 
   AssociationRouteData? associationRouteData;
+
   @override
   void initState() {
     super.initState();
@@ -72,9 +73,13 @@ class MapViewerState extends State<MapViewer> {
     setState(() {
       busy = true;
     });
-    associationRouteData = await listApiDog.getAssociationRouteData(
-        widget.route.associationId!, false);
+    pp('\n\n$mm getting route data for ${widget.route.name}');
+    associationRouteData = await listApiDog.getSingleRouteData(
+        widget.route.routeId!, widget.refresh == null? false: true);
+
     if (associationRouteData != null) {
+      pp('$mm route data found: ${associationRouteData?.routeDataList.length} routes');
+
       for (var routeData in associationRouteData!.routeDataList) {
         if (routeData.routeId == widget.route.routeId!) {
           routePoints = routeData.routePoints;
@@ -82,12 +87,14 @@ class MapViewerState extends State<MapViewer> {
         }
       }
     }
-
     if (routePoints.isEmpty) {
-      _showNoPointsDialog();
+      //_showNoPointsDialog();
+      if (mounted) {
+        showErrorToast(message: 'Route has not been mapped yet', context: context);
+      }
       return;
     }
-    pp('$mm .......... _getRouteData completed : ${associationRouteData!.routeDataList.length} routes found.');
+    pp('$mm .......... _getRouteData completed : $routePoints routePoints found.');
 
     await _setMapPolyLine();
     await _setRouteLandmarks();
@@ -219,6 +226,7 @@ class MapViewerState extends State<MapViewer> {
   }
 
   RouteData? routeData;
+
   Future _setCameraPosition() async {
     _myCurrentCameraPosition = CameraPosition(
       target: LatLng(
@@ -231,6 +239,7 @@ class MapViewerState extends State<MapViewer> {
   }
 
   int index = 0;
+
   Future<BitmapDescriptor> getBitmapDescriptorFromAssetBytes(
       String path) async {
     final ByteData data = await rootBundle.load(path);
@@ -281,6 +290,7 @@ class MapViewerState extends State<MapViewer> {
   String waitingForGPS = 'waiting for mapping ...';
   bool showColors = false;
   var topHeight = 100.0;
+
   @override
   Widget build(BuildContext context) {
     pp('$mm .......... build ... markers: ${_markers.length} polyline: ${_polyLines.length}');

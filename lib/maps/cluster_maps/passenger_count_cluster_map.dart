@@ -51,7 +51,7 @@ class PassengerCountClusterMapState extends State<PassengerCountClusterMap>
       m[value.passengerCount.routeId!] = value.passengerCount.routeName!;
     }
     for (var value1 in m.keys.toList()) {
-      final route = await listApiDog.getRoute(value1);
+      final route = await listApiDog.getRoute(routeId: value1, refresh: false);
       routes.add(route!);
     }
     pp('${routes.length} routes filtered');

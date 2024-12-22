@@ -60,7 +60,7 @@ class TinyBloc {
 
       final user = prefs.getUser();
       if (user != null) {
-        route = await listApiDog.getRoute(routeId);
+        route = await listApiDog.getRoute(routeId: routeId, refresh: false);
         if (route != null) {
         _streamController.sink.add(route);
         }

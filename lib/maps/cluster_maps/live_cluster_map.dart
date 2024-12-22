@@ -102,7 +102,7 @@ class LiveClusterMapState extends State<LiveClusterMap>
       m[value.routeId!] = value.routeName!;
     }
     for (var value1 in m.keys.toList()) {
-      final route = await listApiDog.getRoute(value1);
+      final route = await listApiDog.getRoute(routeId: value1, refresh: false);
       routes.add(route!);
     }
     pp('$mm ${routes.length} distinct routes from dispatches and requests ');

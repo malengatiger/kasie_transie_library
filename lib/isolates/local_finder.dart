@@ -126,7 +126,7 @@ class LocalFinder {
         radiusInMetres: radiusInMetres);
 
     if (routeLandmarks.isNotEmpty) {
-      final rt = await listApiDog.getRoute(routeLandmarks.first.routeId!);
+      final rt = await listApiDog.getRoute(routeId: routeLandmarks.first.routeId!, refresh:   false);
       return rt;
     } else {
       final user = prefs.getUser();
@@ -152,7 +152,7 @@ class LocalFinder {
     var rList = <Route>[];
     var map = HashMap<String, Route>();
     for (var rk in routeLandmarks) {
-      final rt = await listApiDog.getRoute(rk.routeId!);
+      final rt = await listApiDog.getRoute(routeId: rk.routeId!, refresh: false);
       if (rt != null) {
         map[rt.routeId!] = rt;
       }

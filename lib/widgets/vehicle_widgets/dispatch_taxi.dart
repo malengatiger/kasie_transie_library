@@ -174,6 +174,8 @@ class DispatchTaxiState extends State<DispatchTaxi>
           landmarkName: mark?.landmarkName,
           routeLandmarkId: mark?.landmarkId);
       //
+      pp('$mm ... _sendTheDispatchRecord ... sending: ${dispatchRecord.toJson()}');
+      myPrettyJsonPrint(dispatchRecord.toJson());
       _dataApiDog.addDispatchRecord(dispatchRecord);
       pp('$mm ... _sendTheDispatchRecord ... sent ..... ${dispatchRecord.toJson()}');
 

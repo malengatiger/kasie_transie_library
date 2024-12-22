@@ -153,18 +153,18 @@ class AppAuth {
     if (user != null) {
       token = await user.getIdToken(true);
       await user.getIdTokenResult(true).then((idTokenResult) async {
-        pp('$locks getIdTokenResult: 🍎 expirationTime: ${idTokenResult.expirationTime?.toIso8601String()} ');
+        // pp('$locks getIdTokenResult: 🍎 expirationTime: ${idTokenResult.expirationTime?.toIso8601String()} ');
 
         DateTime expirationTime = idTokenResult.expirationTime as DateTime;
         Duration diff = expirationTime.difference(DateTime.now());
         token = idTokenResult.token;
-        pp('$locks expiration difference in 🍎 seconds: ${diff.inSeconds} ');
+        // pp('$locks expiration difference in 🍎 seconds: ${diff.inSeconds} ');
         if (diff.inSeconds < 0) {
           token = await user.getIdToken(true);
           return token;
         }
         if (diff.inMinutes < 10) {
-          pp('$locks expiration difference in 🍎 minutes: ${diff.inMinutes} ');
+          // pp('$locks expiration difference in 🍎 minutes: ${diff.inMinutes} ');
           token = await user.getIdToken(true);
           return token;
         }

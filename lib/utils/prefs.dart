@@ -120,7 +120,7 @@ class Prefs {
     }
     var jx = json.decode(string);
     var user = Commuter.fromJson(jx);
-    pp("🌽 🌽 🌽 Prefs: getCommuter: 🧩  ${user.toJson()} retrieved");
+    pp("🌽 🌽 🌽 Prefs: getCommuter: 🧩  ${user.commuterId} retrieved");
     return user;
   }
 

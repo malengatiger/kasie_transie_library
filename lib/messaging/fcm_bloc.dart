@@ -23,7 +23,6 @@ import '../utils/error_handler.dart';
 import '../utils/functions.dart';
 import '../utils/kasie_exception.dart';
 import '../utils/prefs.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 final FCMService fcmBloc = FCMService(fb.FirebaseMessaging.instance);
 String? appName;
@@ -41,6 +40,7 @@ class FCMService {
   lib.Vehicle? car;
   lib.Association? ass;
   bool demoFlag = false;
+
   //
   late ListApiDog listApiDog;
   late Prefs prefs;
@@ -49,11 +49,11 @@ class FCMService {
 
   Future initialize() async {
     pp('\n\n$mm ... FirebaseMessaging initialize starting ... ');
-     listApiDog = GetIt.instance<ListApiDog>();
-     prefs = GetIt.instance<Prefs>();
-     dataApiDog = GetIt.instance<DataApiDog>();
-     errorHandler = GetIt.instance<ErrorHandler>();
-     locationBloc = GetIt.instance<DeviceLocationBloc>();
+    listApiDog = GetIt.instance<ListApiDog>();
+    prefs = GetIt.instance<Prefs>();
+    dataApiDog = GetIt.instance<DataApiDog>();
+    errorHandler = GetIt.instance<ErrorHandler>();
+    locationBloc = GetIt.instance<DeviceLocationBloc>();
 
     user = prefs.getUser();
     car = prefs.getCar();
@@ -79,8 +79,8 @@ class FCMService {
 
     const DarwinInitializationSettings initializationSettingsDarwin =
         DarwinInitializationSettings(
-          defaultPresentSound: true,
-            );
+      defaultPresentSound: true,
+    );
 
     const LinuxInitializationSettings initializationSettingsLinux =
         LinuxInitializationSettings(defaultActionName: 'Open notification');
@@ -122,7 +122,6 @@ class FCMService {
       // ...
       'YOUR_REGISTRATION_TOKEN_n'
     ];
-
   }
 
   Future<void> subscribeForBackendMonitor(String app) async {
@@ -280,10 +279,19 @@ class FCMService {
         .subscribeToTopic('${Constants.routeUpdateRequest}$associationId');
     pp('$newMM ..... FCM: subscribed to ${Constants.routeUpdateRequest}$associationId');
     //
-
-    pp('$newMM ........................................'
-        ' FCM: subscribed to all ${E.pear} 1 RouteBuilder FCM topics\n\n');
   }
+
+  Future<void> subscribeForCommuterDispatch(
+      String app, String associationId) async {
+    appName = app;
+    newMM = '$newMM$app 🔷🔷';
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.dispatchRecord}$associationId');
+    pp('\n\n$newMM FCM: commuter subscribed to ${Constants.dispatchRecord}$associationId \n\n');
+    //
+  }
+
   Future<void> subscribeForRouteBuilder(String app) async {
     String? associationId;
     appName = app;
@@ -396,7 +404,6 @@ class FCMService {
     pp("$newMM onDidReceiveLocalNotification: $red processing message title: $title body: $body ");
   }
 
-
   Future<void> processFCMMessage(fb.RemoteMessage message, String type) async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     myName = packageInfo.appName;
@@ -460,7 +467,8 @@ class FCMService {
         break;
 
       case Constants.userGeofenceEvent:
-        _userGeofenceStreamController.sink.add(UserGeofenceEvent.fromJson(data));
+        _userGeofenceStreamController.sink
+            .add(UserGeofenceEvent.fromJson(data));
         break;
 
       case Constants.vehicleMediaRequest:
@@ -543,6 +551,10 @@ class FCMService {
       if (car!.vehicleId == dispatchRecord.vehicleId) {
         _dispatchStreamController.sink.add(dispatchRecord);
       }
+    }
+    var commuter = prefs.getCommuter();
+    if (commuter != null) {
+      _dispatchStreamController.sink.add(dispatchRecord);
     }
   }
 
@@ -630,6 +642,7 @@ class FCMService {
       return;
     }
   }
+
   void _processCommuterResponse(lib.CommuterResponse commuterResponse) {
     pp('$newMM _processCommuterResponse ... ${commuterResponse.routeName}');
 
@@ -638,7 +651,6 @@ class FCMService {
       return;
     }
     _commuterResponseStreamController.sink.add(commuterResponse);
-
   }
 
   void _processHeartbeat(lib.VehicleHeartbeat heartbeat) {
@@ -675,7 +687,6 @@ class FCMService {
       pp('$newMM location request is for me! ... must respond!!');
       final loc = await locationBloc.getLocation();
       final resp = lib.LocationResponse(
-
         associationId: car.associationId,
         created: DateTime.now().toUtc().toIso8601String(),
         userId: request.userId,
@@ -758,16 +769,16 @@ class FCMService {
   Stream<lib.CommuterRequest> get commuterRequestStreamStream =>
       _commuterRequestStreamController.stream;
 
-  final StreamController<lib.CommuterResponse> _commuterResponseStreamController =
-  StreamController.broadcast();
+  final StreamController<lib.CommuterResponse>
+      _commuterResponseStreamController = StreamController.broadcast();
 
   Stream<lib.CommuterResponse> get commuterResponseStreamStream =>
       _commuterResponseStreamController.stream;
 
-
   addCommuterRequest(CommuterRequest request) {
     _commuterRequestStreamController.sink.add(request);
   }
+
   final StreamController<lib.VehicleHeartbeat> _heartbeatStreamController =
       StreamController.broadcast();
 
@@ -817,8 +828,7 @@ String? myName;
 var mxx = '💙💙💙💙💙💙FCM Background Processing:  💙💙';
 
 @pragma('vm:entry-point')
-Future kasieFirebaseMessagingBackgroundHandler(
-    fb.RemoteMessage message) async {
+Future kasieFirebaseMessagingBackgroundHandler(fb.RemoteMessage message) async {
   // await Firebase.initializeApp();
   pp("\n\n$mxx 🍎🍎🍎🍎handle message in background 🍎🍎🍎🍎 ....");
 
