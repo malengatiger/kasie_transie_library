@@ -94,7 +94,7 @@ class MapViewerState extends State<MapViewer> {
       }
       return;
     }
-    pp('$mm .......... _getRouteData completed : $routePoints routePoints found.');
+    pp('$mm .......... _getRouteData completed : ${routePoints.length} routePoints found.');
 
     await _setMapPolyLine();
     await _setRouteLandmarks();
@@ -293,7 +293,7 @@ class MapViewerState extends State<MapViewer> {
 
   @override
   Widget build(BuildContext context) {
-    pp('$mm .......... build ... markers: ${_markers.length} polyline: ${_polyLines.length}');
+    // pp('$mm .......... build ... markers: ${_markers.length} polyline: ${_polyLines.length}');
 
     return Scaffold(
         key: _key,

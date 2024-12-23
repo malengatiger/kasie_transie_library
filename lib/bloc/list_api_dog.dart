@@ -739,6 +739,22 @@ class ListApiDog {
     }
     return localList;
   }
+  Future<List<DispatchRecord>> getRouteDispatchRecords(
+      {required String routeId,
+        required String startDate}) async {
+    var localList = <DispatchRecord>[];
+
+    try {
+      final url =
+          '${KasieEnvironment.getUrl()}dispatch/getRouteDispatchRecords?routeId=$routeId'
+          '&startDate=$startDate';
+      localList = await _getDispatchRecordsFromBackend(url: url);
+      pp('$mm DispatchRecord from backend:: ${localList.length}');
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
 
   Future<List<AmbassadorPassengerCount>>
       getAssociationAmbassadorPassengerCounts(
@@ -813,23 +829,6 @@ class ListApiDog {
     return localList;
   }
 
-  Future<List<DispatchRecord>> getRouteDispatchRecords(
-      {required String routeId,
-      required bool refresh,
-      required String startDate}) async {
-    var localList = <DispatchRecord>[];
-
-    try {
-      final url =
-          '${KasieEnvironment.getUrl()}getRouteDispatchRecords?routeId=$routeId'
-          '&startDate=$startDate';
-      localList = await _getDispatchRecordsFromBackend(url: url);
-      pp('$mm DispatchRecord from backend:: ${localList.length}');
-    } catch (e) {
-      pp(e);
-    }
-    return localList;
-  }
 
   Future<List<CommuterRequest>> getRouteCommuterRequests(
       {required String routeId,
