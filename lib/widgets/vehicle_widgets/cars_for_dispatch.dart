@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/vehicle_search.dart';
+import 'package:kasie_transie_library/widgets/scanners/kasie/last_scanner_widget.dart';
+
 import 'package:page_transition/page_transition.dart';
 
 import '../../maps/map_viewer.dart';
@@ -35,9 +39,8 @@ class _CarForDispatchState extends State<CarForDispatch> {
     }
   }
 
-  void _navigateToDispatch(vehicle) {
-    if (vehicle != null) {
-      pp('$mm vehicle to dispatch: ${vehicle!.vehicleReg} on ${widget.route.name}');
+  void _navigateToDispatch(lib.Vehicle vehicle) {
+    pp('$mm vehicle to dispatch: ${vehicle.vehicleReg} on ${widget.route.name}');
 
       if (mounted) {
         NavigationUtils.navigateTo(
@@ -45,31 +48,37 @@ class _CarForDispatchState extends State<CarForDispatch> {
           widget: DispatchTaxi(
               route: widget.route,
               onDispatched: (dr) {
-                pp('Car dispatched: ${dr.toJson()}');
+                pp('$mm DispatchTaxi onDispatched fired : Car dispatched: ');
+                myPrettyJsonPrint(dr.toJson());
               },
               vehicle: vehicle),
         );
       }
-    }
+
   }
 
   _scan() async {
-    showToast(
-        padding: 20,
-        duration: const Duration(seconds: 3),
-        backgroundColor: Colors.amber.shade800,
-        textStyle: myTextStyle(color: Colors.white),
-        message: 'Scanning feature under construction!',
-        context: context);
-    return;
+    // showToast(
+    //     padding: 20,
+    //     duration: const Duration(seconds: 3),
+    //     backgroundColor: Colors.amber.shade800,
+    //     textStyle: myTextStyle(color: Colors.white),
+    //     message: 'Scanning feature under construction!',
+    //     context: context);
+    // return;
 
     var vehicle = await NavigationUtils.navigateTo(
       context: context,
       widget: const ScanTaxi(),
     );
-    if (vehicle != null) {
-      pp('$mm vehicle scanned for dispatch: ${vehicle!.vehicleReg} on ${widget.route.name}');
+
+    if (vehicle != null && vehicle is lib.Vehicle) {
+      pp('$mm  _scan(): ....... vehicle scanned for dispatch: ${vehicle!.vehicleReg} on ${widget.route.name}');
       _navigateToDispatch(vehicle);
+    } else {
+      pp('$mm  _scan(): ... something wrong here : $vehicle');
+      var car = lib.Vehicle.fromJson(vehicle);
+      _navigateToDispatch(car);
     }
   }
 
@@ -108,7 +117,7 @@ class _CarForDispatchState extends State<CarForDispatch> {
                       child: Text(
                         widget.route.name!,
                         style: myTextStyle(
-                            fontSize: 28,
+                            fontSize: 20,
                             weight: FontWeight.w900,
                             color: Theme.of(context).primaryColor),
                       ),
@@ -135,7 +144,7 @@ class _CarForDispatchState extends State<CarForDispatch> {
                       'Search Taxi',
                       style: myTextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: 16,
                       ),
                     ),
                   )),
@@ -155,7 +164,7 @@ class _CarForDispatchState extends State<CarForDispatch> {
                       'Scan Taxi',
                       style: myTextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: 16,
                       ),
                     ),
                   )),
@@ -176,6 +185,37 @@ class ScanTaxi extends StatefulWidget {
 
 class _ScanTaxiState extends State<ScanTaxi> {
   @override
+  void initState() {
+    super.initState();
+    -_navigateToScanner();
+  }
+
+  static const mm = '🍎🍎🍎🍎 ScanTaxi 🍎';
+  _navigateToScanner() async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    if (mounted) {
+      try {
+           await NavigationUtils.navigateTo(
+            context: context,
+            widget: LastScannerWidget(onScanned: (json) {
+              pp('$mm ScanTaxi: onScanned; ... will pop');
+              if (json['vehicleId'] != null && json['vehicleReg'] != null) {
+                myPrettyJsonPrint(json);
+                var car = lib.Vehicle.fromJson(json);
+                Navigator.of(context).pop(car);
+              } else {
+                showErrorToast(
+                    message: 'The QR Code scanned is not a vehicle',
+                    context: context);
+              }
+            }));
+      } catch (e, s) {
+        pp('$e $s');
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(title: const Text('Scan Taxi'), actions: [
@@ -183,6 +223,16 @@ class _ScanTaxiState extends State<ScanTaxi> {
               onPressed: () {},
               icon: const FaIcon(FontAwesomeIcons.mapLocation))
         ]),
-        body: const SafeArea(child: Center(child: Text('Scanner to come'))));
+        body: SafeArea(
+            child: Stack(
+          children: [
+            Center(
+                child: ElevatedButton(
+                    onPressed: () {
+                      _navigateToScanner();
+                    },
+                    child: const Text('Start Scan')))
+          ],
+        )));
   }
 }

@@ -5,7 +5,6 @@ import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
-import 'package:page_transition/page_transition.dart';
 
 import '../../data/route_data.dart';
 import '../../utils/functions.dart';
@@ -32,6 +31,7 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
   lib.Route? route;
   bool busy = false;
   lib.User? user;
+  int limit = 1;
 
   @override
   void initState() {
@@ -53,9 +53,10 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
       if (user != null) {
         var routeData = await listApiDog.getAssociationRouteData(
             user!.associationId!, false);
+
         routes = await devLoc.getRouteDistances(
-            routeData: routeData!, limitMetres: 2000);
-        routes.sort((a, b) => a.name!.compareTo(b.name!));
+            routeData: routeData!, limitMetres: limit * 1000);
+        // routes.sort((a, b) => a.name!.compareTo(b.name!));
 
         pp('$mm nearest routes: ${routes.length}');
       }
@@ -95,11 +96,12 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
                     });
                   },
                   child: const Text('No')),
-
-              TextButton(onPressed: () {
-                Navigator.of(context).pop(route!);
-                _navigateToCarForDispatch();
-              }, child: const Text('Yes')),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(route!);
+                    _navigateToCarForDispatch();
+                  },
+                  child: const Text('Yes')),
             ],
           );
         });
@@ -139,7 +141,6 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       gapH32,
-                      gapH32,
                       InkWell(
                         onTap: () {
                           if (route != null) {
@@ -147,10 +148,44 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
                           }
                         },
                         child: Text(
-                            route == null ? 'Select Route' : route!.name!,
+                            route == null ? 'Select Route for Dispatch' : route!.name!,
                             style: myTextStyleMediumLarge(context, 20)),
                       ),
                       gapH32,
+                      Row(
+                        children: [
+                          const Text('Search Radius in KM'),
+                          gapW32,
+                          DropdownButton<int>(
+                              dropdownColor: Colors.white,
+                              items: const [
+                                DropdownMenuItem<int>(
+                                    value: 1, child: Text('1')),
+                                DropdownMenuItem<int>(
+                                    value: 2, child: Text('2')),
+                                DropdownMenuItem<int>(
+                                    value: 3, child: Text('3')),
+                                DropdownMenuItem<int>(
+                                    value: 4, child: Text('4')),
+                                DropdownMenuItem<int>(
+                                    value: 5, child: Text('5')),
+                              ],
+                              onChanged: (value) {
+                                if (value != null) {
+                                  setState(() {
+                                    limit = value ;
+                                  });
+                                  _getRouteData();
+                                }
+                              }),
+                          gapW32,
+                          Text(
+                            '$limit km',
+                            style: myTextStyle(
+                                weight: FontWeight.w900, color: Colors.red),
+                          )
+                        ],
+                      ),
                       gapH32,
                       routes.isEmpty
                           ? Center(
@@ -182,17 +217,33 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
                                         },
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(
-                                              vertical: 4),
+                                              vertical: 2),
                                           child: Card(
                                             elevation: 8,
                                             child: Padding(
-                                              padding: const EdgeInsets.all(16),
-                                              child: Text(
-                                                r.name!,
-                                                style:
-                                                    myTextStyle(fontSize: 18),
-                                              ),
-                                            ),
+                                                padding:
+                                                    const EdgeInsets.all(16),
+                                                child: Row(
+                                                  children: [
+                                                    SizedBox(
+                                                        width: 24,
+                                                        child: Text(
+                                                          '${index + 1}',
+                                                          style: myTextStyle(
+                                                              weight: FontWeight
+                                                                  .w900,
+                                                              color:
+                                                                  Colors.pink),
+                                                        )),
+                                                    Flexible(
+                                                      child: Text(
+                                                        r.name!,
+                                                        style: myTextStyle(
+                                                            fontSize: 14),
+                                                      ),
+                                                    )
+                                                  ],
+                                                )),
                                           ),
                                         ),
                                       );

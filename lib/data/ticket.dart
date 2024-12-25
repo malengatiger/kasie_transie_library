@@ -11,8 +11,7 @@ class Ticket {
   int? numberOfTrips;
   TicketType? ticketType;
   List<TicketRoute>? ticketRoutes = [];
-  String? created, qrCodeUrl, bucketFileName;
-  String? qrCodeBytes;
+  String? created, qrCodeUrl;
   bool? validOnAllRoutes = false;
 
   Ticket(
@@ -24,9 +23,7 @@ class Ticket {
       required this.ticketRoutes,
       this.numberOfTrips,
       this.created,
-      this.bucketFileName,
       this.qrCodeUrl,
-      this.qrCodeBytes,
       this.validOnAllRoutes,
       required this.ticketType});
 
@@ -42,33 +39,30 @@ class CommuterTicket {
   String? commuterTicketId,
       ticketId,
       commuterId,
-      commuterEmail,
+      commuterEmail, qrCodeUrl,
       commuterCellphone;
   double? value;
   int? numberOfTrips;
-  String? validFromDate, validToDate, bucketFileName;
-  String? qrCodeBytes;
-
+  String? validFromDate, validToDate;
   TicketType? ticketType;
   List<TicketRoute> ticketRoutes = [];
 
-  CommuterTicket(
-      this.associationId,
-      this.userId,
-      this.associationName,
-      this.ticketId,
-      this.commuterId,
+  CommuterTicket({
+      required this.associationId,
+      required this.userId,
+      required this.associationName,
+      required this.ticketId,
+      required this.commuterId,
       this.commuterEmail,
       this.commuterCellphone,
-      this.commuterTicketId,
-      this.value,
-      this.qrCodeBytes,
-      this.bucketFileName,
-      this.validFromDate,
-      this.numberOfTrips,
-      this.validToDate,
-      this.ticketRoutes,
-      this.ticketType);
+      required this.commuterTicketId,
+      required this.value,
+      this.qrCodeUrl,
+      required this.validFromDate,
+      required this.numberOfTrips,
+      required this.validToDate,
+      required this.ticketRoutes,
+      required this.ticketType});
 
   factory CommuterTicket.fromJson(Map<String, dynamic> json) =>
       _$CommuterTicketFromJson(json);

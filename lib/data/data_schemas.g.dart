@@ -666,7 +666,6 @@ Vehicle _$VehicleFromJson(Map<String, dynamic> json) => Vehicle(
       ownerName: json['ownerName'] as String?,
       ownerId: json['ownerId'] as String?,
       created: json['created'] as String?,
-      qrCodeBytes: json['qrCodeBytes'] as String?,
       dateInstalled: json['dateInstalled'] as String?,
       vehicleReg: json['vehicleReg'] as String?,
       make: json['make'] as String?,
@@ -680,7 +679,6 @@ Vehicle _$VehicleFromJson(Map<String, dynamic> json) => Vehicle(
       photos: (json['photos'] as List<dynamic>?)
           ?.map((e) => VehiclePhoto.fromJson(e as Map<String, dynamic>))
           .toList(),
-      bucketFileName: json['bucketFileName'] as String?,
       videos: (json['videos'] as List<dynamic>?)
           ?.map((e) => VehicleVideo.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -700,10 +698,8 @@ Map<String, dynamic> _$VehicleToJson(Vehicle instance) => <String, dynamic>{
       'model': instance.model,
       'year': instance.year,
       'qrCodeUrl': instance.qrCodeUrl,
-      'bucketFileName': instance.bucketFileName,
       'passengerCapacity': instance.passengerCapacity,
       'active': instance.active,
-      'qrCodeBytes': instance.qrCodeBytes,
       'associationId': instance.associationId,
       'associationName': instance.associationName,
       'photos': instance.photos?.map((e) => e.toJson()).toList(),
@@ -887,13 +883,11 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       associationName: json['associationName'] as String?,
       fcmToken: json['fcmToken'] as String?,
       password: json['password'] as String?,
-      bucketFileName: json['bucketFileName'] as String?,
       email: json['email'] as String?,
       cellphone: json['cellphone'] as String?,
-      qrCodeBytes: json['qrCodeBytes'] as String?,
+      qrCodeUrl: json['qrCodeUrl'] as String?,
       profileThumbnail: json['profileThumbnail'] as String?,
       created: json['created'] as String?,
-      qrCodeUrl: json['qrCodeUrl'] as String?,
       profileUrl: json['profileUrl'] as String?,
     );
 
@@ -909,13 +903,11 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'fcmToken': instance.fcmToken,
       'password': instance.password,
       'email': instance.email,
-      'bucketFileName': instance.bucketFileName,
-      'qrCodeBytes': instance.qrCodeBytes,
+      'qrCodeUrl': instance.qrCodeUrl,
       'cellphone': instance.cellphone,
       'profileThumbnail': instance.profileThumbnail,
       'profileUrl': instance.profileUrl,
       'created': instance.created,
-      'qrCodeUrl': instance.qrCodeUrl,
     };
 
 RegistrationBag _$RegistrationBagFromJson(Map<String, dynamic> json) =>

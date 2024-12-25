@@ -7,6 +7,7 @@ import 'package:kasie_transie_library/widgets/vehicle_widgets/vehicle_search.dar
 import 'package:page_transition/page_transition.dart';
 
 import '../../maps/map_viewer.dart';
+import '../vehicle_widgets/cars_for_dispatch.dart';
 
 class CarForAmbassador extends StatefulWidget {
   const CarForAmbassador({super.key, required this.associationId});
@@ -36,24 +37,28 @@ class _CarForAmbassadorState extends State<CarForAmbassador> {
 
 
   _scan() async {
-    showToast(
-        padding: 20,
-        duration: const Duration(seconds: 3),
-        backgroundColor: Colors.amber.shade800,
-        textStyle: myTextStyle(color: Colors.white),
-        message: 'Scanning feature under construction!',
-        context: context);
-    return;
+    // showToast(
+    //     padding: 20,
+    //     duration: const Duration(seconds: 3),
+    //     backgroundColor: Colors.amber.shade800,
+    //     textStyle: myTextStyle(color: Colors.white),
+    //     message: 'Scanning feature under construction!',
+    //     context: context);
+    // return;
 
-    // var vehicle = await NavigationUtils.navigateTo(
-    //   context: context,
-    //   widget: const ScanTaxi(),
-    // );
-    // if (vehicle != null) {
-    //   pp('$mm vehicle scanned for dispatch: ${vehicle!.vehicleReg} on ${widget
-    //       .route.name}');
-    //   _navigateToDispatch(vehicle);
-    // }
+    var vehicle = await NavigationUtils.navigateTo(
+      context: context,
+      widget: ScanTaxi(onScanned: (v ) {
+        Navigator.of(context).pop(v);
+
+      },),
+    );
+    if (vehicle != null) {
+      pp('$mm vehicle found: ${vehicle!.vehicleReg}');
+      if (mounted) {
+        Navigator.of(context).pop(vehicle);
+      }
+    }
   }
 
   @override
@@ -97,7 +102,7 @@ class _CarForAmbassadorState extends State<CarForAmbassador> {
                           'Search Taxi',
                           style: myTextStyle(
                             color: Colors.white,
-                            fontSize: 24,
+                            fontSize: 18,
                           ),
                         ),
                       )),
@@ -118,7 +123,7 @@ class _CarForAmbassadorState extends State<CarForAmbassador> {
                           'Scan Taxi',
                           style: myTextStyle(
                             color: Colors.white,
-                            fontSize: 24,
+                            fontSize: 18,
                           ),
                         ),
                       )),
@@ -127,25 +132,5 @@ class _CarForAmbassadorState extends State<CarForAmbassador> {
             ),
           )),
     );
-  }
-}
-
-class ScanTaxi extends StatefulWidget {
-  const ScanTaxi({super.key});
-
-  @override
-  State<ScanTaxi> createState() => _ScanTaxiState();
-}
-
-class _ScanTaxiState extends State<ScanTaxi> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: const Text('Scan Taxi'), actions: [
-          IconButton(
-              onPressed: () {},
-              icon: const FaIcon(FontAwesomeIcons.mapLocation))
-        ]),
-        body: const SafeArea(child: Center(child: Text('Scanner to come'))));
   }
 }

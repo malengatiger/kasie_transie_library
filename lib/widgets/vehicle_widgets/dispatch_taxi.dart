@@ -1,5 +1,6 @@
 import 'package:badges/badges.dart' as bd;
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_it/get_it.dart';
@@ -186,6 +187,7 @@ class DispatchTaxiState extends State<DispatchTaxi>
         showToast(
             padding: 24,
             backgroundColor: Colors.green.shade900,
+            toastGravity: ToastGravity.BOTTOM,
             duration: const Duration(seconds: 5),
             textStyle: const TextStyle(color: Colors.white),
             message:
@@ -238,82 +240,85 @@ class DispatchTaxiState extends State<DispatchTaxi>
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Card(
-                elevation: 4,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Card(
-                        elevation: 8,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text(
-                            '${widget.route.name}',
-                            style: myTextStyleMediumLarge(context, 24),
-                          ),
-                        ),
-                      ),
-                    ),
-                    gapH32,
-                    Text(
-                      '${widget.vehicle!.vehicleReg}',
-                      style: myTextStyle(
-                          color: Colors.pink,
-                          fontSize: 48,
-                          weight: FontWeight.w900),
-                    ),
-                    gapH32,
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        const Text('Number of Passengers'),
-                        NumberDropDown(
-                            onNumberPicked: (number) {
-                              setState(() {
-                                passengerCount = number;
-                              });
-                            },
-                            color: Colors.black,
-                            count: 36,
-                            fontSize: 20),
-                        Text('$passengerCount',
-                            style: myTextStyle(
-                                color: Colors.blue,
-                                fontSize: 28,
-                                weight: FontWeight.w900)),
-                      ],
-                    ),
-                    gapH32,
-                    gapH32,
-                    gapH32,
-                    ElevatedButton(
-                      style: const ButtonStyle(
-                          backgroundColor: WidgetStatePropertyAll(Colors.blue),
-                          elevation: WidgetStatePropertyAll(8.0)),
-                      onPressed: () {
-                        _sendTheDispatchRecord();
-                      },
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Card(
+                      elevation: 8,
                       child: Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16),
                         child: Text(
-                          dispatchTaxi == null
-                              ? 'Dispatch Taxi'
-                              : dispatchTaxi!,
+                          '${widget.route.name}',
                           style: myTextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              weight: FontWeight.normal),
+                              weight: FontWeight.w900,
+                              color: Colors.grey,
+                              fontSize: 20),
                         ),
                       ),
                     ),
-                    gapH32,
-                  ],
-                ),
+                  ),
+                  gapH32,
+                  Text(
+                    '${widget.vehicle!.vehicleReg}',
+                    style: myTextStyle(
+                        color: Colors.pink,
+                        fontSize: 48,
+                        weight: FontWeight.w900),
+                  ),
+                  gapH32,
+                  gapH32,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      const Text('Number of Passengers'),
+                      NumberDropDown(
+                          onNumberPicked: (number) {
+                            setState(() {
+                              passengerCount = number;
+                            });
+                          },
+                          color: Colors.black,
+                          count: 36,
+                          fontSize: 20),
+                      Text('$passengerCount',
+                          style: myTextStyle(
+                              color: Colors.blue,
+                              fontSize: 28,
+                              weight: FontWeight.w900)),
+                    ],
+                  ),
+                  gapH32,
+                  gapH32,
+                ],
               ),
             ),
+            Positioned(
+                bottom: 24,
+                right: 24,
+                child: SizedBox(
+                  width: 300,
+                  child: ElevatedButton(
+                    style: const ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(Colors.blue),
+                        elevation: WidgetStatePropertyAll(8.0)),
+                    onPressed: () {
+                      _sendTheDispatchRecord();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        dispatchTaxi == null ? 'Dispatch Taxi' : dispatchTaxi!,
+                        style: myTextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            weight: FontWeight.normal),
+                      ),
+                    ),
+                  ),
+                )),
             busy
                 ? const Positioned(
                     child: Center(

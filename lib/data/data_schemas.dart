@@ -671,10 +671,9 @@ class Vehicle {
   String? make;
   String? model;
   String? year;
-  String? qrCodeUrl, bucketFileName;
+  String? qrCodeUrl;
   int? passengerCapacity;
   int? active;
-  String? qrCodeBytes;
 
   String? associationId, associationName;
   List<VehiclePhoto>? photos = [];
@@ -686,7 +685,6 @@ class Vehicle {
       this.ownerName,
       this.ownerId,
       this.created,
-      this.qrCodeBytes,
       this.dateInstalled,
       required this.vehicleReg,
       required this.make,
@@ -698,7 +696,6 @@ class Vehicle {
       required this.passengerCapacity,
       required this.associationId,
       this.photos,
-      this.bucketFileName,
       this.videos,
       required this.associationName});
 
@@ -887,10 +884,10 @@ class User {
   String? associationName;
   String? fcmToken;
   String? password;
-  String? email, bucketFileName;
-  String? qrCodeBytes;
+  String? email;
+  String? qrCodeUrl;
 
-  String? cellphone, profileThumbnail, profileUrl, created, qrCodeUrl;
+  String? cellphone, profileThumbnail, profileUrl, created;
 
   User(
       {required this.userType,
@@ -903,13 +900,11 @@ class User {
       required this.associationName,
       this.fcmToken,
       this.password,
-      this.bucketFileName,
       required this.email,
       required this.cellphone,
-      this.qrCodeBytes,
+      this.qrCodeUrl,
       this.profileThumbnail,
       this.created,
-      this.qrCodeUrl,
       this.profileUrl});
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
