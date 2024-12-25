@@ -48,15 +48,18 @@ class _CarForAmbassadorState extends State<CarForAmbassador> {
 
     var vehicle = await NavigationUtils.navigateTo(
       context: context,
-      widget: ScanTaxi(onScanned: (v ) {
-        Navigator.of(context).pop(v);
-
-      },),
+      widget: const ScanTaxi(),
     );
-    if (vehicle != null) {
-      pp('$mm vehicle found: ${vehicle!.vehicleReg}');
+    if (vehicle != null && vehicle is lib.Vehicle) {
+      pp('$mm  _scan(): ....... vehicle scanned for dispatch: ${vehicle!.vehicleReg}');
       if (mounted) {
         Navigator.of(context).pop(vehicle);
+      }
+    } else {
+      pp('$mm  _scan(): ... something wrong here : $vehicle');
+      var car = lib.Vehicle.fromJson(vehicle);
+      if (mounted) {
+        Navigator.of(context).pop(car);
       }
     }
   }

@@ -31,6 +31,7 @@ class NearestRoutesListState extends State<NearestRoutesList>
   lib.Route? route;
   bool busy = false;
   lib.User? user;
+  int limit = 1;
 
   @override
   void initState() {
@@ -51,8 +52,7 @@ class NearestRoutesListState extends State<NearestRoutesList>
         var routeData = await listApiDog.getAssociationRouteData(
             widget.associationId, false);
 
-        routes = await devLoc.getRouteDistances(routeData: routeData!, limitMetres: 2000);
-        routes.sort((a, b) => a.name!.compareTo(b.name!));
+        routes = await devLoc.getRouteDistances(routeData: routeData!, limitMetres: limit * 1000);
 
         pp('$mm nearest routes: ${routes.length}');
 
@@ -101,6 +101,40 @@ class NearestRoutesListState extends State<NearestRoutesList>
                         child: Text(
                             route == null ? 'Select Route' : route!.name!,
                             style: myTextStyleMediumLarge(context, 20)),
+                      ),
+                      Row(
+                        children: [
+                          const Text('Search Radius in KM'),
+                          gapW32,
+                          DropdownButton<int>(
+                              dropdownColor: Colors.white,
+                              items: const [
+                                DropdownMenuItem<int>(
+                                    value: 1, child: Text('1')),
+                                DropdownMenuItem<int>(
+                                    value: 2, child: Text('2')),
+                                DropdownMenuItem<int>(
+                                    value: 3, child: Text('3')),
+                                DropdownMenuItem<int>(
+                                    value: 4, child: Text('4')),
+                                DropdownMenuItem<int>(
+                                    value: 5, child: Text('5')),
+                              ],
+                              onChanged: (value) {
+                                if (value != null) {
+                                  setState(() {
+                                    limit = value ;
+                                  });
+                                  _getRouteData();
+                                }
+                              }),
+                          gapW32,
+                          Text(
+                            '$limit km',
+                            style: myTextStyle(
+                                weight: FontWeight.w900, color: Colors.red),
+                          )
+                        ],
                       ),
                       gapH32,
                       gapH32,
