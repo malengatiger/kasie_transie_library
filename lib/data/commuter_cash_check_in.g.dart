@@ -19,7 +19,7 @@ CommuterCashCheckIn _$CommuterCashCheckInFromJson(Map<String, dynamic> json) =>
       position: json['position'] == null
           ? null
           : Position.fromJson(json['position'] as Map<String, dynamic>),
-      receiptBucketFileName: json['receiptBucketFileName'] as String?,
+      receiptUrl: json['receiptUrl'] as String?,
       created: json['created'] as String?,
     );
 
@@ -35,6 +35,6 @@ Map<String, dynamic> _$CommuterCashCheckInToJson(
       'userId': instance.userId,
       'userName': instance.userName,
       'created': instance.created,
-      'receiptBucketFileName': instance.receiptBucketFileName,
+      'receiptUrl': instance.receiptUrl,
       'position': instance.position,
     };

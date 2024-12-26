@@ -11,7 +11,7 @@ class RankFeeCashCheckIn {
       associationId,
       associationName;
   double? amount;
-  String? userId, userName, created, receiptBucketFileName;
+  String? userId, userName, created, receiptUrl;
   Position? position;
 
   RankFeeCashCheckIn(
@@ -23,7 +23,7 @@ class RankFeeCashCheckIn {
       required this.amount,
       required this.userId,
       required this.position,
-      required this.receiptBucketFileName,
+      required this.receiptUrl,
       required this.userName,
       required this.created});
 

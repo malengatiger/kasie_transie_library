@@ -78,7 +78,7 @@ class RankFeeCashCheckInWidgetState extends State<RankFeeCashCheckInWidget>
         userName: '${user.firstName} ${user.lastName}',
         created: DateTime.now().toUtc().toIso8601String(),
         position: null,
-        receiptBucketFileName: '');
+        receiptUrl: '');
     try {
       var res = await dataApiDog.addCommuterCashCheckIn(ccp);
       pp('$mm $title submitted OK: ${res.toJson()}');

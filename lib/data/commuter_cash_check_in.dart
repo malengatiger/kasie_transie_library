@@ -12,7 +12,7 @@ class CommuterCashCheckIn {
       associationId,
       associationName;
   double? amount;
-  String? userId, userName, created, receiptBucketFileName;
+  String? userId, userName, created, receiptUrl;
   Position? position;
 
   CommuterCashCheckIn(
@@ -25,7 +25,7 @@ class CommuterCashCheckIn {
       required this.userId,
       required this.userName,
       required this.position,
-      required this.receiptBucketFileName,
+      required this.receiptUrl,
       required this.created});
 
   factory CommuterCashCheckIn.fromJson(Map<String, dynamic> json) =>

@@ -18,7 +18,7 @@ RankFeeCashCheckIn _$RankFeeCashCheckInFromJson(Map<String, dynamic> json) =>
       position: json['position'] == null
           ? null
           : Position.fromJson(json['position'] as Map<String, dynamic>),
-      receiptBucketFileName: json['receiptBucketFileName'] as String?,
+      receiptUrl: json['receiptUrl'] as String?,
       userName: json['userName'] as String?,
       created: json['created'] as String?,
     );
@@ -34,6 +34,6 @@ Map<String, dynamic> _$RankFeeCashCheckInToJson(RankFeeCashCheckIn instance) =>
       'userId': instance.userId,
       'userName': instance.userName,
       'created': instance.created,
-      'receiptBucketFileName': instance.receiptBucketFileName,
+      'receiptUrl': instance.receiptUrl,
       'position': instance.position,
     };

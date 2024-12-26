@@ -222,6 +222,39 @@ class DataApiDog {
     throw Exception('Vehicle photo file upload failed');
   }
 
+  Future<String?> uploadReceipt(
+      {required io.File file,
+        required String associationId,}) async {
+    pp('$mm uploadReceipt: 🌿........... file: ${file.path} ');
+
+    var url = KasieEnvironment.getUrl();
+    var mUrl =
+        '${url}storage/uploadReceiptFile?associationId=$associationId';
+    var request = http.MultipartRequest('POST', Uri.parse(mUrl));
+
+    // For mobile/desktop, use fromPath
+    request.files
+        .add(await http.MultipartFile.fromPath('imageFile', file.path!));
+
+    token = await getAuthToken();
+    if (token == null) {
+      throw Exception('Missing auth token');
+    }
+    pp('\n\n$mm calling: $mUrl\n');
+
+    request.headers['Authorization'] = 'Bearer $token';
+    var response = await request.send();
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      pp('$mm Yebo! receipt photo file uploaded successfully! 🥬🥬🥬🥬🥬\n');
+      final responseBody = await response.stream.bytesToString();
+      final mJson = jsonDecode(responseBody);
+      return mJson['url'];
+    } else {
+      pp('$mm 😈😈File upload failed with status code: 😈${response.statusCode} 😈 ${response.reasonPhrase}');
+    }
+    throw Exception('receipt photo file upload failed');
+  }
+
   Future<List<RouteAssignment>> addRouteAssignments(
       RouteAssignmentList assignments) async {
     final bag = assignments.toJson();
@@ -289,6 +322,16 @@ class DataApiDog {
     return lr;
   }
 
+  Future<RankFeeCashCheckIn> addRankFeeCashCheckIn(RankFeeCashCheckIn cashCheckIn) async {
+    final bag = cashCheckIn.toJson();
+    final cmd = '${url}payment/addRankFeeCashCheckIn';
+    final res = await _callPost(cmd, bag);
+    final lr = RankFeeCashCheckIn.fromJson(res);
+
+    pp('$mm RankFeeCashCheckIn added to database: $res');
+    return lr;
+  }
+
   Future<PaymentProvider> addPaymentProvider(PaymentProvider provider) async {
     final bag = provider.toJson();
     final cmd = '${url}payment/addPaymentProvider';
@@ -332,16 +375,6 @@ class DataApiDog {
     return lr;
   }
 
-  Future<RankFeeCashCheckIn> addRankFeeCashCheckIn(
-      RankFeeCashCheckIn cashCheckIn) async {
-    final bag = cashCheckIn.toJson();
-    final cmd = '${url}payment/addRankFeeCashCheckIn';
-    final res = await _callPost(cmd, bag);
-    final lr = RankFeeCashCheckIn.fromJson(res);
-
-    pp('$mm RankFeeCashCheckIn added to database: $res');
-    return lr;
-  }
 
   Future<CommuterRequest> addCommuterRequest(CommuterRequest request) async {
     final bag = request.toJson();
