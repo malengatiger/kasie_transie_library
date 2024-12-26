@@ -409,7 +409,7 @@ class RankFeeSenderState extends State<RankFeeSender>
                               'Submit Rank Fee',
                               style: myTextStyle(
                                   color: Colors.white,
-                                  fontSize: 24,
+                                  fontSize: 18,
                                   weight: FontWeight.normal),
                             ),
                           ),
