@@ -93,6 +93,7 @@ class CashCheckInWidgetState extends State<CashCheckInWidget>
             duration: const Duration(seconds: 2),
             message: 'Please enter an appropriate amount',
             context: context);
+        return;
       }
     }
     setState(() {
@@ -235,8 +236,6 @@ class CashCheckInWidgetState extends State<CashCheckInWidget>
       } else {
         pp('😈😈😈😈😈_deviceOrientation is null, wtf?? 😈 means that user did not change device orientation? ..........');
       }
-      // var thumb = await _getThumbnail(mFile);
-
       pp('$mm ... mFile: ${await mFile.length()} bytes,  🍎');
       // pp('$mm ... thumb: ${await thumb?.length()} bytes,  🍎');
 
@@ -313,18 +312,10 @@ class CashCheckInWidgetState extends State<CashCheckInWidget>
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    imageFile == null
-                        ? gapW32
-                        : Expanded(
-                            child: SizedBox(
-                                width: 400,
-                                child: Image.file(imageFile!,
-                                    fit: BoxFit.cover,
-                                    height: 400,
-                                    width: 400))),
                     CashCheckInForm(
                       globalKey: mKey,
                       amountController: amountController,
+                      imageFile: imageFile,
                       onSubmit: () {
                         _onSubmit();
                       },
@@ -332,6 +323,16 @@ class CashCheckInWidgetState extends State<CashCheckInWidget>
                         _onReceiptPhoto();
                       },
                     ),
+                    gapH32,
+                    imageFile == null
+                        ? gapW32
+                        : Expanded(
+                            child: SizedBox(
+                                width: 300,
+                                child: Image.file(imageFile!,
+                                    fit: BoxFit.cover,
+                                    height: 300,
+                                    width: 300))),
                   ],
                 ),
               ),
@@ -354,12 +355,14 @@ class CashCheckInForm extends StatelessWidget {
       required this.globalKey,
       required this.amountController,
       required this.onSubmit,
-      required this.onReceiptPhoto});
+      required this.onReceiptPhoto,
+      this.imageFile});
 
   final GlobalKey<FormState> globalKey;
   final TextEditingController amountController;
   final Function onSubmit;
   final Function onReceiptPhoto;
+  final File? imageFile;
 
   @override
   Widget build(BuildContext context) {
@@ -406,19 +409,22 @@ class CashCheckInForm extends StatelessWidget {
                     style: myTextStyle(color: Colors.white)),
               )),
           gapH32,
-          SizedBox(
-            width: 300,
-            child: ElevatedButton(
-              style: const ButtonStyle(
-                  elevation: WidgetStatePropertyAll(8),
-                  padding: WidgetStatePropertyAll(EdgeInsets.all(16)),
-                  backgroundColor: WidgetStatePropertyAll(Colors.blue)),
-              onPressed: () {
-                onSubmit();
-              },
-              child: Text('Submit', style: myTextStyle(color: Colors.white)),
-            ),
-          ),
+          imageFile == null
+              ? gapW32
+              : SizedBox(
+                  width: 300,
+                  child: ElevatedButton(
+                    style: const ButtonStyle(
+                        elevation: WidgetStatePropertyAll(8),
+                        padding: WidgetStatePropertyAll(EdgeInsets.all(16)),
+                        backgroundColor: WidgetStatePropertyAll(Colors.blue)),
+                    onPressed: () {
+                      onSubmit();
+                    },
+                    child:
+                        Text('Submit', style: myTextStyle(color: Colors.white)),
+                  ),
+                ),
         ],
       ),
     );

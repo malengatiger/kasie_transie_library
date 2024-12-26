@@ -351,7 +351,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                       padding: const EdgeInsets.all(16),
                       child: Text('Submit',
                           style:
-                              myTextStyle(color: Colors.white, fontSize: 24)),
+                              myTextStyle(color: Colors.white, fontSize: 18)),
                     ),
                   ),
                 ),

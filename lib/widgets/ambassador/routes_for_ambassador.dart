@@ -1,5 +1,6 @@
 import 'package:badges/badges.dart' as bd;
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
@@ -31,28 +32,28 @@ class NearestRoutesListState extends State<NearestRoutesList>
   lib.Route? route;
   bool busy = false;
   lib.User? user;
-  int limit = 1;
+  int limit = 3;
 
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
-    _getRouteData();
+    _getRouteData(false);
   }
 
   List<DistanceBag> distanceBags = [];
-  static const mm = '🧡🧡🧡🧡NearestRoutesList 🧡';
+  static const mm = '🧡🧡🧡🧡 NearestRoutesList 🧡';
 
-  _getRouteData() async {
+  _getRouteData(bool refresh) async {
     setState(() {
       busy = true;
     });
     try {
-
         var routeData = await listApiDog.getAssociationRouteData(
-            widget.associationId, false);
+            widget.associationId, refresh);
 
-        routes = await devLoc.getRouteDistances(routeData: routeData!, limitMetres: limit * 1000);
+        routes = await devLoc.getRouteDistances(routeData: routeData!,
+            limitMetres: limit * 1000);
 
         pp('$mm nearest routes: ${routes.length}');
 
@@ -80,6 +81,12 @@ class NearestRoutesListState extends State<NearestRoutesList>
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.title, style: myTextStyleMedium(context)),
+          actions: [
+            IconButton(onPressed: (){
+              limit = 5;
+              _getRouteData(true);
+            }, icon: const FaIcon(FontAwesomeIcons.arrowsRotate))
+          ]
         ),
         body: SafeArea(
           child: Stack(
@@ -125,7 +132,7 @@ class NearestRoutesListState extends State<NearestRoutesList>
                                   setState(() {
                                     limit = value ;
                                   });
-                                  _getRouteData();
+                                  _getRouteData(true);
                                 }
                               }),
                           gapW32,
@@ -176,7 +183,7 @@ class NearestRoutesListState extends State<NearestRoutesList>
                                         child: Text(
                                           r.name!,
                                           style:
-                                          myTextStyle(fontSize: 18),
+                                          myTextStyle(fontSize: 15),
                                         ),
                                       ),
                                     ),
