@@ -61,7 +61,7 @@ class RegisterServices {
     pp('$mm .... VehicleTelemetryService: 🦠telemetryService initialized');
 
     final listApi =
-        ListApiDog(client, appAuth, prefs, errorHandler, zipHandler, semCache);
+        ListApiDog(client);
     pp('$mm .... ListApiDog: 🦠listApiDog initialized');
     //
     CloudStorageBloc csb = CloudStorageBloc(

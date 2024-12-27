@@ -671,7 +671,7 @@ class Vehicle {
   String? make;
   String? model;
   String? year;
-  String? qrCodeUrl;
+  String? qrCodeUrl, fcmToken;
   int? passengerCapacity;
   int? active;
 
@@ -690,6 +690,7 @@ class Vehicle {
       required this.make,
       required this.model,
       required this.year,
+        required this.fcmToken,
       this.qrCodeUrl,
       this.cellphone,
       this.active,

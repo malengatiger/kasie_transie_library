@@ -42,7 +42,7 @@ class CashCheckInWidgetState extends State<CashCheckInWidget>
   late AnimationController _controller;
   static const mm = '💙💙💙💙CashCheckInWidget 💙';
   final TextEditingController amountController =
-      TextEditingController(text: '0.00');
+      TextEditingController(text: '0');
   final TextEditingController passengersController = TextEditingController();
 
   DataApiDog dataApiDog = GetIt.instance<DataApiDog>();

@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:geofence_service/geofence_service.dart' as geo;
 import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
-import 'package:uuid/uuid.dart';
 import 'package:uuid/v4.dart';
 
 import '../data/data_schemas.dart';
@@ -25,7 +23,7 @@ final geofenceService = geo.GeofenceService.instance.setup(
     geofenceRadiusSortType: geo.GeofenceRadiusSortType.DESC);
 
 class TheGreatGeofencer {
-  final xx = '😡😡😡😡😡😡😡 TheGreatGeofencer:  🔱 🔱 ';
+  final xx = '😡😡😡😡😡😡😡 TheGreatGeofencer: 😡😡😡😡 ';
   final reds = '🔴🔴🔴🔴🔴🔴 TheGreatGeofencer: ';
   final ListApiDog listApiDog;
   final DataApiDog dataApiDog;
@@ -54,7 +52,8 @@ class TheGreatGeofencer {
 
   final _geofenceList = <geo.Geofence>[];
   User? _user;
-  SettingsModel? _settingsModel;
+
+  // SettingsModel? _settingsModel;
 
   var defaultRadiusInKM = 100.0;
   var defaultRadiusInMetres = 150.0;
@@ -75,8 +74,6 @@ class TheGreatGeofencer {
     pp('\n\n$xx buildGeofences .... build geofences for '
         'the association started ... 🌀🌀🌀🌀 ');
 
-    _settingsModel = prefs.getSettings();
-    _user = prefs.getUser();
     _vehicle = prefs.getCar();
     _geofenceList.clear();
 
@@ -100,29 +97,35 @@ class TheGreatGeofencer {
       landmarks.add(bag.routeLandmark);
     }
     pp('$xx buildGeofences .... landmarks: ${landmarks.length} ');
+    if (landmarks.isEmpty) {
+      return;
+    }
 
     int cnt = 0;
     var radius = 200.0;
-    if (_settingsModel != null) {
-      radius = _settingsModel!.geofenceRadius!.toDouble();
-    }
+
     pp('$xx buildGeofences .... radius in metres: $radius ');
 
     for (var landmark in landmarks) {
-      await addGeofence(
-          landmarkId: landmark.landmarkId!,
-          landmarkName: landmark.landmarkName!,
-          longitude: landmark.position!.coordinates[0],
-          latitude: landmark.position!.coordinates[1],
-          routeId: landmark.routeId!,
-          routeName: landmark.routeName!,
-          radius: radius);
-      cnt++;
-      if (cnt > 98) {
-        break;
+      if (landmark.associationId == _vehicle!.associationId) {
+        await addGeofence(
+            landmarkId: landmark.landmarkId!,
+            landmarkName: landmark.landmarkName!,
+            longitude: landmark.position!.coordinates[0],
+            latitude: landmark.position!.coordinates[1],
+            routeId: landmark.routeId!,
+            routeName: landmark.routeName!,
+            radius: radius);
+        cnt++;
+        if (cnt > 99) {
+          pp('$xx buildGeofences .... $cnt fences built, other landmarks, from 100, not built');
+          break;
+        }
       }
     }
-    pp('$xx buildGeofences .... fences: $cnt ');
+    pp('$xx buildGeofences .... fences built: $cnt ');
+    pp('$xx buildGeofences .... fence #1 built: ${landmarks[0].landmarkName} ');
+
     geofenceService.addGeofenceList(_geofenceList);
 
     geofenceService.addGeofenceStatusChangeListener(
@@ -167,7 +170,7 @@ class TheGreatGeofencer {
       latitude: latitude,
       longitude: longitude,
       radius: [
-        geo.GeofenceRadius(id: 'radius_from_settings', length: radius),
+        geo.GeofenceRadius(id: 'default radius', length: radius),
       ],
     );
 

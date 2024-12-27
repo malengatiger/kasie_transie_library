@@ -115,6 +115,12 @@ class FCMService {
   static const red = '🍎🍎';
   var newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMBloc: 🌀🌀🌀🌀';
 
+  Future<String?> getFCMToken() async {
+    final fcmToken = await fb.FirebaseMessaging.instance.getToken();
+    pp("FCMToken $fcmToken");
+    return fcmToken;
+  }
+
   Future subscribeWebApp() async {
     // These registration tokens come from the client FCM SDKs.
     const registrationTokens = [
@@ -176,17 +182,12 @@ class FCMService {
         ' FCM: subscribed to all ${E.pear} 5 (five) DemoDriver FCM topics\n\n');
   }
 
-  Future<void> subscribeForCar(String app) async {
+  Future<void> subscribeForCar(Vehicle car,String app) async {
     String? associationId;
     appName = app;
     newMM = '$newMM$app 🔷🔷';
-    car = prefs.getCar();
-    demoFlag = prefs.getDemoFlag();
-    if (car != null) {
-      associationId = car!.associationId!;
-    } else {
-      return;
-    }
+    // demoFlag = prefs.getDemoFlag();
+    associationId = car.associationId!;
 
     await firebaseMessaging
         .subscribeToTopic('${Constants.routeUpdateRequest}$associationId');

@@ -205,7 +205,7 @@ List<Vehicle> getVehiclesFromCsv(
       associationId: associationId,
       associationName: associationName,
       ownerName: owner,
-      vehicleId: const Uuid().v4(),
+      vehicleId: const Uuid().v4(), fcmToken: 'NAY',
     );
     cars.add(car);
   }

@@ -92,7 +92,7 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
           ownerName: user.name,
           passengerCapacity: vehicle!.passengerCapacity,
           qrCodeUrl: vehicle!.qrCodeUrl,
-          year: vehicle!.year,
+          year: vehicle!.year, fcmToken: '',
         );
         pp('$mm updated owner vehicle ${E.redDot}');
         myPrettyJsonPrint(updatedVehicle.toJson());

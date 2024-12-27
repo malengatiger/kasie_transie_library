@@ -6,6 +6,8 @@ class Constants {
    static const   DRIVER = 'DRIVER';
    static const   OWNER = 'OWNER';
    static const   ROUTE_BUILDER = 'ROUTE_BUILDER';
+   static const   VEHICLE = 'VEHICLE';
+
    static const   ADMINISTRATOR_AFTAROBOT = 'ADMINISTRATOR_AFTAROBOT';
    static const   ADMINISTRATOR_ASSOCIATION = 'ADMINISTRATOR_ASSOCIATION';
 

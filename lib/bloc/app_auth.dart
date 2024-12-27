@@ -22,7 +22,7 @@ class AppAuth {
 
   AppAuth({required this.firebaseAuth}) {
     listen();
-    startAuthenticationTimer();
+    // startAuthenticationTimer();
   }
 
   late Timer timer;
@@ -100,7 +100,7 @@ class AppAuth {
   void startAuthenticationTimer() {
     pp('$locks ✳️ ✳️ Auth Timer starting ...');
     timer = Timer.periodic(const Duration(minutes: 30), (timer) {
-      pp('$locks ✳️ ✳️ Auth Timer ticked: tick #${timer.tick} at ${DateTime.now().toIso8601String()} ✳️ will check And possibly refreshToken ...');
+      pp('\n\n$locks ✳️ ✳️  😡 😡 😡 😡 😡 😡 😡 😡 😡 😡 😡Auth Timer ticked: tick #${timer.tick} at ${DateTime.now().toIso8601String()}  😡 😡 😡 😡 😡 😡 😡✳️ will check And possibly refreshToken ...');
       getAuthToken();
     });
     var isActive = timer.isActive;
@@ -110,22 +110,24 @@ class AppAuth {
   void listen() {
     pp('$locks listen for  FirebaseAuth.instance idTokenChanges and authStateChanges ...');
     firebaseAuth.idTokenChanges().listen((auth.User? user) async {
-      // if (user == null) {
-      //   pp('$locks idTokenChanges: User is currently signed out!');
-      // } else {
-      //   // pp('$locks idTokenChanges: User is not null! ${user.displayName}, checking auth token state ');
-      //   // await getAuthToken();
-      // }
+      if (user == null) {
+        pp('$locks idTokenChanges: User is currently signed out!');
+      } else {
+        pp('$locks idTokenChanges: User is not null! ${user.displayName}, checking auth token state ');
+        await _getRefreshedToken();
+      }
     });
 
     firebaseAuth.authStateChanges().listen((auth.User? user) async {
-      // if (user == null) {
-      //   pp('$locks authStateChanges: User is currently signed out!');
-      // } else {
-      //   pp('$locks authStateChanges: User is signed in! ${user.displayName}, checking auth token state ...');
-      //   // await getAuthToken();
-      // }
+      if (user == null) {
+        pp('$locks authStateChanges: User is currently signed out!');
+      } else {
+        pp('$locks authStateChanges: User is signed in! ${user.displayName}, checking auth token state ...');
+        await _getRefreshedToken();
+      }
     });
+
+
   }
 
   static const msg =
@@ -133,7 +135,7 @@ class AppAuth {
 
   Future<String?> getAuthToken() async {
     try {
-      String? token = await _checkAndRefreshToken();
+      String? token = await _getRefreshedToken();
       if (token != null) {
         pp('$locks getAuthToken has a  ✅ good token. We good to trot!!  ✅ ');
         return token;
@@ -147,28 +149,20 @@ class AppAuth {
     }
   }
 
-  Future<String?> _checkAndRefreshToken() async {
+  Future<String?> _getRefreshedToken() async {
     auth.User? user = firebaseAuth.currentUser;
     String? token;
     if (user != null) {
       token = await user.getIdToken(true);
       await user.getIdTokenResult(true).then((idTokenResult) async {
-        // pp('$locks getIdTokenResult: 🍎 expirationTime: ${idTokenResult.expirationTime?.toIso8601String()} ');
-
-        DateTime expirationTime = idTokenResult.expirationTime as DateTime;
-        Duration diff = expirationTime.difference(DateTime.now());
         token = idTokenResult.token;
-        // pp('$locks expiration difference in 🍎 seconds: ${diff.inSeconds} ');
-        if (diff.inSeconds < 0) {
-          token = await user.getIdToken(true);
-          return token;
+        var date = idTokenResult.expirationTime;
+        if (date != null) {
+          if (date.isBefore(DateTime.now())) {
+            pp('$locks 😈😈 token expiration date is ${date.toIso8601String()} - expired! 😈😈😈 ');
+            token = await user.getIdToken(true);          } else {
+          }
         }
-        if (diff.inMinutes < 10) {
-          // pp('$locks expiration difference in 🍎 minutes: ${diff.inMinutes} ');
-          token = await user.getIdToken(true);
-          return token;
-        }
-
         return token;
       });
     } else {

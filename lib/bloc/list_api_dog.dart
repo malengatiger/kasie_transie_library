@@ -25,11 +25,10 @@ import '../utils/error_handler.dart';
 import '../utils/functions.dart';
 import '../utils/prefs.dart';
 import 'app_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 
 class ListApiDog {
   static const mm = '🔵🔵🔵🔵🔵🔵🔵🔵️ ListApiDog: ❤️: ';
-  final ZipHandler zipHandler;
-  final SemCache semCache;
 
   Map<String, String> headers = {
     'Content-type': 'application/json',
@@ -44,28 +43,68 @@ class ListApiDog {
   static const timeOutInSeconds = 300;
 
   final http.Client client;
-  final AppAuth appAuth;
-  final Prefs prefs;
-  final ErrorHandler errorHandler;
+  late Prefs prefs;
+  late ErrorHandler errorHandler;
+  late ZipHandler zipHandler;
+  late SemCache semCache;
+
   bool initialized = false;
   String? token;
 
   ListApiDog(
     this.client,
-    this.appAuth,
-    this.prefs,
-    this.errorHandler,
-    this.zipHandler,
-    this.semCache,
+
   ) {
     url = KasieEnvironment.getUrl();
     databaseString = KasieEnvironment.getUrl();
+    listen();
+  }
+  void listen() {
+    pp('$mm listen for  FirebaseAuth.instance idTokenChanges and authStateChanges ...');
+    auth.FirebaseAuth.instance.idTokenChanges().listen((auth.User? user) async {
+      if (user == null) {
+        pp('$mm idTokenChanges: User is currently signed out!');
+      } else {
+        pp('$mm idTokenChanges: User is not null! ${user.displayName}, checking auth token state ');
+      }
+    });
+
+    auth.FirebaseAuth.instance.authStateChanges().listen((auth.User? user) async {
+      if (user == null) {
+        pp('$mm authStateChanges: User is currently signed out!');
+      } else {
+        pp('$mm authStateChanges: User is signed in! ${user.displayName}, checking auth token state ...');
+      }
+    });
+
+
+  }
+  Future<String?> _getRefreshedToken() async {
+    auth.User? user = auth.FirebaseAuth.instance.currentUser;
+    String? token;
+    if (user != null) {
+      token = await user.getIdToken(true);
+      await user.getIdTokenResult(true).then((idTokenResult) async {
+        token = idTokenResult.token;
+        var date = idTokenResult.expirationTime;
+        if (date != null) {
+          if (date.isBefore(DateTime.now())) {
+            pp('$mm 😈😈 token expiration date is ${date.toIso8601String()} - expired! 😈😈😈 ');
+            token = await user.getIdToken(true);          } else {
+          }
+        }
+        return token;
+      });
+    } else {
+      throw Exception('No current user');
+    }
+    return token;
   }
 
   Future<String?> getAuthToken() async {
     pp('$mm getAuthToken: ...... Getting Firebase token ......');
     try {
-      var m = await appAuth.getAuthToken();
+      var m = await _getRefreshedToken();
       if (m == null) {
         pp('$mm Unable to get Firebase token');
         return null;
@@ -383,6 +422,7 @@ class ListApiDog {
   Future<AssociationRouteData?> getAssociationRouteData(
       String associationId, bool refresh) async {
     pp('\n\n$mm ...... getAssociationRouteData: ... starting ...');
+    semCache = GetIt.instance<SemCache>();
     var routeData = await semCache.getAssociationRouteData(associationId);
     if (!refresh && routeData != null && routeData.routeDataList.isNotEmpty) {
       return routeData;
@@ -521,6 +561,7 @@ class ListApiDog {
 
   Future<List<Association>> getAssociations(bool refresh) async {
     final cmd = '${url}association/getAssociations';
+    semCache = GetIt.instance<SemCache>();
     List<Association> list = await semCache.getAssociations();
     if (refresh || list.isEmpty) {
       List resp = await _sendHttpGET(cmd);
@@ -587,7 +628,7 @@ class ListApiDog {
       String routeId, bool refresh, String associationId) async {
     List<RoutePoint> localList =
         await semCache.getRoutePoints(routeId, associationId);
-
+    zipHandler = GetIt.instance<ZipHandler>();
     if (localList.isEmpty || refresh) {
       try {
         final s = await zipHandler.getRoutePoints(routeId: routeId);
@@ -607,6 +648,8 @@ class ListApiDog {
   }
 
   Future getAllPhotosAndVideos({Association? association}) async {
+    prefs = GetIt.instance<Prefs>();
+
     association ?? prefs.getAssociation();
     if (association == null) {
       pp('$mm Association is null ... quitting!');
@@ -1207,6 +1250,7 @@ class ListApiDog {
   }
 
   Future<List<Route>> findRoutesByLocation(LocationFinderParameter p) async {
+    prefs = GetIt.instance<Prefs>();
     var list = <Route>[];
     final user = prefs.getUser();
 
@@ -1368,6 +1412,8 @@ class ListApiDog {
 
   Future _sendHttpGET(String mUrl) async {
     pp('$xz _sendHttpGET: 🔆 🔆 🔆 ...... calling : 💙 $mUrl  💙');
+    errorHandler = GetIt.instance<ErrorHandler>();
+
     var start = DateTime.now();
     token ??= await getAuthToken();
     if (token == null) {

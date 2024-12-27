@@ -57,7 +57,6 @@ class DataApiDog {
   static const timeOutInSeconds = 360;
   String? token;
   late http.Client client;
-  late AppAuth appAuth;
   late CacheManager cacheManager;
   late Prefs prefs;
   late ErrorHandler errorHandler;
@@ -72,23 +71,52 @@ class DataApiDog {
     var p = await SharedPreferences.getInstance();
     errorHandler = ErrorHandler(DeviceLocationBloc(), Prefs(p));
     url = KasieEnvironment.getUrl();
-    appAuth = AppAuth(firebaseAuth: auth.FirebaseAuth.instance);
     cacheManager = CacheManager();
     prefs = Prefs(await SharedPreferences.getInstance());
     semCache = SemCache();
     client = http.Client();
   }
 
+  void listen() {
+    pp('$mm listen for  FirebaseAuth.instance idTokenChanges and authStateChanges ...');
+    auth.FirebaseAuth.instance.idTokenChanges().listen((auth.User? user) async {
+      if (user == null) {
+        pp('$mm idTokenChanges: User is currently signed out!');
+      } else {
+        pp('$mm idTokenChanges: User is not null! ${user.displayName}, checking auth token state ');
+      }
+    });
+
+    auth.FirebaseAuth.instance.authStateChanges().listen((auth.User? user) async {
+      if (user == null) {
+        pp('$mm authStateChanges: User is currently signed out!');
+      } else {
+        pp('$mm authStateChanges: User is signed in! ${user.displayName}, checking auth token state ...');
+      }
+    });
+
+
+  }
+  Future<String?> _getRefreshedToken() async {
+    auth.User? user = auth.FirebaseAuth.instance.currentUser;
+    String? token;
+    if (user != null) {
+      token = await user.getIdToken(true);
+    } else {
+      throw Exception('No current user');
+    }
+    return token;
+  }
+
   Future<String?> getAuthToken() async {
     pp('$mm getAuthToken: ...... Getting Firebase token ......');
     try {
-      appAuth = GetIt.instance<AppAuth>();
-      var m = await appAuth.getAuthToken();
+      var m = await _getRefreshedToken();
       if (m == null) {
         pp('$mm Unable to get Firebase token');
         return null;
       } else {
-        pp('$mm Firebase token retrieved OK ✅ ');
+        pp('$mm Firebase token retrieved OK  ✅ ');
         return m;
       }
     } catch (e, s) {
@@ -96,7 +124,6 @@ class DataApiDog {
       rethrow;
     }
   }
-
   Future<String?> uploadQRCodeFile(
       {required Uint8List imageBytes, required String associationId}) async {
     pp('\n\n$mm ............ uploadQRCodeFile: 🌿 associationId: $associationId');
@@ -462,16 +489,29 @@ class DataApiDog {
     final res = await _callPost(cmd, bag);
     // semCache.saveUsers([user]);
     pp('$mm user added to database: 🥬 🥬 ');
-    return User.fromJson(res);
+    var u = User.fromJson(res);
+    prefs.saveUser(u);
+    return u;
   }
-
+  Future<User> createVehicleUser(User user) async {
+    final bag = user.toJson();
+    final cmd = '${url}user/createVehicleUser';
+    final res = await _callPost(cmd, bag);
+    pp('$mm VehicleUser added to database: 🥬 🥬 ');
+    var u = User.fromJson(res);
+    pp('$mm VehicleUser saving to Prefs: 🥬 🥬 ');
+    prefs.saveUser(u);
+    return u;
+  }
   Future<User> addOwner(User user) async {
     final bag = user.toJson();
     final cmd = '${url}user/createOwner';
     final res = await _callPost(cmd, bag);
     // semCache.saveUsers([user]);
     pp('$mm owner added to database: 🥬 🥬');
-    return User.fromJson(res);
+    var u = User.fromJson(res);
+    prefs.saveUser(u);
+    return u;
   }
 
   Future addUserGeofenceEvent(UserGeofenceEvent event) async {
@@ -1028,7 +1068,8 @@ class DataApiDog {
     if (token == null) {
       throw Exception('token not found');
     }
-    client = http.Client();
+    client = GetIt.instance<http.Client>();
+
     headers['Authorization'] = 'Bearer $token';
     while (retryCount < maxRetries) {
       try {
@@ -1139,7 +1180,7 @@ class DataApiDog {
     const maxRetries = 3;
     var retryCount = 0;
     var waitTime = const Duration(seconds: 2);
-    var token = await appAuth.getAuthToken();
+    var token = await getAuthToken();
     if (token != null) {
       pp('$mm _sendHttpGET: 😡😡😡 Firebase Auth Token: 💙️ Token is GOOD! 💙 ');
     } else {
@@ -1152,7 +1193,7 @@ class DataApiDog {
       errorHandler.handleError(exception: gex);
       throw gex;
     }
-    client = http.Client();
+    client = GetIt.instance<http.Client>();
     headers['Authorization'] = 'Bearer $token';
     while (retryCount < maxRetries) {
       try {
