@@ -1101,6 +1101,7 @@ class ListApiDog {
     final res = await _sendHttpGET(cmd);
     pp('$mm response: $res');
     var mRoute = Route.fromJson(res);
+    semCache = GetIt.instance<SemCache>();
     await semCache.saveRoute(route: mRoute);
     return mRoute;
   }
