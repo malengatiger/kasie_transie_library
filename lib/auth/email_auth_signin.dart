@@ -59,6 +59,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
     });
     try {
       pp('\n\n$mm ... sign in ....: ${emailController.text} ${pswdController.text} - ${E.leaf}');
+
       user = await appAuth.signInWithEmailAndPassword(
           emailController.text, pswdController.text);
       if (user != null) {
@@ -73,12 +74,14 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
     } catch (e) {
       pp(e);
       widget.onSignInError();
+      if (mounted) {
+        showErrorToast(message: 'SignIn failed. $e', context: context);
+      }
     }
     setState(() {
       busy = false;
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -88,8 +91,8 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
           title: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'KasieTransie Email Sign In',
-              style: myTextStyleLarge(context),
+              'Kasie Transie Email Sign In',
+              style: myTextStyle(),
             ),
           ),
         ),
@@ -97,78 +100,85 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
           children: [
             Center(
               child: SizedBox(
-                width: 480,
-                height: 660,
-                child: Card(
-                    elevation: 8,
-                    child: Form(
-                        key: formKey,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              gapH16,
-                              SizedBox(
-                                width: 420,
-                                child: TextFormField(
-                                  controller: emailController,
-                                  decoration: InputDecoration(
-                                    label: const Text('Email Address'),
-                                    hintText: 'Enter your Email address',
-                                    icon: const Icon(Icons.email),
-                                    iconColor: Theme.of(context).primaryColor,
-                                  ),
+                  width: 480,
+                  height: 660,
+                  child: Form(
+                      key: formKey,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            gapH16,
+                            SizedBox(
+                              width: 420,
+                              child: TextFormField(
+                                controller: emailController,
+                                style: myTextStyle(fontSize: 18),
+                                decoration: InputDecoration(
+                                  border: const OutlineInputBorder(),
+                                  label: const Text('Email Address'),
+                                  hintText: 'Enter your Email address',
+                                  icon: const Icon(Icons.email),
+                                  iconColor: Theme.of(context).primaryColor,
                                 ),
                               ),
-                              const SizedBox(
-                                height: 36,
-                              ),
-                              SizedBox(
-                                width: 420,
-                                child: TextFormField(
-                                  controller: pswdController,
-                                  obscureText: true,
-                                  decoration: InputDecoration(
-                                    label: const Text('Password'),
-                                    hintText: 'Enter your password',
-                                    icon: const Icon(Icons.lock),
-                                    iconColor: Theme.of(context).primaryColor,
-                                  ),
+                            ),
+                            gapH32,
+                            SizedBox(
+                              width: 420,
+                              child: TextFormField(
+                                controller: pswdController,
+                                style: myTextStyle(fontSize: 18),
+                                obscureText: true,
+                                decoration: InputDecoration(
+                                  border: const OutlineInputBorder(),
+                                  label: const Text('Password'),
+                                  hintText: 'Enter your password',
+                                  icon: const Icon(Icons.lock),
+                                  iconColor: Theme.of(context).primaryColor,
                                 ),
                               ),
-                              const SizedBox(
-                                height: 80,
-                              ),
-                              busy
-                                  ? const SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 12,
-                                        backgroundColor: Colors.amber,
-                                      ),
-                                    )
-                                  : SizedBox(
-                                      width: 300,
-                                      height: 60,
-                                      child: ElevatedButton(
-                                          style: const ButtonStyle(
-                                            elevation:
-                                                WidgetStatePropertyAll<double>(
-                                                    8.0),
-                                          ),
-                                          onPressed: () {
-                                            _signIn();
-                                          },
-                                          child: const Text(
-                                              'Send Sign In Credentials')),
-                                    )
-                            ],
-                          ),
-                        ))),
-              ),
+                            ),
+                            const SizedBox(
+                              height: 80,
+                            ),
+                            busy
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 12,
+                                      backgroundColor: Colors.amber,
+                                    ),
+                                  )
+                                : SizedBox(
+                                    width: 300,
+                                    height: 60,
+                                    child: ElevatedButton(
+                                        style: const ButtonStyle(
+                                          backgroundColor:
+                                              WidgetStatePropertyAll(
+                                                  Colors.pink),
+                                          elevation:
+                                              WidgetStatePropertyAll<double>(
+                                                  8.0),
+                                        ),
+                                        onPressed: () {
+                                          _signIn();
+                                        },
+                                        child: Text(
+                                          'Send Sign In Credentials',
+                                          style: myTextStyle(
+                                              color: Colors.white,
+                                              fontSize: 20,
+                                              weight: FontWeight.normal),
+                                        )),
+                                  )
+                          ],
+                        ),
+                      ))),
             ),
           ],
         ),

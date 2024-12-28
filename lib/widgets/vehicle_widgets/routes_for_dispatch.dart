@@ -1,5 +1,6 @@
 import 'package:badges/badges.dart' as bd;
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
@@ -31,19 +32,19 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
   lib.Route? route;
   bool busy = false;
   lib.User? user;
-  int limit = 1;
+  int limit = 3;
 
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
-    _getRouteData();
+    _getRouteData(false);
   }
 
   List<DistanceBag> distanceBags = [];
   static const mm = '🧡🧡🧡🧡RoutesForDispatch 🧡';
 
-  _getRouteData() async {
+  _getRouteData(bool refresh) async {
     setState(() {
       busy = true;
     });
@@ -52,7 +53,7 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
     try {
       if (user != null) {
         var routeData = await listApiDog.getAssociationRouteData(
-            user!.associationId!, false);
+            user!.associationId!, refresh);
 
         routes = await devLoc.getRouteDistances(
             routeData: routeData!, limitMetres: limit * 1000);
@@ -130,6 +131,11 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
     return Scaffold(
         appBar: AppBar(
           title: Text('Routes For Dispatch', style: myTextStyleMedium(context)),
+          actions: [
+            IconButton(onPressed: (){
+              _getRouteData(true);
+            }, icon: const FaIcon(FontAwesomeIcons.arrowsRotate)),
+          ]
         ),
         body: SafeArea(
           child: Stack(
@@ -175,7 +181,7 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
                                   setState(() {
                                     limit = value ;
                                   });
-                                  _getRouteData();
+                                  _getRouteData(true);
                                 }
                               }),
                           gapW32,

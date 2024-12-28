@@ -4,10 +4,11 @@ import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/vehicle_search.dart';
-import 'package:page_transition/page_transition.dart';
 
-import '../../maps/map_viewer.dart';
 import '../vehicle_widgets/cars_for_dispatch.dart';
+import 'package:get_it/get_it.dart';
+import 'package:kasie_transie_library/utils/prefs.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 
 class CarForAmbassador extends StatefulWidget {
   const CarForAmbassador({super.key, required this.associationId});
@@ -20,7 +21,23 @@ class CarForAmbassador extends StatefulWidget {
 
 class _CarForAmbassadorState extends State<CarForAmbassador> {
   static const mm = '🍄🍄🍄🍄CarForAmbassador 🍄';
-
+  Prefs prefs = GetIt.instance<Prefs>();
+  lib.User? user;
+  @override
+  void initState() {
+    super.initState();
+    _signIn();
+  }
+  _signIn() async {
+    user = prefs.getUser();
+    if (user != null) {
+      var u = await auth.FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: user!.email!, password: user!.password!);
+      if (u.user != null) {
+        pp('$mm user has signed in');
+      }
+    }
+  }
   _search() async {
     var vehicle = await NavigationUtils.navigateTo(
       context: context,

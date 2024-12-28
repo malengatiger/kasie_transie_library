@@ -475,6 +475,7 @@ class ListApiDog {
 
   Future<List<Vehicle>> getAssociationCars(
       String associationId, bool refresh) async {
+    semCache = GetIt.instance<SemCache>();
     var cachedList = await semCache.getVehicles(associationId);
     if (refresh || cachedList.isEmpty) {
       final cmd =
@@ -1476,7 +1477,7 @@ class ListApiDog {
           translationKey: 'serverProblem',
           errorType: KasieException.httpException);
       errorHandler.handleError(exception: gex);
-      throw gex;
+      throw Exception('Server experienced an HTTP problem. ');
     } on FormatException {
       pp("$xz ............ Bad response format 👎");
       final gex = KasieException(
@@ -1485,7 +1486,7 @@ class ListApiDog {
           translationKey: 'serverProblem',
           errorType: KasieException.formatException);
       errorHandler.handleError(exception: gex);
-      throw gex;
+      throw Exception('Server experienced an Format problem. ');
     } on TimeoutException {
       pp("$xz No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
       final gex = KasieException(

@@ -1068,7 +1068,7 @@ class DataApiDog {
     if (token == null) {
       throw Exception('token not found');
     }
-    client = GetIt.instance<http.Client>();
+    client = http.Client();
 
     headers['Authorization'] = 'Bearer $token';
     while (retryCount < maxRetries) {
@@ -1095,16 +1095,14 @@ class DataApiDog {
             pp('$mm  $dev  _callWebAPIPost: 🔆 statusCode:  ${resp.statusCode} $dev for $mUrl');
             pp('$mm metadata: ${resp.body}');
             pp('$mm  $dev  _callWebAPIPost: 🔆 Firebase ID token may have expired, trying to refresh ... 🔴🔴🔴🔴🔴🔴 ');
-            token = await getAuthToken();
-
-            pp('$mm Throwing my toys!!! : 💙 statusCode: ${resp.statusCode} $dev  ');
+            pp('$mm Throwing my toys!!! .... ');
             final gex = KasieException(
                 message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
                 url: mUrl,
                 translationKey: 'serverProblem',
                 errorType: KasieException.socketException);
             errorHandler.handleError(exception: gex);
-            throw Exception('The status is BAD, Boss!');
+            throw Exception('The status is BAD (401 or 403), Boss!');
           } else {
             if (resp.statusCode == 400 || resp.statusCode == 500) {
               final gex = KasieException(
@@ -1114,7 +1112,7 @@ class DataApiDog {
                   translationKey: 'serverProblem',
                   errorType: KasieException.socketException);
               errorHandler.handleError(exception: gex);
-              throw Exception('The status is BAD, Boss!');
+              throw Exception('The status is BAD (400 or 500), Boss!');
             }
           }
         }
@@ -1128,7 +1126,7 @@ class DataApiDog {
             translationKey: 'serverProblem',
             errorType: KasieException.socketException);
         errorHandler.handleError(exception: gex);
-        throw gex;
+        throw Exception('The server is not available');;
       } on io.HttpException catch (e) {
         pp("$mm  HttpException occurred 😱");
         final gex = KasieException(
@@ -1137,7 +1135,8 @@ class DataApiDog {
             translationKey: 'serverProblem',
             errorType: KasieException.httpException);
         errorHandler.handleError(exception: gex);
-        throw gex;
+        throw Exception('Something went wrong: $e');;
+
       } on http.ClientException catch (e) {
         pp("$mm   http.ClientException  occurred 😱");
         final gex = KasieException(
@@ -1146,12 +1145,8 @@ class DataApiDog {
             translationKey: 'serverProblem',
             errorType: KasieException.httpException);
         errorHandler.handleError(exception: gex);
-        retryCount++;
-        if (retryCount < maxRetries) {
-          // Calculate the exponential backoff wait time
-          waitTime *= 2;
-          await Future.delayed(waitTime);
-        }
+        throw Exception('Something went wrong: $e');;
+
       } on FormatException catch (e) {
         pp("$mm  Bad response format 👎");
         final gex = KasieException(
@@ -1160,7 +1155,8 @@ class DataApiDog {
             translationKey: 'serverProblem',
             errorType: KasieException.formatException);
         errorHandler.handleError(exception: gex);
-        throw gex;
+        throw Exception('Something went wrong: $e');;
+
       } on TimeoutException catch (e) {
         pp("$mm  No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
         final gex = KasieException(
@@ -1169,7 +1165,8 @@ class DataApiDog {
             translationKey: 'networkProblem',
             errorType: KasieException.timeoutException);
         errorHandler.handleError(exception: gex);
-        throw gex;
+        throw Exception('Something went wrong: $e');;
+
       }
     }
   }
@@ -1193,7 +1190,7 @@ class DataApiDog {
       errorHandler.handleError(exception: gex);
       throw gex;
     }
-    client = GetIt.instance<http.Client>();
+    client = http.Client();
     headers['Authorization'] = 'Bearer $token';
     while (retryCount < maxRetries) {
       try {

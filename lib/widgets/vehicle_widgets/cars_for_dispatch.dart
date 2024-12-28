@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/functions.dart';
@@ -93,99 +94,99 @@ class _CarForDispatchState extends State<CarForDispatch> {
             icon: const FaIcon(FontAwesomeIcons.mapLocation))
       ]),
       body: SafeArea(
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Text('Route'),
-                  gapH8,
-                  Card(
-                    elevation: 8,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              widget.route.name!,
-                              style: myTextStyle(
-                                  fontSize: 20,
-                                  weight: FontWeight.w900,
-                                  color: Theme.of(context).primaryColor),
-                            ),
-                          )
-                        ],
-                      ),
+          child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text('Route'),
+                gapH8,
+                Card(
+                  elevation: 8,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            widget.route.name!,
+                            style: myTextStyle(
+                                fontSize: 20,
+                                weight: FontWeight.w900,
+                                color: Theme.of(context).primaryColor),
+                          ),
+                        )
+                      ],
                     ),
                   ),
-                  gapH32,
-                  gapH32,
-                  gapH32,
-                  const Text('Select a taxi using one or the other method'),
-                  gapH32,
-                  SizedBox(
-                    width: 300,
-                    child: ElevatedButton(
-                        style: const ButtonStyle(
-                            elevation: WidgetStatePropertyAll(8),
-                            backgroundColor: WidgetStatePropertyAll(Colors.blue)),
-                        onPressed: _search,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Text(
-                            'Search Taxi',
-                            style: myTextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
+                ),
+                gapH32,
+                gapH32,
+                gapH32,
+                const Text('Select a taxi using one or the other method'),
+                gapH32,
+                SizedBox(
+                  width: 300,
+                  child: ElevatedButton(
+                      style: const ButtonStyle(
+                          elevation: WidgetStatePropertyAll(8),
+                          backgroundColor: WidgetStatePropertyAll(Colors.blue)),
+                      onPressed: _search,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          'Search Taxi',
+                          style: myTextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
                           ),
-                        )),
-                  ),
-                  gapH32,
-                  gapH32,
-                  SizedBox(
-                    width: 300,
-                    child: ElevatedButton(
-                        onPressed: _scan,
-                        style: const ButtonStyle(
-                            elevation: WidgetStatePropertyAll(8),
-                            backgroundColor: WidgetStatePropertyAll(Colors.green)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Text(
-                            'Scan Taxi',
-                            style: myTextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
+                        ),
+                      )),
+                ),
+                gapH32,
+                gapH32,
+                SizedBox(
+                  width: 300,
+                  child: ElevatedButton(
+                      onPressed: _scan,
+                      style: const ButtonStyle(
+                          elevation: WidgetStatePropertyAll(8),
+                          backgroundColor:
+                              WidgetStatePropertyAll(Colors.green)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          'Scan Taxi',
+                          style: myTextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
                           ),
-                        )),
-                  ),
-                ],
+                        ),
+                      )),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            right: 32,
+            bottom: 16,
+            child: ElevatedButton(
+              style: const ButtonStyle(elevation: WidgetStatePropertyAll(4)),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Padding(
+                padding: EdgeInsets.all(16),
+                child: Text('Done'),
               ),
             ),
-            Positioned(
-              right: 32,
-              bottom: 16,
-              child: ElevatedButton(
-                style: const ButtonStyle(elevation: WidgetStatePropertyAll(4)),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text('Done'),
-                ),
-              ),
-            )
-          ],
-        )
-      ),
+          )
+        ],
+      )),
     );
   }
 }
@@ -220,6 +221,8 @@ class _ScanTaxiState extends State<ScanTaxi> {
                 Navigator.of(context).pop(car);
               } else {
                 showErrorToast(
+                    duration: const Duration(seconds: 2),
+                    toastGravity: ToastGravity.BOTTOM,
                     message: 'The QR Code scanned is not a vehicle',
                     context: context);
               }
@@ -242,11 +245,24 @@ class _ScanTaxiState extends State<ScanTaxi> {
             child: Stack(
           children: [
             Center(
+              child: SizedBox(
+                width: 300,
                 child: ElevatedButton(
-                    onPressed: () {
-                      _navigateToScanner();
-                    },
-                    child: const Text('Start Scan')))
+                  style: ButtonStyle(
+                    elevation: const WidgetStatePropertyAll(8),
+                    backgroundColor:
+                        WidgetStatePropertyAll(Colors.blue.shade600),
+                  ),
+                  onPressed: () {
+                    _navigateToScanner();
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text('Start Scan', style: TextStyle(fontSize: 20, color: Colors.white)),
+                  ),
+                ),
+              ),
+            ),
           ],
         )));
   }

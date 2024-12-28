@@ -6,6 +6,7 @@ import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 
 import '../../data/route_data.dart';
 import '../../utils/functions.dart';
@@ -13,7 +14,8 @@ import '../../utils/navigator_utils.dart';
 import '../../utils/prefs.dart';
 
 class NearestRoutesList extends StatefulWidget {
-  const NearestRoutesList({super.key, required this.associationId, required this.title});
+  const NearestRoutesList(
+      {super.key, required this.associationId, required this.title});
   final String associationId, title;
 
   @override
@@ -38,25 +40,35 @@ class NearestRoutesListState extends State<NearestRoutesList>
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
-    _getRouteData(false);
+    _signIn();
   }
 
   List<DistanceBag> distanceBags = [];
   static const mm = '🧡🧡🧡🧡 NearestRoutesList 🧡';
+  _signIn() async {
+    user = prefs.getUser();
+    if (user != null) {
+      var u = await auth.FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: user!.email!, password: user!.password!);
+      if (u.user != null) {
+        pp('$mm user has signed in');
+        _getRouteData(false);
+      }
+    }
+  }
 
   _getRouteData(bool refresh) async {
     setState(() {
       busy = true;
     });
     try {
-        var routeData = await listApiDog.getAssociationRouteData(
-            widget.associationId, refresh);
+      var routeData = await listApiDog.getAssociationRouteData(
+          widget.associationId, refresh);
 
-        routes = await devLoc.getRouteDistances(routeData: routeData!,
-            limitMetres: limit * 1000);
+      routes = await devLoc.getRouteDistances(
+          routeData: routeData!, limitMetres: limit * 1000);
 
-        pp('$mm nearest routes: ${routes.length}');
-
+      pp('$mm nearest routes: ${routes.length}');
     } catch (e, s) {
       pp('$e $s');
       if (mounted) {
@@ -74,20 +86,19 @@ class NearestRoutesListState extends State<NearestRoutesList>
     super.dispose();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(widget.title, style: myTextStyleMedium(context)),
-          actions: [
-            IconButton(onPressed: (){
-              limit = 5;
-              _getRouteData(true);
-            }, icon: const FaIcon(FontAwesomeIcons.arrowsRotate))
-          ]
-        ),
+            title: Text(widget.title, style: myTextStyleMedium(context)),
+            actions: [
+              IconButton(
+                  onPressed: () {
+                    limit = 5;
+                    _getRouteData(true);
+                  },
+                  icon: const FaIcon(FontAwesomeIcons.arrowsRotate))
+            ]),
         body: SafeArea(
           child: Stack(
             children: [
@@ -130,7 +141,7 @@ class NearestRoutesListState extends State<NearestRoutesList>
                               onChanged: (value) {
                                 if (value != null) {
                                   setState(() {
-                                    limit = value ;
+                                    limit = value;
                                   });
                                   _getRouteData(true);
                                 }
@@ -147,61 +158,76 @@ class NearestRoutesListState extends State<NearestRoutesList>
                       gapH32,
                       routes.isEmpty
                           ? Center(
-                          child: Text(
-                            'No routes found within your current vicinity',
-                            style: myTextStyleLarge(context),
-                          ))
+                              child: Text(
+                              'Finding routes in your current vicinity',
+                              style: myTextStyle(
+                                  fontSize: 16, weight: FontWeight.w400),
+                            ))
                           : Expanded(
-                        child: bd.Badge(
-                          badgeContent: Text(
-                            '${routes.length}',
-                            style: myTextStyle(color: Colors.white),
-                          ),
-                          badgeStyle: const bd.BadgeStyle(
-                              padding: EdgeInsets.all(16),
-                              badgeColor: Colors.red),
-                          position:
-                          bd.BadgePosition.topEnd(top: -48, end: 6),
-                          child: ListView.builder(
-                              itemCount: routes.length,
-                              itemBuilder: (ctx, index) {
-                                var r = routes[index];
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      route = r;
-                                    });
-                                    Navigator.of(context).pop(route);
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 4),
-                                    child: Card(
-                                      elevation: 8,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16),
-                                        child: Text(
-                                          r.name!,
-                                          style:
-                                          myTextStyle(fontSize: 15),
+                              child: bd.Badge(
+                                badgeContent: Text(
+                                  '${routes.length}',
+                                  style: myTextStyle(color: Colors.white),
+                                ),
+                                badgeStyle: const bd.BadgeStyle(
+                                    padding: EdgeInsets.all(16),
+                                    badgeColor: Colors.red),
+                                position:
+                                    bd.BadgePosition.topEnd(top: -48, end: 6),
+                                child: ListView.builder(
+                                    itemCount: routes.length,
+                                    itemBuilder: (ctx, index) {
+                                      var r = routes[index];
+                                      return GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            route = r;
+                                          });
+                                          Navigator.of(context).pop(route);
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 4),
+                                          child: Card(
+                                            elevation: 8,
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(16),
+                                              child: Row(children: [
+                                                SizedBox(
+                                                    width: 24,
+                                                    child: Text(
+                                                      '${index + 1}',
+                                                      style: myTextStyle(
+                                                          color: Colors.blue,
+                                                          fontSize: 12,
+                                                          weight:
+                                                              FontWeight.w900),
+                                                    )),
+                                                Flexible(
+                                                  child: Text(
+                                                    r.name!,
+                                                    style: myTextStyle(
+                                                        fontSize: 15),
+                                                  ),
+                                                ),
+                                              ]),
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }),
-                        ),
-                      ),
+                                      );
+                                    }),
+                              ),
+                            ),
                       gapH32,
                     ],
                   )),
               busy
                   ? const Positioned(
-                child: Center(
-                    child: TimerWidget(
-                        title: 'Loading Route data ...',
-                        isSmallSize: true)),
-              )
+                      child: Center(
+                          child: TimerWidget(
+                              title: 'Loading Route data ...',
+                              isSmallSize: true)),
+                    )
                   : gapW32,
             ],
           ),

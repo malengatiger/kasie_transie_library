@@ -10,7 +10,7 @@ import '../../utils/functions.dart';
 import '../../utils/prefs.dart';
 import '../photo_handler.dart';
 import '../vehicle_widgets/vehicle_search.dart';
-
+import 'package:permission_handler/permission_handler.dart';
 class AssociationVehiclePhotoHandler extends StatefulWidget {
   const AssociationVehiclePhotoHandler({super.key});
 
@@ -36,8 +36,18 @@ class AssociationVehiclePhotoHandlerState
     _controller = AnimationController(vsync: this);
     super.initState();
     _navigateToCarSearch();
+    _getCameraPermission();
   }
 
+  _getCameraPermission() async {
+    bool isGranted = await Permission.camera.isGranted;
+    if (isGranted) {
+      pp('$mm camera permission granted: $isGranted');
+      return;
+    }
+    var status = await Permission.camera.request();
+    pp('$mm camera permission status: ${status.name}');
+  }
   @override
   void dispose() {
     _controller.dispose();

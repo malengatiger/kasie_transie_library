@@ -298,7 +298,7 @@ class PhotoHandlerState extends State<PhotoHandler>
               icon: const Icon(Icons.arrow_back_ios)),
           title: Text(
             '${widget.vehicle.vehicleReg}',
-            style: myTextStyleMediumWithColor(context, color),
+            style: myTextStyle(color: Colors.blue.shade700, weight: FontWeight.w900, fontSize: 24),
           ),
         ),
         body: Stack(
@@ -346,7 +346,7 @@ class PhotoHandlerState extends State<PhotoHandler>
                                 child: Text(
                                   'Upload Photo',
                                   style: myTextStyle(
-                                      color: Colors.white, fontSize: 20),
+                                      color: Colors.white, fontSize: 18),
                                 ),
                               ))
                           : gapW4,
@@ -360,7 +360,7 @@ class PhotoHandlerState extends State<PhotoHandler>
                                       ? 'Take Picture'
                                       : takePicture!,
                                   style: myTextStyle(
-                                      color: Colors.white, fontSize: 20),
+                                      color: Colors.white, fontSize: 18),
                                 ),
                               ))
                           : gapH32,
@@ -370,7 +370,7 @@ class PhotoHandlerState extends State<PhotoHandler>
               ),
             ),
             Positioned(
-              right: 16, bottom: 16, child: ElevatedButton(onPressed: (){
+              right: 8, bottom: 4, child: ElevatedButton(onPressed: (){
                 Navigator.of(context).pop();
             },
                 child: const Text('Done'))
