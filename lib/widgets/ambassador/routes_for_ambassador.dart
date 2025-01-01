@@ -34,7 +34,7 @@ class NearestRoutesListState extends State<NearestRoutesList>
   lib.Route? route;
   bool busy = false;
   lib.User? user;
-  int limit = 3;
+  int limit = 5;
 
   @override
   void initState() {

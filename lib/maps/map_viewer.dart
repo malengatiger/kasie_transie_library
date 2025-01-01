@@ -126,6 +126,7 @@ class MapViewerState extends State<MapViewer> {
 
     _markers.clear();
     landmarkIndex = 0;
+    routeLandmarks.sort((a,b) => a.index!.compareTo(b.index!));
     for (var landmark in routeLandmarks) {
       final latLng = LatLng(landmark.position!.coordinates.last,
           landmark.position!.coordinates.first);

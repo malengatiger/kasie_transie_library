@@ -108,7 +108,7 @@ class DeviceLocationBloc {
     for (var r in result) {
       if (r.distance <= limitMetres) {
         finalDistanceBags.add(r);
-        pp('$mm getRouteDistances: route within 1000 meters: ${r.distance} \t - ${r.routePoint.routeName}');
+        pp('$mm getRouteDistances: route within $limitMetres meters: ${r.distance} \t - ${r.routePoint.routeName}');
       }
     }
     finalDistanceBags.sort((a, b) => a.distance.compareTo(b.distance));
@@ -120,6 +120,7 @@ class DeviceLocationBloc {
         }
       }
     }
+
     return routes;
   }
 
