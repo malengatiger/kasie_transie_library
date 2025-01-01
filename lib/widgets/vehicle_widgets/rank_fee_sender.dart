@@ -153,7 +153,7 @@ class RankFeeSenderState extends State<RankFeeSender>
     lib.RouteLandmark? mark = await findNearestLandmark(loc);
     if (paymentProvider != null) {
       var rfpp = RankFeeProviderPayment(
-          rankFeeProviderPaymentId: const UuidV4().toString(),
+          rankFeeProviderPaymentId: const UuidV4().generate(),
           vehicleId: widget.vehicle.vehicleId,
           vehicleReg: widget.vehicle.vehicleReg,
           associationId: widget.vehicle.associationId,
@@ -198,7 +198,7 @@ class RankFeeSenderState extends State<RankFeeSender>
       });
 
       rankFeePayment = RankFeeCashPayment(
-          rankFeeCashPaymentId: const UuidV4().toString(),
+          rankFeeCashPaymentId: const UuidV4().generate(),
           userId: user!.userId,
           userName: '${user!.firstName} ${user!.lastName}',
           created: DateTime.now().toUtc().toIso8601String(),
