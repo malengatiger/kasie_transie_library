@@ -229,7 +229,7 @@ class DamnEmailLinkState extends State<DamnEmailLink>
             var zipHandler = GetIt.instance<ZipHandler>();
             // var vehicleIsolate = GetIt.instance<VehicleIsolate>();
             //await vehicleIsolate.getVehicles(mUser.associationId!);
-            await zipHandler.getRoutes(associationId: mUser.associationId!);
+            await zipHandler.getRouteData(associationId: mUser.associationId!);
 
             try {
               pp('$mm emailLinkAuthProvider: ${emailLinkAuthProvider.providerId} '

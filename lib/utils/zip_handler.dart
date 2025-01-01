@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:archive/archive_io.dart';
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/bloc/app_auth.dart';
 import 'package:kasie_transie_library/bloc/sem_cache.dart';
@@ -13,17 +14,14 @@ import '../data/data_schemas.dart';
 import '../data/route_data.dart';
 import 'functions.dart';
 import 'kasie_exception.dart';
-
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 // final ZipHandler zipHandler = ZipHandler();
 
 class ZipHandler {
   static const xz = '🍐🍐🍐🍐 ZipHandler : ';
-  final AppAuth appAuth;
-  final SemCache semCache;
+  late SemCache semCache;
 
-  ZipHandler(this.appAuth, this.semCache);
-
-  Future<String> getCars(String associationId, String token) async {
+  Future<String> getCars(String associationId) async {
     pp('$xz getVehiclesZippedFile: 🔆🔆🔆 get zipped car data associationId: $associationId ...');
 
     final mUrl =
@@ -31,13 +29,7 @@ class ZipHandler {
     var start = DateTime.now();
     List<Vehicle> cars = [];
 
-    Map<String, String> headers = {
-      'Authorization': 'Bearer $token',
-      'Accept': '*/*',
-    };
-    headers['Authorization'] = 'Bearer $token';
-
-    http.Response response = await getUsingHttp(mUrl, headers);
+    http.Response response = await getUsingHttp(mUrl);
     pp('$xz getCars: 🔆🔆🔆 get zipped data, response: ${response.contentLength} bytes ...');
 
     try {
@@ -74,11 +66,13 @@ class ZipHandler {
     var start = DateTime.now();
     List<Vehicle> cars = [];
 
+    var token = await auth.FirebaseAuth.instance.currentUser!.getIdToken(true);
     Map<String, String> headers = {
       'Accept': '*/*',
+      'Authorization': 'Bearer $token'
     };
 
-    http.Response response = await getUsingHttp(mUrl, headers);
+    http.Response response = await getUsingHttp(mUrl);
     pp('$xz getOwnerCars: 🔆🔆🔆 get zipped data, response: ${response.contentLength} bytes ...');
 
     try {
@@ -134,12 +128,8 @@ class ZipHandler {
     var start = DateTime.now();
     List<City> cities = [];
 
-    Map<String, String> headers = {
-      'Accept': '*/*',
-    };
-
     try {
-      http.Response response = await getUsingHttp(mUrl, headers);
+      http.Response response = await getUsingHttp(mUrl);
       pp('$xz getCities: 🔆🔆🔆 get zipped data, response: ${response.contentLength} bytes ...');
       final archive = ZipDecoder().decodeBytes(response.bodyBytes);
       pp('$xz getCities: 🔆🔆🔆 handle file inside zip archive: ${archive.files.length} files');
@@ -166,7 +156,7 @@ class ZipHandler {
     return jsonEncode(cities);
   }
 
-  Future<AssociationRouteData> getRoutes({required String associationId}) async {
+  Future<AssociationRouteData> getRouteData({required String associationId}) async {
     pp('$xz getRouteData: 🔆🔆🔆 zipped for associationId: $associationId ...');
 
     final mUrl =
@@ -175,12 +165,9 @@ class ZipHandler {
 
     var start = DateTime.now();
 
-    Map<String, String> headers = {
-      'Accept': '*/*',
-    };
-
     try {
-      http.Response response = await getUsingHttp(mUrl, headers);
+      semCache = GetIt.instance<SemCache>();
+      http.Response response = await getUsingHttp(mUrl);
       pp('$xz getRouteDataString: 🔆🔆🔆 get zipped data, response: ${response.contentLength} bytes ...');
 
       final archive = ZipDecoder().decodeBytes(response.bodyBytes);
@@ -222,11 +209,9 @@ class ZipHandler {
         '${KasieEnvironment.getUrl()}routes/getRoutePointsZipped?routeId'
         '=$routeId';
 
-    Map<String, String> headers = {
-      'Accept': '*/*',
-    };
 
-    http.Response response = await getUsingHttp(mUrl, headers);
+
+    http.Response response = await getUsingHttp(mUrl);
     final list = await _getPointsFromArchive(response);
     return jsonEncode(list);
   }
@@ -240,10 +225,8 @@ class ZipHandler {
     final mUrl = '${KasieEnvironment.getUrl()}deleteRoutePoints?routeId'
         '=$routeId&latitude=$latitude&longitude=$longitude';
 
-    Map<String, String> headers = {
-      'Accept': '*/*',
-    };
-    http.Response response = await getUsingHttp(mUrl, headers);
+
+    http.Response response = await getUsingHttp(mUrl);
     final points = await _getPointsFromArchive(response);
     return jsonEncode(points);
   }
@@ -286,11 +269,8 @@ class ZipHandler {
 
     var start = DateTime.now();
 
-    Map<String, String> headers = {
-      'Accept': '*/*',
-    };
 
-    http.Response response = await getUsingHttp(mUrl, headers);
+    http.Response response = await getUsingHttp(mUrl);
 
     pp('$xz refreshRoute: 🔆🔆🔆 get zipped data, response: ${response.contentLength} bytes ...');
     RouteBag? bag;
@@ -319,13 +299,15 @@ class ZipHandler {
   }
 
   Future<http.Response> getUsingHttp(
-      String mUrl, Map<String, String> headers) async {
+      String mUrl) async {
     pp('$xz httpGet: 🔆 🔆 🔆 calling : 💙 $mUrl  💙');
     var start = DateTime.now();
-    var tkn = await appAuth.getAuthToken();
-    if (tkn != null) {
-      headers['Authorization'] = tkn;
-    }
+    var token = await auth.FirebaseAuth.instance.currentUser!.getIdToken(true);
+    Map<String, String> headers = {
+      'Accept': '*/*',
+      'Authorization': 'Bearer $token'
+    };
+
     try {
       final http.Client client = http.Client();
       var resp = await client

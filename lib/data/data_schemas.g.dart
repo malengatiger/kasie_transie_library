@@ -1150,21 +1150,24 @@ Map<String, dynamic> _$LandmarkToJson(Landmark instance) => <String, dynamic>{
 
 SettingsModel _$SettingsModelFromJson(Map<String, dynamic> json) =>
     SettingsModel(
-      json['associationId'] as String?,
-      json['locale'] as String?,
-      json['created'] as String?,
-      (json['refreshRateInSeconds'] as num?)?.toInt(),
-      (json['themeIndex'] as num?)?.toInt(),
-      (json['geofenceRadius'] as num?)?.toInt(),
-      (json['commuterGeofenceRadius'] as num?)?.toInt(),
-      (json['vehicleSearchMinutes'] as num?)?.toInt(),
-      (json['heartbeatIntervalSeconds'] as num?)?.toInt(),
-      (json['loiteringDelay'] as num?)?.toInt(),
-      (json['commuterSearchMinutes'] as num?)?.toInt(),
-      (json['commuterGeoQueryRadius'] as num?)?.toInt(),
-      (json['vehicleGeoQueryRadius'] as num?)?.toInt(),
-      (json['numberOfLandmarksToScan'] as num?)?.toInt(),
-      (json['distanceFilter'] as num?)?.toInt(),
+      associationId: json['associationId'] as String?,
+      locale: json['locale'] as String?,
+      created: json['created'] as String?,
+      refreshRateInSeconds: (json['refreshRateInSeconds'] as num?)?.toInt(),
+      themeIndex: (json['themeIndex'] as num?)?.toInt(),
+      geofenceRadius: (json['geofenceRadius'] as num?)?.toInt(),
+      commuterGeofenceRadius: (json['commuterGeofenceRadius'] as num?)?.toInt(),
+      vehicleSearchMinutes: (json['vehicleSearchMinutes'] as num?)?.toInt(),
+      heartbeatIntervalSeconds:
+          (json['heartbeatIntervalSeconds'] as num?)?.toInt(),
+      loiteringDelay: (json['loiteringDelay'] as num?)?.toInt(),
+      commuterSearchMinutes: (json['commuterSearchMinutes'] as num?)?.toInt(),
+      commuterGeoQueryRadius: (json['commuterGeoQueryRadius'] as num?)?.toInt(),
+      vehicleGeoQueryRadius: (json['vehicleGeoQueryRadius'] as num?)?.toInt(),
+      numberOfLandmarksToScan:
+          (json['numberOfLandmarksToScan'] as num?)?.toInt(),
+      geofenceRefreshMinutes: (json['geofenceRefreshMinutes'] as num?)?.toInt(),
+      distanceFilter: (json['distanceFilter'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$SettingsModelToJson(SettingsModel instance) =>
@@ -1176,6 +1179,7 @@ Map<String, dynamic> _$SettingsModelToJson(SettingsModel instance) =>
       'themeIndex': instance.themeIndex,
       'geofenceRadius': instance.geofenceRadius,
       'commuterGeofenceRadius': instance.commuterGeofenceRadius,
+      'geofenceRefreshMinutes': instance.geofenceRefreshMinutes,
       'vehicleSearchMinutes': instance.vehicleSearchMinutes,
       'heartbeatIntervalSeconds': instance.heartbeatIntervalSeconds,
       'loiteringDelay': instance.loiteringDelay,

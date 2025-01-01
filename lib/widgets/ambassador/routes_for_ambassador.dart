@@ -7,7 +7,7 @@ import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
-
+import 'package:permission_handler/permission_handler.dart';
 import '../../data/route_data.dart';
 import '../../utils/functions.dart';
 import '../../utils/navigator_utils.dart';
@@ -61,6 +61,10 @@ class NearestRoutesListState extends State<NearestRoutesList>
     setState(() {
       busy = true;
     });
+    var ok = await Permission.location.isGranted;
+    if (!ok) {
+      await Permission.location.request();
+    }
     try {
       var routeData = await listApiDog.getAssociationRouteData(
           widget.associationId, refresh);

@@ -62,6 +62,7 @@ class CarDetailsState extends State<CarDetails>
   late StreamSubscription<lib.VehicleArrival> arrivalStreamSub;
   late StreamSubscription<lib.VehicleDeparture> departureStreamSub;
   late StreamSubscription<lib.VehicleHeartbeat> heartbeatStreamSub;
+  late FCMService fcmService;
 
   Prefs prefs = GetIt.instance<Prefs>();
 
@@ -81,6 +82,8 @@ class CarDetailsState extends State<CarDetails>
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
+    fcmService = GetIt.instance<FCMService>();
+
     _listen();
     _setTexts();
     _getData(false);
@@ -91,7 +94,7 @@ class CarDetailsState extends State<CarDetails>
 
   void _listen() async {
     pp('$mm ............... listen to FCM .............................');
-    arrivalStreamSub = fcmBloc.vehicleArrivalStream.listen((event) {
+    arrivalStreamSub = fcmService.vehicleArrivalStream.listen((event) {
       pp('$mm vehicleArrivalStream delivered: ${E.leaf2} ${event.vehicleReg} at ${DateTime.now().toIso8601String()}');
       if (event.vehicleId == widget.vehicle.vehicleId) {
         arrivals++;
@@ -100,7 +103,7 @@ class CarDetailsState extends State<CarDetails>
         }
       }
     });
-    departureStreamSub = fcmBloc.vehicleDepartureStream.listen((event) {
+    departureStreamSub = fcmService.vehicleDepartureStream.listen((event) {
       pp('$mm vehicleDepartureStream delivered: ${E.leaf2} ${event.vehicleReg} at ${DateTime.now().toIso8601String()}');
       if (event.vehicleId == widget.vehicle.vehicleId) {
         departures++;
@@ -109,7 +112,7 @@ class CarDetailsState extends State<CarDetails>
         }
       }
     });
-    respSub = fcmBloc.locationResponseStream.listen((event) {
+    respSub = fcmService.locationResponseStream.listen((event) {
       pp('$mm locationResponseStream delivered: ${E.leaf2} ${event.vehicleReg} at ${DateTime.now().toIso8601String()}');
       locationResponse = event;
       if (mounted) {
@@ -117,8 +120,8 @@ class CarDetailsState extends State<CarDetails>
       }
     });
     dispatchStreamSub =
-        fcmBloc.dispatchStream.listen((lib.DispatchRecord dRec) {
-      pp('$mm ... fcmBloc.dispatchStream delivered dispatch for: ${dRec.vehicleReg}');
+        fcmService.dispatchStream.listen((lib.DispatchRecord dRec) {
+      pp('$mm ... fcmService.dispatchStream delivered dispatch for: ${dRec.vehicleReg}');
       if (dRec.vehicleId == widget.vehicle.vehicleId) {
         dispatches++;
         routeName = dRec.routeName;
@@ -129,9 +132,9 @@ class CarDetailsState extends State<CarDetails>
         }
       }
     });
-    passengerStreamSub = fcmBloc.passengerCountStream
+    passengerStreamSub = fcmService.passengerCountStream
         .listen((lib.AmbassadorPassengerCount cunt) {
-      pp('$mm ... fcmBloc.passengerCountStream delivered count for: ${cunt.vehicleReg}');
+      pp('$mm ... fcmService.passengerCountStream delivered count for: ${cunt.vehicleReg}');
       if (cunt.vehicleId == widget.vehicle.vehicleId) {
         totalPassengers += cunt.passengersIn!;
         routeName = cunt.routeName;
@@ -142,8 +145,8 @@ class CarDetailsState extends State<CarDetails>
       }
     });
     heartbeatStreamSub =
-        fcmBloc.heartbeatStreamStream.listen((lib.VehicleHeartbeat cunt) {
-      pp('$mm ... fcmBloc.heartbeatStreamStream delivered heartbeat for: ${cunt.vehicleReg}');
+        fcmService.heartbeatStreamStream.listen((lib.VehicleHeartbeat cunt) {
+      pp('$mm ... fcmService.heartbeatStreamStream delivered heartbeat for: ${cunt.vehicleReg}');
       if (cunt.vehicleId == widget.vehicle.vehicleId) {
         heartbeats++;
         if (mounted) {

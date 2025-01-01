@@ -24,7 +24,7 @@ import '../utils/functions.dart';
 import '../utils/kasie_exception.dart';
 import '../utils/prefs.dart';
 
-final FCMService fcmBloc = FCMService(fb.FirebaseMessaging.instance);
+// final FCMService fcmBloc = FCMService(fb.FirebaseMessaging.instance);
 String? appName;
 
 class FCMService {
@@ -561,8 +561,8 @@ class FCMService {
 
   void _processRouteUpdate(lib.RouteUpdateRequest req) async {
     pp('$newMM _processRouteUpdate ... ${req.routeName}');
-    var routesIsolate = GetIt.instance<ZipHandler>();
-    await routesIsolate.refreshRoute(routeId: req.routeId!);
+    var zipHandler = GetIt.instance<ZipHandler>();
+    await zipHandler.getRouteData(associationId: req.associationId!);
     _routeUpdateRequestStreamController.sink.add(req);
   }
 
@@ -684,6 +684,7 @@ class FCMService {
       pp('$newMM location request is NOT for me. ${E.redDot}${E.redDot}${E.redDot} ');
       return;
     }
+
     if (request.vehicleId == car.vehicleId) {
       pp('$newMM location request is for me! ... must respond!!');
       final loc = await locationBloc.getLocation();
@@ -704,8 +705,8 @@ class FCMService {
       try {
         pp('$newMM sending location response! ${E.blueDot}');
         final result = await dataApiDog.addLocationResponse(resp);
-        pp('$newMM location response successfully sent! ${E.leaf} ');
-        // myPrettyJsonPrint(result.toJson());
+        pp('$newMM location response successfully sent! } ');
+        myPrettyJsonPrint(result.toJson());
       } catch (e) {
         pp(e);
       }

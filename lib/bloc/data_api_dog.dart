@@ -87,16 +87,17 @@ class DataApiDog {
       }
     });
 
-    auth.FirebaseAuth.instance.authStateChanges().listen((auth.User? user) async {
+    auth.FirebaseAuth.instance
+        .authStateChanges()
+        .listen((auth.User? user) async {
       if (user == null) {
         pp('$mm authStateChanges: User is currently signed out!');
       } else {
         pp('$mm authStateChanges: User is signed in! ${user.displayName}, checking auth token state ...');
       }
     });
-
-
   }
+
   Future<String?> _getRefreshedToken() async {
     auth.User? user = auth.FirebaseAuth.instance.currentUser;
     String? token;
@@ -124,6 +125,7 @@ class DataApiDog {
       rethrow;
     }
   }
+
   Future<String?> uploadQRCodeFile(
       {required Uint8List imageBytes, required String associationId}) async {
     pp('\n\n$mm ............ uploadQRCodeFile: 🌿 associationId: $associationId');
@@ -249,14 +251,14 @@ class DataApiDog {
     throw Exception('Vehicle photo file upload failed');
   }
 
-  Future<String?> uploadReceipt(
-      {required io.File file,
-        required String associationId,}) async {
+  Future<String?> uploadReceipt({
+    required io.File file,
+    required String associationId,
+  }) async {
     pp('$mm uploadReceipt: 🌿........... file: ${file.path} ');
 
     var url = KasieEnvironment.getUrl();
-    var mUrl =
-        '${url}storage/uploadReceiptFile?associationId=$associationId';
+    var mUrl = '${url}storage/uploadReceiptFile?associationId=$associationId';
     var request = http.MultipartRequest('POST', Uri.parse(mUrl));
 
     // For mobile/desktop, use fromPath
@@ -319,8 +321,7 @@ class DataApiDog {
     return lr;
   }
 
-  Future<Trip> addTrip(
-      Trip trip) async {
+  Future<Trip> addTrip(Trip trip) async {
     final bag = trip.toJson();
     final cmd = '${url}dispatch/addTrip';
     final res = await _callPost(cmd, bag);
@@ -329,8 +330,8 @@ class DataApiDog {
     pp('$mm Trip added to database: ${lr.toJson()}');
     return lr;
   }
-  Future<dynamic> updateTrip(
-      Trip trip) async {
+
+  Future<dynamic> updateTrip(Trip trip) async {
     final bag = trip.toJson();
     final cmd = '${url}dispatch/updateTrip';
     final res = await _callPost(cmd, bag);
@@ -338,6 +339,7 @@ class DataApiDog {
     pp('$mm Trip updated on database: $res');
     return res;
   }
+
   Future<CommuterCashCheckIn> addCommuterCashCheckIn(
       CommuterCashCheckIn cashCheckIn) async {
     final bag = cashCheckIn.toJson();
@@ -349,7 +351,8 @@ class DataApiDog {
     return lr;
   }
 
-  Future<RankFeeCashCheckIn> addRankFeeCashCheckIn(RankFeeCashCheckIn cashCheckIn) async {
+  Future<RankFeeCashCheckIn> addRankFeeCashCheckIn(
+      RankFeeCashCheckIn cashCheckIn) async {
     final bag = cashCheckIn.toJson();
     final cmd = '${url}payment/addRankFeeCashCheckIn';
     final res = await _callPost(cmd, bag);
@@ -402,7 +405,6 @@ class DataApiDog {
     return lr;
   }
 
-
   Future<CommuterRequest> addCommuterRequest(CommuterRequest request) async {
     final bag = request.toJson();
     final cmd = '${url}commuter/addCommuterRequest';
@@ -438,7 +440,7 @@ class DataApiDog {
   Future<LocationResponse> addLocationResponse(
       LocationResponse response) async {
     final bag = response.toJson();
-    final cmd = '${url}addLocationResponse';
+    final cmd = '${url}vehicle/addLocationResponse';
     final res = await _callPost(cmd, bag);
     pp('$mm LocationResponse added to database: $res');
     final lr = LocationResponse.fromJson(res);
@@ -493,6 +495,7 @@ class DataApiDog {
     prefs.saveUser(u);
     return u;
   }
+
   Future<User> createVehicleUser(User user) async {
     final bag = user.toJson();
     final cmd = '${url}user/createVehicleUser';
@@ -503,6 +506,7 @@ class DataApiDog {
     prefs.saveUser(u);
     return u;
   }
+
   Future<User> addOwner(User user) async {
     final bag = user.toJson();
     final cmd = '${url}user/createOwner';
@@ -847,7 +851,7 @@ class DataApiDog {
 
   Future<SettingsModel> addSettings(SettingsModel settings) async {
     final bag = settings.toJson();
-    final cmd = '${url}addSettingsModel';
+    final cmd = '${url}association/addSettingsModel';
 
     final res = await _callPost(cmd, bag);
     final r = SettingsModel.fromJson(res);
@@ -1064,110 +1068,118 @@ class DataApiDog {
     var retryCount = 0;
     var waitTime = const Duration(seconds: 2);
     var start = DateTime.now();
-    token ??= await getAuthToken();
+    auth.User? user = auth.FirebaseAuth.instance.currentUser;
+    String? token;
+    if (user != null) {
+      token = await user.getIdToken(true);
+    } else {
+      throw Exception('No current user');
+    }
     if (token == null) {
       throw Exception('token not found');
     }
     client = http.Client();
-
     headers['Authorization'] = 'Bearer $token';
-    while (retryCount < maxRetries) {
-      try {
-        var resp = await client
-            .post(
-              Uri.parse(mUrl),
-              body: mBag,
-              headers: headers,
-            )
-            .timeout(const Duration(seconds: timeOutInSeconds));
-        pp('$mm  _callWebAPIPost RESPONSE: 👌👌👌 statusCode: ${resp.statusCode} 👌👌👌 for $mUrl');
 
-        if (resp.statusCode == 200 || resp.statusCode == 201) {
-          try {
-            var mJson = json.decode(resp.body);
-            return mJson;
-          } catch (e) {
-            pp("$mm $dev  $dev  json.decode failed, returning response body");
-            return resp.body;
-          }
+    try {
+      pp('$mm  _callWebAPIPost: running client.post for $mUrl');
+
+      var resp = await client
+          .post(
+            Uri.parse(mUrl),
+            body: mBag,
+            headers: headers,
+          ) .timeout(const Duration(seconds: timeOutInSeconds));
+
+
+      if (resp.statusCode == 200 || resp.statusCode == 201) {
+        pp('$mm  _callWebAPIPost RESPONSE: 👌👌👌 statusCode: ${resp.statusCode} 👌👌👌 for $mUrl');
+        try {
+          var mJson = json.decode(resp.body);
+          return mJson;
+        } catch (e) {
+          pp("$mm $dev  $dev  json.decode failed, returning response body");
+          return resp.body;
+        }
+      } else {
+        pp('$mm  _callWebAPIPost RESPONSE: 😈😈😈 statusCode: ${resp.statusCode} 😈😈😈 for $mUrl');
+        if (resp.statusCode == 401 || resp.statusCode == 403) {
+          pp('$mm  $dev  _callWebAPIPost: 🔆 error statusCode:  ${resp.statusCode} $dev for $mUrl');
+          pp('$mm metadata: ${resp.body}');
+          pp('$mm  $dev  _callWebAPIPost: 🔆 Firebase ID token may have expired, trying to refresh ... 🔴🔴🔴🔴🔴🔴 ');
+          pp('$mm Throwing my toys!!! .... ');
+          final gex = KasieException(
+              message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
+              url: mUrl,
+              translationKey: 'serverProblem',
+              errorType: KasieException.socketException);
+          errorHandler.handleError(exception: gex);
+          throw Exception('The status is BAD (401 or 403), Boss!');
         } else {
-          if (resp.statusCode == 401 || resp.statusCode == 403) {
-            pp('$mm  $dev  _callWebAPIPost: 🔆 statusCode:  ${resp.statusCode} $dev for $mUrl');
-            pp('$mm metadata: ${resp.body}');
-            pp('$mm  $dev  _callWebAPIPost: 🔆 Firebase ID token may have expired, trying to refresh ... 🔴🔴🔴🔴🔴🔴 ');
-            pp('$mm Throwing my toys!!! .... ');
+          if (resp.statusCode == 400 || resp.statusCode == 500) {
             final gex = KasieException(
-                message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
+                message:
+                    'Bad status code: ${resp.statusCode} - ${resp.body}, please try again',
                 url: mUrl,
                 translationKey: 'serverProblem',
                 errorType: KasieException.socketException);
             errorHandler.handleError(exception: gex);
-            throw Exception('The status is BAD (401 or 403), Boss!');
-          } else {
-            if (resp.statusCode == 400 || resp.statusCode == 500) {
-              final gex = KasieException(
-                  message:
-                      'Bad status code: ${resp.statusCode} - ${resp.body}, please try again',
-                  url: mUrl,
-                  translationKey: 'serverProblem',
-                  errorType: KasieException.socketException);
-              errorHandler.handleError(exception: gex);
-              throw Exception('The status is BAD (400 or 500), Boss!');
-            }
+            throw Exception('The status is BAD (400 or 500), Boss!');
           }
         }
-        var end = DateTime.now();
-        pp('$mm  _callWebAPIPost: 🔆 elapsed time: ${end.difference(start).inSeconds} seconds 🔆 $mUrl');
-      } on io.SocketException catch (e) {
-        pp('$mm  SocketException: really means that server cannot be reached 😑');
-        final gex = KasieException(
-            message: 'Server not available: $e',
-            url: mUrl,
-            translationKey: 'serverProblem',
-            errorType: KasieException.socketException);
-        errorHandler.handleError(exception: gex);
-        throw Exception('The server is not available');;
-      } on io.HttpException catch (e) {
-        pp("$mm  HttpException occurred 😱");
-        final gex = KasieException(
-            message: 'Server not available: $e',
-            url: mUrl,
-            translationKey: 'serverProblem',
-            errorType: KasieException.httpException);
-        errorHandler.handleError(exception: gex);
-        throw Exception('Something went wrong: $e');;
-
-      } on http.ClientException catch (e) {
-        pp("$mm   http.ClientException  occurred 😱");
-        final gex = KasieException(
-            message: 'ClientException: $e',
-            url: mUrl,
-            translationKey: 'serverProblem',
-            errorType: KasieException.httpException);
-        errorHandler.handleError(exception: gex);
-        throw Exception('Something went wrong: $e');;
-
-      } on FormatException catch (e) {
-        pp("$mm  Bad response format 👎");
-        final gex = KasieException(
-            message: 'Bad response format: $e',
-            url: mUrl,
-            translationKey: 'serverProblem',
-            errorType: KasieException.formatException);
-        errorHandler.handleError(exception: gex);
-        throw Exception('Something went wrong: $e');;
-
-      } on TimeoutException catch (e) {
-        pp("$mm  No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
-        final gex = KasieException(
-            message: 'Request timed out. No Internet connection: $e',
-            url: mUrl,
-            translationKey: 'networkProblem',
-            errorType: KasieException.timeoutException);
-        errorHandler.handleError(exception: gex);
-        throw Exception('Something went wrong: $e');;
-
       }
+      var end = DateTime.now();
+      pp('$mm  _callWebAPIPost: 🔆 elapsed time: ${end.difference(start).inSeconds} seconds 🔆 $mUrl');
+    } on io.SocketException catch (e) {
+      pp('$mm  SocketException: really means that server cannot be reached 😑');
+      final gex = KasieException(
+          message: 'Server not available: $e',
+          url: mUrl,
+          translationKey: 'serverProblem',
+          errorType: KasieException.socketException);
+      errorHandler.handleError(exception: gex);
+      throw Exception('The server is not available');
+      ;
+    } on io.HttpException catch (e) {
+      pp("$mm  HttpException occurred 😱");
+      final gex = KasieException(
+          message: 'Server not available: $e',
+          url: mUrl,
+          translationKey: 'serverProblem',
+          errorType: KasieException.httpException);
+      errorHandler.handleError(exception: gex);
+      throw Exception('Something went wrong: $e');
+      ;
+    } on http.ClientException catch (e) {
+      pp("$mm   http.ClientException  occurred 😱");
+      final gex = KasieException(
+          message: 'ClientException: $e',
+          url: mUrl,
+          translationKey: 'serverProblem',
+          errorType: KasieException.httpException);
+      errorHandler.handleError(exception: gex);
+      throw Exception('Something went wrong: $e');
+      ;
+    } on FormatException catch (e) {
+      pp("$mm  Bad response format 👎");
+      final gex = KasieException(
+          message: 'Bad response format: $e',
+          url: mUrl,
+          translationKey: 'serverProblem',
+          errorType: KasieException.formatException);
+      errorHandler.handleError(exception: gex);
+      throw Exception('Something went wrong: $e');
+      ;
+    } on TimeoutException catch (e) {
+      pp("$mm  No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
+      final gex = KasieException(
+          message: 'Request timed out. No Internet connection: $e',
+          url: mUrl,
+          translationKey: 'networkProblem',
+          errorType: KasieException.timeoutException);
+      errorHandler.handleError(exception: gex);
+      throw Exception('Something went wrong: $e');
+      ;
     }
   }
 

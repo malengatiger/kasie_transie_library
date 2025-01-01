@@ -38,6 +38,7 @@ class LiveClusterMapState extends State<LiveClusterMap>
 
   Set<Marker> dispatchMarkers = {};
   Set<Marker> requestMarkers = {};
+  late FCMService fcmService;
 
   List<lib.DispatchRecord> liveDispatchRecords = [];
   List<lib.CommuterRequest> liveCommuterRequests = [];
@@ -55,11 +56,12 @@ class LiveClusterMapState extends State<LiveClusterMap>
     dispatchClusterManager = _initDispatchClusterManager();
     requestsClusterManager = _initRequestClusterManager();
     super.initState();
+    fcmService = GetIt.instance<FCMService>();
     _listen();
   }
 
   void _listen() async {
-    dispatchSub = fcmBloc.dispatchStream.listen((event) {
+    dispatchSub = fcmService.dispatchStream.listen((event) {
       pp('$mm ... dispatchStream delivered: ${event.vehicleReg}');
       liveDispatchRecords.add(event);
       dispatchRecordCovers.add(DispatchRecordCover(
@@ -76,7 +78,7 @@ class LiveClusterMapState extends State<LiveClusterMap>
             event.position!.coordinates[1], event.position!.coordinates[0]));
       }
     });
-    commuterSub = fcmBloc.commuterRequestStreamStream.listen((event) {
+    commuterSub = fcmService.commuterRequestStreamStream.listen((event) {
       pp('$mm ... commuterRequestStreamStream delivered: ${event.dateRequested}');
       liveCommuterRequests.add(event);
       commuterRequestCovers.add(CommuterRequestCover(

@@ -59,7 +59,7 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
 
   late cl.ClusterManager clusterManager;
   late cl.ClusterManager clusterManager2;
-
+  late FCMService fcmService;
   final CameraPosition _parisCameraPosition =
       const CameraPosition(target: LatLng(-27.856613, 25.352222), zoom: 14.0);
 
@@ -70,6 +70,7 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
     clusterManager2 = _initClusterManager2();
 
     super.initState();
+    fcmService = GetIt.instance<FCMService>();
     _listen();
     _getRoutes();
   }
@@ -108,7 +109,7 @@ class DispatchClusterMapState extends State<DispatchClusterMap>
     //     setState(() {});
     //   }
     // });
-    dispatchSub = fcmBloc.dispatchStream.listen((event) {
+    dispatchSub = fcmService.dispatchStream.listen((event) {
       pp('$mm ... dispatchStream delivered a dispatch record \t '
           '${E.appleGreen} ${event.vehicleReg} ${event.landmarkName} ${E.blueDot} date:  ${event.created}');
       widget.dispatchRecordCovers.add(DispatchRecordCover(

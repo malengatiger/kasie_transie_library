@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:badges/badges.dart' as bd;
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/functions.dart';
 
@@ -38,6 +39,7 @@ class _LiveOperationsState extends State<LiveOperations> {
   late StreamSubscription<lib.VehicleHeartbeat> heartbeatSub;
   late StreamSubscription<lib.VehicleArrival> arrivalsSub;
   late StreamSubscription<lib.VehicleDeparture> departureSub;
+  late FCMService fcmService;
 
 
   @override
@@ -45,6 +47,8 @@ class _LiveOperationsState extends State<LiveOperations> {
     super.initState();
     _listen();
     _restart();
+    fcmService = GetIt.instance<FCMService>();
+
   }
 
   void _restart() {
@@ -61,7 +65,7 @@ class _LiveOperationsState extends State<LiveOperations> {
   void _listen() async {
     pp('\n\n$mm ... listening to FCM topics .......................... ');
 
-    arrivalsSub = fcmBloc.vehicleArrivalStream.listen((event) {
+    arrivalsSub = fcmService.vehicleArrivalStream.listen((event) {
       pp('$mm ... vehicleArrivalStream delivered an arrival \t${E.appleRed} '
           '${event.vehicleReg} at ${event.landmarkName} ${E.blueDot} date: ${event.created}');
       
@@ -70,7 +74,7 @@ class _LiveOperationsState extends State<LiveOperations> {
         setState(() {});
       }
     });
-    departureSub = fcmBloc.vehicleDepartureStream.listen((event) {
+    departureSub = fcmService.vehicleDepartureStream.listen((event) {
       pp('$mm ... vehicleDepartureStream delivered an arrival \t${E.appleRed} '
           '${event.vehicleReg} at ${event.landmarkName} ${E.blueDot} date: ${event.created}');
 
@@ -80,7 +84,7 @@ class _LiveOperationsState extends State<LiveOperations> {
       }
     });
 
-    passengerSub = fcmBloc.passengerCountStream.listen((event) {
+    passengerSub = fcmService.passengerCountStream.listen((event) {
       pp('$mm ... passengerCountStream delivered a count \t ${E.pear} ${event.vehicleReg} '
           '${E.blueDot} date:  ${event.created}');
       
@@ -93,7 +97,7 @@ class _LiveOperationsState extends State<LiveOperations> {
         setState(() {});
       }
     });
-    dispatchSub = fcmBloc.dispatchStream.listen((event) {
+    dispatchSub = fcmService.dispatchStream.listen((event) {
       pp('$mm ... dispatchStream delivered a dispatch record \t '
           '${E.appleGreen} ${event.vehicleReg} ${event.landmarkName} ${E.blueDot} date:  ${event.created}');
       
@@ -102,7 +106,7 @@ class _LiveOperationsState extends State<LiveOperations> {
         setState(() {});
       }
     });
-    requestSub = fcmBloc.commuterRequestStreamStream.listen((event) {
+    requestSub = fcmService.commuterRequestStreamStream.listen((event) {
       pp('$mm ... commuterRequestStreamStream delivered a request \t ${E.appleRed} '
           '${event.routeName} ${E.blueDot} date:  ${event.dateRequested}');
       
@@ -111,7 +115,7 @@ class _LiveOperationsState extends State<LiveOperations> {
         setState(() {});
       }
     });
-    heartbeatSub = fcmBloc.heartbeatStreamStream.listen((event) {
+    heartbeatSub = fcmService.heartbeatStreamStream.listen((event) {
       pp('$mm ... heartbeatStreamStream delivered a heartbeat \t '
           '${E.appleRed} ${event.vehicleReg} ${E.blueDot} date:  ${event.created}');
       

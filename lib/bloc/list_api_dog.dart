@@ -300,7 +300,7 @@ class ListApiDog {
       String associationId, bool refresh) async {
     List<SettingsModel> list1 = [];
     if (refresh) {
-      final cmd = '${url}getAssociationSettings?associationId=$associationId';
+      final cmd = '${url}association/getAssociationSettingsModels??associationId=$associationId';
       List resp = await _sendHttpGET(cmd);
       list1.clear();
       for (var value in resp) {
@@ -421,8 +421,10 @@ class ListApiDog {
 
   Future<AssociationRouteData?> getAssociationRouteData(
       String associationId, bool refresh) async {
-    pp('\n\n$mm ...... getAssociationRouteData: ... starting ...');
+    pp('\n\n$mm .................................................... getAssociationRouteData: ... starting ...');
     semCache = GetIt.instance<SemCache>();
+    var zipHandler = GetIt.instance<ZipHandler>();
+
     var routeData = await semCache.getAssociationRouteData(associationId);
     if (!refresh && routeData != null && routeData.routeDataList.isNotEmpty) {
       return routeData;
@@ -433,12 +435,13 @@ class ListApiDog {
         '${url}routes/getAssociationRouteData?associationId=$associationId';
     try {
       var resp = await _sendHttpGET(cmd);
-      var data = AssociationRouteData.fromJson(resp);
-      pp('$mm getAssociationRouteData: ... routes: ${data.routeDataList.length}');
-      await semCache.saveAssociationRouteData(data);
+      routeData = AssociationRouteData.fromJson(resp);
+      pp('$mm getAssociationRouteData: ... routes: ${routeData.routeDataList.length}');
+      await semCache.saveAssociationRouteData(routeData);
       var end = DateTime.now();
       pp('$mm getAssociationRouteData: elapsed seconds: 🍎${end.difference(start).inSeconds} 🍎');
-      return data;
+
+      return routeData;
     } catch (e, s) {
       pp('$mm ERROR in getAssociationRouteData: $e \n$s');
       throw Exception('ERROR loading Association Route Data: $e');

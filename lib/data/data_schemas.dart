@@ -1137,6 +1137,7 @@ class SettingsModel {
   String? locale, created;
   int? refreshRateInSeconds, themeIndex;
   int? geofenceRadius, commuterGeofenceRadius;
+  int? geofenceRefreshMinutes;
   int? vehicleSearchMinutes,
       heartbeatIntervalSeconds,
       loiteringDelay,
@@ -1146,22 +1147,23 @@ class SettingsModel {
       numberOfLandmarksToScan;
   int? distanceFilter;
 
-  SettingsModel(
-      this.associationId,
-      this.locale,
-      this.created,
-      this.refreshRateInSeconds,
-      this.themeIndex,
-      this.geofenceRadius,
-      this.commuterGeofenceRadius,
-      this.vehicleSearchMinutes,
-      this.heartbeatIntervalSeconds,
-      this.loiteringDelay,
-      this.commuterSearchMinutes,
-      this.commuterGeoQueryRadius,
-      this.vehicleGeoQueryRadius,
-      this.numberOfLandmarksToScan,
-      this.distanceFilter);
+  SettingsModel({
+      required this.associationId,
+      required this.locale,
+      required this.created,
+      required this.refreshRateInSeconds,
+      required this.themeIndex,
+      required this.geofenceRadius,
+      required this.commuterGeofenceRadius,
+      required this.vehicleSearchMinutes,
+      required this.heartbeatIntervalSeconds,
+      required this.loiteringDelay,
+      required this.commuterSearchMinutes,
+      required this.commuterGeoQueryRadius,
+      required this.vehicleGeoQueryRadius,
+      required this.numberOfLandmarksToScan,
+      required this.geofenceRefreshMinutes,
+      required this.distanceFilter});
 
   SettingsModel.name();
 

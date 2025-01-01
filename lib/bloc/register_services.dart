@@ -51,7 +51,7 @@ class RegisterServices {
     pp('$mm .... ErrorHandler: 🦠errorHandler initialized');
     final SemCache semCache = SemCache();
     pp('$mm .... SemCache: 🦠cache initialized');
-    final ZipHandler zipHandler = ZipHandler(appAuth, semCache);
+    final ZipHandler zipHandler = ZipHandler();
     pp('$mm .... ZipHandler: 🦠handler initialized');
 
     FCMService fcmService = FCMService(FirebaseMessaging.instance);

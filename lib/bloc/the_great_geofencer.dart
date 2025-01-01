@@ -59,7 +59,7 @@ class TheGreatGeofencer {
   var defaultRadiusInMetres = 150.0;
   var defaultDwellInMilliSeconds = 30;
   late Timer timer;
-  int refreshMinutes = 30;
+  int refreshMinutes = 60;
 
   setRefreshFencesTimer() {
     pp('$xx initialize Timer for refreshing fences');
@@ -102,7 +102,7 @@ class TheGreatGeofencer {
     }
 
     int cnt = 0;
-    var radius = 200.0;
+    var radius = 300.0;
 
     pp('$xx buildGeofences .... radius in metres: $radius ');
 
@@ -130,6 +130,8 @@ class TheGreatGeofencer {
 
     geofenceService.addGeofenceStatusChangeListener(
         (geofence, geofenceRadius, geofenceStatus, location) async {
+      pp('$xx  🌀🌀🌀🌀🌀🌀 addGeofenceStatusChangeListener : status: ${geofenceStatus.name}  landmark: ${geofence.data['landmarkName']}   ${geofence.data['routeName']} ');
+
       await _processGeofenceEvent(
         geofence: geofence,
         geofenceRadius: geofenceRadius,
@@ -138,15 +140,18 @@ class TheGreatGeofencer {
     });
 
     try {
-      pp('$xx  🔶🔶🔶🔶🔶🔶 Starting GeofenceService ...... 🔶🔶🔶🔶🔶🔶 ');
+      pp('$xx  🌀🌀🌀🌀🌀🌀 Starting GeofenceService ...... 🌀🌀🌀🌀🌀🌀 ');
       await geofenceService.start().onError((error, stackTrace) {
         pp('\n\n$xx GeofenceService failed to start: 🔴 $error 🔴 }');
       });
-      pp('$xx  🔶🔶🔶🔶🔶🔶 GeofenceService started 🌀🌀🌀🌀 ...... 🔶🔶🔶🔶🔶🔶 ');
+      pp('$xx  🌀🌀🌀🌀🌀🌀 GeofenceService started 🌀🌀🌀🌀 ...... 🌀🌀🌀🌀🌀🌀 ');
     } catch (e) {
       pp('\n\n$xx GeofenceService failed to start: 🔴 $e 🔴 }');
+      rethrow;
     }
   }
+
+  List<PreviousGeofence> previousGeofences = [];
 
   Future addGeofence(
       {required String landmarkName,
@@ -187,6 +192,7 @@ class TheGreatGeofencer {
     _user = prefs.getUser();
     _vehicle = prefs.getCar();
 
+    pp('$xx  🌀🌀🌀🌀🌀🌀 _processGeofenceEvent  ${geofenceStatus.toString()} ... ');
     String status = geofenceStatus.toString();
     switch (status) {
       case 'GeofenceStatus.ENTER':
@@ -194,6 +200,8 @@ class TheGreatGeofencer {
         //     'event for either user or vehicle ');
         return;
       case 'GeofenceStatus.DWELL':
+        pp('$xx....  🔵🔵🔵🔵🔵🔵🔵_processGeofenceEvent - DWELL');
+
         if (_user != null) {
           _addUserGeofenceEvent(geofence, 'GeofenceStatus.DWELL');
         }
@@ -207,8 +215,8 @@ class TheGreatGeofencer {
           // _addUserGeofenceEvent(geofence, 'GeofenceStatus.EXIT');
         }
         if (_vehicle != null) {
-          // pp('$xx vehicle Geofence EXIT fragile?');
-          // _addVehicleDeparture(geofence);
+          pp('$xx 🔴🔴🔴🔴🔴_processGeofenceEvent GeofenceEvent - EXIT 🔴🔴🔴🔴🔴');
+          _addVehicleDeparture(geofence);
         }
 
         break;
@@ -216,10 +224,34 @@ class TheGreatGeofencer {
     //
   }
 
+  List<PreviousGeofence> prevGeofences = [];
+
+  bool findGeofence(geo.Geofence geofence) {
+    bool found = false;
+    for (var pg in prevGeofences) {
+      if (pg.geofence.data['landmarkId'] == geofence.data['landmarkId'] &&
+          pg.geofence.data['routeId'] == geofence.data['routeId']) {
+        var diff = DateTime.now().difference(pg.dateTime).inMinutes;
+        if (diff < 30) {
+          found = true;
+          break;
+        }
+      }
+    }
+    return found;
+  }
+
   void _addVehicleArrival(geo.Geofence geofence) async {
-    pp('\n\n$xx _adding VehicleArrival ... 🔵 geofence status: ${geofence.status.toString()}');
+    pp('\n\n$xx ......... _adding VehicleArrival ... 🔵 geofence status: ${geofence.status.toString()}');
     pp('$xx _adding VehicleArrival ... 🔵 geofence data: ${geofence.data}');
 
+    var geofenceFound = findGeofence(geofence);
+    if (geofenceFound) {
+      pp('$xx ignore event: ${geofence.data} ');
+      return;
+    }
+
+    prevGeofences.add(PreviousGeofence(geofence, DateTime.now()));
     final m = VehicleArrival(
       vehicleArrivalId: const UuidV4().generate(),
       associationId: _vehicle!.associationId,
@@ -250,6 +282,17 @@ class TheGreatGeofencer {
 
   void _addVehicleDeparture(geo.Geofence geofence) async {
     pp('\n\n$xx _addVehicleDeparture ... geofence status: ${geofence.status.toString()}');
+
+    pp('\n\n$xx ......... _addVehicleDeparture  ... 🔵 geofence status: ${geofence.status.toString()}');
+    pp('$xx _addVehicleDeparture ... 🔵 geofence data: ${geofence.data}');
+
+    var geofenceFound = findGeofence(geofence);
+    if (geofenceFound) {
+      pp('$xx ignore event: ${geofence.data} ');
+      return;
+    }
+
+    prevGeofences.add(PreviousGeofence(geofence, DateTime.now()));
     var pos = Position.fromJson({
       'type': "Point",
       'coordinates': [geofence.longitude, geofence.latitude],
@@ -301,4 +344,11 @@ class TheGreatGeofencer {
     await dataApiDog.addUserGeofenceEvent(m);
     pp('$xx ... UserGeofenceEvent should be OK! ${_vehicle!.vehicleReg}');
   }
+}
+
+class PreviousGeofence {
+  final geo.Geofence geofence;
+  final DateTime dateTime;
+
+  PreviousGeofence(this.geofence, this.dateTime);
 }

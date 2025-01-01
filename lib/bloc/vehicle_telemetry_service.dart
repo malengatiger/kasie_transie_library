@@ -25,7 +25,7 @@ class VehicleTelemetryService {
 
   Stream<lib.VehicleTelemetry> get telemetryStream =>
       _telemetryController.stream;
-  static const minutes = 3;
+  static const minutes = 5;
 
   static const mm = '🍎🍎🍎🍎 VehicleTelemetryService 🍎🍎';
 

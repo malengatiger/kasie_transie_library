@@ -4,6 +4,7 @@ import 'package:kasie_transie_library/auth/sign_in_strings.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 
 import '../bloc/app_auth.dart';
+import '../bloc/data_api_dog.dart';
 import '../bloc/list_api_dog.dart';
 import '../data/data_schemas.dart';
 import '../utils/emojis.dart';
@@ -38,6 +39,8 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
   User? user;
   SignInStrings? signInStrings;
   ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
+
   Prefs prefs = GetIt.instance<Prefs>();
   AppAuth appAuth = GetIt.instance<AppAuth>();
 
@@ -66,8 +69,33 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
         var ass = await listApiDog.getAssociationById(user!.associationId!);
         if (ass != null) {
           prefs.saveAssociation(ass);
+          var settings = await listApiDog.getSettings(ass.associationId!, true);
+          if (settings.isNotEmpty) {
+            prefs.saveSettings(settings.last);
+          } else {
+            var s = SettingsModel(
+                associationId: ass.associationId!,
+                locale: 'en',
+                created: DateTime.now().toUtc().toIso8601String(),
+                refreshRateInSeconds: 300,
+                themeIndex: 0,
+                geofenceRadius: 500,
+                commuterGeofenceRadius: 500,
+                vehicleSearchMinutes: 10,
+                heartbeatIntervalSeconds: 300,
+                loiteringDelay: 60,
+                commuterSearchMinutes: 10,
+                commuterGeoQueryRadius: 500,
+                vehicleGeoQueryRadius: 10000,
+                numberOfLandmarksToScan: 0,
+                geofenceRefreshMinutes: 30,
+                distanceFilter: 500);
+            await dataApiDog.addSettings(s);
+            prefs.saveSettings(s);
+          }
         }
         widget.onGoodSignIn();
+
       } else {
         widget.onSignInError();
       }

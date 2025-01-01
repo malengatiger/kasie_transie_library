@@ -6,6 +6,7 @@ import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../data/route_data.dart';
 import '../../utils/functions.dart';
@@ -32,7 +33,7 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
   lib.Route? route;
   bool busy = false;
   lib.User? user;
-  int limit = 3;
+  int limit = 5;
 
   @override
   void initState() {
@@ -51,13 +52,18 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
     user = prefs.getUser();
     route = prefs.getRoute();
     try {
+      var ok = await Permission.location.isGranted;
+      if (!ok) {
+        await Permission.location.request();
+      }
       if (user != null) {
         var routeData = await listApiDog.getAssociationRouteData(
             user!.associationId!, refresh);
 
-        routes = await devLoc.getRouteDistances(
-            routeData: routeData!, limitMetres: limit * 1000);
-        // routes.sort((a, b) => a.name!.compareTo(b.name!));
+        if (routeData != null) {
+          routes = await devLoc.getRouteDistances(
+              routeData: routeData, limitMetres: limit * 1000);
+        }
 
         pp('$mm nearest routes: ${routes.length}');
       }
@@ -130,13 +136,15 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Routes For Dispatch', style: myTextStyleMedium(context)),
-          actions: [
-            IconButton(onPressed: (){
-              _getRouteData(true);
-            }, icon: const FaIcon(FontAwesomeIcons.arrowsRotate)),
-          ]
-        ),
+            title:
+                Text('Routes For Dispatch', style: myTextStyleMedium(context)),
+            actions: [
+              IconButton(
+                  onPressed: () {
+                    _getRouteData(true);
+                  },
+                  icon: const FaIcon(FontAwesomeIcons.arrowsRotate)),
+            ]),
         body: SafeArea(
           child: Stack(
             children: [
@@ -154,7 +162,9 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
                           }
                         },
                         child: Text(
-                            route == null ? 'Select Route for Dispatch' : route!.name!,
+                            route == null
+                                ? 'Select Route for Dispatch'
+                                : route!.name!,
                             style: myTextStyleMediumLarge(context, 20)),
                       ),
                       gapH32,
@@ -179,7 +189,7 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
                               onChanged: (value) {
                                 if (value != null) {
                                   setState(() {
-                                    limit = value ;
+                                    limit = value;
                                   });
                                   _getRouteData(true);
                                 }

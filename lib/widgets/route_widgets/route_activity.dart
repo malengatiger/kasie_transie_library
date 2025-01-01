@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:responsive_builder/responsive_builder.dart';
@@ -30,16 +31,19 @@ class RouteActivityState extends State<RouteActivity>
 
   ScrollController listScrollController1 = ScrollController();
   ScrollController listScrollController2 = ScrollController();
+  late FCMService fcmService;
 
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
+    fcmService = GetIt.instance<FCMService>();
+
     _listen();
   }
 
   void _listen() async {
-    dispatchSub = fcmBloc.dispatchStream.listen((event) {
+    dispatchSub = fcmService.dispatchStream.listen((event) {
       pp('$mm ... dispatchStream delivered: ${event.vehicleReg}');
       if (event.routeId == widget.route.routeId) {
         liveDispatchRecords.add(event);
@@ -52,7 +56,7 @@ class RouteActivityState extends State<RouteActivity>
         }
       }
     });
-    passengerSub = fcmBloc.passengerCountStream.listen((event) {
+    passengerSub = fcmService.passengerCountStream.listen((event) {
       pp('$mm ... passengerCountStream delivered: ${event.vehicleReg}');
       if (event.routeId == widget.route.routeId) {
         liveCommuterRequests.add(event);

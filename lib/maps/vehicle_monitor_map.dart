@@ -56,17 +56,19 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
   int totalPassengers = 0;
   bool showPassengerCount = false;
   bool retryDone = false;
+  late FCMService fcmService;
 
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
+    fcmService = GetIt.instance<FCMService>();
     _listen();
     _control();
   }
 
   void _listen() async {
-    arrivalStreamSub = fcmBloc.vehicleArrivalStream.listen((event) async {
+    arrivalStreamSub = fcmService.vehicleArrivalStream.listen((event) async {
       pp('$mm ... vehicleArrivalStream delivered: ${E.leaf2} ${event.vehicleReg} at ${event.created}');
       if (event.vehicleId == widget.vehicle.vehicleId) {
         arrivals.add(event);
@@ -75,7 +77,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
         // }
       }
     });
-    departureStreamSub = fcmBloc.vehicleDepartureStream.listen((event) {
+    departureStreamSub = fcmService.vehicleDepartureStream.listen((event) {
       pp('$mm ... vehicleDepartureStream delivered: ${E.leaf2} ${event.vehicleReg} at ${event.created}');
       if (event.vehicleId == widget.vehicle.vehicleId) {
         departures.add(event);
@@ -86,7 +88,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     });
 
     dispatchStreamSub =
-        fcmBloc.dispatchStream.listen((lib.DispatchRecord dRec) async {
+        fcmService.dispatchStream.listen((lib.DispatchRecord dRec) async {
       pp('$mm ... dispatchStream delivered dispatch for: ${dRec.vehicleReg} at ${dRec.landmarkName} at ${dRec.created}');
       if (dRec.vehicleId == widget.vehicle.vehicleId) {
         dispatches.add(dRec);
@@ -96,7 +98,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
         // }
       }
     });
-    passengerStreamSub = fcmBloc.passengerCountStream
+    passengerStreamSub = fcmService.passengerCountStream
         .listen((lib.AmbassadorPassengerCount cunt) {
       pp('$mm ... passengerCountStream delivered count for: ${cunt.vehicleReg} at ${cunt.created}');
       if (cunt.vehicleId == widget.vehicle.vehicleId) {
@@ -114,7 +116,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
         }
       }
     });
-    heartbeatStreamSub = fcmBloc.heartbeatStreamStream
+    heartbeatStreamSub = fcmService.heartbeatStreamStream
         .listen((lib.VehicleHeartbeat heartbeat) async {
       pp('$mm ... heartbeatStreamStream delivered heartbeat for: ${heartbeat.vehicleReg} at ${heartbeat.created}');
       if (heartbeat.vehicleId == widget.vehicle.vehicleId) {

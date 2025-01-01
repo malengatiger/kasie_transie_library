@@ -25,13 +25,13 @@ class SemCache {
     if (kIsWeb) {
       sw.DatabaseFactory dbFactoryWeb = sw.databaseFactoryWeb;
       dbWeb = await dbFactoryWeb.openDatabase(dbPath);
-      pp('$mm cache database set up for web. (1)');
+      // pp('$mm cache database set up for web. (1)');
     } else {
       final dir = await getApplicationDocumentsDirectory();
       await dir.create(recursive: true);
       final dPath = p.join(dir.path, dbPath);
       dbPhone = await sp.databaseFactoryIo.openDatabase(dPath);
-      pp('$mm cache database set up for phone');
+      // pp('$mm cache database set up for phone');
     }
   }
 
@@ -40,14 +40,12 @@ class SemCache {
     if (kIsWeb) {
       sw.DatabaseFactory dbFactoryWeb = sw.databaseFactoryWeb;
       dbWeb = await dbFactoryWeb.openDatabase(dbPath);
-      pp('$mm cache database set up for web (2)');
       return dbWeb;
     } else {
       final dir = await getApplicationDocumentsDirectory();
       await dir.create(recursive: true);
       final dPath = p.join(dir.path, dbPath);
       dbPhone = await sp.databaseFactoryIo.openDatabase(dPath);
-      pp('$mm cache database set up for phone');
 
       return dbPhone;
     }
