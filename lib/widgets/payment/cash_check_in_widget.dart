@@ -25,13 +25,15 @@ class CashCheckInWidget extends StatefulWidget {
     this.vehicle,
     this.route,
     required this.isCommuterCash,
-    required this.isRankFeeCash,
+    required this.isRankFeeCash, this.amount, this.passengers,
   });
 
   final lib.Vehicle? vehicle;
   final lib.Route? route;
   final bool isCommuterCash, isRankFeeCash;
   final Function(String) onError;
+  final double? amount;
+  final int? passengers;
 
   @override
   CashCheckInWidgetState createState() => CashCheckInWidgetState();
@@ -41,9 +43,8 @@ class CashCheckInWidgetState extends State<CashCheckInWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   static const mm = '💙💙💙💙CashCheckInWidget 💙';
-  final TextEditingController amountController =
-      TextEditingController(text: '0');
-  final TextEditingController passengersController = TextEditingController();
+  late TextEditingController amountController ;
+  late TextEditingController passengersController ;
 
   DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
   Prefs prefs = GetIt.instance<Prefs>();
@@ -52,6 +53,8 @@ class CashCheckInWidgetState extends State<CashCheckInWidget>
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
+    amountController = TextEditingController(text: widget.amount?.toString() ?? '0');
+    passengersController = TextEditingController(text: widget.passengers?.toString() ?? '0');
     if (widget.isRankFeeCash) {
       title = 'Rank Fees Checkin';
     }
@@ -310,7 +313,8 @@ class CashCheckInWidgetState extends State<CashCheckInWidget>
             children: [
               Padding(
                 padding: const EdgeInsets.all(20),
-                child: Column(
+                child: Column(mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment:  CrossAxisAlignment.center,
                   children: [
                     CashCheckInForm(
                       globalKey: mKey,
