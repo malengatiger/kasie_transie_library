@@ -24,6 +24,13 @@ class Constants {
 
    static const   locationRequest = 'locationRequest';
 
+
+    static const commuterCashPayment = 'commuterCashPayment';
+    static const commuterCashCheckIn = 'commuterCashCheckIn';
+
+    static const rankFeeCashPayment = 'rankFeeCashPayment';
+    static const rankFeeCashCheckIn = 'rankFeeCashCheckIn';
+
    static const   locationResponse = 'locationResponse';
    static const   userGeofenceEvent = 'userGeofenceEvent';
    static const   vehicleMediaRequest = 'vehicleMediaRequest';

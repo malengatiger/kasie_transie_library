@@ -44,6 +44,27 @@ class DataApiDog {
   Stream<RouteLandmark> get routeLandmarkStream =>
       _routeLandmarkController.stream;
 
+  final StreamController<Trip> _tripController = StreamController.broadcast();
+  Stream<Trip> get tripStream => _tripController.stream;
+
+  final StreamController<CommuterCashPayment> _commuterCashController = StreamController.broadcast();
+  Stream<CommuterCashPayment> get commuterCashPaymentStream => _commuterCashController.stream;
+
+  final StreamController<AmbassadorPassengerCount> _passengerCountsController = StreamController.broadcast();
+  Stream<AmbassadorPassengerCount> get passengerCountStream => _passengerCountsController.stream;
+
+  final StreamController<CommuterCashCheckIn> _commuterCashCheckInController = StreamController.broadcast();
+  Stream<CommuterCashCheckIn> get commuterCashCheckInStream => _commuterCashCheckInController.stream;
+
+  final StreamController<DispatchRecord> _dispatchRecordController = StreamController.broadcast();
+  Stream<DispatchRecord> get dispatchRecordStream => _dispatchRecordController.stream;
+
+  final StreamController<RankFeeCashPayment> _rankFeeCashPaymentController = StreamController.broadcast();
+  Stream<RankFeeCashPayment> get rankFeeCashPaymentStream => _rankFeeCashPaymentController.stream;
+
+  final StreamController<RankFeeCashCheckIn> _rankFeeCashCheckInController = StreamController.broadcast();
+  Stream<RankFeeCashCheckIn> get rankFeeCashCheckInStream => _rankFeeCashCheckInController.stream;
+
   Map<String, String> headers = {
     'Content-type': 'application/json',
     'Accept': 'application/json',
@@ -307,6 +328,7 @@ class DataApiDog {
     final lr = CommuterCashPayment.fromJson(res);
 
     pp('$mm CommuterCashPayment added to database: $res');
+    _commuterCashController.sink.add(lr);
     return lr;
   }
 
@@ -337,6 +359,7 @@ class DataApiDog {
     final res = await _callPost(cmd, bag);
 
     pp('$mm Trip updated on database: $res');
+    _tripController.sink.add(trip);
     return res;
   }
 
@@ -348,6 +371,7 @@ class DataApiDog {
     final lr = CommuterCashCheckIn.fromJson(res);
 
     pp('$mm CommuterCashCheckIn added to database: $res');
+    _commuterCashCheckInController.sink.add(lr);
     return lr;
   }
 
@@ -359,6 +383,7 @@ class DataApiDog {
     final lr = RankFeeCashCheckIn.fromJson(res);
 
     pp('$mm RankFeeCashCheckIn added to database: $res');
+    _rankFeeCashCheckInController.sink.add(lr);
     return lr;
   }
 
@@ -391,6 +416,7 @@ class DataApiDog {
     final lr = RankFeeCashPayment.fromJson(res);
 
     pp('$mm RankFeeCashPayment added to database: $res');
+    _rankFeeCashPaymentController.sink.add(lr);
     return lr;
   }
 
@@ -533,6 +559,7 @@ class DataApiDog {
       final r = DispatchRecord.fromJson(res);
 
       pp('$mm DispatchRecord added to database: ${r.toJson()}');
+      _dispatchRecordController.sink.add(r);
       return r;
     } catch (e) {
       await cacheManager.saveDispatchRecord(dispatchRecord);
@@ -951,6 +978,7 @@ class DataApiDog {
       final r = AmbassadorPassengerCount.fromJson(res);
       pp('$mm AmbassadorPassengerCount added to database ...');
       myPrettyJsonPrint(res);
+      _passengerCountsController.sink.add(count);
       return r;
     } catch (e) {
       pp(e);

@@ -200,7 +200,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
                                           'Send Sign In Credentials',
                                           style: myTextStyle(
                                               color: Colors.white,
-                                              fontSize: 20,
+                                              fontSize: 16,
                                               weight: FontWeight.normal),
                                         )),
                                   )
