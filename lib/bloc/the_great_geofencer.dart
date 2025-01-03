@@ -64,10 +64,10 @@ class TheGreatGeofencer {
   setRefreshFencesTimer() {
     pp('$xx initialize Timer for refreshing fences');
     timer = Timer.periodic(Duration(minutes: refreshMinutes), (timer) {
-      pp('\n\n$xx Timer tick ${timer.tick} - refresh geoFences');
+      pp('\n\n$xx Timer tick every $refreshMinutes minutes:  ${timer.tick} - refresh geoFences');
       buildGeofences();
     });
-    pp('$xx  Geofence Timer initialized ');
+    pp('$xx  Geofence Timer initialized  for $refreshMinutes minutes');
   }
 
   Future buildGeofences() async {
@@ -102,7 +102,7 @@ class TheGreatGeofencer {
     }
 
     int cnt = 0;
-    var radius = 300.0;
+    var radius = 500.0;
 
     pp('$xx buildGeofences .... radius in metres: $radius ');
 

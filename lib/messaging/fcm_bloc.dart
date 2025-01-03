@@ -113,7 +113,7 @@ class FCMService {
   }
 
   static const red = '🍎🍎';
-  var newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMBloc: 🌀🌀🌀🌀';
+  var newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMService: 🌀🌀🌀🌀';
 
   Future<String?> getFCMToken() async {
     final fcmToken = await fb.FirebaseMessaging.instance.getToken();

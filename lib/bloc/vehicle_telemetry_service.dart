@@ -25,14 +25,23 @@ class VehicleTelemetryService {
 
   Stream<lib.VehicleTelemetry> get telemetryStream =>
       _telemetryController.stream;
-  static const minutes = 5;
+int minutes = 5;
 
   static const mm = '🍎🍎🍎🍎 VehicleTelemetryService 🍎🍎';
 
-  init() {
+  initializeTimer() async {
     pp('\n\n$mm initialize Timer for telemetry');
+    var settings = prefs.getSettings();
+    if (settings == null) {
+      var ass = prefs.getAssociation();
+      var list = await listApiDog.getSettings(ass!.associationId!, true);
+      if (list.isNotEmpty) {
+        minutes = (list.first.heartbeatIntervalSeconds! / 60) as int;
+        pp('$mm createTelemetry  - fired ever $minutes minutes');
 
-    timer = Timer.periodic(const Duration(minutes: minutes), (timer) {
+      }
+    }
+    timer = Timer.periodic( Duration(minutes: minutes), (timer) {
       pp('\n\n$mm Timer tick ${timer.tick} - create telemetry');
       createTelemetry();
     });
@@ -56,6 +65,7 @@ class VehicleTelemetryService {
         routeData = await listApiDog.getAssociationRouteData(
             ass!.associationId!, false);
       }
+
     }
     lib.Route? route;
     routes = await locationBloc.getRouteDistances(routeData: routeData!, limitMetres: 1000);

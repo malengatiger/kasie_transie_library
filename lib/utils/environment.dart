@@ -10,7 +10,7 @@ class KasieEnvironment {
   static const _devUrlNode = 'http://192.168.64.1:8080/api/v1/';
 
 
-  static const _prodUrlNode = 'https://kasie-transie-3-backend-854189510560.europe-west1.run.app/api/v1/';
+  static const _prodUrlNode = 'https://kasie-transie-4-backend-657690570978.europe-west1.run.app/api/v1/';
   static const aubs = 'aubreym';
   static const aubs2 = 'kkTiger23';
   static const aubs3 = 'mon';
