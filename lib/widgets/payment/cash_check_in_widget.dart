@@ -136,7 +136,7 @@ class CashCheckInWidgetState extends State<CashCheckInWidget>
                 toastGravity: ToastGravity.BOTTOM,
                 message: '$title submitted OK',
                 context: context);
-            Navigator.of(context).pop();
+            Navigator.of(context).pop(true);
           }
         } catch (e) {
           if (mounted) {
@@ -167,7 +167,7 @@ class CashCheckInWidgetState extends State<CashCheckInWidget>
                 toastGravity: ToastGravity.BOTTOM,
                 message: '$title submitted OK',
                 context: context);
-            Navigator.of(context).pop();
+            Navigator.of(context).pop(true);
           }
         } catch (e) {
           if (mounted) {
