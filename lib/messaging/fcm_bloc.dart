@@ -95,6 +95,8 @@ class FCMService {
         onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
 
     fb.FirebaseMessaging.onMessage.listen((fb.RemoteMessage message) {
+      pp("$newMM FirebaseMessaging.onMessage listen fired: $red message received in "
+          "foreground: ${E.leaf}${E.leaf} ... will processFCMMessage ...");
       processFCMMessage(message, getMessageType(message));
     });
 
@@ -185,7 +187,7 @@ class FCMService {
   Future<void> subscribeForCar(Vehicle car,String app) async {
     String? associationId;
     appName = app;
-    newMM = '$newMM$app 🔷🔷';
+    newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMService: 🌀🌀🌀🌀$app 🔷🔷';
     // demoFlag = prefs.getDemoFlag();
     associationId = car.associationId!;
 
@@ -199,6 +201,15 @@ class FCMService {
 
     pp('$newMM .............................................'
         ' FCM: subscribed to all ${E.pear} Car FCM topics\n\n');
+  }
+  Future<void> subscribeForRouteCommuterRequests({required Vehicle car, required String routeId, required String app}) async {
+    appName = app;
+    newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMService: 🌀🌀🌀🌀$app 🔷🔷';
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.commuterRequest}$routeId');
+    pp('$newMM ..... FCM: subscribed to commuterRequest route topic ${Constants.commuterRequest}$routeId');
+
   }
 
   Future<void> subscribeForOwnerMarshalOfficialAmbassador(String app) async {
@@ -257,40 +268,14 @@ class FCMService {
         ' FCM: subscribed to all ${E.pear} 9 OwnerMarshalOfficialAmbassador FCM topics\n\n');
   }
 
-  Future<void> subscribeForCommuter(String app) async {
-    String? associationId;
-    appName = app;
-    newMM = '$newMM$app 🔷🔷';
-    user = prefs.getUser();
-    final association = prefs.getAssociation();
-    if (association != null) {
-      associationId = association.associationId!;
-    }
-    demoFlag = prefs.getDemoFlag();
-    if (user != null) {
-      associationId = user!.associationId!;
-    }
-
-    if (associationId == null) {
-      pp('$newMM ... association is null. ${E.redDot}${E.redDot}${E.redDot}'
-          ' cannot subscribe');
-      return;
-    }
-    await firebaseMessaging
-        .subscribeToTopic('${Constants.routeUpdateRequest}$associationId');
-    pp('$newMM ..... FCM: subscribed to ${Constants.routeUpdateRequest}$associationId');
-    //
-  }
-
   Future<void> subscribeForCommuterDispatch(
-      String app, String associationId) async {
+      String app, String routeId) async {
     appName = app;
-    newMM = '$newMM$app 🔷🔷';
+    newMM = '$newMM $app 🔷🔷';
 
     await firebaseMessaging
-        .subscribeToTopic('${Constants.dispatchRecord}$associationId');
-    pp('\n\n$newMM FCM: commuter subscribed to ${Constants.dispatchRecord}$associationId \n\n');
-    //
+        .subscribeToTopic('${Constants.dispatchRecord}$routeId');
+    pp('\n\n$newMM FCM: commuter subscribed to route topic: ${Constants.dispatchRecord}$routeId \n\n');
   }
 
   Future<void> subscribeForRouteBuilder(String app) async {
@@ -405,7 +390,10 @@ class FCMService {
     pp("$newMM onDidReceiveLocalNotification: $red processing message title: $title body: $body ");
   }
 
-  Future<void> processFCMMessage(fb.RemoteMessage message, String type) async {
+  Future<void> processFCMMessage(fb.RemoteMessage message, String mType) async {
+
+    pp("$newMM processFCMMessage: $red message received in "
+        "foreground: ${E.leaf}${E.leaf}  type: $mType");
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     myName = packageInfo.appName;
     if (!newMM.contains(myName!)) {
@@ -632,16 +620,9 @@ class FCMService {
   void _processCommuterRequest(lib.CommuterRequest commuterRequest) {
     pp('$newMM _processCommuterRequest ... ${commuterRequest.routeName}');
 
-    if (demoFlag) {
-      _commuterRequestStreamController.sink.add(commuterRequest);
-      return;
-    }
-    if (user!.userType == Constants.ASSOCIATION_OFFICIAL ||
-        user!.userType == Constants.AMBASSADOR ||
-        user!.userType == Constants.MARSHAL) {
-      _commuterRequestStreamController.sink.add(commuterRequest);
-      return;
-    }
+    _commuterRequestStreamController.sink.add(commuterRequest);
+
+
   }
 
   void _processCommuterResponse(lib.CommuterResponse commuterResponse) {
@@ -768,7 +749,7 @@ class FCMService {
   final StreamController<lib.CommuterRequest> _commuterRequestStreamController =
       StreamController.broadcast();
 
-  Stream<lib.CommuterRequest> get commuterRequestStreamStream =>
+  Stream<lib.CommuterRequest> get commuterRequestStream =>
       _commuterRequestStreamController.stream;
 
   final StreamController<lib.CommuterResponse>

@@ -153,6 +153,30 @@ class SemCache {
     pp('$mm users added to cache: 🥦 ${users.length} 🥦');
   }
 
+  Future saveCommuterRoute(Route route) async {
+    var store = intMapStoreFactory.store('commuterRoutes');
+
+      store
+          .record(dateToInt(route.created ?? DateTime.now().toIso8601String()))
+          .put(await getDb(), route.toJson());
+
+
+    pp('$mm commuterRoute added to cache: 🥦 ${route.name} 🥦');
+  }
+  Future<List<Route>> getCommuterRoutes() async {
+    var store = intMapStoreFactory.store('commuterRoutes');
+    var records = await store.find(await getDb());
+
+    List<Route> routes = [];
+    for (var rec in records) {
+      var route = Route.fromJson(rec.value);
+      routes.add(route);
+    }
+    pp('$mm commuter routes retrieved from cache: ${routes.length}');
+    return routes;
+
+  }
+
   //
   Future saveRouteCities(List<RouteCity> routeCities) async {
     var store = intMapStoreFactory.store('routeCities');

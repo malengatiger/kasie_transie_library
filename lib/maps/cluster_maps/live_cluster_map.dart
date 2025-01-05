@@ -78,7 +78,7 @@ class LiveClusterMapState extends State<LiveClusterMap>
             event.position!.coordinates[1], event.position!.coordinates[0]));
       }
     });
-    commuterSub = fcmService.commuterRequestStreamStream.listen((event) {
+    commuterSub = fcmService.commuterRequestStream.listen((event) {
       pp('$mm ... commuterRequestStreamStream delivered: ${event.dateRequested}');
       liveCommuterRequests.add(event);
       commuterRequestCovers.add(CommuterRequestCover(
