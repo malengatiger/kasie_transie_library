@@ -31,15 +31,7 @@ class VehicleTelemetryService {
 
   initializeTimer() async {
     pp('\n\n$mm initialize Timer for telemetry');
-    // var settings = prefs.getSettings();
-    // if (settings == null) {
-    //   var ass = prefs.getAssociation();
-    //   var list = await listApiDog.getSettings(ass!.associationId!, true);
-    //   if (list.isNotEmpty) {
-    //     minutes = (list.first.heartbeatIntervalSeconds! / 60) as int;
-    //     pp('$mm createTelemetry  - fired ever $minutes minutes');
-    //   }
-    // }
+
     timer = Timer.periodic(Duration(minutes: minutes), (timer) {
       pp('\n\n$mm Timer tick ${timer.tick} - create telemetry');
       createTelemetry();
