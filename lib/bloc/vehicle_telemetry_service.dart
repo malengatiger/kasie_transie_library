@@ -21,31 +21,30 @@ class VehicleTelemetryService {
   late DataApiDog dataApiDog;
 
   final StreamController<lib.VehicleTelemetry> _telemetryController =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
   Stream<lib.VehicleTelemetry> get telemetryStream =>
       _telemetryController.stream;
-int minutes = 5;
+  int minutes = 5;
 
   static const mm = '🍎🍎🍎🍎 VehicleTelemetryService 🍎🍎';
 
   initializeTimer() async {
     pp('\n\n$mm initialize Timer for telemetry');
-    var settings = prefs.getSettings();
-    if (settings == null) {
-      var ass = prefs.getAssociation();
-      var list = await listApiDog.getSettings(ass!.associationId!, true);
-      if (list.isNotEmpty) {
-        minutes = (list.first.heartbeatIntervalSeconds! / 60) as int;
-        pp('$mm createTelemetry  - fired ever $minutes minutes');
-
-      }
-    }
-    timer = Timer.periodic( Duration(minutes: minutes), (timer) {
+    // var settings = prefs.getSettings();
+    // if (settings == null) {
+    //   var ass = prefs.getAssociation();
+    //   var list = await listApiDog.getSettings(ass!.associationId!, true);
+    //   if (list.isNotEmpty) {
+    //     minutes = (list.first.heartbeatIntervalSeconds! / 60) as int;
+    //     pp('$mm createTelemetry  - fired ever $minutes minutes');
+    //   }
+    // }
+    timer = Timer.periodic(Duration(minutes: minutes), (timer) {
       pp('\n\n$mm Timer tick ${timer.tick} - create telemetry');
       createTelemetry();
     });
-    pp('$mm  Timer initialized for 🌀 $minutes minutes per tick🌀');
+    pp('\n\n$mm  VehicleTelemetry Timer initialized for 🌀 $minutes minutes per tick🌀');
 
     //create initial telemetry record
     //createTelemetry();
@@ -65,15 +64,16 @@ int minutes = 5;
         routeData = await listApiDog.getAssociationRouteData(
             ass!.associationId!, false);
       }
-
     }
     lib.Route? route;
-    routes = await locationBloc.getRouteDistances(routeData: routeData!, limitMetres: 1000);
+    routes = await locationBloc.getRouteDistances(
+        routeData: routeData!, limitMetres: 1000);
     if (routes.isNotEmpty) {
       route = routes.first;
       pp('$mm nearest route: ${route.toJson()}');
     }
-    var landmarkDistanceBags = await locationBloc.getRouteLandmarkDistances(routeData: routeData!);
+    var landmarkDistanceBags =
+        await locationBloc.getRouteLandmarkDistances(routeData: routeData!);
     lib.RouteLandmark? rLandmark;
     if (landmarkDistanceBags.isNotEmpty) {
       rLandmark = landmarkDistanceBags.first.routeLandmark;
