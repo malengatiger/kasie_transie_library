@@ -157,7 +157,7 @@ class DeviceLocationBloc {
   }
 
 Future<List<RoutePointDistanceBag>> getRoutePointDistances({
-  required List<RoutePoint> routePoints,
+  required List<RoutePoint> routePoints
 }) async {
   List<RoutePointDistanceBag> bags = [];
   pp('$mm getRoutePointDistances: total routePoints: ${routePoints.length}');
@@ -168,7 +168,7 @@ Future<List<RoutePointDistanceBag>> getRoutePointDistances({
         longitude: r.position!.coordinates[0],
         toLatitude: loc.latitude,
         toLongitude: loc.longitude);
-    bags.add(RoutePointDistanceBag(r, dist));
+    bags.add(RoutePointDistanceBag(r, dist, ''));
   }
   pp('$mm getRoutePointDistances: total bags: ${bags.length}');
   bags.sort((a, b) => a.distance.compareTo(b.distance));
@@ -201,7 +201,8 @@ class LandmarkDistanceBag {
 class RoutePointDistanceBag {
   final RoutePoint routePoint;
   final double distance;
+  final String associationId;
 
-  RoutePointDistanceBag(this.routePoint, this.distance);
+  RoutePointDistanceBag(this.routePoint, this.distance, this.associationId);
 
 }

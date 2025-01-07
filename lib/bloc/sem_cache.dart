@@ -442,4 +442,34 @@ class SemCache {
 
     return route;
   }
+
+  Future saveSingleRoute(Route route) async {
+    pp('$mm ... saveSingleRoute ...');
+    var store = intMapStoreFactory.store('singleRoutes');
+    var records = await store.record(1).put(await getDb(), route.toJson());
+    pp('$mm ... saveSingleRoute: route: ${route.name}  added to cache...');
+  }
+
+  Future<List<Route>> getSingleRoutes() async {
+    var store = intMapStoreFactory.store('singleRoutes');
+    var records = await store.find(await getDb());
+    List<Route> routes = [];
+    for (var rec in records) {
+      var route = Route.fromJson(rec.value);
+      routes.add(route);
+    }
+    pp('$mm single routes retrieved from cache: ${routes.length}');
+    return routes;
+  }
+  Future<Route?> getSingleRouteById(String routeId) async {
+    var store = intMapStoreFactory.store('singleRoutes');
+    var records = await store.find(await getDb());
+    for (var rec in records) {
+      var route = Route.fromJson(rec.value);
+     if (routeId == route.routeId) {
+       return route;
+     }
+    }
+    return null;
+  }
 }

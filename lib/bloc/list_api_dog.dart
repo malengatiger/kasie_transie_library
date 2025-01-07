@@ -1092,6 +1092,7 @@ class ListApiDog {
       required bool refresh,
       String? associationId}) async {
     pp('$mm .................. getRoute routeId: $routeId');
+    semCache = GetIt.instance<SemCache>();
 
     if (associationId != null) {
       var r = await semCache.getRoute(routeId, associationId);

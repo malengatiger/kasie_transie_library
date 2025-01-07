@@ -16,6 +16,7 @@ class Constants {
    static const   vehicleArrival = 'vehicleArrival';
    static const   vehicleDeparture = 'vehicleDeparture';
    static const   dispatchRecord = 'dispatchRecord';
+   static const   routeDispatchRecord = 'routeDispatchRecord';
 
    static const   passengerCount = 'passengerCount';
    static const   heartbeat = 'heartbeat';

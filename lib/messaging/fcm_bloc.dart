@@ -95,7 +95,7 @@ class FCMService {
         onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
 
     fb.FirebaseMessaging.onMessage.listen((fb.RemoteMessage message) {
-      pp("$newMM FirebaseMessaging.onMessage listen fired: $red message received in "
+      pp("\n\n\n$newMM FirebaseMessaging.onMessage listen fired: $red message received in "
           "foreground: ${E.leaf}${E.leaf} ... will processFCMMessage ...");
       processFCMMessage(message, getMessageType(message));
     });
@@ -268,14 +268,14 @@ class FCMService {
         ' FCM: subscribed to all ${E.pear} 9 OwnerMarshalOfficialAmbassador FCM topics\n\n');
   }
 
-  Future<void> subscribeForCommuterDispatch(
+  Future<void> subscribeForRouteDispatch(
       String app, String routeId) async {
     appName = app;
     newMM = '$newMM $app 🔷🔷';
 
     await firebaseMessaging
-        .subscribeToTopic('${Constants.dispatchRecord}$routeId');
-    pp('\n\n$newMM FCM: commuter subscribed to route topic: ${Constants.dispatchRecord}$routeId \n\n');
+        .subscribeToTopic('${Constants.routeDispatchRecord}$routeId');
+    pp('\n\n$newMM FCM: commuter subscribed to route topic: ${Constants.routeDispatchRecord}$routeId \n\n');
   }
 
   Future<void> subscribeForRouteBuilder(String app) async {
@@ -404,8 +404,6 @@ class FCMService {
     final data1 = message.data;
     var type = data1['type'];
     final data = jsonDecode(data1['data']);
-    pp("$newMM processFCMMessage: $red message received in "
-        "foreground: ${E.leaf}${E.leaf} type: $type ");
 
     switch (type) {
       case Constants.vehicleChanges:
@@ -423,6 +421,11 @@ class FCMService {
       case Constants.dispatchRecord:
         final kk = DispatchRecord.fromJson(data);
         _processDispatchRecord(kk);
+        break;
+
+      case Constants.routeDispatchRecord:
+        final kk = DispatchRecord.fromJson(data);
+        _processRouteDispatchRecord(kk);
         break;
 
       case Constants.passengerCount:
@@ -525,26 +528,14 @@ class FCMService {
   void _processDispatchRecord(lib.DispatchRecord dispatchRecord) {
     pp('$newMM _processDispatchRecord ... ${dispatchRecord.vehicleReg}');
 
-    if (demoFlag) {
-      _dispatchStreamController.sink.add(dispatchRecord);
-      return;
-    }
-    if (user != null) {
-      if (user!.userId == dispatchRecord.marshalId ||
-          user!.userId == dispatchRecord.ownerId ||
-          user!.userType == 'ASSOCIATION_OFFICIAL') {
-        _dispatchStreamController.sink.add(dispatchRecord);
-      }
-    }
-    if (car != null) {
-      if (car!.vehicleId == dispatchRecord.vehicleId) {
-        _dispatchStreamController.sink.add(dispatchRecord);
-      }
-    }
-    var commuter = prefs.getCommuter();
-    if (commuter != null) {
-      _dispatchStreamController.sink.add(dispatchRecord);
-    }
+    _dispatchStreamController.sink.add(dispatchRecord);
+
+  }
+  void _processRouteDispatchRecord(lib.DispatchRecord dispatchRecord) {
+    pp('$newMM _processRouteDispatchRecord ... ${dispatchRecord.vehicleReg}');
+
+    _routeDispatchStreamController.sink.add(dispatchRecord);
+
   }
 
   void _processRouteUpdate(lib.RouteUpdateRequest req) async {
@@ -734,6 +725,12 @@ class FCMService {
 
   Stream<lib.DispatchRecord> get dispatchStream =>
       _dispatchStreamController.stream;
+
+  final StreamController<lib.DispatchRecord> _routeDispatchStreamController =
+  StreamController.broadcast();
+
+  Stream<lib.DispatchRecord> get routeDispatchStream =>
+      _routeDispatchStreamController.stream;
 
   final StreamController<lib.UserGeofenceEvent> _userGeofenceStreamController =
       StreamController.broadcast();
@@ -1176,11 +1173,13 @@ Future _sendLocationResponse(lib.LocationResponse resp, String fcmToken) async {
 
 //
 String getMessageType(fb.RemoteMessage message) {
-  //myPrettyJsonPrint(message.data);
+  myPrettyJsonPrint(message.data);
   final data = message.data;
   var type = data['type'];
-  pp("$mxx onMessage: ${E.pear} ${E.pear}${E.pear} $type - FCM message has arrived!  ... ${E.pear}${E.pear} ");
+  pp("$mxx onMessage: ${E.pear}${E.pear}${E.pear} $type - FCM message has arrived!  ... ${E.pear}${E.pear} ");
   if (type != null) {
+    pp("$mxx onMessage: ${E.pear}${E.pear}${E.pear} $type - FCM message type: $type -  ... ${E.pear}${E.pear} ");
+
     return type;
   }
   pp("$mxx onMessage: unknown message has arrived!  ...");

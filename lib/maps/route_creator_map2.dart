@@ -319,6 +319,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
           longitude: latLng.longitude,
         ),
         routePointId: id,
+        associationId: widget.route.associationId,
         created: DateTime.now().toUtc().toIso8601String());
 
     existingRoutePoints.add(routePoint);
