@@ -22,9 +22,10 @@ import 'package:uuid/uuid.dart';
 class MapViewer extends StatefulWidget {
   final lib.Route route;
   final bool? refresh;
+  final List<lib.CommuterRequest>? commuterRequests;
   const MapViewer({
     super.key,
-    required this.route, this.refresh,
+    required this.route, this.refresh, this.commuterRequests,
   });
 
   @override
@@ -156,8 +157,46 @@ class MapViewerState extends State<MapViewer> {
       landmarkIndex++;
     }
     _addCurrentCarLocation();
+    if (widget.commuterRequests != null && widget.commuterRequests!.isNotEmpty) {
+      await _setCommuterRequests();
+    }
   }
+  int _getPassengers() {
+    var cnt = 0;
+    for (var req in widget.commuterRequests!) {
+    cnt += req.numberOfPassengers!;
+    }
+    return cnt;
+  }
+  Future _setCommuterRequests() async {
+    pp('$mm _setCommuterRequests ...  route: ${widget.route.name!}; commuterRequests: ${widget.commuterRequests?.length} ');
 
+    for (var req in widget.commuterRequests!) {
+      final latLng = LatLng(req.currentPosition!.coordinates.last,
+          req.currentPosition!.coordinates.first);
+      _markers.add(Marker(
+          markerId: MarkerId('${req.commuterRequestId}'),
+          position: latLng,
+          icon:  await getMarkerBitmap(72,
+            text: '${req.numberOfPassengers}',
+            color:  'red',
+            fontSize: 20,
+            fontWeight: FontWeight.w900, borderColor: Colors.black, ),
+          onTap: () {
+            pp('$mm .............. marker tapped, index: $index, $latLng - '
+                'commuterRequestId: ${req.commuterRequestId} - routeId: ${req.routeId}');
+          },
+          infoWindow: InfoWindow(
+              snippet:
+              '\nCommuter request\n',
+              title: 'Commuter request number Of Passengers: ${req.numberOfPassengers} ',
+              onTap: () {
+                pp('$mm ............. infoWindow tapped, point index: $index');
+                //_deleteLandmark(req);
+              }),
+          position: latLng));
+    }
+  }
   void _showNoPointsDialog() {
     showDialog(
         context: context,

@@ -456,6 +456,7 @@ class ListApiDog {
     // }
 
     var start = DateTime.now();
+    semCache = GetIt.instance<SemCache>();
     final cmd =
         '${url}routes/getSingleRouteData?routeId=$routeId';
     try {

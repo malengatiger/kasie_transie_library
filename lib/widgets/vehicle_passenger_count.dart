@@ -272,7 +272,9 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
   void _navigateToRouteMap() {
     pp('$mm ... _navigateToRouteMap');
     NavigationUtils.navigateTo(
-        context: context, widget: MapViewer(route: widget.route));
+        context: context, widget: MapViewer(
+        commuterRequests: commuterRequests,
+        route: widget.route));
   }
 
   _onPassengersIn(int number) {
@@ -440,6 +442,9 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
               bd.Badge(
                 badgeContent: Text('${_getPassengers()}', style: myTextStyle(color: Colors.white)),
                 badgeStyle: bd.BadgeStyle(padding: EdgeInsets.all(12), badgeColor:  Colors.green.shade700),
+                onTap: () {
+                  _navigateToRouteMap();
+                },
               ),
               gapW32,
               Text('Requests', style: myTextStyle(weight: FontWeight.w900, fontSize: 12, color: Colors.grey)),
