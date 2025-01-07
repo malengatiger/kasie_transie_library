@@ -85,6 +85,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
     super.initState();
     _listen();
     _control();
+    _initializeTimer();
   }
   List<lib.CommuterRequest> commuterRequests = [];
 
@@ -128,11 +129,18 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
   void _control() async {
     user = prefs.getUser();
     await _setTexts();
-    // Future.delayed(const Duration(milliseconds: 100), () {
-    //   _getVehiclePassengerCounts(false);
-    // });
-  }
 
+  }
+ late Timer timer;
+  _initializeTimer() async {
+    pp('\n\n$mm initialize Timer for ambassador commuters');
+    timer = Timer.periodic(Duration(seconds: 60), (timer) {
+      pp('\n\n$mm Timer tick ${timer.tick} - _filterCommuterRequests ...');
+      _filterCommuterRequests(commuterRequests);
+    });
+    pp('\n\n$mm  Ambassador Timer initialized for 🌀 60 seconds per tick🌀');
+
+  }
   @override
   void dispose() {
     _controller.dispose();
@@ -337,7 +345,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                   style: myTextStyle(fontSize: 12, weight: FontWeight.normal, color: Colors.grey),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   child: Text(
                     '${widget.route.name}',
                     style: myTextStyle(
@@ -350,7 +358,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                 PassengerCounter(
                     title: 'Passengers In',
                     count: 50,
-                    fontSize: 36,
+                    fontSize: 28,
                     onNumberSelected: (number) {
                       _onPassengersIn(number);
                     },
@@ -359,7 +367,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                 PassengerCounter(
                     title: 'Passengers Out',
                     count: 50,
-                    fontSize: 36,
+                    fontSize: 28,
                     onNumberSelected: (number) {
                       _onPassengersOut(number);
                     },
@@ -372,18 +380,18 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            const Text('Current Passengers'),
+                            Text('Current Passengers', style:  myTextStyle(weight:  FontWeight.w900, fontSize: 18, color: Colors.grey),),
                             gapW32,
                             Text(
                               '$currentPassengers',
                               style: myTextStyle(
-                                  fontSize: 48,
+                                  fontSize: 36,
                                   color: Colors.black,
                                   weight: FontWeight.w900),
                             )
                           ],
                         ))),
-                gapH32,
+                gapH16,
                 SizedBox(
                   width: 300,
                   child: ElevatedButton(
@@ -394,10 +402,10 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                       _submitCounts();
                     },
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(12),
                       child: Text('Submit',
                           style:
-                              myTextStyle(color: Colors.white, fontSize: 18)),
+                              myTextStyle(color: Colors.white, fontSize: 16)),
                     ),
                   ),
                 ),
@@ -424,15 +432,21 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
             ),
           ),
           commuterRequests.isNotEmpty? Positioned(
-              bottom: 16, right: 16,
+              bottom: 8, right: 16,
               child: Row(
             children: [
-               Text('Commuter Requests on the route', style: myTextStyle(weight: FontWeight.w900, fontSize: 18)),
+               Text('Commuters on the route', style: myTextStyle(weight: FontWeight.w900, fontSize: 12, color: Colors.grey)),
               gapW16,
               bd.Badge(
                 badgeContent: Text('${_getPassengers()}', style: myTextStyle(color: Colors.white)),
-                badgeStyle: bd.BadgeStyle(padding: EdgeInsets.all(16), badgeColor:  Colors.green.shade700),
-
+                badgeStyle: bd.BadgeStyle(padding: EdgeInsets.all(12), badgeColor:  Colors.green.shade700),
+              ),
+              gapW32,
+              Text('Requests', style: myTextStyle(weight: FontWeight.w900, fontSize: 12, color: Colors.grey)),
+              gapW16,
+              bd.Badge(
+                badgeContent: Text('${commuterRequests.length}', style: myTextStyle(color: Colors.white)),
+                badgeStyle: bd.BadgeStyle(padding: EdgeInsets.all(12), badgeColor:  Colors.grey.shade500),
               ),
             ],
           )): gapW32,
