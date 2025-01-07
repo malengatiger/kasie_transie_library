@@ -461,6 +461,8 @@ class ListApiDog {
         '${url}routes/getSingleRouteData?routeId=$routeId';
     try {
       var resp = await _sendHttpGET(cmd);
+      pp('$mm getSingleRouteData: ... resp: $resp');
+
       var data = AssociationRouteData.fromJson(resp);
       pp('$mm getSingleRouteData: ... routes: ${data.routeDataList.length}');
       await semCache.saveAssociationRouteData(data);

@@ -194,7 +194,7 @@ class MapViewerState extends State<MapViewer> {
                 pp('$mm ............. infoWindow tapped, point index: $index');
                 //_deleteLandmark(req);
               }),
-          position: latLng));
+         ));
     }
   }
   void _showNoPointsDialog() {
