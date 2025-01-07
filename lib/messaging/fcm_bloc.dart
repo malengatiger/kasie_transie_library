@@ -202,6 +202,28 @@ class FCMService {
     pp('$newMM .............................................'
         ' FCM: subscribed to all ${E.pear} Car FCM topics\n\n');
   }
+  Future<void> subscribeForAmbassador(Route route,String app) async {
+    String? associationId;
+    appName = app;
+    newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMService: 🌀🌀🌀🌀$app 🔷🔷';
+    // demoFlag = prefs.getDemoFlag();
+    associationId = route.associationId!;
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.commuterRequest}${route.routeId}');
+    pp('$newMM ..... FCM: subscribed to ${Constants.commuterRequest}${route.routeId}');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.routeUpdateRequest}$associationId');
+    pp('$newMM ..... FCM: subscribed to ${Constants.routeUpdateRequest}$associationId');
+    //
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.locationRequest}$associationId');
+    pp('$newMM ..... FCM: subscribed to ${Constants.locationRequest}$associationId');
+
+    pp('$newMM .............................................'
+        ' FCM: subscribed to  ${E.pear} Ambassador FCM topics\n\n');
+  }
   Future<void> subscribeForRouteCommuterRequests({required Vehicle car, required String routeId, required String app}) async {
     appName = app;
     newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMService: 🌀🌀🌀🌀$app 🔷🔷';
@@ -531,6 +553,7 @@ class FCMService {
     _dispatchStreamController.sink.add(dispatchRecord);
 
   }
+
   void _processRouteDispatchRecord(lib.DispatchRecord dispatchRecord) {
     pp('$newMM _processRouteDispatchRecord ... ${dispatchRecord.vehicleReg}');
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
@@ -15,7 +17,9 @@ import 'package:kasie_transie_library/widgets/payment/commuter_cash_payment_widg
 import 'package:kasie_transie_library/widgets/photo_handler.dart';
 import 'package:kasie_transie_library/widgets/scanners/dispatch_helper.dart';
 
+import '../messaging/fcm_bloc.dart';
 import 'ambassador/counter.dart';
+import 'package:badges/badges.dart' as bd;
 
 class VehiclePassengerCount extends StatefulWidget {
   const VehiclePassengerCount(
@@ -39,6 +43,9 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
   Prefs prefs = GetIt.instance<Prefs>();
   DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
   DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
+  late StreamSubscription<lib.CommuterRequest> commuterRequestSub;
+  FCMService fcmService = GetIt.instance<FCMService>();
+
   static const mm = ' 🔷🔷🔷🔷🔷🔷 VehiclePassengerCount 🔷';
   var passengerCounts = <lib.AmbassadorPassengerCount>[];
 
@@ -76,9 +83,48 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
+    _listen();
     _control();
   }
+  List<lib.CommuterRequest> commuterRequests = [];
 
+  void _listen() {
+    commuterRequestSub = fcmService.commuterRequestStream.listen((req) {
+      commuterRequests.add(req);
+      _filterCommuterRequests(commuterRequests);
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+  int  _getPassengers() {
+    var cnt = 0;
+    for (var cr in commuterRequests) {
+      cnt += cr.numberOfPassengers!;
+    }
+    return cnt;
+  }
+  List<lib.CommuterRequest> _filterCommuterRequests(
+      List<lib.CommuterRequest> requests) {
+    pp('$mm _filterCommuterRequests arrived: ${requests.length}');
+
+    List<lib.CommuterRequest> filtered = [];
+    DateTime now = DateTime.now().toUtc();
+    for (var r in requests) {
+      var date = DateTime.parse(r.dateRequested!);
+      var difference = now.difference(date);
+      pp('$mm _filterCommuterRequests difference: $difference');
+
+      if (difference <= const Duration(hours: 1)) {
+        filtered.add(r);
+      }
+    }
+    pp('$mm _filterCommuterRequests filtered: ${filtered.length}');
+    setState(() {
+      commuterRequests = filtered;
+    });
+    return filtered;
+  }
   void _control() async {
     user = prefs.getUser();
     await _setTexts();
@@ -377,6 +423,19 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
               ],
             ),
           ),
+          commuterRequests.isNotEmpty? Positioned(
+              bottom: 16, right: 16,
+              child: Row(
+            children: [
+               Text('Commuter Requests on the route', style: myTextStyle(weight: FontWeight.w900, fontSize: 18)),
+              gapW16,
+              bd.Badge(
+                badgeContent: Text('${_getPassengers()}', style: myTextStyle(color: Colors.white)),
+                badgeStyle: bd.BadgeStyle(padding: EdgeInsets.all(16), badgeColor:  Colors.green.shade700),
+
+              ),
+            ],
+          )): gapW32,
           busy
               ? const Positioned(
                   child: Center(
