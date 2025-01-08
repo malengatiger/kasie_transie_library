@@ -109,10 +109,9 @@ class TimerWidgetState extends State<TimerWidget>
                   ),
                   Text(
                     getFormattedTime(timeInSeconds: elapsed),
-                    style: myTextStyleMediumLargeWithColor(
-                        context,
-                        Theme.of(context).primaryColor,
-                        widget.isSmallSize ? 28 : 32),
+                    style: myTextStyle(
+                        color: Colors.pink,
+                        weight: FontWeight.w900, fontSize: 36),
                   ),
                   SizedBox(
                     height: widget.isSmallSize ? 16 : 32,

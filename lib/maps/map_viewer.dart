@@ -59,7 +59,7 @@ class MapViewerState extends State<MapViewer> {
   String? stringColor;
   String routeMapViewer = 'Viewer', changeColor = '';
 
-  AssociationRouteData? associationRouteData;
+  RouteData? routeData;
 
   @override
   void initState() {
@@ -75,21 +75,15 @@ class MapViewerState extends State<MapViewer> {
       busy = true;
     });
     pp('\n\n$mm getting route data for ${widget.route.name}');
-    associationRouteData = await listApiDog.getSingleRouteData(
-        widget.route.routeId!, widget.refresh == null? false: true);
+    routeData = await listApiDog.getSingleRouteData(routeId: widget.route.routeId!,
+        associationId: widget.route.associationId!, refresh: false);
 
-    if (associationRouteData != null) {
-      pp('$mm route data found: ${associationRouteData?.routeDataList.length} routes');
-
-      for (var routeData in associationRouteData!.routeDataList) {
-        if (routeData.routeId == widget.route.routeId!) {
-          routePoints = routeData.routePoints;
-          routeLandmarks = routeData.landmarks;
-        }
-      }
+    if (routeData != null) {
+      pp('$mm route data found: ${routeData?.landmarks.length} landmarks');
+      routePoints = routeData!.routePoints;
+      routeLandmarks = routeData!.landmarks;
     }
     if (routePoints.isEmpty) {
-      //_showNoPointsDialog();
       if (mounted) {
         showErrorToast(message: 'Route has not been mapped yet', context: context);
       }
@@ -265,7 +259,6 @@ class MapViewerState extends State<MapViewer> {
     _user = prefs.getUser();
   }
 
-  RouteData? routeData;
 
   Future _setCameraPosition() async {
     _myCurrentCameraPosition = CameraPosition(

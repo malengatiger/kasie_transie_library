@@ -201,13 +201,13 @@ class _VehicleSearchState extends State<VehicleSearch> {
                                       Navigator.pop(context, vehicle);
                                     },
                                     child: Card(
-                                      color: Colors.grey,
+                                      color: Colors.black26,
                                       elevation: 8,
                                       child: Center(
                                           child: Text(
                                             '${c.vehicleReg}',
                                             style: myTextStyle(fontSize: 16,
-                                                weight: FontWeight.normal,
+                                                weight: FontWeight.bold,
                                                 color: Colors.white),
                                           )),
                                     ),

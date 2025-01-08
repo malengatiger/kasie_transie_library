@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:badges/badges.dart' as bd;
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -10,7 +11,7 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/widgets/scanners/kasie/last_scanner_widget.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/vehicle_search.dart';
-import 'package:badges/badges.dart' as bd;
+
 import '../../maps/map_viewer.dart';
 import 'dispatch_taxi.dart';
 
@@ -30,10 +31,12 @@ class _CarForDispatchState extends State<CarForDispatch> {
   late StreamSubscription commuterRequestSub;
 
   List<lib.CommuterRequest> requests = [];
+
   @override
   void initState() {
     super.initState();
     _listen();
+    _startTimer();
   }
 
   _listen() async {
@@ -45,10 +48,42 @@ class _CarForDispatchState extends State<CarForDispatch> {
       pp('\n\n$mm fcmService.commuterRequestStream delivered a request: ');
       myPrettyJsonPrint(req.toJson());
       requests.insert(0, req);
+      _filterCommuterRequests(requests);
       if (mounted) {
         setState(() {});
       }
     });
+  }
+
+  late Timer timer;
+
+  void _startTimer() {
+    timer = Timer.periodic(const Duration(seconds: 60), (timer) {
+      pp('$mm Timer tick #${timer.tick} - _filterCommuterRequests ...');
+      _filterCommuterRequests(requests);
+    });
+  }
+
+  List<lib.CommuterRequest> _filterCommuterRequests(
+      List<lib.CommuterRequest> requests) {
+    pp('$mm _filterCommuterRequests : ${requests.length}');
+
+    List<lib.CommuterRequest> filtered = [];
+    DateTime now = DateTime.now().toUtc();
+    for (var r in requests) {
+      var date = DateTime.parse(r.dateRequested!);
+      var difference = now.difference(date);
+      pp('$mm _filterCommuterRequests difference: $difference');
+
+      if (difference <= const Duration(hours: 1)) {
+        filtered.add(r);
+      }
+    }
+    pp('$mm _filterCommuterRequests filtered: ${filtered.length}');
+    setState(() {
+      requests = filtered;
+    });
+    return filtered;
   }
 
   _search() async {
@@ -83,7 +118,6 @@ class _CarForDispatchState extends State<CarForDispatch> {
   }
 
   _scan() async {
-
     var vehicle = await NavigationUtils.navigateTo(
       context: context,
       widget: const ScanTaxi(),
@@ -112,6 +146,7 @@ class _CarForDispatchState extends State<CarForDispatch> {
                   context: context,
                   widget: MapViewer(
                     route: widget.route,
+                    commuterRequests: requests,
                   ));
             },
             icon: const FaIcon(FontAwesomeIcons.mapLocation))
@@ -150,7 +185,8 @@ class _CarForDispatchState extends State<CarForDispatch> {
                 gapH32,
                 gapH32,
                 gapH32,
-                const Text('Select a taxi using one or the other method'),
+                Text('Select a taxi using one or the other method',
+                    style: myTextStyle(color: Colors.grey)),
                 gapH32,
                 SizedBox(
                   width: 300,
@@ -215,12 +251,15 @@ class _CarForDispatchState extends State<CarForDispatch> {
                   right: 24,
                   child: Row(
                     children: [
-                      Text('Passengers on Route'),
+                      Text(
+                        'Passengers on Route',
+                        style: myTextStyle(color: Colors.grey, weight: FontWeight.w900),
+                      ),
                       gapW8,
                       bd.Badge(
                         badgeContent: Text(
                           '${_getPassengers()}',
-                          style: myTextStyle(color: Colors.white),
+                          style: myTextStyle(color: Colors.white,, weight: FontWeight.w900),
                         ),
                         badgeStyle: bd.BadgeStyle(
                           elevation: 8,
@@ -228,13 +267,13 @@ class _CarForDispatchState extends State<CarForDispatch> {
                           badgeColor: Colors.red,
                         ),
                       ),
-                      gapW32,
-                      Text('Requests'),
+                      gapW8,
+                      Text('Requests', style: myTextStyle(color: Colors.grey, fontSize: 12)),
                       gapW8,
                       bd.Badge(
                         badgeContent: Text(
                           '${requests.length}',
-                          style: myTextStyle(color: Colors.white),
+                          style: myTextStyle(color: Colors.white),,
                         ),
                         badgeStyle: bd.BadgeStyle(
                           elevation: 8,

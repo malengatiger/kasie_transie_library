@@ -292,6 +292,28 @@ class SemCache {
     pp('$mm RouteData assoc added to cache: ☎️ ${data.associationId} ☎️ ');
     pp('$mm routes added to cache: ☎️ ${data.routeDataList.length} ☎️ ');
   }
+  Future saveSingleRouteData(AssociationRouteData data) async {
+
+    var assRouteData = await getAssociationRouteData(data.associationId!);
+   if (assRouteData != null) {
+     List<RouteData> list = [];
+     for (var rd in assRouteData.routeDataList) {
+       if (rd.routeId == data.routeDataList.first.routeId) {
+          list.add(data.routeDataList.first);
+       } else {
+         list.add(rd);
+       }
+     }
+     assRouteData.routeDataList = list;
+   }
+    var store = intMapStoreFactory.store('routeData');
+    store
+        .record(stringToInt(data.associationId!))
+        .put(await getDb(), assRouteData!.toJson());
+
+    pp('$mm Association RouteData updatted with single route on cache: ☎️ ${data.associationId} ☎️ ');
+    pp('$mm routes in cache: ☎️ ${assRouteData.routeDataList.length} ☎️ ');
+  }
 
   Future<AssociationRouteData?> getAssociationRouteData(
       String associationId) async {
@@ -305,6 +327,27 @@ class SemCache {
       var assocRouteData = AssociationRouteData.fromJson(mData);
       pp('$mm association routes found in cache: ${assocRouteData.routeDataList.length}');
       return assocRouteData;
+    }
+    pp('$mm association route data not found in cache 😈😈😈😈');
+    return null;
+  }
+  Future<RouteData?> getRouteDataByRoute(
+      String associationId, String routeId) async {
+    var store = intMapStoreFactory.store('routeData');
+    sw.Finder finder = sw.Finder(
+        filter: sw.Filter.equals('associationId', associationId), limit: 1);
+    var records = await store.find(await getDb());
+
+    if (records.isNotEmpty) {
+      for (var rec in records) {
+        var mData = rec.value;
+        var assocRouteData = AssociationRouteData.fromJson(mData);
+        for (var rd in assocRouteData.routeDataList) {
+          if (rd.routeId == routeId) {
+            return rd;
+          }
+        }
+      }
     }
     pp('$mm association route data not found in cache 😈😈😈😈');
     return null;

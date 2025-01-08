@@ -51,34 +51,35 @@ class ListApiDog {
   bool initialized = false;
   String? token;
 
-  ListApiDog(
-    this.client,
-
-  ) {
+  ListApiDog(this.client,) {
     url = KasieEnvironment.getUrl();
     databaseString = KasieEnvironment.getUrl();
     listen();
   }
+
   void listen() {
-    pp('$mm listen for  FirebaseAuth.instance idTokenChanges and authStateChanges ...');
+    pp(
+        '$mm listen for  FirebaseAuth.instance idTokenChanges and authStateChanges ...');
     auth.FirebaseAuth.instance.idTokenChanges().listen((auth.User? user) async {
       if (user == null) {
         pp('$mm idTokenChanges: User is currently signed out!');
       } else {
-        pp('$mm idTokenChanges: User is not null! ${user.displayName}, checking auth token state ');
+        pp('$mm idTokenChanges: User is not null! ${user
+            .displayName}, checking auth token state ');
       }
     });
 
-    auth.FirebaseAuth.instance.authStateChanges().listen((auth.User? user) async {
+    auth.FirebaseAuth.instance.authStateChanges().listen((
+        auth.User? user) async {
       if (user == null) {
         pp('$mm authStateChanges: User is currently signed out!');
       } else {
-        pp('$mm authStateChanges: User is signed in! ${user.displayName}, checking auth token state ...');
+        pp('$mm authStateChanges: User is signed in! ${user
+            .displayName}, checking auth token state ...');
       }
     });
-
-
   }
+
   Future<String?> _getRefreshedToken() async {
     auth.User? user = auth.FirebaseAuth.instance.currentUser;
     String? token;
@@ -89,9 +90,10 @@ class ListApiDog {
         var date = idTokenResult.expirationTime;
         if (date != null) {
           if (date.isBefore(DateTime.now())) {
-            pp('$mm 😈😈 token expiration date is ${date.toIso8601String()} - expired! 😈😈😈 ');
-            token = await user.getIdToken(true);          } else {
-          }
+            pp('$mm 😈😈 token expiration date is ${date
+                .toIso8601String()} - expired! 😈😈😈 ');
+            token = await user.getIdToken(true);
+          } else {}
         }
         return token;
       });
@@ -161,7 +163,8 @@ class ListApiDog {
       if (cars.isNotEmpty) {
         await semCache.saveVehicles(cars);
       }
-      pp('$mm setUpVehicleData looks cool! 🍎 returning car: ${car.toJson()}.... 🍎');
+      pp('$mm setUpVehicleData looks cool! 🍎 returning car: ${car
+          .toJson()}.... 🍎');
       return car;
     }
     pp('$mm setUpVehicleData: Car data setup failed '
@@ -225,7 +228,8 @@ class ListApiDog {
   }
 
   Future<BigBag> getOwnersBag(String userId, String startDate) async {
-    pp('$mm ............................ getOwnersBag, userId: $userId startDate: $startDate ....');
+    pp(
+        '$mm ............................ getOwnersBag, userId: $userId startDate: $startDate ....');
     final url = KasieEnvironment.getUrl();
     final cmd = '${url}getOwnersBag?userId=$userId&startDate=$startDate';
     final resp = await _sendHttpGET(cmd);
@@ -296,8 +300,8 @@ class ListApiDog {
     return list1;
   }
 
-  Future<List<SettingsModel>> getSettings(
-      String associationId, bool refresh) async {
+  Future<List<SettingsModel>> getSettings(String associationId,
+      bool refresh) async {
     List<SettingsModel> list1 = [];
     if (refresh) {
       final cmd = '${url}association/getAssociationSettingsModels??associationId=$associationId';
@@ -316,7 +320,7 @@ class ListApiDog {
   }
 
   final StreamController<List<Vehicle>> _vehiclesStreamController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   Stream<List<Vehicle>> get vehiclesStream => _vehiclesStreamController.stream;
 
@@ -334,8 +338,8 @@ class ListApiDog {
 
   Future<List<DispatchRecord>> getMarshalDispatchRecords(
       {required String userId,
-      required bool refresh,
-      required int days}) async {
+        required bool refresh,
+        required int days}) async {
     final list = <DispatchRecord>[];
     if (refresh) {
       return await getMarshalDispatchesFromBackend(userId, days);
@@ -344,15 +348,15 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<RouteAssignment>> getVehicleRouteAssignments(
-      String vehicleId, bool refresh) async {
+  Future<List<RouteAssignment>> getVehicleRouteAssignments(String vehicleId,
+      bool refresh) async {
     final list = <RouteAssignment>[];
 
     return await getVehicleRouteAssignmentsFromBackend(vehicleId);
   }
 
-  Future<List<RouteAssignment>> getRouteAssignments(
-      String routeId, bool refresh) async {
+  Future<List<RouteAssignment>> getRouteAssignments(String routeId,
+      bool refresh) async {
     final list = <RouteAssignment>[];
     return await getRouteAssignmentsFromBackend(routeId);
   }
@@ -369,8 +373,8 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<CounterBag>> getVehicleCountsByDate(
-      String vehicleId, String startDate) async {
+  Future<List<CounterBag>> getVehicleCountsByDate(String vehicleId,
+      String startDate) async {
     final cmd =
         '${url}getVehicleCountsByDate?vehicleId=$vehicleId&startDate=$startDate';
     List resp = await _sendHttpGET(cmd);
@@ -395,8 +399,8 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<RouteLandmark>> getAssociationRouteLandmarks(
-      String associationId, bool refresh) async {
+  Future<List<RouteLandmark>> getAssociationRouteLandmarks(String associationId,
+      bool refresh) async {
     var landmarks = <RouteLandmark>[];
     var list = <RouteLandmark>[];
 
@@ -419,9 +423,10 @@ class ListApiDog {
     return [];
   }
 
-  Future<AssociationRouteData?> getAssociationRouteData(
-      String associationId, bool refresh) async {
-    pp('\n\n$mm .................................................... getAssociationRouteData: ... starting ...');
+  Future<AssociationRouteData?> getAssociationRouteData(String associationId,
+      bool refresh) async {
+    pp(
+        '\n\n$mm .................................................... getAssociationRouteData: ... starting ...');
     semCache = GetIt.instance<SemCache>();
 
     var routeData = await semCache.getAssociationRouteData(associationId);
@@ -435,10 +440,13 @@ class ListApiDog {
     try {
       var resp = await _sendHttpGET(cmd);
       routeData = AssociationRouteData.fromJson(resp);
-      pp('$mm getAssociationRouteData: ... routes: ${routeData.routeDataList.length}');
+      pp('$mm getAssociationRouteData: ... routes: ${routeData.routeDataList
+          .length}');
       await semCache.saveAssociationRouteData(routeData);
       var end = DateTime.now();
-      pp('$mm getAssociationRouteData: elapsed seconds: 🍎${end.difference(start).inSeconds} 🍎');
+      pp('$mm getAssociationRouteData: elapsed seconds: 🍎${end
+          .difference(start)
+          .inSeconds} 🍎');
 
       return routeData;
     } catch (e, s) {
@@ -446,16 +454,21 @@ class ListApiDog {
       throw Exception('ERROR loading Association Route Data: $e');
     }
   }
-  Future<AssociationRouteData?> getSingleRouteData(
-      String routeId, bool? refresh) async {
+
+  Future<RouteData?> getSingleRouteData({
+    required String routeId, required bool refresh, required String associationId}) async {
     pp('\n\n$mm ...... getSingleRouteData: ... starting ...');
-    // var routeData = await semCache.getrAssociationRouteData(associationId);
-    // if (!refresh && routeData != null && routeData.routeDataList.isNotEmpty) {
-    //   return routeData;
-    // }
+    semCache = GetIt.instance<SemCache>();
+
+    if (!refresh) {
+      var routeData = await semCache.getRouteDataByRoute(associationId, routeId);
+      if (routeData != null ) {
+       return routeData;
+        }
+      }
 
     var start = DateTime.now();
-    semCache = GetIt.instance<SemCache>();
+    RouteData? routeData;
     final cmd =
         '${url}routes/getSingleRouteData?routeId=$routeId';
     try {
@@ -463,11 +476,14 @@ class ListApiDog {
       pp('$mm getSingleRouteData: ... resp: $resp');
 
       var data = AssociationRouteData.fromJson(resp);
+      routeData = data.routeDataList.first;
       pp('$mm getSingleRouteData: ... routes: ${data.routeDataList.length}');
-      await semCache.saveAssociationRouteData(data);
+      await semCache.saveSingleRouteData(data);
       var end = DateTime.now();
-      pp('$mm getSingleRouteData: elapsed seconds: 🍎${end.difference(start).inSeconds} 🍎');
-      return data;
+      pp('$mm getSingleRouteData: elapsed seconds: 🍎${end
+          .difference(start)
+          .inSeconds} 🍎');
+      return routeData;
     } catch (e, s) {
       pp('$mm ERROR in getSingleRouteData: $e \n$s');
       throw Exception('ERROR loading  Route Data: $e');
@@ -478,8 +494,8 @@ class ListApiDog {
     return 0;
   }
 
-  Future<List<Vehicle>> getAssociationCars(
-      String associationId, bool refresh) async {
+  Future<List<Vehicle>> getAssociationCars(String associationId,
+      bool refresh) async {
     semCache = GetIt.instance<SemCache>();
     var cachedList = await semCache.getVehicles(associationId);
     if (refresh || cachedList.isEmpty) {
@@ -550,8 +566,8 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<DispatchRecord>> getMarshalDispatchesFromBackend(
-      String userId, int days) async {
+  Future<List<DispatchRecord>> getMarshalDispatchesFromBackend(String userId,
+      int days) async {
     final startDate = DateTime.now().toUtc().subtract(Duration(days: days));
     final cmd =
         '${url}getMarshalDispatchRecords?marshalId=$userId&startDate=$startDate';
@@ -588,7 +604,7 @@ class ListApiDog {
   }
 
   final StreamController<List<RoutePoint>> _routePointController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   Stream<List<RoutePoint>> get routePointStream => _routePointController.stream;
 
@@ -598,7 +614,7 @@ class ListApiDog {
   }
 
   final StreamController<List<Route>> _routeController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   Stream<List<Route>> get routeStream => _routeController.stream;
 
@@ -607,12 +623,12 @@ class ListApiDog {
   }
 
   final StreamController<List<City>> _cityController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   Stream<List<City>> get cityStream => _cityController.stream;
 
-  Future<List<RouteLandmark>> getRouteLandmarks(
-      String routeId, bool refresh, String associationId) async {
+  Future<List<RouteLandmark>> getRouteLandmarks(String routeId, bool refresh,
+      String associationId) async {
     List<RouteLandmark> localList = await semCache.getRouteLandmarks(
         routeId: routeId, associationId: associationId);
 
@@ -630,10 +646,10 @@ class ListApiDog {
     return localList;
   }
 
-  Future<List<RoutePoint>> getRoutePoints(
-      String routeId, bool refresh, String associationId) async {
+  Future<List<RoutePoint>> getRoutePoints(String routeId, bool refresh,
+      String associationId) async {
     List<RoutePoint> localList =
-        await semCache.getRoutePoints(routeId, associationId);
+    await semCache.getRoutePoints(routeId, associationId);
     zipHandler = GetIt.instance<ZipHandler>();
     if (localList.isEmpty || refresh) {
       try {
@@ -643,7 +659,8 @@ class ListApiDog {
         for (var r in m) {
           localList.add(RoutePoint.fromJson(r));
         }
-        pp('$mm RoutePoints from backend via zip: 🍎 ${localList.length} points');
+        pp('$mm RoutePoints from backend via zip: 🍎 ${localList
+            .length} points');
       } catch (e) {
         pp(e);
         rethrow;
@@ -662,7 +679,8 @@ class ListApiDog {
       return;
     }
     List<Vehicle> cars = await getCarsFromBackend(association.associationId!);
-    pp('$mm getAllPhotosAndVideos: ... cars: ${cars.length} from association: ${association.associationName}');
+    pp('$mm getAllPhotosAndVideos: ... cars: ${cars
+        .length} from association: ${association.associationName}');
     var totalPhotos = 0;
     var totalVideos = 0;
     for (var car in cars) {
@@ -677,7 +695,8 @@ class ListApiDog {
       await semCache.saveVehicles([car]);
     }
 
-    pp('$mm getAllPhotosAndVideos completed: ${cars.length} cars and totalPhotos: $totalPhotos and totalVideos: $totalVideos');
+    pp('$mm getAllPhotosAndVideos completed: ${cars
+        .length} cars and totalPhotos: $totalPhotos and totalVideos: $totalVideos');
   }
 
   Future getVehicleMedia(Vehicle car, bool refresh) async {
@@ -685,17 +704,19 @@ class ListApiDog {
     var listV = await _getVehicleVideosFromBackend(vehicleId: car.vehicleId!);
     car.photos = listP;
     car.videos = listV;
-    pp('$mm car media found for ${car.vehicleReg} photos: ${listP.length} videos: ${listV.length}');
+    pp('$mm car media found for ${car.vehicleReg} photos: ${listP
+        .length} videos: ${listV.length}');
   }
 
-  Future<List<VehiclePhoto>> getVehiclePhotos(
-      Vehicle vehicle, bool refresh) async {
+  Future<List<VehiclePhoto>> getVehiclePhotos(Vehicle vehicle,
+      bool refresh) async {
     var localList = <VehiclePhoto>[];
     //
     try {
       localList =
-          await _getVehiclePhotosFromBackend(vehicleId: vehicle.vehicleId!);
-      pp('$mm VehiclePhotos from backend: vehicleId: ${vehicle.vehicleReg} found: ${localList.length} photos');
+      await _getVehiclePhotosFromBackend(vehicleId: vehicle.vehicleId!);
+      pp('$mm VehiclePhotos from backend: vehicleId: ${vehicle
+          .vehicleReg} found: ${localList.length} photos');
       vehicle.photos = localList;
       await semCache.saveVehicles([vehicle]);
     } catch (e) {
@@ -704,14 +725,15 @@ class ListApiDog {
     return localList;
   }
 
-  Future<List<VehicleVideo>> getVehicleVideos(
-      Vehicle vehicle, bool refresh) async {
+  Future<List<VehicleVideo>> getVehicleVideos(Vehicle vehicle,
+      bool refresh) async {
     var localList = <VehicleVideo>[];
     //
     try {
       localList =
-          await _getVehicleVideosFromBackend(vehicleId: vehicle.vehicleId!);
-      pp('$mm VehicleVideos from backend: vehicleId: ${vehicle.vehicleReg} found: ${localList.length} photos');
+      await _getVehicleVideosFromBackend(vehicleId: vehicle.vehicleId!);
+      pp('$mm VehicleVideos from backend: vehicleId: ${vehicle
+          .vehicleReg} found: ${localList.length} photos');
       vehicle.videos = localList;
       await semCache.saveVehicles([vehicle]);
     } catch (e) {
@@ -722,8 +744,8 @@ class ListApiDog {
 
   Future<List<AmbassadorPassengerCount>> getAmbassadorPassengerCountsByVehicle(
       {required String vehicleId,
-      required bool refresh,
-      required String startDate}) async {
+        required bool refresh,
+        required String startDate}) async {
     var localList = <AmbassadorPassengerCount>[];
 
     //
@@ -739,8 +761,8 @@ class ListApiDog {
 
   Future<List<AmbassadorPassengerCount>> getAmbassadorPassengerCountsByUser(
       {required String userId,
-      required bool refresh,
-      required String startDate}) async {
+        required bool refresh,
+        required String startDate}) async {
     var localList = <AmbassadorPassengerCount>[];
 
     try {
@@ -755,13 +777,14 @@ class ListApiDog {
 
   Future<List<CommuterRequest>> getAssociationCommuterRequests(
       {required String associationId,
-      required bool refresh,
-      required String startDate}) async {
+        required bool refresh,
+        required String startDate}) async {
     var localList = <CommuterRequest>[];
 
     try {
       final url =
-          '${KasieEnvironment.getUrl()}getAssociationCommuterRequests?associationId=$associationId'
+          '${KasieEnvironment
+          .getUrl()}getAssociationCommuterRequests?associationId=$associationId'
           '&startDate=$startDate';
       localList = await _getCommuterRequestsFromBackend(url: url);
       pp('$mm CommuterRequests from backend:: ${localList.length}');
@@ -773,13 +796,14 @@ class ListApiDog {
 
   Future<List<DispatchRecord>> getAssociationDispatchRecords(
       {required String associationId,
-      required bool refresh,
-      required String startDate}) async {
+        required bool refresh,
+        required String startDate}) async {
     var localList = <DispatchRecord>[];
 
     try {
       final url =
-          '${KasieEnvironment.getUrl()}getAssociationDispatchRecords?associationId=$associationId'
+          '${KasieEnvironment
+          .getUrl()}getAssociationDispatchRecords?associationId=$associationId'
           '&startDate=$startDate';
       localList = await _getDispatchRecordsFromBackend(url: url);
       pp('$mm DispatchRecord from backend:: ${localList.length}');
@@ -788,14 +812,15 @@ class ListApiDog {
     }
     return localList;
   }
-  Future<List<DispatchRecord>> getRouteDispatchRecords(
-      {required String routeId,
-        required String startDate}) async {
+
+  Future<List<DispatchRecord>> getRouteDispatchRecords({required String routeId,
+    required String startDate}) async {
     var localList = <DispatchRecord>[];
 
     try {
       final url =
-          '${KasieEnvironment.getUrl()}dispatch/getRouteDispatchRecords?routeId=$routeId'
+          '${KasieEnvironment
+          .getUrl()}dispatch/getRouteDispatchRecords?routeId=$routeId'
           '&startDate=$startDate';
       localList = await _getDispatchRecordsFromBackend(url: url);
       pp('$mm DispatchRecord from backend:: ${localList.length}');
@@ -806,15 +831,15 @@ class ListApiDog {
   }
 
   Future<List<AmbassadorPassengerCount>>
-      getAssociationAmbassadorPassengerCounts(
-          {required String associationId,
-          required bool refresh,
-          required String startDate}) async {
+  getAssociationAmbassadorPassengerCounts({required String associationId,
+    required bool refresh,
+    required String startDate}) async {
     var localList = <AmbassadorPassengerCount>[];
 
     try {
       final url =
-          '${KasieEnvironment.getUrl()}getAssociationAmbassadorPassengerCounts?associationId=$associationId'
+          '${KasieEnvironment
+          .getUrl()}getAssociationAmbassadorPassengerCounts?associationId=$associationId'
           '&startDate=$startDate';
       localList = await _getPassengerCountsFromBackend(url: url);
       pp('$mm AmbassadorPassengerCounts from backend:: ${localList.length}');
@@ -826,8 +851,8 @@ class ListApiDog {
 
   Future<List<AmbassadorPassengerCount>> getRoutePassengerCounts(
       {required String routeId,
-      required bool refresh,
-      required String startDate}) async {
+        required bool refresh,
+        required String startDate}) async {
     var localList = <AmbassadorPassengerCount>[];
 
     try {
@@ -844,13 +869,14 @@ class ListApiDog {
 
   Future<List<VehicleArrival>> getAssociationVehicleArrivals(
       {required String associationId,
-      required bool refresh,
-      required String startDate}) async {
+        required bool refresh,
+        required String startDate}) async {
     var localList = <VehicleArrival>[];
 
     try {
       final url =
-          '${KasieEnvironment.getUrl()}getAssociationVehicleArrivals?associationId=$associationId'
+          '${KasieEnvironment
+          .getUrl()}getAssociationVehicleArrivals?associationId=$associationId'
           '&startDate=$startDate';
       localList = await _getVehicleArrivalsFromBackend(url: url);
       pp('$mm VehicleArrivals from backend:: ${localList.length}');
@@ -860,10 +886,9 @@ class ListApiDog {
     return localList;
   }
 
-  Future<List<VehicleArrival>> getRouteVehicleArrivals(
-      {required String routeId,
-      required bool refresh,
-      required String startDate}) async {
+  Future<List<VehicleArrival>> getRouteVehicleArrivals({required String routeId,
+    required bool refresh,
+    required String startDate}) async {
     var localList = <VehicleArrival>[];
 
     try {
@@ -881,13 +906,14 @@ class ListApiDog {
 
   Future<List<CommuterRequest>> getRouteCommuterRequests(
       {required String routeId,
-      required bool refresh,
-      required String startDate}) async {
+        required bool refresh,
+        required String startDate}) async {
     var localList = <CommuterRequest>[];
 
     try {
       final url =
-          '${KasieEnvironment.getUrl()}getRouteCommuterRequests?routeId=$routeId'
+          '${KasieEnvironment
+          .getUrl()}getRouteCommuterRequests?routeId=$routeId'
           '&startDate=$startDate';
       localList = await _getCommuterRequestsFromBackend(url: url);
       pp('$mm CommuterRequests from backend:: ${localList.length}');
@@ -897,8 +923,8 @@ class ListApiDog {
     return localList;
   }
 
-  Future<List<VehicleMediaRequest>> getVehicleMediaRequests(
-      String vehicleId, bool refresh) async {
+  Future<List<VehicleMediaRequest>> getVehicleMediaRequests(String vehicleId,
+      bool refresh) async {
     var localList = <VehicleMediaRequest>[];
 
     try {
@@ -918,15 +944,16 @@ class ListApiDog {
     try {
       localList = await _getVehicleMediaRequestsFromBackend(
           vehicleId: null, associationId: associationId, startDate: startDate);
-      pp('$mm VehicleMediaRequests from backend, caching to realm: ${localList.length}');
+      pp('$mm VehicleMediaRequests from backend, caching to realm: ${localList
+          .length}');
     } catch (e) {
       pp(e);
     }
     return localList;
   }
 
-  Future<List<RouteUpdateRequest>> getRouteUpdateRequests(
-      String routeId, bool refresh) async {
+  Future<List<RouteUpdateRequest>> getRouteUpdateRequests(String routeId,
+      bool refresh) async {
     var localList = <RouteUpdateRequest>[];
 
     try {
@@ -1008,13 +1035,13 @@ class ListApiDog {
 
   Future<List<VehicleMediaRequest>> _getVehicleMediaRequestsFromBackend(
       {required String? associationId,
-      required String? vehicleId,
-      required String? startDate}) async {
+        required String? vehicleId,
+        required String? startDate}) async {
     final list = <VehicleMediaRequest>[];
     var command = '';
     if (associationId != null) {
       command =
-          '${url}vehicle/getAssociationVehicleMediaRequests?associationId=$associationId&startDate=$startDate';
+      '${url}vehicle/getAssociationVehicleMediaRequests?associationId=$associationId&startDate=$startDate';
     }
     if (vehicleId != null) {
       command = '${url}getVehicleMediaRequests?vehicleId=$vehicleId';
@@ -1058,8 +1085,8 @@ class ListApiDog {
   }
 
   Future<List<AmbassadorPassengerCount>>
-      _getVehicleAmbassadorPassengerCountsFromBackend(
-          {required String vehicleId, required String startDate}) async {
+  _getVehicleAmbassadorPassengerCountsFromBackend(
+      {required String vehicleId, required String startDate}) async {
     final list = <AmbassadorPassengerCount>[];
     final cmd =
         '${url}getVehicleAmbassadorPassengerCounts?vehicleId=$vehicleId&startDate=$startDate';
@@ -1074,8 +1101,8 @@ class ListApiDog {
   }
 
   Future<List<AmbassadorPassengerCount>>
-      _getUserAmbassadorPassengerCountsFromBackend(
-          {required String userId, required String startDate}) async {
+  _getUserAmbassadorPassengerCountsFromBackend(
+      {required String userId, required String startDate}) async {
     final list = <AmbassadorPassengerCount>[];
     final cmd =
         '${url}getUserAmbassadorPassengerCounts?userId=$userId&startDate=$startDate';
@@ -1089,10 +1116,9 @@ class ListApiDog {
     return list;
   }
 
-  Future<Route?> getRoute(
-      {required String routeId,
-      required bool refresh,
-      String? associationId}) async {
+  Future<Route?> getRoute({required String routeId,
+    required bool refresh,
+    String? associationId}) async {
     pp('$mm .................. getRoute routeId: $routeId');
     semCache = GetIt.instance<SemCache>();
 
@@ -1112,11 +1138,11 @@ class ListApiDog {
     return mRoute;
   }
 
-  Future<List<CalculatedDistance>> getCalculatedDistances(
-      String routeId, String associationId, bool refresh) async {
+  Future<List<CalculatedDistance>> getCalculatedDistances(String routeId,
+      String associationId, bool refresh) async {
     pp('$mm .................. getCalculatedDistances refresh: $refresh');
     RouteDistanceCalculator routeDistanceCalculator =
-        GetIt.instance<RouteDistanceCalculator>();
+    GetIt.instance<RouteDistanceCalculator>();
 
     var localList = <CalculatedDistance>[];
 
@@ -1178,8 +1204,8 @@ class ListApiDog {
   //   return routes;
   // }
 
-  Future<List<Route>> getAssociationRoutes(
-      String associationId, bool refresh) async {
+  Future<List<Route>> getAssociationRoutes(String associationId,
+      bool refresh) async {
     final list = <Route>[];
     final cmd =
         '${url}routes/getAssociationRoutes?associationId=$associationId';
@@ -1195,9 +1221,10 @@ class ListApiDog {
 
   Future<List<RouteLandmark>> findRouteLandmarksByLocation(
       {required double latitude,
-      required double longitude,
-      required double radiusInKM}) async {
-    pp('$mm .................. findRouteLandmarksByLocation; radius: $radiusInKM');
+        required double longitude,
+        required double radiusInKM}) async {
+    pp(
+        '$mm .................. findRouteLandmarksByLocation; radius: $radiusInKM');
 
     final list = <RouteLandmark>[];
     final cmd = '${url}routes/findRouteLandmarksByLocation?latitude=$latitude'
@@ -1215,7 +1242,8 @@ class ListApiDog {
 
   Future<List<CalculatedDistance>> _getCalculatedDistancesFromBackend(
       {required String routeId}) async {
-    pp('$mm .................. _getCalculatedDistancesFromBackend; routeId: $routeId');
+    pp(
+        '$mm .................. _getCalculatedDistancesFromBackend; routeId: $routeId');
 
     final list = <CalculatedDistance>[];
     final cmd = '${url}routes/getCalculatedDistances?routeId=$routeId';
@@ -1279,7 +1307,8 @@ class ListApiDog {
     var list = <Route>[];
 
     final cmd =
-        '${url}routes/findAssociationRoutesByLocation?associationId=${p.associationId}'
+        '${url}routes/findAssociationRoutesByLocation?associationId=${p
+        .associationId}'
         '&latitude=${p.latitude}'
         '&longitude=${p.longitude}&radiusInKM=${p.radiusInKM}';
     List resp = await _sendHttpGET(cmd);
@@ -1287,7 +1316,8 @@ class ListApiDog {
       list.add(Route.fromJson(value));
     }
 
-    pp('$mm findAssociationRoutesByLocation;  ${E.appleRed} routes found: ${list.length}');
+    pp('$mm findAssociationRoutesByLocation;  ${E.appleRed} routes found: ${list
+        .length}');
     myPrettyJsonPrint(list.first.toJson());
     return list;
   }
@@ -1297,7 +1327,8 @@ class ListApiDog {
     var list = <Route>[];
 
     final cmd =
-        '${url}findAssociationRouteLandmarksByLocation?associationId=${p.associationId}'
+        '${url}findAssociationRouteLandmarksByLocation?associationId=${p
+        .associationId}'
         '&latitude=${p.latitude}'
         '&longitude=${p.longitude}&radiusInKM=${p.radiusInKM}';
     List resp = await _sendHttpGET(cmd);
@@ -1305,15 +1336,15 @@ class ListApiDog {
       list.add(Route.fromJson(value));
     }
 
-    pp('$mm findAssociationRouteLandmarksByLocation;  ${E.appleRed} found: ${list.length}');
+    pp('$mm findAssociationRouteLandmarksByLocation;  ${E
+        .appleRed} found: ${list.length}');
     myPrettyJsonPrint(list.first.toJson());
     return list;
   }
 
-  Future<List<RoutePoint>> findRoutePointsByLocation(
-      {required double latitude,
-      required double longitude,
-      required double radiusInKM}) async {
+  Future<List<RoutePoint>> findRoutePointsByLocation({required double latitude,
+    required double longitude,
+    required double radiusInKM}) async {
     var list = <RoutePoint>[];
 
     final cmd = '${url}routes/findRoutePointsByLocation?latitude=$latitude'
@@ -1324,16 +1355,20 @@ class ListApiDog {
       list.add(RoutePoint.fromJson(value));
     }
 
-    pp('$mm findRoutePointsByLocation;  ${E.appleRed} routePoints found: ${list.length}');
+    pp('$mm findRoutePointsByLocation;  ${E.appleRed} routePoints found: ${list
+        .length}');
 
     return list;
   }
 
   Future<List<City>> findCitiesByLocation(LocationFinderParameter p) async {
     var list = <City>[];
-    pp('$mm findCitiesByLocation: 🍎🍎lat: ${p.latitude} lng: ${p.longitude} 🍎🍎 radiusInKM: ${p.radiusInKM} 🍎🍎associationId: ${p.associationId}');
+    pp('$mm findCitiesByLocation: 🍎🍎lat: ${p.latitude} lng: ${p
+        .longitude} 🍎🍎 radiusInKM: ${p.radiusInKM} 🍎🍎associationId: ${p
+        .associationId}');
     final cmd = '${url}city/findCitiesByLocation?latitude=${p.latitude}'
-        '&longitude=${p.longitude}&maxDistanceInMetres=${p.radiusInKM}&limit=${p.limit}';
+        '&longitude=${p.longitude}&maxDistanceInMetres=${p.radiusInKM}&limit=${p
+        .limit}';
 
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {
@@ -1355,8 +1390,8 @@ class ListApiDog {
     //todo - remove from mongo
   }
 
-  Future<List<User>> getAssociationUsers(
-      String associationId, bool refresh) async {
+  Future<List<User>> getAssociationUsers(String associationId,
+      bool refresh) async {
     var list = <User>[];
     await _getUsersFromBackEnd(associationId, list);
     // await semCache.saveUsers(list);
@@ -1375,8 +1410,8 @@ class ListApiDog {
     return list;
   }
 
-  Future<List<User>> _getUsersFromBackEnd(
-      String associationId, List<User> list) async {
+  Future<List<User>> _getUsersFromBackEnd(String associationId,
+      List<User> list) async {
     final cmd =
         '${url}association/getAssociationUsers?associationId=$associationId';
     List resp = await _sendHttpGET(cmd);
@@ -1431,13 +1466,14 @@ class ListApiDog {
     try {
       var resp = await client
           .get(
-            Uri.parse(mUrl),
-            headers: headers,
-          )
+        Uri.parse(mUrl),
+        headers: headers,
+      )
           .timeout(const Duration(seconds: timeOutInSeconds));
 
       if (resp.statusCode == 200 || resp.statusCode == 201) {
-        pp('$mm  _sendHttpGET RESPONSE: 👌👌👌 statusCode: ${resp.statusCode} 👌👌👌 for $mUrl');
+        pp('$mm  _sendHttpGET RESPONSE: 👌👌👌 statusCode: ${resp
+            .statusCode} 👌👌👌 for $mUrl');
         try {
           var mJson = json.decode(resp.body);
           return mJson;
@@ -1447,14 +1483,17 @@ class ListApiDog {
         }
       } else {
         if (resp.statusCode == 401 || resp.statusCode == 403) {
-          pp('$mm  $dev _sendHttpGET: 🔆 Auth problem. statusCode:  ${resp.statusCode} for $mUrl $dev');
+          pp('$mm  $dev _sendHttpGET: 🔆 Auth problem. statusCode:  ${resp
+              .statusCode} for $mUrl $dev');
           pp('$mm metadata: ${resp.body}');
-          pp('$mm  $dev _sendHttpGET: 🔆 Firebase ID token has expired, trying to refresh ... 🔴🔴🔴🔴🔴🔴 ');
+          pp(
+              '$mm  $dev _sendHttpGET: 🔆 Firebase ID token has expired, trying to refresh ... 🔴🔴🔴🔴🔴🔴 ');
           token = await getAuthToken();
           if (token != null || token != 'NoToken') {
             _sendHttpGET(mUrl);
           } else {
-            pp('$xz $dev Throwing my toys!!! : statusCode: ${resp.statusCode} $dev ');
+            pp('$xz $dev Throwing my toys!!! : statusCode: ${resp
+                .statusCode} $dev ');
             final gex = KasieException(
                 message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
                 url: mUrl,
@@ -1466,7 +1505,9 @@ class ListApiDog {
         }
       }
       var end = DateTime.now();
-      pp('$xz _sendHttpGET: 🔆 elapsed time for http: ${end.difference(start).inSeconds} seconds 🔆 \n\n');
+      pp('$xz _sendHttpGET: 🔆 elapsed time for http: ${end
+          .difference(start)
+          .inSeconds} seconds 🔆 \n\n');
     } on SocketException {
       pp('$xz SocketException, really means that server cannot be reached 😑');
       final gex = KasieException(
@@ -1495,7 +1536,8 @@ class ListApiDog {
       errorHandler.handleError(exception: gex);
       throw Exception('Server experienced an Format problem. ');
     } on TimeoutException {
-      pp("$xz No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
+      pp(
+          "$xz No Internet connection. Request has timed out in $timeOutInSeconds seconds 👎");
       final gex = KasieException(
           message: 'No Internet connection. Request timed out',
           url: mUrl,
@@ -1505,4 +1547,6 @@ class ListApiDog {
       throw gex;
     }
   }
+
+
 }
