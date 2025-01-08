@@ -148,7 +148,12 @@ class _CarForDispatchState extends State<CarForDispatch> {
       _navigateToDispatch(car);
     }
   }
-
+  @override
+void dispose() {
+    timer.cancel();
+    commuterRequestSub.cancel();
+    super.dispose();
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(

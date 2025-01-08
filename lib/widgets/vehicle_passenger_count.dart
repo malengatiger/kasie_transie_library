@@ -86,7 +86,9 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
     _listen();
     _control();
     _initializeTimer();
+    _getCommuterRequests();
   }
+
   List<lib.CommuterRequest> commuterRequests = [];
 
   void _listen() {
@@ -98,13 +100,24 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
       }
     });
   }
-  int  _getPassengers() {
+
+  void _getCommuterRequests() async {
+    var date = DateTime.now().toUtc().subtract(const Duration(hours: 1));
+    commuterRequests = await listApiDog.getRouteCommuterRequests(
+        routeId: widget.route.routeId!, startDate: date.toIso8601String());
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  int _getPassengers() {
     var cnt = 0;
     for (var cr in commuterRequests) {
       cnt += cr.numberOfPassengers!;
     }
     return cnt;
   }
+
   List<lib.CommuterRequest> _filterCommuterRequests(
       List<lib.CommuterRequest> requests) {
     pp('$mm _filterCommuterRequests arrived: ${requests.length}');
@@ -114,36 +127,40 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
     for (var r in requests) {
       var date = DateTime.parse(r.dateRequested!);
       var difference = now.difference(date);
-      pp('$mm _filterCommuterRequests difference: $difference');
+      pp('$mm _filterCommuterRequests difference: 🍎 $difference');
 
       if (difference <= const Duration(hours: 1)) {
         filtered.add(r);
       }
     }
     pp('$mm _filterCommuterRequests filtered: ${filtered.length}');
-    setState(() {
-      commuterRequests = filtered;
-    });
+    if (mounted) {
+      setState(() {
+        commuterRequests = filtered;
+      });
+    }
     return filtered;
   }
+
   void _control() async {
     user = prefs.getUser();
     await _setTexts();
-
   }
- late Timer timer;
+
+  late Timer timer;
   _initializeTimer() async {
     pp('\n\n$mm initialize Timer for ambassador commuters');
     timer = Timer.periodic(Duration(seconds: 60), (timer) {
-      pp('\n\n$mm Timer tick ${timer.tick} - _filterCommuterRequests ...');
+      pp('\n\n$mm Timer tick #${timer.tick} - _filterCommuterRequests ...');
       _filterCommuterRequests(commuterRequests);
     });
     pp('\n\n$mm  Ambassador Timer initialized for 🌀 60 seconds per tick🌀');
-
   }
+
   @override
   void dispose() {
     _controller.dispose();
+    timer.cancel();
     super.dispose();
   }
 
@@ -185,7 +202,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
     try {
       previousPassengersIn = passengersIn;
       final loc = await locationBloc.getLocation();
-       passengerCount = lib.AmbassadorPassengerCount(
+      passengerCount = lib.AmbassadorPassengerCount(
         associationId: user!.associationId,
         tripId: widget.trip.tripId,
         created: DateTime.now().toUtc().toIso8601String(),
@@ -249,7 +266,8 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
           vehicle: widget.vehicle,
           route: widget.route,
           onError: (err) {},
-          trip: widget.trip, numberOfPassengers: passengerCount.passengersIn!,
+          trip: widget.trip,
+          numberOfPassengers: passengerCount.passengersIn!,
         ));
   }
 
@@ -272,9 +290,9 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
   void _navigateToRouteMap() {
     pp('$mm ... _navigateToRouteMap');
     NavigationUtils.navigateTo(
-        context: context, widget: MapViewer(
-        commuterRequests: commuterRequests,
-        route: widget.route));
+        context: context,
+        widget:
+            MapViewer(commuterRequests: commuterRequests, route: widget.route));
   }
 
   _onPassengersIn(int number) {
@@ -344,7 +362,10 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                 ),
                 Text(
                   '${widget.vehicle.make} ${widget.vehicle.model} ${widget.vehicle.year}',
-                  style: myTextStyle(fontSize: 12, weight: FontWeight.normal, color: Colors.grey),
+                  style: myTextStyle(
+                      fontSize: 12,
+                      weight: FontWeight.normal,
+                      color: Colors.grey),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(12),
@@ -382,7 +403,13 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Text('Current Passengers', style:  myTextStyle(weight:  FontWeight.w900, fontSize: 18, color: Colors.grey),),
+                            Text(
+                              'Current Passengers',
+                              style: myTextStyle(
+                                  weight: FontWeight.w900,
+                                  fontSize: 18,
+                                  color: Colors.grey),
+                            ),
                             gapW32,
                             Text(
                               '$currentPassengers',
@@ -404,7 +431,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                       _submitCounts();
                     },
                     child: Padding(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(16),
                       child: Text('Submit',
                           style:
                               myTextStyle(color: Colors.white, fontSize: 16)),
@@ -416,7 +443,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                   width: 300,
                   child: ElevatedButton(
                     style: const ButtonStyle(
-                        backgroundColor: WidgetStatePropertyAll(Colors.red),
+                        backgroundColor: WidgetStatePropertyAll(Colors.grey),
                         elevation: WidgetStatePropertyAll(2)),
                     onPressed: () {
                       _tripHasEnded();
@@ -433,28 +460,45 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
               ],
             ),
           ),
-          commuterRequests.isNotEmpty? Positioned(
-              bottom: 8, right: 16,
-              child: Row(
-            children: [
-               Text('Commuters on the route', style: myTextStyle(weight: FontWeight.w900, fontSize: 12, color: Colors.grey)),
-              gapW16,
-              bd.Badge(
-                badgeContent: Text('${_getPassengers()}', style: myTextStyle(color: Colors.white)),
-                badgeStyle: bd.BadgeStyle(padding: EdgeInsets.all(12), badgeColor:  Colors.green.shade700),
-                onTap: () {
-                  _navigateToRouteMap();
-                },
-              ),
-              gapW32,
-              Text('Requests', style: myTextStyle(weight: FontWeight.w900, fontSize: 12, color: Colors.grey)),
-              gapW16,
-              bd.Badge(
-                badgeContent: Text('${commuterRequests.length}', style: myTextStyle(color: Colors.white)),
-                badgeStyle: bd.BadgeStyle(padding: EdgeInsets.all(12), badgeColor:  Colors.grey.shade500),
-              ),
-            ],
-          )): gapW32,
+          commuterRequests.isNotEmpty
+              ? Positioned(
+                  bottom: 8,
+                  right: 16,
+                  child: Row(
+                    children: [
+                      Text('Commuters on the route',
+                          style: myTextStyle(
+                              weight: FontWeight.w900,
+                              fontSize: 12,
+                              color: Colors.grey)),
+                      gapW16,
+                      bd.Badge(
+                        badgeContent: Text('${_getPassengers()}',
+                            style: myTextStyle(color: Colors.white)),
+                        badgeStyle: bd.BadgeStyle(
+                            padding: EdgeInsets.all(12),
+                            badgeColor: Colors.red.shade700),
+                        onTap: () {
+                          _navigateToRouteMap();
+                        },
+                      ),
+                      gapW32,
+                      Text('Requests',
+                          style: myTextStyle(
+                              weight: FontWeight.w900,
+                              fontSize: 12,
+                              color: Colors.grey)),
+                      gapW16,
+                      bd.Badge(
+                        badgeContent: Text('${commuterRequests.length}',
+                            style: myTextStyle(color: Colors.white)),
+                        badgeStyle: bd.BadgeStyle(
+                            padding: EdgeInsets.all(12),
+                            badgeColor: Colors.grey.shade500),
+                      ),
+                    ],
+                  ))
+              : gapW32,
           busy
               ? const Positioned(
                   child: Center(
