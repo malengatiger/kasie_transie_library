@@ -65,12 +65,12 @@ class _CarForDispatchState extends State<CarForDispatch> {
   }
 
   List<lib.CommuterRequest> _filterCommuterRequests(
-      List<lib.CommuterRequest> requests) {
-    pp('$mm _filterCommuterRequests : ${requests.length}');
+      List<lib.CommuterRequest> mRequests) {
+    pp('$mm _filterCommuterRequests : ${mRequests.length}');
 
     List<lib.CommuterRequest> filtered = [];
     DateTime now = DateTime.now().toUtc();
-    for (var r in requests) {
+    for (var r in mRequests) {
       var date = DateTime.parse(r.dateRequested!);
       var difference = now.difference(date);
       pp('$mm _filterCommuterRequests difference: $difference');
@@ -259,7 +259,7 @@ class _CarForDispatchState extends State<CarForDispatch> {
                       bd.Badge(
                         badgeContent: Text(
                           '${_getPassengers()}',
-                          style: myTextStyle(color: Colors.white,, weight: FontWeight.w900),
+                          style: myTextStyle(color: Colors.white, weight: FontWeight.w900),
                         ),
                         badgeStyle: bd.BadgeStyle(
                           elevation: 8,
@@ -273,7 +273,7 @@ class _CarForDispatchState extends State<CarForDispatch> {
                       bd.Badge(
                         badgeContent: Text(
                           '${requests.length}',
-                          style: myTextStyle(color: Colors.white),,
+                          style: myTextStyle(color: Colors.white),
                         ),
                         badgeStyle: bd.BadgeStyle(
                           elevation: 8,
@@ -282,7 +282,8 @@ class _CarForDispatchState extends State<CarForDispatch> {
                         ),
                       ),
                     ],
-                  ))
+                  ),
+          )
               : gapW32,
         ],
       )),
