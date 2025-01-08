@@ -12,6 +12,7 @@ import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/widgets/scanners/kasie/last_scanner_widget.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/vehicle_search.dart';
 
+import '../../bloc/list_api_dog.dart';
 import '../../maps/map_viewer.dart';
 import 'dispatch_taxi.dart';
 
@@ -37,6 +38,7 @@ class _CarForDispatchState extends State<CarForDispatch> {
     super.initState();
     _listen();
     _startTimer();
+    _getCommuterRequests();
   }
 
   _listen() async {
@@ -55,6 +57,18 @@ class _CarForDispatchState extends State<CarForDispatch> {
     });
   }
 
+  ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+  void _getCommuterRequests() async {
+
+    var date = DateTime.now().toUtc().subtract(const Duration(hours: 1));
+    requests = await listApiDog.getRouteCommuterRequests(routeId: widget.route.routeId!,
+        startDate: date.toIso8601String());
+    if (mounted) {
+      setState(() {
+
+      });
+    }
+  }
   late Timer timer;
 
   void _startTimer() {
