@@ -423,7 +423,6 @@ class ListApiDog {
       String associationId, bool refresh) async {
     pp('\n\n$mm .................................................... getAssociationRouteData: ... starting ...');
     semCache = GetIt.instance<SemCache>();
-    var zipHandler = GetIt.instance<ZipHandler>();
 
     var routeData = await semCache.getAssociationRouteData(associationId);
     if (!refresh && routeData != null && routeData.routeDataList.isNotEmpty) {

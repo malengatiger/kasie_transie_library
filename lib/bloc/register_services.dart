@@ -27,6 +27,7 @@ import 'app_auth.dart';
 import 'cache_manager.dart';
 import 'data_api_dog.dart';
 import 'list_api_dog.dart';
+import 'marshal_sem_cache.dart';
 
 class RegisterServices {
   static const mm = '🅿️🅿️🅿️🅿️ RegisterServices  🅿️🅿️';
@@ -50,6 +51,9 @@ class RegisterServices {
     final ErrorHandler errorHandler = ErrorHandler(DeviceLocationBloc(), prefs);
     pp('$mm .... ErrorHandler: 🦠errorHandler initialized');
     final SemCache semCache = SemCache();
+    pp('$mm .... SemCache: 🦠cache initialized');
+
+    final MarshalSemCache marshalSemCache = MarshalSemCache();
     pp('$mm .... SemCache: 🦠cache initialized');
     final ZipHandler zipHandler = ZipHandler();
     pp('$mm .... ZipHandler: 🦠handler initialized');
@@ -79,6 +83,9 @@ class RegisterServices {
 
     instance.registerLazySingleton<QRGenerationService>(() => qrGenerationService);
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... QRGenerationService');
+
+    instance.registerLazySingleton<MarshalSemCache>(() => marshalSemCache);
+    pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... MarshalSemCache');
 
     instance.registerLazySingleton<Prefs>(() => prefs);
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... Prefs');
@@ -141,6 +148,6 @@ class RegisterServices {
     pp('$mm 🦠🦠🦠🦠🦠registerLazySingletons ... VehicleTelemetryService');
 
     pp('\n\n$mm  returning message form RegisterService  🍎🍎🍎\n\n');
-    return '\n🍎🍎🍎 RegisterServices: 16 Service singletons registered!';
+    return '\n🍎🍎🍎 RegisterServices: 17 Service singletons registered!';
   }
 }

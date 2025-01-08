@@ -7,7 +7,7 @@ import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
-
+import '../../bloc/marshal_sem_cache.dart';
 import '../../data/route_data.dart';
 import '../../utils/functions.dart';
 import '../../utils/navigator_utils.dart';
@@ -31,10 +31,11 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
   DeviceLocationBloc devLoc = GetIt.instance<DeviceLocationBloc>();
   List<lib.Route> routes = [];
   lib.Route? route;
+  List<lib.Route> marshalRoutes = [];
   bool busy = false;
   lib.User? user;
   int limit = 5;
-
+  final MarshalSemCache marshalSemCache = GetIt.instance<MarshalSemCache>();
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
@@ -49,9 +50,10 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
     setState(() {
       busy = true;
     });
-    user = prefs.getUser();
-    route = prefs.getRoute();
+
     try {
+      user = prefs.getUser();
+      marshalRoutes = await marshalSemCache.getMarshalRoutes();
       var ok = await Permission.location.isGranted;
       if (!ok) {
         await Permission.location.request();
@@ -59,17 +61,17 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
       if (user != null) {
         var routeData = await listApiDog.getAssociationRouteData(
             user!.associationId!, refresh);
-
         if (routeData != null) {
+          await marshalSemCache.saveAssociationRouteData(routeData);
           routes = await devLoc.getRouteDistances(
               routeData: routeData, limitMetres: limit * 1000);
         }
 
         pp('$mm nearest routes: ${routes.length}');
       }
-      if (route != null) {
-        _showConfirmDialog();
-      }
+      // if (marshalRoutes.isNotEmpty) {
+      //   _showConfirmDialog();
+      // }
     } catch (e, s) {
       pp('$e $s');
       if (mounted) {
@@ -87,13 +89,23 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
         builder: (_) {
           return AlertDialog(
             content: SizedBox(
-                height: 120,
-                child: Column(children: [
-                  const Text(
-                      'Do you want to keep using the route that you used previously?'),
-                  gapH8,
-                  Text('${route!.name}'),
-                ])),
+                height: 200,
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                          'Please select a route that you used previously?'),
+                      gapH32,
+                      RouteDropdown(
+                        routes: marshalRoutes,
+                        isList: true,
+                        onSelected: (r) {
+                          setState(() {
+                            route = r;
+                          });
+                        },
+                      ),
+                    ])),
             actions: [
               TextButton(
                   onPressed: () {
@@ -123,13 +135,16 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
   List<lib.DispatchRecord> dispatches = [];
 
   _navigateToCarForDispatch() async {
-    prefs.saveRoute(route!);
-    NavigationUtils.navigateTo(
-      context: context,
-      widget: CarForDispatch(
-        route: route!,
-      ),
-    );
+    await marshalSemCache.saveMarshalRoute(route!);
+
+    if (mounted) {
+      NavigationUtils.navigateTo(
+        context: context,
+        widget: CarForDispatch(
+          route: route!,
+        ),
+      );
+    }
   }
 
   @override
@@ -280,5 +295,43 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
             ],
           ),
         ));
+  }
+}
+
+class RouteDropdown extends StatelessWidget {
+  const RouteDropdown(
+      {super.key,
+      required this.routes,
+      required this.onSelected,
+      required this.isList});
+  final List<lib.Route> routes;
+  final Function(lib.Route) onSelected;
+  final bool isList;
+  @override
+  Widget build(BuildContext context) {
+    List<DropdownMenuItem<lib.Route>> items = [];
+    for (var r in routes) {
+      items.add(DropdownMenuItem<lib.Route>(value: r, child: Text(r.name!)));
+    }
+    if (isList) {
+      return ListView.builder(
+          itemCount: routes.length,
+          itemBuilder: (ctx, index) {
+            var r = routes[index];
+            return TextButton(onPressed: () {}, child: Text('${r.name}'));
+          });
+    }
+
+    return Expanded(
+        child: DropdownButton<lib.Route>(
+      elevation: 8,
+      dropdownColor: Colors.white,
+      items: items,
+      onChanged: (value) {
+        if (value != null) {
+          onSelected(value);
+        }
+      },
+    ));
   }
 }

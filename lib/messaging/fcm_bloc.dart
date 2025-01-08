@@ -224,7 +224,7 @@ class FCMService {
     pp('$newMM .............................................'
         ' FCM: subscribed to  ${E.pear} Ambassador FCM topics\n\n');
   }
-  Future<void> subscribeForRouteCommuterRequests({required Vehicle car, required String routeId, required String app}) async {
+  Future<void> subscribeForRouteCommuterRequests({ required String routeId, required String app}) async {
     appName = app;
     newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMService: 🌀🌀🌀🌀$app 🔷🔷';
 
@@ -632,11 +632,8 @@ class FCMService {
   }
 
   void _processCommuterRequest(lib.CommuterRequest commuterRequest) {
-    pp('$newMM _processCommuterRequest ... ${commuterRequest.routeName}');
-
+    pp('$newMM ................................. _processCommuterRequest ... ${commuterRequest.routeName}');
     _commuterRequestStreamController.sink.add(commuterRequest);
-
-
   }
 
   void _processCommuterResponse(lib.CommuterResponse commuterResponse) {

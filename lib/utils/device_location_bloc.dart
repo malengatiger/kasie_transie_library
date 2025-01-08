@@ -108,12 +108,13 @@ class DeviceLocationBloc {
     for (var r in result) {
       if (r.distance <= limitMetres) {
         finalDistanceBags.add(r);
-        pp('$mm getRouteDistances: route within $limitMetres meters: ${r.distance} \t - ${r.routePoint.routeName}');
       }
     }
     finalDistanceBags.sort((a, b) => a.distance.compareTo(b.distance));
     List<Route> routes = [];
     for (var bag in finalDistanceBags) {
+      pp('$mm getRouteDistances: route within $limitMetres meters:  🔵${bag.distance.toStringAsFixed(1)} \t - ${bag.routePoint.routeName}');
+
       for (var rd in routeData.routeDataList) {
         if (rd.routeId == bag.routePoint.routeId) {
           routes.add(rd.route!);

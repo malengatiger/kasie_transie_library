@@ -1,12 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
+import 'package:kasie_transie_library/messaging/fcm_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/widgets/scanners/kasie/last_scanner_widget.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/vehicle_search.dart';
-
+import 'package:badges/badges.dart' as bd;
 import '../../maps/map_viewer.dart';
 import 'dispatch_taxi.dart';
 
@@ -21,6 +25,31 @@ class CarForDispatch extends StatefulWidget {
 
 class _CarForDispatchState extends State<CarForDispatch> {
   static const mm = '🍄🍄🍄🍄CarForDispatch 🍄';
+
+  FCMService fcmService = GetIt.instance<FCMService>();
+  late StreamSubscription commuterRequestSub;
+
+  List<lib.CommuterRequest> requests = [];
+  @override
+  void initState() {
+    super.initState();
+    _listen();
+  }
+
+  _listen() async {
+    await fcmService.initialize();
+    await fcmService.subscribeForRouteCommuterRequests(
+        routeId: widget.route.routeId!, app: 'Marshal');
+
+    commuterRequestSub = fcmService.commuterRequestStream.listen((req) {
+      pp('\n\n$mm fcmService.commuterRequestStream delivered a request: ');
+      myPrettyJsonPrint(req.toJson());
+      requests.insert(0, req);
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
 
   _search() async {
     var vehicle = await NavigationUtils.navigateTo(
@@ -54,20 +83,14 @@ class _CarForDispatchState extends State<CarForDispatch> {
   }
 
   _scan() async {
-    // showToast(
-    //     padding: 20,
-    //     duration: const Duration(seconds: 3),
-    //     backgroundColor: Colors.amber.shade800,
-    //     textStyle: myTextStyle(color: Colors.white),
-    //     message: 'Scanning feature under construction!',
-    //     context: context);
-    // return;
 
     var vehicle = await NavigationUtils.navigateTo(
       context: context,
       widget: const ScanTaxi(),
     );
 
+    await fcmService.subscribeForRouteCommuterRequests(
+        routeId: widget.route.routeId!, app: 'Marshal');
     if (vehicle != null && vehicle is lib.Vehicle) {
       pp('$mm  _scan(): ....... vehicle scanned for dispatch: ${vehicle!.vehicleReg} on ${widget.route.name}');
       _navigateToDispatch(vehicle);
@@ -184,10 +207,55 @@ class _CarForDispatchState extends State<CarForDispatch> {
                 child: Text('Done'),
               ),
             ),
-          )
+          ),
+          requests.isNotEmpty
+              ? Positioned(
+                  top: 24,
+                  left: 24,
+                  right: 24,
+                  child: Row(
+                    children: [
+                      Text('Passengers on Route'),
+                      gapW8,
+                      bd.Badge(
+                        badgeContent: Text(
+                          '${_getPassengers()}',
+                          style: myTextStyle(color: Colors.white),
+                        ),
+                        badgeStyle: bd.BadgeStyle(
+                          elevation: 8,
+                          padding: EdgeInsets.all(16),
+                          badgeColor: Colors.red,
+                        ),
+                      ),
+                      gapW32,
+                      Text('Requests'),
+                      gapW8,
+                      bd.Badge(
+                        badgeContent: Text(
+                          '${requests.length}',
+                          style: myTextStyle(color: Colors.white),
+                        ),
+                        badgeStyle: bd.BadgeStyle(
+                          elevation: 8,
+                          padding: EdgeInsets.all(12),
+                          badgeColor: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ))
+              : gapW32,
         ],
       )),
     );
+  }
+
+  int _getPassengers() {
+    var cnt = 0;
+    for (var r in requests) {
+      cnt += r.numberOfPassengers!;
+    }
+    return cnt;
   }
 }
 
@@ -258,7 +326,8 @@ class _ScanTaxiState extends State<ScanTaxi> {
                   },
                   child: const Padding(
                     padding: EdgeInsets.all(16),
-                    child: Text('Start Scan', style: TextStyle(fontSize: 20, color: Colors.white)),
+                    child: Text('Start Scan',
+                        style: TextStyle(fontSize: 20, color: Colors.white)),
                   ),
                 ),
               ),
