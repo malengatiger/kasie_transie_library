@@ -575,16 +575,16 @@ class RoutePoint {
   String? geoHash;
 
   RoutePoint(
-      {this.routePointId,
-      this.associationId,
-      this.latitude,
-      this.longitude,
+      { required this.routePointId,
+      required this.associationId,
+      required this.latitude,
+      required this.longitude,
       this.heading,
-      this.index,
-      this.created,
-      this.routeId,
-      this.routeName,
-      this.position,
+      required this.index,
+      required this.created,
+      required this.routeId,
+      required this.routeName,
+      required this.position,
       this.geoHash});
 
   factory RoutePoint.fromJson(Map<String, dynamic> json) =>

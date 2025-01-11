@@ -64,7 +64,7 @@ class ListApiDog {
       if (user == null) {
         pp('$mm idTokenChanges: User is currently signed out!');
       } else {
-        pp('$mm idTokenChanges: User is not null! ${user.displayName}, checking auth token state ');
+        // pp('$mm idTokenChanges: User is not null! ${user.displayName}, checking auth token state ');
       }
     });
 
@@ -584,7 +584,7 @@ class ListApiDog {
       for (var m in resp) {
         var ass = Association.fromJson(m);
         list.add(ass);
-        pp('$mm ass: ${ass.associationName} carUser: ${ass.carUser?.toJson()}');
+        pp('$mm ass:  ${ass.associationId}  ${ass.associationName} carUser: ${ass.carUser?.toJson()}');
       }
 
       pp('$mm associations from atlas: ${list.length} - refresh: $refresh');
@@ -1339,7 +1339,7 @@ class ListApiDog {
     var list = <City>[];
     pp('$mm findCitiesByLocation: 🍎🍎lat: ${p.latitude} lng: ${p.longitude} 🍎🍎 radiusInKM: ${p.radiusInKM} 🍎🍎associationId: ${p.associationId}');
     final cmd = '${url}city/findCitiesByLocation?latitude=${p.latitude}'
-        '&longitude=${p.longitude}&maxDistanceInMetres=${p.radiusInKM}&limit=${p.limit}';
+        '&longitude=${p.longitude}&maxDistanceInMetres=${p.radiusInKM * 1000}&limit=${p.limit}';
 
     List resp = await _sendHttpGET(cmd);
     for (var value in resp) {

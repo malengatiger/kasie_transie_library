@@ -112,14 +112,12 @@ class CityChooserState extends State<CityChooser>
 class CitySearch extends StatefulWidget {
   const CitySearch({
     super.key,
-    required this.showScaffold,
     required this.onCitySelected,
     required this.cities,
     required this.title,
     required this.onCityAdded,
   });
 
-  final bool showScaffold;
   final List<lib.City> cities;
   final Function(lib.City) onCitySelected;
   final String title;
@@ -149,18 +147,19 @@ class _CitySearchState extends State<CitySearch> {
       setState(() {});
       return;
     }
-    _citiesToDisplay.clear();
 
-    pp('$mm ...  filtering projects that contain: $text from ${_cityNames.length} countries');
+    pp('$mm ...  filtering cities that contain: $text from ${_cityNames.length} cities');
+    _citiesToDisplay.clear();
     for (var name in _cityNames) {
       if (name.toLowerCase().contains(text.toLowerCase())) {
-        var proj = _findCity(name);
-        if (proj != null) {
-          _citiesToDisplay.add(proj);
+        var city = _findCity(name);
+        if (city != null) {
+          pp('$mm ...  matching city $text from: 🌀${city.name} ');
+          _citiesToDisplay.add(city);
         }
       }
     }
-    pp('$mm .... set state with projectsToDisplay: ${_citiesToDisplay.length} ......');
+    pp('$mm .... set state with _citiesToDisplay: ${_citiesToDisplay.length} ......');
     setState(() {});
   }
 
@@ -186,6 +185,8 @@ class _CitySearchState extends State<CitySearch> {
   }
 
   void _setUp() {
+    pp('$mm .... set up: ${widget.cities.length} cities ......');
+
     for (var p in widget.cities) {
       _cityNames.add(p.name!);
     }
@@ -193,8 +194,7 @@ class _CitySearchState extends State<CitySearch> {
     for (var country in widget.cities) {
       _citiesToDisplay.add(country);
     }
-    pp('$mm _cities: ${widget.cities.length}');
-
+    pp('$mm widget cities: ${widget.cities.length}');
     pp('$mm _citiesToDisplay: ${_citiesToDisplay.length}');
   }
 
@@ -214,113 +214,113 @@ class _CitySearchState extends State<CitySearch> {
     }
 
     return SizedBox(
-        width: 460,
-        child: Card(
-          color: Colors.blue.shade50,
-          elevation: 12,
-          child: Padding(
-            padding: EdgeInsets.all(leftPadding),
-            child: Column(children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.title,
-                      style: myTextStyleMediumBoldPrimaryColor(context),
-                    ),
-                  ],
+      width: 460,
+      height: 800,
+      child: Card(
+        color: Colors.blue.shade50,
+        elevation: 12,
+        child: Column(children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  widget.title,
+                  style: myTextStyleMediumBoldPrimaryColor(context),
                 ),
-              ),
-              gapH4,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  SizedBox(
-                    width: type == 'phone' ? 220 : 400,
-                    child: SearchBar(
-                      controller: _textEditingController,
-                      leading: IconButton(
-                        onPressed: () {
-                          pp('$mm search icon tapped .... ${_textEditingController.text}');
-                        },
-                        icon: const Icon(Icons.search),
-                      ),
-                      onChanged: (s) {
-                        pp('$mm search onChanged: .... ${_textEditingController.text}');
-                        _runFilter(_textEditingController.text);
-                      },
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 4,
-                  ),
-                  IconButton(
-                      onPressed: () {
-                        _navigateToCityCreatorMap();
-                      },
-                      tooltip: 'Create a new city, town or place ',
-                      icon: Icon(
-                        Icons.add,
-                        color: Theme.of(context).primaryColor,
-                      ))
-                ],
-              ),
-              gapH16,
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.all(type == 'phone' ? 8 : 48.0),
-                  child: bd.Badge(
-                    badgeContent: Text(
-                      '${_citiesToDisplay.length}',
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    badgeStyle: const bd.BadgeStyle(
-                        padding: EdgeInsets.all(8.0), badgeColor: Colors.blue),
-                    child: GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4, mainAxisExtent: 48),
-                        itemCount: _citiesToDisplay.length,
-                        itemBuilder: (ctx, index) {
-                          var city = _citiesToDisplay.elementAt(index);
-                          return GestureDetector(
-                            onTap: () {
-                              _close(city);
-                            },
-                            child: SizedBox(
-                              height: 20,
-                              child: Card(
-                                elevation: 2,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text('${city.name}'),
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
-                  ),
-                ),
-              ),
-            ]),
+              ],
+            ),
           ),
-        ));
+          gapH4,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              SizedBox(
+                width: type == 'phone' ? 220 : 400,
+                child: SearchBar(
+                  controller: _textEditingController,
+                  leading: IconButton(
+                    onPressed: () {
+                      pp('$mm search icon tapped .... ${_textEditingController.text}');
+                    },
+                    icon: const Icon(Icons.search),
+                  ),
+                  onChanged: (s) {
+                    pp('$mm search onChanged: .... ${_textEditingController.text}');
+                    _runFilter(_textEditingController.text);
+                  },
+                ),
+              ),
+              const SizedBox(
+                width: 4,
+              ),
+              IconButton(
+                  onPressed: () {
+                    _navigateToCityCreatorMap();
+                  },
+                  tooltip: 'Create a new city, town or place ',
+                  icon: Icon(
+                    Icons.add,
+                    color: Theme.of(context).primaryColor,
+                  ))
+            ],
+          ),
+          gapH16,
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(type == 'phone' ? 8 : 48.0),
+              child: bd.Badge(
+                position: bd.BadgePosition.topEnd(top:-36, end: 4),
+                badgeContent: Text(
+                  '${_citiesToDisplay.length}',
+                  style: const TextStyle(color: Colors.white),
+                ),
+                badgeStyle: const bd.BadgeStyle(
+                    padding: EdgeInsets.all(8.0), badgeColor: Colors.blue),
+                child: GridView.builder(
+                    gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2, mainAxisExtent: 48),
+                    itemCount: _citiesToDisplay.length,
+                    itemBuilder: (ctx, index) {
+                      var city = _citiesToDisplay.elementAt(index);
+                      return GestureDetector(
+                        onTap: () {
+                          _close(city);
+                        },
+                        child: SizedBox(
+                          height: 20,
+                          child: Card(
+                            elevation: 2,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text('${city.name}'),
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+              ),
+            ),
+          ),
+        ]),
+      ),
+    );
   }
 
   _navigateToCityCreatorMap() {
     NavigationUtils.navigateTo(
-        context: context,
-        widget: CityCreatorMap(
-          onCityAdded: (c) {
-            pp('$mm ... city added by CityCreatorMap: 🌀🌀${c.toJson()}');
-            widget.onCityAdded(c);
-            setState(() {
-              _citiesToDisplay.insert(0, c);
-            });
-          },
-        ),
-        );
+      context: context,
+      widget: CityCreatorMap(
+        onCityAdded: (c) {
+          pp('$mm ... city added by CityCreatorMap: 🌀🌀${c.toJson()}');
+          widget.onCityAdded(c);
+          setState(() {
+            _citiesToDisplay.insert(0, c);
+          });
+        },
+      ),
+    );
   }
 }

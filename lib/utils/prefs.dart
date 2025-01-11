@@ -11,6 +11,58 @@ class Prefs {
 
   Prefs(this.prefs);
 
+  static const String commuterRoutesKey = 'commuterRoutes';
+
+
+  Future<void> addCommuterRoute(Route route) async {
+    pp('\n\n 🔆 🔆 ... addCommuterRoute prefs:  ${route.name}.');
+
+    try {
+      List<Route> routes = await getCommuterRoutes();
+      var found = false;
+      for (var r in routes) {
+        if (route.routeId == r.routeId) {
+          found = true;
+        }
+      }
+      if (!found) {
+        routes.add(route);
+        await _saveCommuterRoutes(routes);
+        pp('🔆 🔆addCommuterRoute:  ✅ Route "${route.name}" added to cached list.');
+      }
+
+    } catch (e) {
+      pp('🔆 🔆addCommuterRoute: ❌ Error adding route: $e');
+    }
+  }
+
+
+  Future<void> _saveCommuterRoutes(List<Route> routes) async {
+    final routesJson = jsonEncode(routes.map((e) => e.toJson()).toList());
+    await prefs.setString(commuterRoutesKey, routesJson);
+    pp('🔆 🔆_saveCommuterRoutes: ✅ ${routes.length} routes saved to cache.');
+  }
+
+
+  Future<List<Route>> getCommuterRoutes() async {
+    pp('\n\n 🔆 🔆... getCommuterRoutes ...');
+
+    final routesJson = prefs.getString(commuterRoutesKey);
+    if (routesJson != null) {
+      try {
+        final List<dynamic> jsonList = jsonDecode(routesJson);
+        final routes = jsonList.map((json) => Route.fromJson(json)).toList();
+        pp('🔆 🔆getCommuterRoutes: ✅ Retrieved ${routes.length} routes from cache.');
+        return routes;
+      } catch (e) {
+        pp('getCommuterRoutes: ❌ Error decoding routes from cache: $e');
+        return [];
+      }
+    } else {
+      pp('🔆 🔆getCommuterRoutes:  No routes found in cache.');
+      return [];
+    }
+  }
   void removeUser() {
     prefs.remove('user');
     pp("🌽 🌽 🌽 Prefs: removeUser done. Cached user removed!");
@@ -52,6 +104,23 @@ class Prefs {
     return country;
   }
 
+  void savePosition(Position position) {
+    Map mJson = position.toJson();
+    var jx = json.encode(mJson);
+    prefs.setString('position', jx);
+    pp("🌽 🌽 🌽 Prefs: position:  SAVED: 🌽 ${position.toJson()} 🌽 🌽 🌽");
+  }
+
+  Position? getPosition() {
+    var string = prefs.getString('position');
+    if (string == null) {
+      return null;
+    }
+    var jx = json.decode(string);
+    var pos = Position.fromJson(jx);
+    pp("🌽 🌽 🌽 Prefs: getPosition 🧩  ${pos.toJson()} retrieved");
+    return pos;
+  }
   void saveRoute(Route route) {
     Map mJson = route.toJson();
     var jx = json.encode(mJson);
