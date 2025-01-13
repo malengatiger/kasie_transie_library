@@ -238,6 +238,57 @@ class FCMService {
 
   }
 
+  Future<void> subscribeForOfficial(Association association,String app) async {
+    String? associationId;
+    appName = app;
+    newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMService: 🌀🌀🌀🌀$app 🔷🔷';
+    // demoFlag = prefs.getDemoFlag();
+    associationId = association.associationId!;
+    pp('$newMM ... subscribeForOfficial: ${association.associationName}');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.routeUpdateRequest}$associationId');
+    pp('$newMM ..... FCM: subscribed to ${Constants.routeUpdateRequest}$associationId');
+    //
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.dispatchRecord}$associationId');
+    pp('$newMM ..... FCM: subscribed to ${Constants.dispatchRecord}$associationId');
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.passengerCount}$associationId');
+    pp('$newMM ..... FCM: subscribed to ${Constants.passengerCount}$associationId');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.commuterCashCheckIn}$associationId');
+    pp('$newMM ..... FCM: subscribed to ${Constants.commuterCashCheckIn}$associationId');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.commuterCashPayment}$associationId');
+    pp('$newMM ..... FCM: subscribed to ${Constants.commuterCashPayment}$associationId');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.rankFeeCashCheckIn}$associationId');
+    pp('$newMM ..... FCM: subscribed to ${Constants.rankFeeCashCheckIn}$associationId');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.rankFeeCashPayment}$associationId');
+    pp('$newMM ..... FCM: subscribed to ${Constants.rankFeeCashPayment}$associationId');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.commuterRequest}$associationId');
+    pp('$newMM ..... FCM: subscribed to ${Constants.commuterRequest}$associationId');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.vehicleArrival}$associationId');
+    pp('$newMM ..... FCM: subscribed to ${Constants.vehicleArrival}$associationId');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.telemetry}$associationId');
+    pp('$newMM ..... FCM: subscribed to ${Constants.telemetry}$associationId');
+
+    pp('$newMM .............................................'
+        ' FCM: Official App subscribed to all ${E.pear} appropriate topics\n\n');
+  }
+
   Future<void> subscribeForOwnerMarshalOfficialAmbassador(String app) async {
     String? associationId;
     appName = app;
