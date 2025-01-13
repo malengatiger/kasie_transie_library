@@ -1,4 +1,9 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:kasie_transie_library/data/rank_fee_cash_check_in.dart';
+import 'package:kasie_transie_library/data/rank_fee_cash_payment.dart';
+
+import 'commuter_cash_check_in.dart';
+import 'commuter_cash_payment.dart';
 
 part 'data_schemas.g.dart';
 
@@ -249,6 +254,47 @@ class Association {
       _$AssociationFromJson(json);
 
   Map<String, dynamic> toJson() => _$AssociationToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class AssociationData {
+  List<CommuterRequest> commuterRequests = [];
+  List<DispatchRecord> dispatchRecords = [];
+  List<CommuterCashPayment> commuterCashPayments = [];
+  List<Trip> trips = [];
+  List<User> users = [];
+  List<Route> routes = [];
+  List<Vehicle> vehicles = [];
+  List<CommuterCashCheckIn> commuterCashCheckIns = [];
+  List<RankFeeCashPayment> rankFeeCashPayments = [];
+  List<RankFeeCashCheckIn> rankFeeCashCheckIns = [];
+  List<AmbassadorPassengerCount> passengerCounts = [];
+  List<VehicleArrival> vehicleArrivals = [];
+  List<VehicleTelemetry> vehicleTelemetry = [];
+  String? associationName, associationId;
+
+
+  AssociationData(
+      this.commuterRequests,
+      this.dispatchRecords,
+      this.commuterCashPayments,
+      this.trips,
+      this.users,
+      this.routes,
+      this.vehicles,
+      this.commuterCashCheckIns,
+      this.rankFeeCashPayments,
+      this.rankFeeCashCheckIns,
+      this.passengerCounts,
+      this.vehicleArrivals,
+      this.vehicleTelemetry,
+      this.associationName,
+      this.associationId);
+
+  factory AssociationData.fromJson(Map<String, dynamic> json) =>
+      _$AssociationDataFromJson(json);
+
+  Map<String, dynamic> toJson() => _$AssociationDataToJson(this);
 }
 //
 

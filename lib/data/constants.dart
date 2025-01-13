@@ -41,13 +41,14 @@ class Constants {
    static const   kasieError = 'kasieError';
    static const   association = 'association';
 
-   static const   qrcode_user = 'user';
-   static const   qrcode_vehicle = 'vehicle';
-   static const   qrcode_route = 'route';
+   static const   qrCodeUser = 'user';
+   static const   qrCodeVehicle = 'vehicle';
+   static const   qrCodeRoute = 'route';
 
    static const associationEmailSuffix = '@kasie.com';
    static const associationPasswordPrefix = 'pass';
 
-
+    static const String telemetry = 'telemetry';
+    static const String trips = 'trips';
 
 }

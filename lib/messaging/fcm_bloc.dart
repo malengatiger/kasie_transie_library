@@ -17,8 +17,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../bloc/data_api_dog.dart';
 import '../bloc/list_api_dog.dart';
+import '../data/commuter_cash_check_in.dart';
+import '../data/commuter_cash_payment.dart';
 import '../data/constants.dart';
 import '../data/data_schemas.dart';
+import '../data/rank_fee_cash_check_in.dart';
+import '../data/rank_fee_cash_payment.dart';
 import '../utils/error_handler.dart';
 import '../utils/functions.dart';
 import '../utils/kasie_exception.dart';
@@ -452,7 +456,8 @@ class FCMService {
 
       case Constants.passengerCount:
         final kk = AmbassadorPassengerCount.fromJson(data);
-        _processPassengerCount(kk);
+        _passengerCountStreamController.sink.add(kk);
+
         break;
 
       case Constants.heartbeat:
@@ -499,6 +504,29 @@ class FCMService {
         break;
       case Constants.kasieError:
         _kasieErrorStreamController.sink.add(data);
+        break;
+      case Constants.telemetry:
+        _vehicleTelemetryStreamController.sink.add(data);
+        break;
+
+      case Constants.trips:
+        _tripStreamController.sink.add(data);
+        break;
+
+      case Constants.commuterCashPayment:
+        _commuterCashPaymentStreamController.sink.add(data);
+        break;
+
+      case Constants.commuterCashCheckIn:
+        _commuterCashCheckInStreamController.sink.add(data);
+        break;
+
+      case Constants.rankFeeCashPayment:
+        _rankFeeCashPaymentStreamController.sink.add(data);
+        break;
+
+      case Constants.rankFeeCashCheckIn:
+        _rankFeeCashCheckInStreamController.sink.add(data);
         break;
 
       default:
@@ -808,6 +836,42 @@ class FCMService {
 
   Stream<lib.AmbassadorPassengerCount> get passengerCountStream =>
       _passengerCountStreamController.stream;
+
+  final StreamController<CommuterCashPayment>
+  _commuterCashPaymentStreamController = StreamController.broadcast();
+
+  Stream<CommuterCashPayment> get commuterCashPaymentStream =>
+      _commuterCashPaymentStreamController.stream;
+
+  final StreamController<CommuterCashCheckIn>
+  _commuterCashCheckInStreamController = StreamController.broadcast();
+
+  Stream<CommuterCashCheckIn> get commuterCashCheckInStream =>
+      _commuterCashCheckInStreamController.stream;
+
+  final StreamController<RankFeeCashPayment>
+  _rankFeeCashPaymentStreamController = StreamController.broadcast();
+
+  Stream<RankFeeCashPayment> get rankFeeCashPaymentStream =>
+      _rankFeeCashPaymentStreamController.stream;
+
+  final StreamController<RankFeeCashCheckIn>
+  _rankFeeCashCheckInStreamController = StreamController.broadcast();
+
+  Stream<RankFeeCashCheckIn> get rankFeeCashCheckInStream =>
+      _rankFeeCashCheckInStreamController.stream;
+
+  final StreamController<VehicleTelemetry>
+  _vehicleTelemetryStreamController = StreamController.broadcast();
+
+  Stream<VehicleTelemetry> get vehicleTelemetryStream =>
+      _vehicleTelemetryStreamController.stream;
+
+  final StreamController<Trip>
+  _tripStreamController = StreamController.broadcast();
+
+  Stream<Trip> get tripStream =>
+      _tripStreamController.stream;
 
   final StreamController<Map<String, dynamic>> _appErrorStreamController =
       StreamController.broadcast();

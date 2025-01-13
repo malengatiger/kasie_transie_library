@@ -263,6 +263,80 @@ Map<String, dynamic> _$AssociationToJson(Association instance) =>
       'adminUser': instance.adminUser?.toJson(),
     };
 
+AssociationData _$AssociationDataFromJson(Map<String, dynamic> json) =>
+    AssociationData(
+      (json['commuterRequests'] as List<dynamic>)
+          .map((e) => CommuterRequest.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['dispatchRecords'] as List<dynamic>)
+          .map((e) => DispatchRecord.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['commuterCashPayments'] as List<dynamic>)
+          .map((e) => CommuterCashPayment.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['trips'] as List<dynamic>)
+          .map((e) => Trip.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['users'] as List<dynamic>)
+          .map((e) => User.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['routes'] as List<dynamic>)
+          .map((e) => Route.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['vehicles'] as List<dynamic>)
+          .map((e) => Vehicle.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['commuterCashCheckIns'] as List<dynamic>)
+          .map((e) => CommuterCashCheckIn.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['rankFeeCashPayments'] as List<dynamic>)
+          .map((e) => RankFeeCashPayment.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['rankFeeCashCheckIns'] as List<dynamic>)
+          .map((e) => RankFeeCashCheckIn.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['passengerCounts'] as List<dynamic>)
+          .map((e) =>
+              AmbassadorPassengerCount.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['vehicleArrivals'] as List<dynamic>)
+          .map((e) => VehicleArrival.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['vehicleTelemetry'] as List<dynamic>)
+          .map((e) => VehicleTelemetry.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      json['associationName'] as String?,
+      json['associationId'] as String?,
+    );
+
+Map<String, dynamic> _$AssociationDataToJson(AssociationData instance) =>
+    <String, dynamic>{
+      'commuterRequests':
+          instance.commuterRequests.map((e) => e.toJson()).toList(),
+      'dispatchRecords':
+          instance.dispatchRecords.map((e) => e.toJson()).toList(),
+      'commuterCashPayments':
+          instance.commuterCashPayments.map((e) => e.toJson()).toList(),
+      'trips': instance.trips.map((e) => e.toJson()).toList(),
+      'users': instance.users.map((e) => e.toJson()).toList(),
+      'routes': instance.routes.map((e) => e.toJson()).toList(),
+      'vehicles': instance.vehicles.map((e) => e.toJson()).toList(),
+      'commuterCashCheckIns':
+          instance.commuterCashCheckIns.map((e) => e.toJson()).toList(),
+      'rankFeeCashPayments':
+          instance.rankFeeCashPayments.map((e) => e.toJson()).toList(),
+      'rankFeeCashCheckIns':
+          instance.rankFeeCashCheckIns.map((e) => e.toJson()).toList(),
+      'passengerCounts':
+          instance.passengerCounts.map((e) => e.toJson()).toList(),
+      'vehicleArrivals':
+          instance.vehicleArrivals.map((e) => e.toJson()).toList(),
+      'vehicleTelemetry':
+          instance.vehicleTelemetry.map((e) => e.toJson()).toList(),
+      'associationName': instance.associationName,
+      'associationId': instance.associationId,
+    };
+
 RouteUpdateRequest _$RouteUpdateRequestFromJson(Map<String, dynamic> json) =>
     RouteUpdateRequest(
       routeId: json['routeId'] as String?,
