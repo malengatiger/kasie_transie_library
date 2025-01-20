@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart' as fb;
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
@@ -78,25 +78,25 @@ class FCMService {
     firebaseMessaging.onTokenRefresh.listen((newToken) {
       pp("$mm listener onTokenRefresh: 🍎🍎🍎 update user: token: $newToken ... 🍎🍎");
     });
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('app_icon');
-
-    const DarwinInitializationSettings initializationSettingsDarwin =
-        DarwinInitializationSettings(
-      defaultPresentSound: true,
-    );
-
-    const LinuxInitializationSettings initializationSettingsLinux =
-        LinuxInitializationSettings(defaultActionName: 'Open notification');
-
-    const InitializationSettings initializationSettings =
-        InitializationSettings(
-            android: initializationSettingsAndroid,
-            iOS: initializationSettingsDarwin,
-            linux: initializationSettingsLinux);
-
-    FlutterLocalNotificationsPlugin().initialize(initializationSettings,
-        onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
+    // const AndroidInitializationSettings initializationSettingsAndroid =
+    //     AndroidInitializationSettings('app_icon');
+    //
+    // const DarwinInitializationSettings initializationSettingsDarwin =
+    //     DarwinInitializationSettings(
+    //   defaultPresentSound: true,
+    // );
+    //
+    // const LinuxInitializationSettings initializationSettingsLinux =
+    //     LinuxInitializationSettings(defaultActionName: 'Open notification');
+    //
+    // const InitializationSettings initializationSettings =
+    //     InitializationSettings(
+    //         android: initializationSettingsAndroid,
+    //         iOS: initializationSettingsDarwin,
+    //         linux: initializationSettingsLinux);
+    //
+    // FlutterLocalNotificationsPlugin().initialize(initializationSettings,
+    //     onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
 
     fb.FirebaseMessaging.onMessage.listen((fb.RemoteMessage message) {
       pp("\n\n\n$newMM FirebaseMessaging.onMessage listen fired: $red message received in "
@@ -188,7 +188,7 @@ class FCMService {
         ' FCM: subscribed to all ${E.pear} 5 (five) DemoDriver FCM topics\n\n');
   }
 
-  Future<void> subscribeForCar(Vehicle car,String app) async {
+  Future<void> subscribeForCar(Vehicle car, String app) async {
     String? associationId;
     appName = app;
     newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMService: 🌀🌀🌀🌀$app 🔷🔷';
@@ -206,7 +206,8 @@ class FCMService {
     pp('$newMM .............................................'
         ' FCM: subscribed to all ${E.pear} Car FCM topics\n\n');
   }
-  Future<void> subscribeForAmbassador(Route route,String app) async {
+
+  Future<void> subscribeForAmbassador(Route route, String app) async {
     String? associationId;
     appName = app;
     newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMService: 🌀🌀🌀🌀$app 🔷🔷';
@@ -228,20 +229,21 @@ class FCMService {
     pp('$newMM .............................................'
         ' FCM: subscribed to  ${E.pear} Ambassador FCM topics\n\n');
   }
-  Future<void> subscribeForRouteCommuterRequests({ required String routeId, required String app}) async {
+
+  Future<void> subscribeForRouteCommuterRequests(
+      {required String routeId, required String app}) async {
     appName = app;
     newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMService: 🌀🌀🌀🌀$app 🔷🔷';
 
     await firebaseMessaging
         .subscribeToTopic('${Constants.commuterRequest}$routeId');
     pp('$newMM ..... FCM: subscribed to commuterRequest route topic ${Constants.commuterRequest}$routeId');
-
   }
 
-  Future<void> subscribeForOfficial(Association association,String app) async {
+  Future<void> subscribeForOfficial(Association association, String app) async {
     String? associationId;
     appName = app;
-    newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMService: 🌀🌀🌀🌀$app 🔷🔷';
+    newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMService: 🌀🌀🌀🌀 $app 🔷🔷';
     // demoFlag = prefs.getDemoFlag();
     associationId = association.associationId!;
     pp('$newMM ... subscribeForOfficial: ${association.associationName}');
@@ -284,6 +286,14 @@ class FCMService {
     await firebaseMessaging
         .subscribeToTopic('${Constants.telemetry}$associationId');
     pp('$newMM ..... FCM: subscribed to ${Constants.telemetry}$associationId');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.locationResponse}$associationId');
+    pp('$newMM ..... FCM: subscribed to ${Constants.locationResponse}$associationId');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.trips}$associationId');
+    pp('$newMM ..... FCM: subscribed to ${Constants.trips}$associationId');
 
     pp('$newMM .............................................'
         ' FCM: Official App subscribed to all ${E.pear} appropriate topics\n\n');
@@ -345,8 +355,7 @@ class FCMService {
         ' FCM: subscribed to all ${E.pear} 9 OwnerMarshalOfficialAmbassador FCM topics\n\n');
   }
 
-  Future<void> subscribeForRouteDispatch(
-      String app, String routeId) async {
+  Future<void> subscribeForRouteDispatch(String app, String routeId) async {
     appName = app;
     newMM = '$newMM $app 🔷🔷';
 
@@ -468,8 +477,7 @@ class FCMService {
   }
 
   Future<void> processFCMMessage(fb.RemoteMessage message, String mType) async {
-
-    pp("$newMM processFCMMessage: $red message received in "
+    pp("\n\n$newMM processFCMMessage: $red message received in "
         "foreground: ${E.leaf}${E.leaf}  type: $mType");
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     myName = packageInfo.appName;
@@ -557,27 +565,32 @@ class FCMService {
         _kasieErrorStreamController.sink.add(data);
         break;
       case Constants.telemetry:
-        _vehicleTelemetryStreamController.sink.add(data);
+        _vehicleTelemetryStreamController.sink
+            .add(VehicleTelemetry.fromJson(data));
         break;
 
       case Constants.trips:
-        _tripStreamController.sink.add(data);
+        _tripStreamController.sink.add(Trip.fromJson(data));
         break;
 
       case Constants.commuterCashPayment:
-        _commuterCashPaymentStreamController.sink.add(data);
+        _commuterCashPaymentStreamController.sink
+            .add(CommuterCashPayment.fromJson(data));
         break;
 
       case Constants.commuterCashCheckIn:
-        _commuterCashCheckInStreamController.sink.add(data);
+        _commuterCashCheckInStreamController.sink
+            .add(CommuterCashCheckIn.fromJson(data));
         break;
 
       case Constants.rankFeeCashPayment:
-        _rankFeeCashPaymentStreamController.sink.add(data);
+        _rankFeeCashPaymentStreamController.sink
+            .add(RankFeeCashPayment.fromJson(data));
         break;
 
       case Constants.rankFeeCashCheckIn:
-        _rankFeeCashCheckInStreamController.sink.add(data);
+        _rankFeeCashCheckInStreamController.sink
+            .add(RankFeeCashCheckIn.fromJson(data));
         break;
 
       default:
@@ -630,14 +643,12 @@ class FCMService {
     pp('$newMM _processDispatchRecord ... ${dispatchRecord.vehicleReg}');
 
     _dispatchStreamController.sink.add(dispatchRecord);
-
   }
 
   void _processRouteDispatchRecord(lib.DispatchRecord dispatchRecord) {
     pp('$newMM _processRouteDispatchRecord ... ${dispatchRecord.vehicleReg}');
 
     _routeDispatchStreamController.sink.add(dispatchRecord);
-
   }
 
   void _processRouteUpdate(lib.RouteUpdateRequest req) async {
@@ -650,13 +661,7 @@ class FCMService {
   void _processLocationResponse(lib.LocationResponse resp) async {
     pp('$newMM _processLocationResponse ... ${resp.vehicleReg}');
 
-    //myPrettyJsonPrint(resp.toJson());
-    if (user == null) {
-      return;
-    }
-    if (user!.userId == resp.userId) {
-      _locationResponseStreamController.sink.add(resp);
-    }
+    _locationResponseStreamController.sink.add(resp);
   }
 
   void _processMediaRequest(lib.VehicleMediaRequest req) async {
@@ -792,9 +797,9 @@ class FCMService {
         'route refreshed: ${E.nice}${E.nice} ${bag.route!.name} ${E.nice}\n');
   }
 
-  void onDidReceiveNotificationResponse(NotificationResponse details) {
-    pp("$newMM onDidReceiveNotificationResponse: $red details: ${details.payload} ");
-  }
+  // void onDidReceiveNotificationResponse(NotificationResponse details) {
+  //   pp("$newMM onDidReceiveNotificationResponse: $red details: ${details.payload} ");
+  // }
 
   final StreamController<String> _routeChangesStreamController =
       StreamController.broadcast();
@@ -826,7 +831,7 @@ class FCMService {
       _dispatchStreamController.stream;
 
   final StreamController<lib.DispatchRecord> _routeDispatchStreamController =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
   Stream<lib.DispatchRecord> get routeDispatchStream =>
       _routeDispatchStreamController.stream;
@@ -889,40 +894,39 @@ class FCMService {
       _passengerCountStreamController.stream;
 
   final StreamController<CommuterCashPayment>
-  _commuterCashPaymentStreamController = StreamController.broadcast();
+      _commuterCashPaymentStreamController = StreamController.broadcast();
 
   Stream<CommuterCashPayment> get commuterCashPaymentStream =>
       _commuterCashPaymentStreamController.stream;
 
   final StreamController<CommuterCashCheckIn>
-  _commuterCashCheckInStreamController = StreamController.broadcast();
+      _commuterCashCheckInStreamController = StreamController.broadcast();
 
   Stream<CommuterCashCheckIn> get commuterCashCheckInStream =>
       _commuterCashCheckInStreamController.stream;
 
   final StreamController<RankFeeCashPayment>
-  _rankFeeCashPaymentStreamController = StreamController.broadcast();
+      _rankFeeCashPaymentStreamController = StreamController.broadcast();
 
   Stream<RankFeeCashPayment> get rankFeeCashPaymentStream =>
       _rankFeeCashPaymentStreamController.stream;
 
   final StreamController<RankFeeCashCheckIn>
-  _rankFeeCashCheckInStreamController = StreamController.broadcast();
+      _rankFeeCashCheckInStreamController = StreamController.broadcast();
 
   Stream<RankFeeCashCheckIn> get rankFeeCashCheckInStream =>
       _rankFeeCashCheckInStreamController.stream;
 
-  final StreamController<VehicleTelemetry>
-  _vehicleTelemetryStreamController = StreamController.broadcast();
+  final StreamController<VehicleTelemetry> _vehicleTelemetryStreamController =
+      StreamController.broadcast();
 
   Stream<VehicleTelemetry> get vehicleTelemetryStream =>
       _vehicleTelemetryStreamController.stream;
 
-  final StreamController<Trip>
-  _tripStreamController = StreamController.broadcast();
+  final StreamController<Trip> _tripStreamController =
+      StreamController.broadcast();
 
-  Stream<Trip> get tripStream =>
-      _tripStreamController.stream;
+  Stream<Trip> get tripStream => _tripStreamController.stream;
 
   final StreamController<Map<String, dynamic>> _appErrorStreamController =
       StreamController.broadcast();
@@ -1172,7 +1176,7 @@ Future<lib.Vehicle?> getCarInBackground() async {
   }
   var jx = json.decode(string);
   car = Vehicle.fromJson(jx);
-  pp('$mxx ... this car is responding while in background');
+  pp('$mxx ... this car is responding while in background: ${car.toJson()}');
   //myPrettyJsonPrint(car.toJson());
 
   return car;
@@ -1183,6 +1187,7 @@ void handleLocationRequest(lib.LocationRequest request) async {
 
   lib.Vehicle? car = await getCarInBackground();
   if (car == null) {
+    pp('$mxx ... handleLocationRequest:  car is null. quitting ...');
     return;
   }
 
@@ -1223,7 +1228,8 @@ void respondToLocationRequest(
   }
 }
 
-Future _sendLocationResponse(lib.LocationResponse resp, String fcmToken) async {
+Future _sendLocationResponse(
+    lib.LocationResponse resp, String authToken) async {
   Map<String, String> headers = {
     'Content-type': 'application/json',
     'Accept': 'application/json',
@@ -1236,7 +1242,7 @@ Future _sendLocationResponse(lib.LocationResponse resp, String fcmToken) async {
   mBag = json.encode(resp.toJson());
 
   var start = DateTime.now();
-  headers['Authorization'] = 'Bearer $fcmToken';
+  headers['Authorization'] = 'Bearer $authToken';
   final client = http.Client();
   try {
     var resp = await client

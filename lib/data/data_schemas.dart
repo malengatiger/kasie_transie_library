@@ -273,7 +273,6 @@ class AssociationData {
   List<VehicleTelemetry> vehicleTelemetry = [];
   String? associationName, associationId;
 
-
   AssociationData(
       this.commuterRequests,
       this.dispatchRecords,
@@ -295,6 +294,39 @@ class AssociationData {
       _$AssociationDataFromJson(json);
 
   Map<String, dynamic> toJson() => _$AssociationDataToJson(this);
+}
+//
+
+@JsonSerializable(explicitToJson: true)
+class VehicleData {
+  List<DispatchRecord> dispatchRecords = [];
+  List<CommuterCashPayment> commuterCashPayments = [];
+  List<Trip> trips = [];
+  List<CommuterCashCheckIn> commuterCashCheckIns = [];
+  List<RankFeeCashPayment> rankFeeCashPayments = [];
+  List<RankFeeCashCheckIn> rankFeeCashCheckIns = [];
+  List<AmbassadorPassengerCount> passengerCounts = [];
+  List<VehicleArrival> vehicleArrivals = [];
+  List<VehicleTelemetry> vehicleTelemetry = [];
+  String? vehicleId, associationId;
+
+  VehicleData(
+      this.dispatchRecords,
+      this.commuterCashPayments,
+      this.trips,
+      this.commuterCashCheckIns,
+      this.rankFeeCashPayments,
+      this.rankFeeCashCheckIns,
+      this.passengerCounts,
+      this.vehicleArrivals,
+      this.vehicleTelemetry,
+      this.vehicleId,
+      this.associationId);
+
+  factory VehicleData.fromJson(Map<String, dynamic> json) =>
+      _$VehicleDataFromJson(json);
+
+  Map<String, dynamic> toJson() => _$VehicleDataToJson(this);
 }
 //
 
@@ -621,7 +653,7 @@ class RoutePoint {
   String? geoHash;
 
   RoutePoint(
-      { required this.routePointId,
+      {required this.routePointId,
       required this.associationId,
       required this.latitude,
       required this.longitude,
@@ -736,7 +768,7 @@ class Vehicle {
       required this.make,
       required this.model,
       required this.year,
-        required this.fcmToken,
+      required this.fcmToken,
       this.qrCodeUrl,
       this.cellphone,
       this.active,
@@ -861,6 +893,7 @@ class CommuterRequest {
 
   Map<String, dynamic> toJson() => _$CommuterRequestToJson(this);
 }
+
 @JsonSerializable(explicitToJson: true)
 class CommuterResponse {
   String? commuterId;
@@ -870,7 +903,6 @@ class CommuterResponse {
   String? message;
   String? associationId;
   String? fcmToken;
-
 
   CommuterResponse(
       this.commuterId,
@@ -1050,15 +1082,16 @@ class LocationRequest {
   String? userId;
   String? userName;
   String? created;
-  String? associationId;
+  String? associationId, fcmToken;
 
   LocationRequest(
-      {this.vehicleId,
-      this.vehicleReg,
-      this.userId,
-      this.userName,
+      {required this.vehicleId,
+      required this.vehicleReg,
+      required this.userId,
+      required this.userName,
+      required this.fcmToken,
       this.created,
-      this.associationId});
+      required this.associationId});
 
   factory LocationRequest.fromJson(Map<String, dynamic> json) =>
       _$LocationRequestFromJson(json);
@@ -1073,18 +1106,19 @@ class LocationResponse {
   String? geoHash;
   String? userName;
   String? created;
-  String? associationId;
+  String? associationId, fcmToken;
   Position? position;
 
   LocationResponse(
       {this.userId,
-      this.vehicleId,
-      this.vehicleReg,
+      required this.vehicleId,
+      required this.vehicleReg,
       this.geoHash,
       this.userName,
       this.created,
-      this.associationId,
-      this.position});
+      required this.fcmToken,
+      required this.associationId,
+      required this.position});
 
   factory LocationResponse.fromJson(Map<String, dynamic> json) =>
       _$LocationResponseFromJson(json);
@@ -1193,8 +1227,8 @@ class SettingsModel {
       numberOfLandmarksToScan;
   int? distanceFilter;
 
-  SettingsModel({
-      required this.associationId,
+  SettingsModel(
+      {required this.associationId,
       required this.locale,
       required this.created,
       required this.refreshRateInSeconds,

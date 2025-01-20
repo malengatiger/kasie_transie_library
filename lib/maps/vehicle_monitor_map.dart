@@ -18,9 +18,10 @@ import '../utils/emojis.dart';
 import '../widgets/counts_widget.dart';
 
 class VehicleMonitorMap extends StatefulWidget {
-  const VehicleMonitorMap({super.key, required this.vehicle});
+  const VehicleMonitorMap({super.key, required this.vehicle, this.locationResponse});
 
   final lib.Vehicle vehicle;
+  final lib.LocationResponse? locationResponse;
 
   @override
   VehicleMonitorMapState createState() => VehicleMonitorMapState();
@@ -52,7 +53,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
   late StreamSubscription<lib.AmbassadorPassengerCount> passengerStreamSub;
   late StreamSubscription<lib.VehicleArrival> arrivalStreamSub;
   late StreamSubscription<lib.VehicleDeparture> departureStreamSub;
-  late StreamSubscription<lib.VehicleHeartbeat> heartbeatStreamSub;
+  late StreamSubscription<lib.VehicleTelemetry> telemetryStreamSub;
   int totalPassengers = 0;
   bool showPassengerCount = false;
   bool retryDone = false;
@@ -65,6 +66,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     fcmService = GetIt.instance<FCMService>();
     _listen();
     _control();
+    _putResponseOnMap();
   }
 
   void _listen() async {
@@ -116,13 +118,20 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
         }
       }
     });
-    heartbeatStreamSub = fcmService.heartbeatStreamStream
-        .listen((lib.VehicleHeartbeat heartbeat) async {
-      pp('$mm ... heartbeatStreamStream delivered heartbeat for: ${heartbeat.vehicleReg} at ${heartbeat.created}');
-      if (heartbeat.vehicleId == widget.vehicle.vehicleId) {
-        await _putLastHeartbeatOnMap(heartbeat);
+    telemetryStreamSub = fcmService.vehicleTelemetryStream
+        .listen((lib.VehicleTelemetry t) async {
+      pp('$mm ... vehicleTelemetryStream delivered heartbeat for: ${t.vehicleReg} at ${t.created}');
+      if (t.vehicleId == widget.vehicle.vehicleId) {
+        await _putLastHeartbeatOnMap(vehicleReg: t.vehicleReg!, created: t.created!, latitude: t.position!.coordinates[1], longitude: t.position!.coordinates[0]);
       }
     });
+  }
+
+  Future<void> _putResponseOnMap() async {
+    if (widget.locationResponse != null) {
+      await _putLastHeartbeatOnMap(vehicleReg: widget.vehicle.vehicleReg!, created: widget.locationResponse!.created!,
+      latitude: widget.locationResponse!.position!.coordinates[1], longitude: widget.locationResponse!.position!.coordinates[0]);
+    }
   }
 
   void _control() async {
@@ -170,7 +179,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
           if (bag!.heartbeats.isNotEmpty) {
             bag!.heartbeats.sort((a, b) => b.created!.compareTo(a.created!));
             lastHeartbeat = bag!.heartbeats.last;
-            _putLastHeartbeatOnMap(lastHeartbeat!);
+            // _putLastHeartbeatOnMap(vehicleReg: vehicleReg, created: created, latitude: latitude, longitude: longitude)
           }
         }
       }
@@ -387,7 +396,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     }
   }
 
-  Future _putLastHeartbeatOnMap(lib.VehicleHeartbeat heartbeat) async {
+  Future _putLastHeartbeatOnMap({required String vehicleReg, required String created, required  double latitude, required double longitude}) async {
     heartbeats.sort((a, b) => a.created!.compareTo(b.created!));
     _heartbeatMarkers.clear();
     if (mounted) {
@@ -403,15 +412,15 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     //     style: style,
     //     path: 'assets/car2.png');
     final icon = await getMarkerBitmap(160,
-        text:  '${heartbeat.vehicleReg}',
+        text:  vehicleReg,
         color: 'pink',
         fontSize: 24,
         fontWeight: FontWeight.w900);
 
       final latLng = LatLng(
-          heartbeat.position!.coordinates[1], heartbeat.position!.coordinates[0]);
+          latitude, longitude);
 
-      final key = DateTime.parse(heartbeat.created!);
+      final key = DateTime.parse(created);
       _heartbeatMarkers.add(Marker(
           markerId: MarkerId('hb_$key'),
           icon: icon,
@@ -421,13 +430,13 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
             pp('$mm ... on Marker tapped ...');
           },
           infoWindow: InfoWindow(
-              title: heartbeat.vehicleReg,
+              title: vehicleReg,
               onTap: () async {
-                pp('$mm ... on infoWindow tapped...${heartbeat.created}');
+                pp('$mm ... on infoWindow tapped...$vehicleReg');
                 _handleTap();
               },
               snippet:
-              '${E.blueDot} ${getFormattedDateLong(heartbeat.created!)}')));
+              '${E.blueDot} ${getFormattedDateLong(created)}')));
     //
     getAllMarkers();
     if (mounted) {
@@ -435,8 +444,8 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     }
 
     try {
-      await _zoomToPosition(LatLng(heartbeat.position!.coordinates.last,
-          heartbeat.position!.coordinates.first));
+      await _zoomToPosition(LatLng(latitude,
+          longitude));
       if (mounted) {
         setState(() {
           showDot = false;
@@ -501,7 +510,7 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
     dispatchStreamSub.cancel();
     arrivalStreamSub.cancel();
     departureStreamSub.cancel();
-    heartbeatStreamSub.cancel();
+    telemetryStreamSub.cancel();
     passengerStreamSub.cancel();
     super.dispose();
   }

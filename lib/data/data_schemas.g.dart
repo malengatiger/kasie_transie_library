@@ -337,6 +337,62 @@ Map<String, dynamic> _$AssociationDataToJson(AssociationData instance) =>
       'associationId': instance.associationId,
     };
 
+VehicleData _$VehicleDataFromJson(Map<String, dynamic> json) => VehicleData(
+      (json['dispatchRecords'] as List<dynamic>)
+          .map((e) => DispatchRecord.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['commuterCashPayments'] as List<dynamic>)
+          .map((e) => CommuterCashPayment.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['trips'] as List<dynamic>)
+          .map((e) => Trip.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['commuterCashCheckIns'] as List<dynamic>)
+          .map((e) => CommuterCashCheckIn.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['rankFeeCashPayments'] as List<dynamic>)
+          .map((e) => RankFeeCashPayment.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['rankFeeCashCheckIns'] as List<dynamic>)
+          .map((e) => RankFeeCashCheckIn.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['passengerCounts'] as List<dynamic>)
+          .map((e) =>
+              AmbassadorPassengerCount.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['vehicleArrivals'] as List<dynamic>)
+          .map((e) => VehicleArrival.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['vehicleTelemetry'] as List<dynamic>)
+          .map((e) => VehicleTelemetry.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      json['vehicleId'] as String?,
+      json['associationId'] as String?,
+    );
+
+Map<String, dynamic> _$VehicleDataToJson(VehicleData instance) =>
+    <String, dynamic>{
+      'dispatchRecords':
+          instance.dispatchRecords.map((e) => e.toJson()).toList(),
+      'commuterCashPayments':
+          instance.commuterCashPayments.map((e) => e.toJson()).toList(),
+      'trips': instance.trips.map((e) => e.toJson()).toList(),
+      'commuterCashCheckIns':
+          instance.commuterCashCheckIns.map((e) => e.toJson()).toList(),
+      'rankFeeCashPayments':
+          instance.rankFeeCashPayments.map((e) => e.toJson()).toList(),
+      'rankFeeCashCheckIns':
+          instance.rankFeeCashCheckIns.map((e) => e.toJson()).toList(),
+      'passengerCounts':
+          instance.passengerCounts.map((e) => e.toJson()).toList(),
+      'vehicleArrivals':
+          instance.vehicleArrivals.map((e) => e.toJson()).toList(),
+      'vehicleTelemetry':
+          instance.vehicleTelemetry.map((e) => e.toJson()).toList(),
+      'vehicleId': instance.vehicleId,
+      'associationId': instance.associationId,
+    };
+
 RouteUpdateRequest _$RouteUpdateRequestFromJson(Map<String, dynamic> json) =>
     RouteUpdateRequest(
       routeId: json['routeId'] as String?,
@@ -1088,6 +1144,7 @@ LocationRequest _$LocationRequestFromJson(Map<String, dynamic> json) =>
       vehicleReg: json['vehicleReg'] as String?,
       userId: json['userId'] as String?,
       userName: json['userName'] as String?,
+      fcmToken: json['fcmToken'] as String?,
       created: json['created'] as String?,
       associationId: json['associationId'] as String?,
     );
@@ -1100,6 +1157,7 @@ Map<String, dynamic> _$LocationRequestToJson(LocationRequest instance) =>
       'userName': instance.userName,
       'created': instance.created,
       'associationId': instance.associationId,
+      'fcmToken': instance.fcmToken,
     };
 
 LocationResponse _$LocationResponseFromJson(Map<String, dynamic> json) =>
@@ -1110,6 +1168,7 @@ LocationResponse _$LocationResponseFromJson(Map<String, dynamic> json) =>
       geoHash: json['geoHash'] as String?,
       userName: json['userName'] as String?,
       created: json['created'] as String?,
+      fcmToken: json['fcmToken'] as String?,
       associationId: json['associationId'] as String?,
       position: json['position'] == null
           ? null
@@ -1125,6 +1184,7 @@ Map<String, dynamic> _$LocationResponseToJson(LocationResponse instance) =>
       'userName': instance.userName,
       'created': instance.created,
       'associationId': instance.associationId,
+      'fcmToken': instance.fcmToken,
       'position': instance.position?.toJson(),
     };
 

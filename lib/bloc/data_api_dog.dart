@@ -456,7 +456,7 @@ class DataApiDog {
 
   Future<LocationRequest> addLocationRequest(LocationRequest request) async {
     final bag = request.toJson();
-    final cmd = '${url}addLocationRequest';
+    final cmd = '${url}vehicle/addLocationRequest';
     final res = await _callPost(cmd, bag);
     final lr = LocationRequest.fromJson(res);
     pp('$mm LocationRequest added to database: $res');

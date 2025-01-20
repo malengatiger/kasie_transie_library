@@ -101,24 +101,53 @@ class ListApiDog {
     return token;
   }
 
-  Future<AssociationData?> getAssociationData({required String associationId, required String startDate, required String endDate}) async {
+  Future<AssociationData?> getAssociationData(
+      {required String associationId,
+      required String startDate,
+      required String endDate}) async {
     pp('$mm ............ getAssociationData ............');
-    final cmd = '${url}association/getAssociationData?associationId=$associationId&startDate=$startDate&endDate=$endDate';
+    final cmd =
+        '${url}association/getAssociationData?associationId=$associationId&startDate=$startDate&endDate=$endDate';
     var resp = await _sendHttpGET(cmd);
     AssociationData? data;
     if (resp != null) {
-       data = AssociationData.fromJson(resp);
-       pp('$mm Association Data; commuterRequests: ${data.commuterRequests.length}');
-       pp('$mm Association Data; commuterCashPayments: ${data.commuterCashPayments.length}');
-       pp('$mm Association Data; commuterCashCheckIns: ${data.commuterCashCheckIns.length}');
-       pp('$mm Association Data; rankFeeCashPayments: ${data.rankFeeCashPayments.length}');
-       pp('$mm Association Data; rankFeeCashCheckIns: ${data.rankFeeCashCheckIns.length}');
-       pp('$mm Association Data; users: ${data.users.length}');
-       pp('$mm Association Data; vehicles: ${data.vehicles.length}');
-       pp('$mm Association Data; routes: ${data.routes.length}');
-       pp('$mm Association Data; dispatchRecords: ${data.dispatchRecords.length}');
-       pp('$mm Association Data; vehicleTelemetry: ${data.vehicleTelemetry.length}');
-       pp('$mm Association Data; passengerCounts: ${data.passengerCounts.length}');
+      data = AssociationData.fromJson(resp);
+      pp('$mm Association Data; commuterRequests: ${data.commuterRequests.length}');
+      pp('$mm Association Data; commuterCashPayments: ${data.commuterCashPayments.length}');
+      pp('$mm Association Data; commuterCashCheckIns: ${data.commuterCashCheckIns.length}');
+      pp('$mm Association Data; rankFeeCashPayments: ${data.rankFeeCashPayments.length}');
+      pp('$mm Association Data; rankFeeCashCheckIns: ${data.rankFeeCashCheckIns.length}');
+      pp('$mm Association Data; users: ${data.users.length}');
+      pp('$mm Association Data; vehicles: ${data.vehicles.length}');
+      pp('$mm Association Data; routes: ${data.routes.length}');
+      pp('$mm Association Data; dispatchRecords: ${data.dispatchRecords.length}');
+      pp('$mm Association Data; vehicleTelemetry: ${data.vehicleTelemetry.length}');
+      pp('$mm Association Data; passengerCounts: ${data.passengerCounts.length}');
+    }
+    return data;
+  }
+
+  Future<VehicleData?> getVehicleData(
+      {required String vehicleId,
+      required String startDate,
+      required String endDate}) async {
+    pp('$mm ............ getVehicleData ............ vehicleId $vehicleId - startDate: $startDate  endDate: $endDate');
+    final cmd =
+        '${url}vehicle/getVehicleData?vehicleId=$vehicleId&startDate=$startDate&endDate=$endDate';
+    var resp = await _sendHttpGET(cmd);
+    pp('$mm getVehicleData: result: $resp');
+    VehicleData? data;
+    if (resp != null) {
+      data = VehicleData.fromJson(resp);
+      pp('$mm Vehicle Data; commuterCashPayments: ${data.commuterCashPayments.length}');
+      pp('$mm Vehicle Data; commuterCashCheckIns: ${data.commuterCashCheckIns.length}');
+      pp('$mm Vehicle Data; rankFeeCashPayments: ${data.rankFeeCashPayments.length}');
+      pp('$mm Vehicle Data; rankFeeCashCheckIns: ${data.rankFeeCashCheckIns.length}');
+
+      pp('$mm Vehicle Data; dispatchRecords: ${data.dispatchRecords.length}');
+      pp('$mm Vehicle Data; vehicleTelemetry: ${data.vehicleTelemetry.length}');
+      pp('$mm Vehicle Data; passengerCounts: ${data.passengerCounts.length}');
+      pp('$mm Vehicle Data; trips: ${data.trips.length}');
     }
     return data;
   }
