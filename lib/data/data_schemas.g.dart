@@ -1145,6 +1145,7 @@ LocationRequest _$LocationRequestFromJson(Map<String, dynamic> json) =>
       userId: json['userId'] as String?,
       userName: json['userName'] as String?,
       fcmToken: json['fcmToken'] as String?,
+      vehicleFcmToken: json['vehicleFcmToken'] as String?,
       created: json['created'] as String?,
       associationId: json['associationId'] as String?,
     );
@@ -1158,6 +1159,7 @@ Map<String, dynamic> _$LocationRequestToJson(LocationRequest instance) =>
       'created': instance.created,
       'associationId': instance.associationId,
       'fcmToken': instance.fcmToken,
+      'vehicleFcmToken': instance.vehicleFcmToken,
     };
 
 LocationResponse _$LocationResponseFromJson(Map<String, dynamic> json) =>
@@ -1169,6 +1171,7 @@ LocationResponse _$LocationResponseFromJson(Map<String, dynamic> json) =>
       userName: json['userName'] as String?,
       created: json['created'] as String?,
       fcmToken: json['fcmToken'] as String?,
+      vehicleFcmToken: json['vehicleFcmToken'] as String?,
       associationId: json['associationId'] as String?,
       position: json['position'] == null
           ? null
@@ -1185,6 +1188,7 @@ Map<String, dynamic> _$LocationResponseToJson(LocationResponse instance) =>
       'created': instance.created,
       'associationId': instance.associationId,
       'fcmToken': instance.fcmToken,
+      'vehicleFcmToken': instance.vehicleFcmToken,
       'position': instance.position?.toJson(),
     };
 

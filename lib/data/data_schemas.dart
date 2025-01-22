@@ -1082,7 +1082,7 @@ class LocationRequest {
   String? userId;
   String? userName;
   String? created;
-  String? associationId, fcmToken;
+  String? associationId, fcmToken, vehicleFcmToken;
 
   LocationRequest(
       {required this.vehicleId,
@@ -1090,6 +1090,7 @@ class LocationRequest {
       required this.userId,
       required this.userName,
       required this.fcmToken,
+      required this.vehicleFcmToken,
       this.created,
       required this.associationId});
 
@@ -1106,7 +1107,7 @@ class LocationResponse {
   String? geoHash;
   String? userName;
   String? created;
-  String? associationId, fcmToken;
+  String? associationId, fcmToken, vehicleFcmToken;
   Position? position;
 
   LocationResponse(
@@ -1117,6 +1118,7 @@ class LocationResponse {
       this.userName,
       this.created,
       required this.fcmToken,
+      required this.vehicleFcmToken,
       required this.associationId,
       required this.position});
 
