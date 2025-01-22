@@ -14,6 +14,7 @@ import 'package:kasie_transie_library/utils/environment.dart';
 import 'package:kasie_transie_library/utils/zip_handler.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_messaging/firebase_messaging.dart' as msg;
 
 import '../bloc/data_api_dog.dart';
 import '../bloc/list_api_dog.dart';
@@ -192,7 +193,6 @@ class FCMService {
     String? associationId;
     appName = app;
     newMM = '🍎🍎🍎🍎🍎🍎🍎🍎 FCMService: 🌀🌀🌀🌀$app 🔷🔷';
-    // demoFlag = prefs.getDemoFlag();
     associationId = car.associationId!;
 
     await firebaseMessaging
@@ -776,7 +776,7 @@ class FCMService {
           coordinates: [loc.longitude, loc.latitude],
           latitude: loc.latitude,
           longitude: loc.longitude,
-        ),
+        ), fcmToken: request.fcmToken,
       );
       try {
         pp('$newMM sending location response! ${E.blueDot}');
@@ -1203,7 +1203,7 @@ void respondToLocationRequest(
     required lib.Vehicle car}) async {
   DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
   final loc = await locationBloc.getLocation();
-  pp('$mxx .. location in background: $loc');
+  pp('$mxx .. respondToLocationRequest: location in background: $loc');
   final resp = lib.LocationResponse(
     associationId: car.associationId,
     created: DateTime.now().toUtc().toIso8601String(),
@@ -1211,6 +1211,7 @@ void respondToLocationRequest(
     userName: request.userName,
     vehicleId: car.vehicleId,
     vehicleReg: car.vehicleReg,
+    fcmToken: request.fcmToken,
     position: lib.Position(
       type: 'Point',
       coordinates: [loc.longitude, loc.latitude],

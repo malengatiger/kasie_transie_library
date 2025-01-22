@@ -10,6 +10,7 @@ import 'package:kasie_transie_library/maps/vehicle_monitor_map.dart';
 import 'package:kasie_transie_library/messaging/fcm_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/counts_widget.dart';
+import 'package:firebase_messaging/firebase_messaging.dart' as msg;
 
 import '../../bloc/data_api_dog.dart';
 import '../../bloc/list_api_dog.dart';
@@ -273,8 +274,10 @@ class CarDetailsState extends State<CarDetails>
     });
 
     final user = prefs.getUser();
-    final lr = lib.LocationRequest(
+    var fcmToken = await msg.FirebaseMessaging.instance.getToken();
 
+    final lr = lib.LocationRequest(
+      fcmToken: fcmToken,
       vehicleId: widget.vehicle.vehicleId,
       userId: user!.userId,
       userName: user.name,
