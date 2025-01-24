@@ -327,6 +327,15 @@ class VehicleData {
       _$VehicleDataFromJson(json);
 
   Map<String, dynamic> toJson() => _$VehicleDataToJson(this);
+
+  bool isEmpty() {
+    var tot = dispatchRecords.length + commuterCashPayments.length +
+    trips.length + commuterCashPayments.length +
+    commuterCashCheckIns.length + rankFeeCashCheckIns.length +
+    rankFeeCashPayments.length + passengerCounts.length +
+    vehicleArrivals.length + vehicleTelemetry.length ;
+    return tot == 0;
+  }
 }
 //
 
@@ -1126,6 +1135,31 @@ class LocationResponse {
       _$LocationResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$LocationResponseToJson(this);
+}
+
+
+@JsonSerializable(explicitToJson: true)
+class LocationResponseError {
+  String? userId;
+  String? vehicleId, vehicleReg;
+  String? userName;
+  String? created;
+  String? associationId, fcmToken, vehicleFcmToken;
+
+  LocationResponseError(
+      {this.userId,
+        required this.vehicleId,
+        required this.vehicleReg,
+        this.userName,
+        this.created,
+        required this.fcmToken,
+        required this.vehicleFcmToken,
+        required this.associationId});
+
+  factory LocationResponseError.fromJson(Map<String, dynamic> json) =>
+      _$LocationResponseErrorFromJson(json);
+
+  Map<String, dynamic> toJson() => _$LocationResponseErrorToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)

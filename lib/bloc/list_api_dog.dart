@@ -292,20 +292,20 @@ class ListApiDog {
     return bag;
   }
 
-  Future<VehicleBag> getVehicleBag(String vehicleId, String startDate) async {
-    final cmd = '${url}getVehicleBag?vehicleId=$vehicleId&startDate=$startDate';
-    final resp = await _sendHttpGET(cmd);
-    final bag = VehicleBag.fromJson(resp);
-
-    pp('$mm VehicleBag: '
-        '\n${E.appleRed} vehicleHeartbeats: ${bag.heartbeats.length} '
-        '\n vehicleArrivals: ${bag.arrivals.length} '
-        '\n dispatchRecords: ${bag.dispatchRecords.length} '
-        '\n passengerCounts: ${bag.passengerCounts.length} '
-        '\n vehicleDepartures: ${bag.departures.length}');
-
-    return bag;
-  }
+  // Future<VehicleBag> getVehicleBag(String vehicleId, String startDate) async {
+  //   final cmd = '${url}getVehicleBag?vehicleId=$vehicleId&startDate=$startDate';
+  //   final resp = await _sendHttpGET(cmd);
+  //   final bag = VehicleBag.fromJson(resp);
+  //
+  //   pp('$mm VehicleBag: '
+  //       '\n${E.appleRed} vehicleHeartbeats: ${bag.heartbeats.length} '
+  //       '\n vehicleArrivals: ${bag.arrivals.length} '
+  //       '\n dispatchRecords: ${bag.dispatchRecords.length} '
+  //       '\n passengerCounts: ${bag.passengerCounts.length} '
+  //       '\n vehicleDepartures: ${bag.departures.length}');
+  //
+  //   return bag;
+  // }
 
   Future<List<StateProvince>> getCountryStates(String countryId) async {
     var mList = <StateProvince>[];

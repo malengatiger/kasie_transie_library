@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart' as fb;
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
@@ -15,6 +16,7 @@ import 'package:kasie_transie_library/utils/zip_handler.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart' as msg;
+import 'package:geolocator/geolocator.dart' as locator;
 
 import '../bloc/data_api_dog.dart';
 import '../bloc/list_api_dog.dart';
@@ -31,6 +33,7 @@ import '../utils/prefs.dart';
 
 // final FCMService fcmBloc = FCMService(fb.FirebaseMessaging.instance);
 String? appName;
+late String? firebaseAuthToken;
 
 class FCMService {
   final fb.FirebaseMessaging firebaseMessaging;
@@ -59,7 +62,8 @@ class FCMService {
     dataApiDog = GetIt.instance<DataApiDog>();
     errorHandler = GetIt.instance<ErrorHandler>();
     locationBloc = GetIt.instance<DeviceLocationBloc>();
-
+    firebaseAuthToken =
+        await auth.FirebaseAuth.instance.currentUser!.getIdToken(true);
     user = prefs.getUser();
     car = prefs.getCar();
     fb.NotificationSettings notificationSettings =
@@ -200,6 +204,10 @@ class FCMService {
     pp('$newMM ..... FCM: subscribed to ${Constants.routeUpdateRequest}$associationId');
     //
     await firebaseMessaging
+        .subscribeToTopic('${Constants.dispatchRecord}$associationId');
+    pp('$newMM ..... FCM: subscribed to ${Constants.dispatchRecord}$associationId');
+    //
+    await firebaseMessaging
         .subscribeToTopic('${Constants.locationRequest}$associationId');
     pp('$newMM ..... FCM: subscribed to ${Constants.locationRequest}$associationId');
 
@@ -290,6 +298,10 @@ class FCMService {
     await firebaseMessaging
         .subscribeToTopic('${Constants.locationResponse}$associationId');
     pp('$newMM ..... FCM: subscribed to ${Constants.locationResponse}$associationId');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.locationResponseError}$associationId');
+    pp('$newMM ..... FCM: subscribed to ${Constants.locationResponseError}$associationId');
 
     await firebaseMessaging
         .subscribeToTopic('${Constants.trips}$associationId');
@@ -485,112 +497,120 @@ class FCMService {
       newMM = '$newMM $myName :';
     }
 
-    // final map = message.data['data'];
-    final data1 = message.data;
-    var type = data1['type'];
-    final data = jsonDecode(data1['data']);
+    // final map = message.payload['payload'];
+    final messageData = message.data;
+    var type = messageData['type'];
+    final payload = jsonDecode(messageData['data']);
+
+    pp('$mm Message Payload');
+    myPrettyJsonPrint(payload);
 
     switch (type) {
       case Constants.vehicleChanges:
-        _vehicleChangesStreamController.sink.add(data as String);
+        _vehicleChangesStreamController.sink.add(payload as String);
         break;
 
       case Constants.vehicleArrival:
-        _processVehicleArrival(VehicleArrival.fromJson(data));
+        _processVehicleArrival(VehicleArrival.fromJson(payload));
         break;
 
       case Constants.vehicleDeparture:
-        _processVehicleDeparture(VehicleDeparture.fromJson(data));
+        _processVehicleDeparture(VehicleDeparture.fromJson(payload));
         break;
 
       case Constants.dispatchRecord:
-        final kk = DispatchRecord.fromJson(data);
+        final kk = DispatchRecord.fromJson(payload);
         _processDispatchRecord(kk);
         break;
 
       case Constants.routeDispatchRecord:
-        final kk = DispatchRecord.fromJson(data);
+        final kk = DispatchRecord.fromJson(payload);
         _processRouteDispatchRecord(kk);
         break;
 
       case Constants.passengerCount:
-        final kk = AmbassadorPassengerCount.fromJson(data);
+        final kk = AmbassadorPassengerCount.fromJson(payload);
         _passengerCountStreamController.sink.add(kk);
 
         break;
 
       case Constants.heartbeat:
-        final kk = VehicleHeartbeat.fromJson(data);
+        final kk = VehicleHeartbeat.fromJson(payload);
         _processHeartbeat(kk);
         break;
 
       case Constants.commuterRequest:
-        final kk = CommuterRequest.fromJson(data);
+        final kk = CommuterRequest.fromJson(payload);
         _processCommuterRequest(kk);
         break;
 
       case Constants.commuterResponse:
-        final kk = CommuterResponse.fromJson(data);
+        final kk = CommuterResponse.fromJson(payload);
         _processCommuterResponse(kk);
         break;
 
       case Constants.locationRequest:
-        final locReq = LocationRequest.fromJson(data);
+        final locReq = LocationRequest.fromJson(payload);
         _processLocationRequest(locReq);
         break;
 
       case Constants.locationResponse:
-        final resp = LocationResponse.fromJson(data);
+        final resp = LocationResponse.fromJson(payload);
         _processLocationResponse(resp);
+        break;
+
+      case Constants.locationResponseError:
+        final resp = LocationResponseError.fromJson(payload);
+        _processLocationResponseError(resp);
         break;
 
       case Constants.userGeofenceEvent:
         _userGeofenceStreamController.sink
-            .add(UserGeofenceEvent.fromJson(data));
+            .add(UserGeofenceEvent.fromJson(payload));
         break;
 
       case Constants.vehicleMediaRequest:
-        final req = VehicleMediaRequest.fromJson(data);
+        final req = VehicleMediaRequest.fromJson(payload);
         _processMediaRequest(req);
         break;
 
       case Constants.routeUpdateRequest:
-        final req = RouteUpdateRequest.fromJson(data);
+        final req = RouteUpdateRequest.fromJson(payload);
         _processRouteUpdate(req);
         break;
       case Constants.appError:
-        _appErrorStreamController.sink.add(data);
+        _appErrorStreamController.sink.add(payload);
         break;
       case Constants.kasieError:
-        _kasieErrorStreamController.sink.add(data);
+        _kasieErrorStreamController.sink.add(payload);
         break;
       case Constants.telemetry:
         _vehicleTelemetryStreamController.sink
-            .add(VehicleTelemetry.fromJson(data));
+            .add(VehicleTelemetry.fromJson(payload));
         break;
 
       case Constants.trips:
-        _tripStreamController.sink.add(Trip.fromJson(data));
+        _tripStreamController.sink.add(Trip.fromJson(payload));
         break;
 
       case Constants.commuterCashPayment:
         _commuterCashPaymentStreamController.sink
-            .add(CommuterCashPayment.fromJson(data));
+            .add(CommuterCashPayment.fromJson(payload));
         break;
 
       case Constants.commuterCashCheckIn:
         _commuterCashCheckInStreamController.sink
-            .add(CommuterCashCheckIn.fromJson(data));
+            .add(CommuterCashCheckIn.fromJson(payload));
         break;
 
       case Constants.rankFeeCashPayment:
         _rankFeeCashPaymentStreamController.sink
-            .add(RankFeeCashPayment.fromJson(data));
+            .add(RankFeeCashPayment.fromJson(payload));
         break;
 
       case Constants.rankFeeCashCheckIn:
         _rankFeeCashCheckInStreamController.sink
-            .add(RankFeeCashCheckIn.fromJson(data));
+            .add(RankFeeCashCheckIn.fromJson(payload));
         break;
 
       default:
@@ -776,11 +796,47 @@ class FCMService {
           coordinates: [loc.longitude, loc.latitude],
           latitude: loc.latitude,
           longitude: loc.longitude,
-        ), fcmToken: request.fcmToken,
+        ),
+        fcmToken: request.fcmToken,
+        vehicleFcmToken: request.vehicleFcmToken,
       );
       try {
         pp('$newMM sending location response! ${E.blueDot}');
         final result = await dataApiDog.addLocationResponse(resp);
+        pp('$newMM location response successfully sent! 👌👌👌');
+        myPrettyJsonPrint(result.toJson());
+      } catch (e) {
+        pp(e);
+      }
+    } else {
+      pp('$newMM ... nice try, but this location request is definitely not for me. ${E.blueDot}');
+    }
+  }
+
+  void _processLocationResponseError(lib.LocationResponseError request) async {
+    pp('$newMM checking if vehicle location request is for me ...');
+    final car = prefs.getCar();
+    if (car == null) {
+      pp('$newMM location request is NOT for me. ${E.redDot}${E.redDot}${E.redDot} ');
+      return;
+    }
+
+    if (request.vehicleId == car.vehicleId) {
+      pp('$newMM location request is for me! ... must respond!!');
+      final resp = lib.LocationResponseError(
+        associationId: car.associationId,
+        created: DateTime.now().toUtc().toIso8601String(),
+        userId: request.userId,
+        userName: request.userName,
+        vehicleId: car.vehicleId,
+        vehicleReg: car.vehicleReg,
+        fcmToken: request.fcmToken,
+        vehicleFcmToken: request.vehicleFcmToken,
+      );
+      try {
+        pp('$newMM sending location response! ${E.blueDot}');
+        final result = await dataApiDog.addLocationResponseError(resp);
+        _locationResponseErrorStreamController .sink.add(resp);
         pp('$newMM location response successfully sent! } ');
         myPrettyJsonPrint(result.toJson());
       } catch (e) {
@@ -887,6 +943,12 @@ class FCMService {
   Stream<lib.LocationResponse> get locationResponseStream =>
       _locationResponseStreamController.stream;
 
+  final StreamController<lib.LocationResponseError>
+      _locationResponseErrorStreamController = StreamController.broadcast();
+
+  Stream<lib.LocationResponseError> get locationResponseErrorStream =>
+      _locationResponseErrorStreamController.stream;
+
   final StreamController<lib.AmbassadorPassengerCount>
       _passengerCountStreamController = StreamController.broadcast();
 
@@ -949,7 +1011,7 @@ var mxx = '💙💙💙💙💙💙FCM Background Processing:  💙💙';
 @pragma('vm:entry-point')
 Future kasieFirebaseMessagingBackgroundHandler(fb.RemoteMessage message) async {
   // await Firebase.initializeApp();
-  pp("\n\n$mxx 🍎🍎🍎🍎handle message in background 🍎🍎🍎🍎 ....");
+  pp("\n\n$mxx 🍎🍎🍎🍎.... handle message in background 🍎🍎🍎🍎 ....");
 
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
   myName = packageInfo.appName;
@@ -957,140 +1019,27 @@ Future kasieFirebaseMessagingBackgroundHandler(fb.RemoteMessage message) async {
     mxx = '$mxx $myName :';
   }
 
-  final data = message.data;
+  final payload = message.data;
   final type = getMessageType(message);
+  final mData = payload['data'];
+  pp("$mxx 🍎🍎🍎🍎locationRequest 🍎🍎🍎🍎mData: $mData");
 
   pp("$mxx 🍎🍎🍎🍎handle message in background! NO-OP except for locationRequest! 🍎🍎🍎🍎type: $type");
+  pp("$mxx 🍎🍎🍎🍎locationRequest 🍎🍎🍎🍎mData: $mData");
 
   try {
     switch (type) {
       case Constants.locationRequest:
-        final locReq = LocationRequest.fromJson(data);
-        handleLocationRequest(locReq);
+        final mRequest = lib.LocationRequest.fromJson(jsonDecode(mData));
+        pp("$mxx 🍎🍎🍎🍎locationRequest object 🍎🍎🍎🍎");
+        myPrettyJsonPrint(mRequest.toJson());
+        _handleLocationRequest(mRequest);
         break;
-      // case Constants.locationResponse:
-      //   final r = buildLocationResponse(data);
-      //   handleLocationResponse(r);
-      //   break;
-      // case Constants.dispatchRecord:
-      //   final dispatch = buildDispatchRecord(data);
-      //   handleDispatch(dispatch);
-      //   break;
-      // case Constants.passengerCount:
-      //   final count = buildAmbassadorPassengerCount(data);
-      //   handlePassengerCount(count);
-      //   break;
-      // case Constants.heartbeat:
-      //   final h = buildVehicleHeartbeat(data);
-      //   handleHeartbeat(h);
-      //   break;
-      // case Constants.vehicleArrival:
-      //   final a = buildVehicleArrival(data);
-      //   handleVehicleArrival(a);
-      //   break;
-      // case Constants.vehicleDeparture:
-      //   final d = buildVehicleDeparture(data);
-      //   handleVehicleDeparture(d);
-      //   break;
-      // case Constants.routeUpdateRequest:
-      //   final d = buildRouteUpdateRequest(data);
-      //   routesIsolate.refreshRoute(d.routeId!);
-      //   break;
     }
   } catch (e, s) {
     pp('${E.redDot}${E.redDot}${E.redDot}${E.redDot}${E.redDot}${E.redDot}'
         '${E.redDot}${E.redDot} stackTrace: $s');
     pp('$e $s');
-  }
-}
-
-///message handlers
-void handleLocationResponse(lib.LocationResponse response) async {
-  pp('$mxx ... handleLocationResponse in background ...');
-  final user = await getUserInBackground();
-
-  if (user != null) {
-    if (user.userType == Constants.OWNER) {
-      if (user.userId == response.userId) {
-        //cacheLocationResponse(response);
-      }
-    }
-
-    if (user.userType == Constants.ASSOCIATION_OFFICIAL) {
-      //cacheLocationResponse(response);
-    }
-  }
-}
-
-void handleHeartbeat(lib.VehicleHeartbeat heartbeat) async {
-  pp('$mxx ... handleHeartbeat in background ...');
-
-  final user = await getUserInBackground();
-
-  if (user != null) {
-    if (user.userType == Constants.OWNER) {
-      if (user.userId == heartbeat.ownerId) {
-        //cacheHeartbeat(heartbeat);
-      }
-    }
-
-    if (user.userType == Constants.ASSOCIATION_OFFICIAL) {
-      //cacheHeartbeat(heartbeat);
-    }
-  }
-}
-
-void handlePassengerCount(lib.AmbassadorPassengerCount passengerCount) async {
-  pp('$mxx ... handlePassengerCount in background ...');
-
-  final user = await getUserInBackground();
-
-  if (user != null) {
-    if (user.userType == Constants.OWNER) {
-      if (user.userId == passengerCount.ownerId) {
-        //cachePassengerCount(passengerCount);
-      }
-    }
-
-    if (user.userType == Constants.ASSOCIATION_OFFICIAL) {
-      //cachePassengerCount(passengerCount);
-    }
-  }
-}
-
-void handleDispatch(lib.DispatchRecord dispatchRecord) async {
-  pp('$mxx ... handleDispatch in background ...');
-
-  final user = await getUserInBackground();
-
-  if (user != null) {
-    if (user.userType == Constants.OWNER) {
-      if (user.userId == dispatchRecord.ownerId) {
-        //cacheDispatchRecord(dispatchRecord);
-      }
-    }
-
-    if (user.userType == Constants.ASSOCIATION_OFFICIAL) {
-      //cacheDispatchRecord(dispatchRecord);
-    }
-  }
-}
-
-void handleVehicleDeparture(lib.VehicleDeparture departure) async {
-  pp('$mxx ... handleVehicleDeparture in background ...');
-
-  final user = await getUserInBackground();
-
-  if (user != null) {
-    if (user.userType == Constants.OWNER) {
-      if (user.userId == departure.ownerId) {
-        //cacheVehicleDeparture(departure);
-      }
-    }
-
-    if (user.userType == Constants.ASSOCIATION_OFFICIAL) {
-      //cacheVehicleDeparture(departure);
-    }
   }
 }
 
@@ -1111,42 +1060,6 @@ void handleVehicleArrival(lib.VehicleArrival arrival) async {
     }
   }
 }
-
-// void cacheLocationResponse(lib.LocationResponse object) {
-//   listApiDog.realm.write(() {
-//     listApiDog.realm.add<lib.LocationResponse>(object);
-//   });
-// }
-//
-// void cachePassengerCount(lib.AmbassadorPassengerCount object) {
-//   listApiDog.realm.write(() {
-//     listApiDog.realm.add<lib.AmbassadorPassengerCount>(object);
-//   });
-// }
-//
-// void cacheHeartbeat(lib.VehicleHeartbeat object) {
-//   listApiDog.realm.write(() {
-//     listApiDog.realm.add<lib.VehicleHeartbeat>(object);
-//   });
-// }
-//
-// void cacheVehicleArrival(lib.VehicleArrival object) {
-//   listApiDog.realm.write(() {
-//     listApiDog.realm.add<lib.VehicleArrival>(object);
-//   });
-// }
-//
-// void cacheVehicleDeparture(lib.VehicleDeparture object) {
-//   listApiDog.realm.write(() {
-//     listApiDog.realm.add<lib.VehicleDeparture>(object);
-//   });
-// }
-//
-// void cacheDispatchRecord(lib.DispatchRecord object) {
-//   listApiDog.realm.write(() {
-//     listApiDog.realm.add<lib.DispatchRecord>(object);
-//   });
-// }
 
 Future<lib.User?> getUserInBackground() async {
   lib.User? user;
@@ -1176,74 +1089,73 @@ Future<lib.Vehicle?> getCarInBackground() async {
   }
   var jx = json.decode(string);
   car = Vehicle.fromJson(jx);
-  pp('$mxx ... this car is responding while in background: ${car.toJson()}');
-  //myPrettyJsonPrint(car.toJson());
+  pp('$mxx ... this car is responding while in background ...');
+  myPrettyJsonPrint(car.toJson());
 
   return car;
 }
 
-void handleLocationRequest(lib.LocationRequest request) async {
-  pp('$mxx ... handleLocationRequest in background ...');
-
+void _handleLocationRequest(lib.LocationRequest request) async {
+  pp('\n\n\n$mxx ... handleLocationRequest in background 😈😈 location not available ... request: ');
+  myPrettyJsonPrint(request.toJson());
   lib.Vehicle? car = await getCarInBackground();
   if (car == null) {
-    pp('$mxx ... handleLocationRequest:  car is null. quitting ...');
+    pp('$mxx ... handleLocationRequest:  😈😈😈😈😈 car is null. quitting ... 😈😈😈😈😈');
+    return;
+  }
+  if (car.vehicleId != request.vehicleId) {
+    pp('\n\n$mxx ... this request is NOT for me .... ${E.blueDot} ... QUIT!!');
     return;
   }
 
-  if (car.vehicleId == request.vehicleId) {
-    pp('\n\n$mxx ... this request is for me .... ${E.blueDot} gotta respond!');
-    respondToLocationRequest(request: request, token: 'myToken', car: car);
-  }
+  pp('\n\n$mxx ... this request is for me .... ${E.blueDot} ... 😈😈😈gotta respond with Error because location cannot be acquired!');
+  sendLocationResponseError(request: request, car: car);
 }
 
-void respondToLocationRequest(
-    {required lib.LocationRequest request,
-    required String token,
-    required lib.Vehicle car}) async {
-  DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
-  final loc = await locationBloc.getLocation();
-  pp('$mxx .. respondToLocationRequest: location in background: $loc');
-  final resp = lib.LocationResponse(
-    associationId: car.associationId,
-    created: DateTime.now().toUtc().toIso8601String(),
-    userId: request.userId,
-    userName: request.userName,
-    vehicleId: car.vehicleId,
-    vehicleReg: car.vehicleReg,
-    fcmToken: request.fcmToken,
-    position: lib.Position(
-      type: 'Point',
-      coordinates: [loc.longitude, loc.latitude],
-      latitude: loc.latitude,
-      longitude: loc.longitude,
-    ),
-  );
+void sendLocationResponseError(
+    {required lib.LocationRequest request, required lib.Vehicle car}) async {
+  pp('$mxx .. respondToLocationRequest: request: ${request.toJson()} ');
+  pp('$mxx .. respondToLocationRequest: car: ${car.toJson()} ');
+
   try {
-    pp('$mxx sending background location response! ${E.blueDot}');
-    final result = await _sendLocationResponse(resp, token);
-    pp('$mxx background location response successfully sent! ${E.leaf} ');
-    //myPrettyJsonPrint(result);
+    pp('$mxx .. respondToLocationRequest with error');
+    final resp = lib.LocationResponseError(
+      associationId: car.associationId,
+      created: DateTime.now().toUtc().toIso8601String(),
+      userId: request.userId,
+      userName: request.userName,
+      vehicleId: car.vehicleId,
+      vehicleReg: car.vehicleReg,
+      fcmToken: request.fcmToken,
+      vehicleFcmToken: request.vehicleFcmToken,
+    );
+    pp('$mxx 😈😈😈background location cannot be acquired!  send error ...😈😈😈😈');
+    final result = await _sendLocationResponseError(resp);
+    pp('$mxx background location error response successfully sent! ${E.leaf} ');
+    myPrettyJsonPrint(result);
+
   } catch (e) {
     pp(e);
   }
 }
 
-Future _sendLocationResponse(
-    lib.LocationResponse resp, String authToken) async {
+
+Future _sendLocationResponseError(lib.LocationResponseError resp) async {
+  pp('$mxx _sendLocationResponseError: 🔆🔆🔆 ...... fcm token : 💙 ${resp.fcmToken}  💙');
+
   Map<String, String> headers = {
     'Content-type': 'application/json',
     'Accept': 'application/json',
+    'Authorization': 'Bearer $firebaseAuthToken',
   };
   final urlPrefix = KasieEnvironment.getUrl();
-  final mUrl = '${urlPrefix}addLocationResponse';
-  pp('$mxx _sendLocationResponse: 🔆🔆🔆 ...... calling : 💙 $mUrl  💙');
+  final mUrl = '${urlPrefix}locationRequest/addLocationResponseError';
+  pp('$mxx _sendLocationResponseError: 🔆🔆🔆 ...... calling : 💙 $mUrl  💙');
   ErrorHandler errorHandler = GetIt.instance<ErrorHandler>();
   String? mBag;
   mBag = json.encode(resp.toJson());
 
   var start = DateTime.now();
-  headers['Authorization'] = 'Bearer $authToken';
   final client = http.Client();
   try {
     var resp = await client
@@ -1253,10 +1165,10 @@ Future _sendLocationResponse(
           headers: headers,
         )
         .timeout(const Duration(seconds: 30));
-    if (resp.statusCode == 200) {
-      pp('$mxx  _sendLocationResponse RESPONSE: 💙💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
+    if (resp.statusCode == 200 || resp.statusCode == 201) {
+      pp('$mxx  _sendLocationResponseError RESPONSE: 💙💙 statusCode: 👌👌👌 ${resp.statusCode} 👌👌👌 💙 for $mUrl');
     } else {
-      pp('$mxx  👿👿👿_sendLocationResponse: 🔆 statusCode: 👿👿👿 ${resp.statusCode} 🔆🔆🔆 for $mUrl');
+      pp('$mxx  👿👿👿_sendLocationResponseError: 🔆 statusCode: 👿👿👿 ${resp.statusCode} 🔆🔆🔆 for $mUrl');
       pp(resp.body);
       throw KasieException(
           message: 'Bad status code: ${resp.statusCode} - ${resp.body}',
@@ -1265,7 +1177,7 @@ Future _sendLocationResponse(
           errorType: KasieException.socketException);
     }
     var end = DateTime.now();
-    pp('$mxx  _sendLocationResponse: 🔆 elapsed time: ${end.difference(start).inSeconds} seconds 🔆');
+    pp('$mxx  _sendLocationResponseError: 🔆 elapsed time: ${end.difference(start).inSeconds} seconds 🔆');
     try {
       var mJson = json.decode(resp.body);
       return mJson;

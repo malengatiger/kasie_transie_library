@@ -233,6 +233,16 @@ class SemCache {
     pp('$mm vehicles retrieved from cache: ${vehicles.length}');
     return vehicles;
   }
+  Future<Vehicle?> getVehicle(String associationId, String vehicleId) async {
+
+    List<Vehicle> vehicles = await getVehicles(associationId);
+    for (var veh in vehicles) {
+      if (veh.vehicleId == vehicleId) {
+        return veh;
+      }
+    }
+    return null;
+  }
 
   //
   Future saveCities(List<City> cities) async {

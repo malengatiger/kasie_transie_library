@@ -1192,6 +1192,32 @@ Map<String, dynamic> _$LocationResponseToJson(LocationResponse instance) =>
       'position': instance.position?.toJson(),
     };
 
+LocationResponseError _$LocationResponseErrorFromJson(
+        Map<String, dynamic> json) =>
+    LocationResponseError(
+      userId: json['userId'] as String?,
+      vehicleId: json['vehicleId'] as String?,
+      vehicleReg: json['vehicleReg'] as String?,
+      userName: json['userName'] as String?,
+      created: json['created'] as String?,
+      fcmToken: json['fcmToken'] as String?,
+      vehicleFcmToken: json['vehicleFcmToken'] as String?,
+      associationId: json['associationId'] as String?,
+    );
+
+Map<String, dynamic> _$LocationResponseErrorToJson(
+        LocationResponseError instance) =>
+    <String, dynamic>{
+      'userId': instance.userId,
+      'vehicleId': instance.vehicleId,
+      'vehicleReg': instance.vehicleReg,
+      'userName': instance.userName,
+      'created': instance.created,
+      'associationId': instance.associationId,
+      'fcmToken': instance.fcmToken,
+      'vehicleFcmToken': instance.vehicleFcmToken,
+    };
+
 RouteLandmark _$RouteLandmarkFromJson(Map<String, dynamic> json) =>
     RouteLandmark(
       routeId: json['routeId'] as String?,

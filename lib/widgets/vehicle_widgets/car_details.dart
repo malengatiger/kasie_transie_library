@@ -283,7 +283,7 @@ class CarDetailsState extends State<CarDetails>
       userName: user.name,
       vehicleReg: widget.vehicle.vehicleReg,
       associationId: user.associationId,
-      created: DateTime.now().toUtc().toIso8601String(),
+      created: DateTime.now().toUtc().toIso8601String(), vehicleFcmToken: widget.vehicle.fcmToken,
     );
     try {
       final res = await dataApiDog.addLocationRequest(lr);

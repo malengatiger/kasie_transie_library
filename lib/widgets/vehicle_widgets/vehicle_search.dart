@@ -38,7 +38,7 @@ class _VehicleSearchState extends State<VehicleSearch> {
   @override
   void initState() {
     super.initState();
-    _getCars(false);
+    _getCars(true);
   }
 
   final _carPlates = <String>[];
@@ -128,7 +128,7 @@ class _VehicleSearchState extends State<VehicleSearch> {
             }, icon: const FaIcon(FontAwesomeIcons.arrowsRotate))
           ],
         ),
-        // backgroundColor: Colors.brown[100],
+        backgroundColor: Colors.amber[50],
         body: SafeArea(
             child: Stack(
               children: [
@@ -201,14 +201,14 @@ class _VehicleSearchState extends State<VehicleSearch> {
                                       Navigator.pop(context, vehicle);
                                     },
                                     child: Card(
-                                      color: Colors.black26,
+                                      // color: Colors.black26,
                                       elevation: 8,
                                       child: Center(
                                           child: Text(
                                             '${c.vehicleReg}',
-                                            style: myTextStyle(fontSize: 16,
+                                            style: myTextStyle(fontSize: 15,
                                                 weight: FontWeight.bold,
-                                                color: Colors.white),
+                                                color: Colors.black),
                                           )),
                                     ),
                                   );

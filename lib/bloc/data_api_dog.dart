@@ -456,7 +456,7 @@ class DataApiDog {
 
   Future<LocationRequest> addLocationRequest(LocationRequest request) async {
     final bag = request.toJson();
-    final cmd = '${url}vehicle/addLocationRequest';
+    final cmd = '${url}locationRequest/addLocationRequest';
     final res = await _callPost(cmd, bag);
     final lr = LocationRequest.fromJson(res);
     pp('$mm LocationRequest added to database: $res');
@@ -466,10 +466,20 @@ class DataApiDog {
   Future<LocationResponse> addLocationResponse(
       LocationResponse response) async {
     final bag = response.toJson();
-    final cmd = '${url}vehicle/addLocationResponse';
+    final cmd = '${url}locationRequest/addLocationResponse';
     final res = await _callPost(cmd, bag);
     pp('$mm LocationResponse added to database: $res');
     final lr = LocationResponse.fromJson(res);
+    return lr;
+  }
+
+  Future<LocationResponseError> addLocationResponseError(
+      LocationResponseError response) async {
+    final bag = response.toJson();
+    final cmd = '${url}locationRequest/addLocationResponseError';
+    final res = await _callPost(cmd, bag);
+    pp('$mm LocationResponseError added to database: $res');
+    final lr = LocationResponseError.fromJson(res);
     return lr;
   }
 
@@ -493,7 +503,7 @@ class DataApiDog {
     return car;
   }
 
-  Future<int> updateVehicle(Vehicle vehicle) async {
+  Future<dynamic> updateVehicle(Vehicle vehicle) async {
     final bag = vehicle.toJson();
     final cmd = '${url}vehicle/updateVehicle';
 
@@ -507,7 +517,7 @@ class DataApiDog {
 
     semCache.saveVehicles([vehicle]);
     pp('$mm vehicle added or updated on Atlas database and local cache : 🥬 🥬 🥬 '
-        ' ${vehicle.vehicleReg}');
+        ' $res');
     return res;
   }
 

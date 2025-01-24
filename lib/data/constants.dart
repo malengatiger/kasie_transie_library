@@ -33,6 +33,8 @@ class Constants {
     static const rankFeeCashCheckIn = 'rankFeeCashCheckIn';
 
    static const   locationResponse = 'locationResponse';
+   static const   locationResponseError = 'locationResponseError';
+
    static const   userGeofenceEvent = 'userGeofenceEvent';
    static const   vehicleMediaRequest = 'vehicleMediaRequest';
    static const   routeUpdateRequest = 'routeUpdateRequest';

@@ -85,7 +85,6 @@ dependencies:
   fast_csv: ^0.2.11
   sound_library: ^1.0.0
   barcode_scan2: ^4.3.3
-#  ai_barcode_scanner: ^6.0.1
   simple_barcode_scanner: ^0.2.5
   pretty_print_json: ^1.0.1
   widgets_to_image: ^1.0.0
@@ -93,7 +92,7 @@ dependencies:
   qr_mobile_vision: ^5.0.2
   mobile_scanner: ^6.0.2
   google_mlkit_barcode_scanning: ^0.13.0
-  currency_formatter: ^2.2.1
+  currency_formatter: ^2.2.2
   file_picker: ^8.1.7
 
 
@@ -105,7 +104,7 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   build_runner: ^2.4.14
   mockito: ^5.4.5
-  json_serializable: ^6.9.2
+  json_serializable: ^6.9.3
   dependency_validator: ^5.0.2
 
 flutter:
