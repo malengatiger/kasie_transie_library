@@ -53,7 +53,21 @@ TextStyle myTextStyle({Color? color, double? fontSize, FontWeight? weight}) {
     color: color,
   );
 }
+TextStyle myTextStyleBold({Color? color, double? fontSize, }) {
+  if (color != null) {
+    return GoogleFonts.roboto(
+      fontWeight: FontWeight.w900,
+      fontSize: fontSize ?? 20,
+      color: color?? Colors.black,
+    );
+  }
 
+  return GoogleFonts.roboto(
+    fontWeight: FontWeight.w900,
+    fontSize: fontSize ?? 20,
+    color: Colors.black,
+  );
+}
 TextStyle myNumberThickStyle(
     {Color? color, double? fontSize, FontWeight? weight}) {
   if (color != null) {
