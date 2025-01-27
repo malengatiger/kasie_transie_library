@@ -19,7 +19,7 @@ final geofenceService = geo.GeofenceService.instance.setup(
     statusChangeDelayMs: 10000,
     useActivityRecognition: false,
     allowMockLocations: false,
-    printDevLog: false,
+    printDevLog: true,
     geofenceRadiusSortType: geo.GeofenceRadiusSortType.DESC);
 
 class TheGreatGeofencer {
@@ -29,9 +29,7 @@ class TheGreatGeofencer {
   final DataApiDog dataApiDog;
   final Prefs prefs;
 
-  TheGreatGeofencer(this.dataApiDog, this.listApiDog, this.prefs) {
-    // setRefreshFencesTimer();
-  }
+  TheGreatGeofencer(this.dataApiDog, this.listApiDog, this.prefs);
 
   final StreamController<VehicleArrival> _vehicleArrivalController =
       StreamController.broadcast();
@@ -71,11 +69,12 @@ class TheGreatGeofencer {
   }
 
   Future buildGeofences() async {
-    pp('\n\n$xx buildGeofences .... build geofences for '
-        'the association started ... 🌀🌀🌀🌀 ');
 
     _vehicle = prefs.getCar();
     _geofenceList.clear();
+    pp('\n\n$xx buildGeofences .... build geofences for '
+        'car ... 🌀🌀🌀🌀 ');
+    myPrettyJsonPrint(_vehicle!.toJson());
 
     var locationBloc = GetIt.instance<DeviceLocationBloc>();
 
@@ -124,13 +123,16 @@ class TheGreatGeofencer {
       }
     }
     pp('$xx buildGeofences .... fences built: $cnt ');
-    pp('$xx buildGeofences .... fence #1 built: ${landmarks[0].landmarkName} ');
+    pp('$xx buildGeofences .... fence #1 built: ${landmarks.first.landmarkName} ');
+    pp('$xx buildGeofences .... fence #n built: ${landmarks.last.landmarkName} ');
 
     geofenceService.addGeofenceList(_geofenceList);
 
     geofenceService.addGeofenceStatusChangeListener(
         (geofence, geofenceRadius, geofenceStatus, location) async {
-      pp('$xx  🌀🌀🌀🌀🌀🌀 addGeofenceStatusChangeListener : status: ${geofenceStatus.name}  landmark: ${geofence.data['landmarkName']}   ${geofence.data['routeName']} ');
+      pp('$xx  🌀🌀🌀🌀🌀🌀 addGeofenceStatusChangeListener : '
+          'status: ${geofenceStatus.name}  landmark: ${geofence.data['landmarkName']}  '
+          ' ${geofence.data['routeName']} ');
 
       await _processGeofenceEvent(
         geofence: geofence,

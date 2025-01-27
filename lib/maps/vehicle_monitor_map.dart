@@ -561,51 +561,11 @@ class VehicleMonitorMapState extends State<VehicleMonitorMap>
         child: Scaffold(
       appBar: AppBar(
         title: Text(
-          'Vehicle Map: ${widget.vehicle.vehicleReg}',
+          'Vehicle on Map: ${widget.vehicle.vehicleReg}',
           style: myTextStyleMediumLargeWithColor(
               context, Theme.of(context).primaryColor, 20),
         ),
-        // bottom: PreferredSize(
-        //     preferredSize: const Size.fromHeight(48),
-        //     child: Column(
-        //       children: [
-        //         Row(
-        //           mainAxisAlignment: MainAxisAlignment.center,
-        //           children: [
-        //             Text(
-        //               'Hours',
-        //               style: myTextStyleSmall(context),
-        //             ),
-        //             const SizedBox(
-        //               width: 16,
-        //             ),
-        //             Text(
-        //               '$hours',
-        //               style: myTextStyleMediumLargeWithColor(
-        //                   context, Theme.of(context).primaryColor, 20),
-        //             ),
-        //             const SizedBox(
-        //               width: 100,
-        //             ),
-        //             NumberDropDown(
-        //                 onNumberPicked: (number) {
-        //                   setState(() {
-        //                     hours = number;
-        //                   });
-        //                   _getVehicleBag();
-        //                 },
-        //                 color: Theme.of(context).primaryColor,
-        //                 count: 49,
-        //                 fontSize: 14),
-        //             const SizedBox(
-        //               width: 48,
-        //             ),
-        //             showDot ? Text(E.redDot) : gapH12,
-        //           ],
-        //         ),
-        //         gapH12,
-        //       ],
-        //     )),
+
       ),
       body: Stack(
         children: [

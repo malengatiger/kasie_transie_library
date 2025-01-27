@@ -1,98 +1,163 @@
 import 'dart:async';
 import 'dart:collection';
-
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:kasie_transie_library/bloc/list_api_dog.dart';
 import 'package:kasie_transie_library/bloc/sem_cache.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
-
-import '../bloc/list_api_dog.dart';
-import '../l10n/translation_handler.dart';
-import '../utils/emojis.dart';
-import '../utils/functions.dart';
-import '../utils/prefs.dart';
+import 'package:kasie_transie_library/messaging/fcm_bloc.dart';
+import 'package:kasie_transie_library/utils/emojis.dart';
+import 'package:kasie_transie_library/utils/functions.dart';
 
 class LocationResponseMap extends StatefulWidget {
-  const LocationResponseMap({super.key, required this.locationResponse});
+  const LocationResponseMap({super.key, required this.vehicle, this.locationResponse});
 
-  final lib.LocationResponse locationResponse;
+  final lib.Vehicle vehicle;
+  final lib.LocationResponse? locationResponse;
 
   @override
   LocationResponseMapState createState() => LocationResponseMapState();
 }
 
-class LocationResponseMapState extends State<LocationResponseMap> {
-  static const mm = '😡😡😡😡😡😡😡 LocationResponseMap: 💪 ';
-  final _key = GlobalKey<ScaffoldState>();
-
+class LocationResponseMapState extends State<LocationResponseMap>
+    with SingleTickerProviderStateMixin {
+  final mm = '🍅🍅🍅🍅VehicleMap 🍐🍅🍐';
   ListApiDog listApiDog = GetIt.instance<ListApiDog>();
-  Prefs prefs = GetIt.instance<Prefs>();
-
-  bool busy = false;
-  bool hybrid = true;
-  final initialCameraPosition =
-      const CameraPosition(target: LatLng(-25.7, 27.6), zoom: 14.6);
-  final Completer<GoogleMapController> _mapController = Completer();
+  late AnimationController _controller;
+  final Completer<GoogleMapController> _googleMapCompleter = Completer();
   late GoogleMapController googleMapController;
+  CameraPosition initialCameraPosition =
+      const CameraPosition(target: LatLng(-25.760, 27.852), zoom: 15);
 
-  final _markers = <Marker>{};
-  final _polyLines = <Polyline>{};
-  var routes = <lib.Route>[];
-  var routePoints = [<lib.RoutePoint>[]];
-  var routeLandmarks = [<lib.RouteLandmark>[]];
+  var telemetry = <lib.VehicleTelemetry>[];
+  lib.VehicleData? vehicleData;
+  int hours = 24;
+  bool busy = false;
+  String title = "Maps";
 
-  String? locationResponseText, dateText, taxiCurrentLocation, loadingRoutes;
-  lib.User? user;
-  var bags = <RouteDataBag>[];
+  // late StreamSubscription<lib.LocationResponse> respSub;
+  late StreamSubscription<lib.VehicleTelemetry> telemetryStreamSub;
+  late FCMService fcmService = GetIt.instance<FCMService>();
 
   @override
   void initState() {
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+      reverseDuration: const Duration(milliseconds: 300),
+    );
     super.initState();
-    pp('$mm at least I get to initState ... ${E.heartRed} ${widget.locationResponse.vehicleReg}');
-    _setTexts();
+    _listen();
+    pp('$mm location response: ......');
+    if (widget.locationResponse != null) {
+      myPrettyJsonPrint(widget.locationResponse!.toJson());
+    }
   }
-  SemCache semCache = GetIt.instance<SemCache>();
 
-  Future<void> _getRoutes() async {
-    pp('$mm ... getting routes ....');
-    final ass = await listApiDog.getVehicleRouteAssignments(
-        widget.locationResponse.vehicleId!, false);
-    var hash = HashMap<String, String>();
-
-    if (ass.isNotEmpty) {
-      for (var a in ass) {
-        hash[a.routeId!] = a.routeId!;
+  void _listen() async {
+    telemetryStreamSub = fcmService.vehicleTelemetryStream
+        .listen((lib.VehicleTelemetry telemetry) async {
+      pp('$mm ... vehicleTelemetryStream delivered heartbeat for: ${telemetry.vehicleReg} at ${telemetry.created}');
+      if (telemetry.vehicleId == widget.vehicle.vehicleId) {
+        await _putCarOnMap(
+            vehicleReg: telemetry.vehicleReg!,
+            created: telemetry.created?? DateTime.now().toIso8601String(),
+            latitude: telemetry.position!.coordinates[1],
+            longitude: telemetry.position!.coordinates[0]);
       }
-      final list = hash.keys.toList();
-      pp('$mm ... _filterRoutes found ${list.length} route ids from route assignments');
+    });
+  }
 
-      for (var routeId in list) {
-        final route = await listApiDog.getRoute(routeId: routeId, refresh: false);
-        if (route != null) {
-          routes.add(route);
+  Future<void> _putResponseOnMap() async {
+    if (widget.locationResponse != null) {
+      await _putCarOnMap(
+          vehicleReg: widget.vehicle.vehicleReg!,
+          created: widget.locationResponse!.created!,
+          latitude: widget.locationResponse!.position!.coordinates[1],
+          longitude: widget.locationResponse!.position!.coordinates[0]);
+    }
+  }
+
+  SemCache semCache = GetIt.instance<SemCache>();
+  String? startDate, endDate;
+
+  Future _getVehicleData() async {
+    pp('$mm ... _getVehicleData that shows the last ${E.blueDot} $hours hours .... ');
+
+    var now = DateTime.now().subtract(const Duration(hours: 24));
+    startDate =
+        DateTime(now.year, now.month, now.day, 0, 0, 0).toIso8601String();
+
+    var end = DateTime.now();
+    endDate =
+        DateTime(end.year, end.month, end.day, 23, 59, 59).toIso8601String();
+
+    final sd = DateTime.parse(startDate!).toUtc().toIso8601String();
+    final ed = DateTime.parse(endDate!).toUtc().toIso8601String();
+
+    setState(() {
+      busy = true;
+    });
+    try {
+      vehicleData = await listApiDog.getVehicleData(
+          vehicleId: widget.vehicle.vehicleId!, startDate: sd, endDate: ed);
+      if (mounted) {
+        if (vehicleData != null) {
+          telemetry = vehicleData!.vehicleTelemetry;
         }
       }
-    } else {
-      routes = await semCache.getRoutes(associationId: widget.locationResponse.associationId!);
+    } catch (e, stack) {
+      pp('$e - $stack');
+      if (mounted) {
+        showSnackBar(
+            backgroundColor: Colors.red,
+            message: 'Could not get data for you. Please try again',
+            context: context);
+      }
     }
-    pp('$mm ... ${routes.length} routes to be put on map ...');
+    setState(() {
+      busy = false;
+    });
+  }
 
-    if (routes.isNotEmpty) {
-      _putRoutesOnMap(true);
+  Future<void> _getRoutes() async {
+    try {
+      pp('$mm ..... getRoutes ..');
+      routes = await semCache.getRoutes(
+          associationId: widget.vehicle.associationId!);
+      // }
+      _printRoutes();
+      if (routes.isNotEmpty) {
+        _putRoutesOnMap(false);
+      }
+    } catch (e, stack) {
+      pp('$mm $e $stack');
     }
   }
 
-  Future _putRoutesOnMap(bool zoomTo) async {
-    pp('$mm ... _putRoutesOnMap: number of routes: ${routes.length}');
+  var routes = <lib.Route>[];
 
-    final hash = HashMap<String, List<lib.RoutePoint>>();
-    _markers.clear();
-    _polyLines.clear();
+  lib.Route? routeSelected;
+  final Set<Marker> _routeMarkers = HashSet();
+  final Set<Marker> _heartbeatMarkers = HashSet();
+  final Set<Marker> _lastHeartbeatMarkers = HashSet();
+  final Set<Circle> _circles = HashSet();
+  final Set<Polyline> _polyLines = {};
+
+  Future _putRoutesOnMap(bool zoomTo) async {
+    pp('\n\n$mm ... _putRoutesOnMap: number of routes: ${E.blueDot} ${routes.length}');
     var semCache = GetIt.instance<SemCache>();
+    final hash = HashMap<String, List<lib.RoutePoint>>();
+    _routeMarkers.clear();
+    _polyLines.clear();
+    lib.RouteLandmark? mLandmark;
     for (var route in routes) {
-      final points = await semCache.getRoutePoints(route.routeId!, route.associationId!);
-      final marks = await semCache.getRouteLandmarks(routeId: route.routeId!, associationId: route.associationId!);
+      final points =
+          await semCache.getRoutePoints(route.routeId!, route.associationId!);
+      final marks = await semCache.getRouteLandmarks(
+          routeId: route.routeId!, associationId: route.associationId!);
       hash[route.routeId!] = points;
       //add polyline
       final List<LatLng> latLngs = [];
@@ -118,7 +183,9 @@ class LocationResponseMapState extends State<LocationResponseMap> {
       _polyLines.add(polyLine);
 
       int index = 0;
-
+      if (marks.isNotEmpty) {
+        mLandmark = marks.first;
+      }
       for (var routeLandmark in marks) {
         final icon = await getMarkerBitmap(64,
             text: '${index + 1}',
@@ -126,7 +193,7 @@ class LocationResponseMapState extends State<LocationResponseMap> {
             fontSize: 28,
             fontWeight: FontWeight.w900);
 
-        _markers.add(Marker(
+        _routeMarkers.add(Marker(
             markerId: MarkerId(routeLandmark.landmarkId!),
             icon: icon,
             zIndex: 1,
@@ -135,27 +202,132 @@ class LocationResponseMapState extends State<LocationResponseMap> {
             infoWindow: InfoWindow(
                 title: routeLandmark.landmarkName,
                 snippet:
-                '🍎Landmark on route:\n\n ${routeLandmark.routeName}')));
+                    '🍎Landmark on route:\n\n ${routeLandmark.routeName}')));
         index++;
       }
     }
-
+    getAllMarkers();
     if (zoomTo) {
-      if (hash.isNotEmpty) {
-        final m = hash.values.first.first;
-        final latLng =
-        LatLng(m.position!.coordinates.last, m.position!.coordinates.first);
+      if (mLandmark != null) {
+        final latLng = LatLng(mLandmark.position!.coordinates.last,
+            mLandmark.position!.coordinates.first);
         _zoomToPosition(latLng);
       }
+    } else {
+      setState(() {});
     }
   }
 
+  Set<Marker> allMarkers = {};
+
+  // Method to get all markers from all sets
+  void getAllMarkers() {
+    allMarkers.clear();
+    allMarkers.addAll(_routeMarkers);
+    allMarkers.addAll(_heartbeatMarkers);
+    allMarkers.addAll(_lastHeartbeatMarkers);
+  }
+
+  Future _putCarOnMap(
+      {required String vehicleReg,
+      required String created,
+      required double latitude,
+      required double longitude}) async {
+    telemetry.sort((a, b) => a.created!.compareTo(b.created!));
+    if (mounted) {
+      setState(() {
+        showDot = true;
+      });
+    }
+    final icon2 = await getTaxiMapIcon(
+        iconSize: 360,
+        text: vehicleReg,
+        style: myTextStyle(color: Colors.white),
+        path: 'assets/car2.png');
+
+    final icon = await getMarkerBitmap(120,
+        text: vehicleReg,
+        color: 'yellow',
+        fontSize: 16,
+        fontWeight: FontWeight.w300);
+
+    pp('$mm _putCarOnMap: latitude: $latitude longitude: $longitude');
+    final latLng = LatLng(latitude, longitude);
+
+    final key = DateTime.parse(created);
+    allMarkers.clear();
+    allMarkers.add(Marker(
+        markerId: MarkerId('hb_$key'),
+        icon: icon,
+        zIndex: 4,
+        position: latLng,
+        onTap: () {
+          pp('$mm ... on Marker tapped ...');
+          _showVehicleDataBottomSheet();
+        },
+        infoWindow: InfoWindow(
+            title: vehicleReg,
+            onTap: () async {
+              pp('$mm ... on infoWindow tapped...$vehicleReg');
+              _showVehicleDataBottomSheet();
+            },
+            snippet: getFormattedDateLong(created))));
+    //
+    // getAllMarkers();
+    if (mounted) {
+      setState(() {});
+    }
+
+    try {
+      await _zoomToPosition(LatLng(latitude, longitude));
+      if (mounted) {
+        setState(() {
+          showDot = false;
+        });
+      }
+    } catch (e) {
+      pp('$mm some error with zooming? ${E.redDot}${E.redDot}${E.redDot}${E.redDot}'
+          ' $e');
+    }
+  }
+
+  void _handleTap() async {
+    setState(() {
+      busy = true;
+    });
+    try {
+      final date = DateTime.now()
+          .toUtc()
+          .subtract(Duration(hours: hours))
+          .toIso8601String();
+      final then = DateTime(DateTime.now().year, DateTime.now().month,
+              DateTime.now().day, 23, 59, 59)
+          .toUtc()
+          .toIso8601String();
+
+      vehicleData = await listApiDog.getVehicleData(
+          vehicleId: widget.vehicle.vehicleId!, startDate: date, endDate: then);
+      setState(() {
+        showDetails = true;
+      });
+    } catch (e) {
+      pp(e);
+    }
+    setState(() {
+      busy = false;
+    });
+  }
+
+  bool showDetails = false;
+
   Future<void> _zoomToPosition(LatLng latLng) async {
-    var cameraPos = CameraPosition(target: latLng, zoom: 13.4);
+    pp('$mm _zoomToPosition: latitude: ${latLng.latitude} longitude: ${latLng.longitude}');
+    var cameraPos = CameraPosition(target: latLng, zoom: 16);
     try {
       await googleMapController
           .animateCamera(CameraUpdate.newCameraPosition(cameraPos));
       setState(() {
+        showDot = true;
       });
     } catch (e) {
       pp('$mm some error with zooming? ${E.redDot} '
@@ -163,196 +335,253 @@ class LocationResponseMapState extends State<LocationResponseMap> {
     }
   }
 
-  Future<BitmapDescriptor> buildIcon(
-      {required int index,
-      required String color,
-      required Color borderColor,
-      required Color textColor,
-      required TextStyle style}) async {
-    final icon = getMarkerBitmap(72,
-        text: '${index + 1}',
-        color: color,
-        fontSize: 32,
-        fontWeight: FontWeight.w900);
-    return icon;
+  void _printRoutes() {
+    int cnt = 1;
+    for (var r in routes) {
+      pp('$mm route #:$cnt ${E.appleRed} ${r.name}');
+      cnt++;
+    }
   }
 
+  bool hybrid = true;
 
-  Future<void> putResponseOnMap() async {
-    pp('$mm _putResponseOnMap .......................'
-        '${widget.locationResponse.vehicleReg}');
-
-    final latLng = LatLng(widget.locationResponse.position!.coordinates[1],
-        widget.locationResponse.position!.coordinates[0]);
-
-    final icon = await getTaxiMapIcon(iconSize: 220,
-        text: widget.locationResponse.vehicleReg!, style: const TextStyle(
-          color: Colors.yellow,
-          fontWeight: FontWeight.w900,
-          fontSize: 32,
-        ), path: 'assets/car2.png');
-    _markers.add(Marker(
-        markerId: MarkerId(widget.locationResponse.vehicleId!),
-        icon: icon,
-        zIndex: 2,
-        position: latLng,
-        onTap: () {
-          pp('$mm ... car tapped. find routes ...');
-        },
-        infoWindow: InfoWindow(
-          title: widget.locationResponse.vehicleReg,
-        )));
-
-    setState(() {});
-    _zoomTo(latLng);
+  @override
+  void dispose() {
+    _controller.dispose();
+    telemetryStreamSub.cancel();
+    super.dispose();
   }
 
-  Future<void> _zoomTo(LatLng latLng) async {
-    pp('$mm ....... zoom to $latLng');
-    var cameraPos = CameraPosition(target: latLng, zoom: 14.0);
-    googleMapController.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
-
-  }
-
-  void _setTexts() async {
-    final c = prefs.getColorAndLocale();
-    final locale = c.locale;
-    locationResponseText =
-        await translator.translate('locationResponse', locale);
-    dateText = await translator.translate('date', locale);
-    loadingRoutes = await translator.translate('loadingRoutes', locale);
-    taxiCurrentLocation =
-        await translator.translate('taxiCurrentLocation', locale);
-    setState(() {});
-  }
+  bool showDot = false;
 
   @override
   Widget build(BuildContext context) {
-    final localDate = DateTime.parse(widget.locationResponse.created!)
-        .toLocal()
-        .toIso8601String();
-    final date = getFormattedDateLong(localDate);
     return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          leading: const SizedBox(),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+        child: Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            Text(
+              'Current Vehicle Location:',
+              style: myTextStyle(),
+            ),
+            gapW16,
+            Text('${widget.vehicle.vehicleReg}',
+              style: myTextStyleBold(),
+            ),
+          ],
+        )
+      ),
+      body: Stack(
+        children: [
+          Column(
             children: [
-              Text(
-                locationResponseText == null
-                    ? 'Response Map'
-                    : locationResponseText!,
-                style: myTextStyleMediumLargeWithColor(
-                    context, Theme.of(context).primaryColor, 18),
-              ),
+              Expanded(
+                  child: GoogleMap(
+                initialCameraPosition: initialCameraPosition,
+                mapType: hybrid ? MapType.hybrid : MapType.normal,
+                markers: allMarkers,
+                polylines: _polyLines,
+                onMapCreated: (cont) {
+                  pp('$mm .......... onMapCreated set up cluster managers ...........');
+                  _googleMapCompleter.complete(cont);
+                  googleMapController = cont;
+                  _putResponseOnMap();
+                },
+              )),
             ],
           ),
-          // actions: [
-          //   IconButton(
-          //       onPressed: () {
-          //         Navigator.of(context).pop();
-          //       },
-          //       icon: const Icon(Icons.close)),
-          // ],
+          busy
+              ? const Positioned(
+                  child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 4,
+                    backgroundColor: Colors.teal,
+                  ),
+                ))
+              : gapW8,
+        ],
+      ),
+    ));
+  }
+
+// ... other imports
+
+  void _showVehicleDataBottomSheet() async {
+    await _getVehicleData();
+    if (mounted) {
+      // 2. Create a Tween for the offset animation
+      Tween<Offset> offsetTween = Tween<Offset>(
+        begin: const Offset(0, 1), // Start below the screen
+        end: Offset.zero, // End at the normal position
+      );
+      // 3. Create an animation from the Tween and controller
+      Animation<Offset> offsetAnimation = offsetTween.animate(_controller);
+      showModalBottomSheet(
+        context: context,
+        isDismissible: true,
+        builder: (context) {
+          // 4. Wrap the bottom sheet content with a SlideTransition
+          return SlideTransition(
+            position: offsetAnimation,
+            child: _buildVehicleDataContent(),
+          );
+        },
+
+        // 5. Set `transitionAnimationController` to control the animation
+        transitionAnimationController: _controller,
+      ).whenComplete(() {
+        pp('$mm when complete');
+      });
+    }
+  }
+
+// ... rest of your code
+
+  Widget _buildVehicleDataContent() {
+    final df = DateFormat('dd MMM yyyy HH:mm');
+    var sd = df.format(DateTime.parse(startDate!));
+    var ed = df.format(DateTime.parse(endDate!));
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            startDate == null
+                ? gapW32
+                : Text(
+                    '$sd - $ed',
+                    style: myTextStyle(weight: FontWeight.w900, fontSize: 16),
+                  ),
+            gapH8,
+            VehicleDataWidget(vehicleData: vehicleData!),
+          ],
         ),
-        body: busy
-            ? Center(
-                child: Card(
-                  elevation: 8,
-                  shape: getDefaultRoundedBorder(),
-                  child: SizedBox(
-                    width: 300,
-                    height: 300,
-                    child: Column(
-                      children: [
-                        const SizedBox(
-                          height: 72,
-                        ),
-                        const CircularProgressIndicator(),
-                        const SizedBox(
-                          height: 24,
-                        ),
-                        Text(loadingRoutes == null
-                            ? 'Loading route data ...'
-                            : loadingRoutes!),
-                      ],
-                    ),
-                  ),
-                ),
-              )
-            : Stack(
-                children: [
-                  GoogleMap(
-                    initialCameraPosition: initialCameraPosition,
-                    buildingsEnabled: true,
-                    mapType: hybrid ? MapType.hybrid : MapType.normal,
-                    compassEnabled: true,
-                    mapToolbarEnabled: true,
-                    polylines: _polyLines,
-                    markers: _markers,
-                    onMapCreated: (cont) async {
-                      pp('\n$mm .......... on onMapCreated .....');
-                      googleMapController = cont;
-                      try {
-                        _mapController.complete(cont);
-                      } catch (e) {
-                        pp('$mm error ignored: $e');
-                      }
-                      await _getRoutes();
-                      putResponseOnMap();
-                    },
-                  ),
-                  Positioned(
-                      child: GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Card(
-                      shape: getDefaultRoundedBorder(),
-                      color: Colors.black38,
-                      elevation: 8,
-                      child: SizedBox(
-                        width: 220,
-                        height: 64,
-                        child: Center(
-                          child: Column(
-                            children: [
-                              const SizedBox(
-                                height: 12,
-                              ),
-                              Text(
-                                '${widget.locationResponse.vehicleReg}',
-                                style: myTextStyleMediumLargeWithColor(
-                                    context, Colors.white, 20),
-                              ),
-                              const SizedBox(
-                                height: 4,
-                              ),
-                              Text(
-                                date,
-                                style: myTextStyleSmall(context),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ))
-                ],
-              ),
       ),
     );
   }
 }
 
-class RouteDataBag {
-  lib.Route route;
-  List<lib.RouteLandmark> routeLandmarks;
-  List<lib.RoutePoint> routePoints;
+class VehicleDataWidget extends StatelessWidget {
+  const VehicleDataWidget({super.key, required this.vehicleData, this.padding});
 
-  RouteDataBag(
-      {required this.route,
-      required this.routeLandmarks,
-      required this.routePoints});
+  final lib.VehicleData vehicleData;
+  final Padding? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    int passengers = 0;
+    for (var count in vehicleData.passengerCounts) {
+      passengers += count.passengersIn!;
+    }
+    double cash = 0.00;
+    for (var count in vehicleData.commuterCashPayments) {
+      cash += count.amount!;
+    }
+    double rfcash = 0.00;
+    for (var payment in vehicleData.rankFeeCashPayments) {
+      rfcash += payment.amount!;
+    }
+    return SizedBox(
+        height: 400,
+        child: ListView(
+          children: [
+            Item(title: 'Trips', count: vehicleData.trips.length,
+              padding: padding,
+              style: myTextStyle(weight: FontWeight.w900, color: Colors.black, fontSize: 22),
+            ),
+            Item(
+                title: 'Dispatches', count: vehicleData.dispatchRecords.length),
+            Item(
+              title: 'Total Passengers',
+              count: passengers,
+              padding: padding,
+              style: myTextStyle(
+                  weight: FontWeight.w900,
+                  fontSize: 28,
+                  color: Colors.red.shade600),
+            ),
+            Item(title: 'Arrivals', count: vehicleData.vehicleArrivals.length,
+              style: myTextStyle(weight: FontWeight.normal, color: Colors.blue),
+            ),
+            Item(
+              title: 'Telemetry',
+              padding: padding,
+              count: vehicleData.vehicleTelemetry.length,
+              style: myTextStyle(weight: FontWeight.normal, color: Colors.grey),
+            ),
+            Item(
+                title: 'Commuter Cash',
+                amount: cash,
+                padding: padding,
+                style: myTextStyle(
+                    weight: FontWeight.w900,
+                    color: Colors.green.shade800,
+                    fontSize: 22)),
+            Item(
+                title: 'Rank Fee Cash',
+                amount: rfcash,
+                padding: padding,
+                style: myTextStyle(
+                    weight: FontWeight.w900,
+                    color: Colors.green.shade800,
+                    fontSize: 16)),
+          ],
+        ));
+  }
+}
+
+class Item extends StatelessWidget {
+  const Item(
+      {super.key, required this.title, this.count, this.amount, this.style, this.padding});
+
+  final String title;
+  final int? count;
+  final double? amount;
+  final TextStyle? style;
+  final Padding? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final nf = NumberFormat('###,###,###');
+    final af = NumberFormat('###,###,##0.00');
+    return Card(
+        elevation: 8,
+        child: padding?? Padding(
+            padding: EdgeInsets.all(8),
+            child: Row(
+              children: [
+                SizedBox(
+                    width: 140,
+                    child: Text(
+                      title,
+                      style: myTextStyle(
+                          weight: FontWeight.w900, color: Colors.grey),
+                    )),
+                count == null
+                    ? gapW32
+                    : Text(
+                        nf.format(count),
+                        style: style == null
+                            ? myTextStyle(
+                                weight: FontWeight.w900,
+                                fontSize: 20,
+                                color: Colors.blue.shade700)
+                            : style!,
+                      ),
+                amount == null
+                    ? gapW32
+                    : Text(
+                        af.format(amount),
+                        style: style == null
+                            ? myTextStyle(
+                                weight: FontWeight.w900,
+                                fontSize: 20,
+                                color: Colors.amber.shade700)
+                            : style!,
+                      ),
+              ],
+            )));
+  }
 }

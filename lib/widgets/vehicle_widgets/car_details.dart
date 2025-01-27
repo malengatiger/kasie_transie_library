@@ -170,7 +170,7 @@ class CarDetailsState extends State<CarDetails>
       busyWithMap = true;
       await Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
         return LocationResponseMap(
-          locationResponse: locationResponse!,
+          locationResponse: locationResponse!, vehicle: widget.vehicle,
         );
       }));
     }

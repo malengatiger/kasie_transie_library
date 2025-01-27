@@ -135,7 +135,6 @@ class ListApiDog {
     final cmd =
         '${url}vehicle/getVehicleData?vehicleId=$vehicleId&startDate=$startDate&endDate=$endDate';
     var resp = await _sendHttpGET(cmd);
-    pp('$mm getVehicleData: result: $resp');
     VehicleData? data;
     if (resp != null) {
       data = VehicleData.fromJson(resp);
