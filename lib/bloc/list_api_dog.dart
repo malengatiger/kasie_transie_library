@@ -395,6 +395,43 @@ class ListApiDog {
     return list;
   }
 
+  Future<List<FuelBrand>> getFuelBrands() async {
+    final cmd =
+        '${url}vehicle/getFuelBrands';
+    List resp = await _sendHttpGET(cmd);
+    var list = <FuelBrand>[];
+    for (var brandJson in resp) {
+      list.add(FuelBrand.fromJson(brandJson));
+    }
+
+    pp('$mm found FuelBrands from backend: ${list.length}');
+    return list;
+  }
+  Future<List<FuelTopUp>> getVehicleFuelTopUps(String vehicleId, String startDate, String endDate) async {
+    final cmd =
+        '${url}vehicle/getVehicleFuelTopUps?vehicleId=$vehicleId&startDate=$startDate&endDate=$endDate';
+    List resp = await _sendHttpGET(cmd);
+    var list = <FuelTopUp>[];
+    for (var brandJson in resp) {
+      list.add(FuelTopUp.fromJson(brandJson));
+    }
+
+    pp('$mm found FuelTopUps from backend: ${list.length}');
+    return list;
+  }
+  Future<List<FuelTopUp>> getAssociationFuelTopUps(String associationId, String startDate, String endDate) async {
+    final cmd =
+        '${url}vehicle/getAssociationFuelTopUps?associationId=$associationId&startDate=$startDate&endDate=$endDate';
+    List resp = await _sendHttpGET(cmd);
+    var list = <FuelTopUp>[];
+    for (var brandJson in resp) {
+      list.add(FuelTopUp.fromJson(brandJson));
+    }
+
+    pp('$mm found FuelTopUps from backend: ${list.length}');
+    return list;
+  }
+
   Future<List<RouteAssignment>> getVehicleRouteAssignments(
       String vehicleId, bool refresh) async {
     final list = <RouteAssignment>[];

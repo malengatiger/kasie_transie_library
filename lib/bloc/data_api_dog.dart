@@ -234,6 +234,50 @@ class DataApiDog {
     throw Exception('Vehicle photo file upload failed');
   }
 
+  Future<String> uploadFuelBrandLogo(
+      {required PlatformFile file,
+        required String fuelBrandId
+      }) async {
+    pp('$mm uploadFuelBrandLogo: 🌿........... fuelBrandId: $fuelBrandId');
+
+    var url = KasieEnvironment.getUrl();
+    var mUrl =
+        '${url}storage/uploadFuelBrandLogo?fuelBrandId=$fuelBrandId';
+    var request = http.MultipartRequest('POST', Uri.parse(mUrl));
+    if (kIsWeb) {
+      request.files.add(http.MultipartFile.fromBytes(
+        'file',
+        file.bytes!,
+        filename: file.name,
+      ));
+
+    } else {
+      // For mobile/desktop, use fromPath
+      request.files
+          .add(await http.MultipartFile.fromPath('file', file.path!));
+    }
+
+    pp('$mm mUrl calling: $mUrl');
+    token = await getAuthToken();
+    if (token == null) {
+      throw Exception('Missing auth token');
+    }
+    request.headers['Authorization'] = 'Bearer $token';
+    var response = await request.send();
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final responseBody = await response.stream.bytesToString();
+      final mJson = jsonDecode(responseBody);
+      var url = mJson['url'];
+      pp('\n\n$mm Yebo! FuelBrand logo file uploaded successfully! 🥬🥬🥬🥬🥬 $mJson\n');
+
+      return url;
+    } else {
+      pp('$mm 😈😈File upload failed with status code: 😈${response.statusCode} 😈 ${response.reasonPhrase}');
+    }
+    throw Exception('File upload failed');
+  }
+
   Future<VehiclePhoto> uploadVehiclePhotoFromCamera(
       {required io.File file,
       required io.File thumb,
@@ -353,6 +397,24 @@ class DataApiDog {
     return lr;
   }
 
+  Future<FuelBrand> addFuelBrand(FuelBrand fuelBrand) async {
+    final bag = fuelBrand.toJson();
+    final cmd = '${url}vehicle/addFuelBrand';
+    final res = await _callPost(cmd, bag);
+    final lr = FuelBrand.fromJson(res);
+
+    pp('$mm FuelBrand added to database: ${lr.toJson()}');
+    return lr;
+  }
+  Future<FuelTopUp> addFuelTopUp(FuelTopUp fuelTopUp) async {
+    final bag = fuelTopUp.toJson();
+    final cmd = '${url}vehicle/addFuelTopUp';
+    final res = await _callPost(cmd, bag);
+    final lr = FuelTopUp.fromJson(res);
+
+    pp('$mm FuelTopUp added to database: ${lr.toJson()}');
+    return lr;
+  }
   Future<dynamic> updateTrip(Trip trip) async {
     final bag = trip.toJson();
     final cmd = '${url}dispatch/updateTrip';

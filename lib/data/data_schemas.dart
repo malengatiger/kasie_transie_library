@@ -1136,7 +1136,38 @@ class LocationResponse {
 
   Map<String, dynamic> toJson() => _$LocationResponseToJson(this);
 }
+@JsonSerializable(explicitToJson: true)
+class FuelTopUp {
+  String? fuelTopUpId, userId, fuelBrandId;
+  String? vehicleId, vehicleReg;
+  String? brandName;
+  String? userName;
+  String? created;
+  String? associationId, associationName;
+  double? amount, numberOfLitres;
+  Position? position;
 
+
+  FuelTopUp({
+     required this.fuelTopUpId,
+     required this.vehicleId,
+     required this.vehicleReg,
+     required this.fuelBrandId,
+     required this.brandName,
+     required this.userId,
+     required this.userName,
+      this.created,
+     required this.associationId,
+     required this.associationName,
+     required this.amount,
+     required this.numberOfLitres,
+     required this.position});
+
+  factory FuelTopUp.fromJson(Map<String, dynamic> json) =>
+      _$FuelTopUpFromJson(json);
+
+  Map<String, dynamic> toJson() => _$FuelTopUpToJson(this);
+}
 
 @JsonSerializable(explicitToJson: true)
 class LocationResponseError {
@@ -1161,7 +1192,21 @@ class LocationResponseError {
 
   Map<String, dynamic> toJson() => _$LocationResponseErrorToJson(this);
 }
+@JsonSerializable(explicitToJson: true)
+class FuelBrand {
+  String? fuelBrandId;
+  String? brandName, logoUrl;
 
+  FuelBrand(
+      {this.fuelBrandId,
+        required this.brandName,
+        required this.logoUrl});
+
+  factory FuelBrand.fromJson(Map<String, dynamic> json) =>
+      _$FuelBrandFromJson(json);
+
+  Map<String, dynamic> toJson() => _$FuelBrandToJson(this);
+}
 @JsonSerializable(explicitToJson: true)
 class RouteLandmark {
   String? routeId;

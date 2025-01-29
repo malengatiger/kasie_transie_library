@@ -1192,6 +1192,40 @@ Map<String, dynamic> _$LocationResponseToJson(LocationResponse instance) =>
       'position': instance.position?.toJson(),
     };
 
+FuelTopUp _$FuelTopUpFromJson(Map<String, dynamic> json) => FuelTopUp(
+      fuelTopUpId: json['fuelTopUpId'] as String?,
+      vehicleId: json['vehicleId'] as String?,
+      vehicleReg: json['vehicleReg'] as String?,
+      fuelBrandId: json['fuelBrandId'] as String?,
+      brandName: json['brandName'] as String?,
+      userId: json['userId'] as String?,
+      userName: json['userName'] as String?,
+      created: json['created'] as String?,
+      associationId: json['associationId'] as String?,
+      associationName: json['associationName'] as String?,
+      amount: (json['amount'] as num?)?.toDouble(),
+      numberOfLitres: (json['numberOfLitres'] as num?)?.toDouble(),
+      position: json['position'] == null
+          ? null
+          : Position.fromJson(json['position'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$FuelTopUpToJson(FuelTopUp instance) => <String, dynamic>{
+      'fuelTopUpId': instance.fuelTopUpId,
+      'userId': instance.userId,
+      'fuelBrandId': instance.fuelBrandId,
+      'vehicleId': instance.vehicleId,
+      'vehicleReg': instance.vehicleReg,
+      'brandName': instance.brandName,
+      'userName': instance.userName,
+      'created': instance.created,
+      'associationId': instance.associationId,
+      'associationName': instance.associationName,
+      'amount': instance.amount,
+      'numberOfLitres': instance.numberOfLitres,
+      'position': instance.position?.toJson(),
+    };
+
 LocationResponseError _$LocationResponseErrorFromJson(
         Map<String, dynamic> json) =>
     LocationResponseError(
@@ -1216,6 +1250,18 @@ Map<String, dynamic> _$LocationResponseErrorToJson(
       'associationId': instance.associationId,
       'fcmToken': instance.fcmToken,
       'vehicleFcmToken': instance.vehicleFcmToken,
+    };
+
+FuelBrand _$FuelBrandFromJson(Map<String, dynamic> json) => FuelBrand(
+      fuelBrandId: json['fuelBrandId'] as String?,
+      brandName: json['brandName'] as String?,
+      logoUrl: json['logoUrl'] as String?,
+    );
+
+Map<String, dynamic> _$FuelBrandToJson(FuelBrand instance) => <String, dynamic>{
+      'fuelBrandId': instance.fuelBrandId,
+      'brandName': instance.brandName,
+      'logoUrl': instance.logoUrl,
     };
 
 RouteLandmark _$RouteLandmarkFromJson(Map<String, dynamic> json) =>

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
@@ -16,6 +17,7 @@ import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/payment/commuter_cash_payment_widget.dart';
 import 'package:kasie_transie_library/widgets/photo_handler.dart';
 import 'package:kasie_transie_library/widgets/scanners/dispatch_helper.dart';
+import 'package:kasie_transie_library/widgets/vehicle_widgets/fuel_top_up_widget.dart';
 
 import '../messaging/fcm_bloc.dart';
 import 'ambassador/counter.dart';
@@ -356,9 +358,16 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                Text(
-                  '${widget.vehicle.vehicleReg}',
-                  style: myTextStyle(fontSize: 36, weight: FontWeight.w900),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${widget.vehicle.vehicleReg}',
+                      style: myTextStyle(fontSize: 36, weight: FontWeight.w900),
+                    ),
+                    IconButton(onPressed: (){
+                      NavigationUtils.navigateTo(context: context, widget: FuelTopUpWidget(vehicle: widget.vehicle));
+                    }, icon: FaIcon(FontAwesomeIcons.gasPump, color: Colors.pink))
+                  ],
                 ),
                 Text(
                   '${widget.vehicle.make} ${widget.vehicle.model} ${widget.vehicle.year}',
