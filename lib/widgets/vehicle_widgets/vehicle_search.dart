@@ -128,7 +128,7 @@ class _VehicleSearchState extends State<VehicleSearch> {
             }, icon: const FaIcon(FontAwesomeIcons.arrowsRotate))
           ],
         ),
-        backgroundColor: Colors.amber[50],
+        backgroundColor: Colors.grey[50],
         body: SafeArea(
             child: Stack(
               children: [
