@@ -233,6 +233,33 @@ class SemCache {
     pp('$mm vehicles retrieved from cache: ${vehicles.length}');
     return vehicles;
   }
+
+  //
+  Future saveFuelBrands(List<FuelBrand> fuelBrands) async {
+    var db = await getDb();
+    var store = intMapStoreFactory.store('fuelBrands');
+    for (var brand in fuelBrands) {
+      store.record(DateTime.now().microsecondsSinceEpoch).put(db, brand.toJson());
+    }
+    pp('\n\n$mm fuelBrands added to cache: 🚘 🚖 ${fuelBrands.length} 🚘 🚖');
+  }
+
+  Future<List<FuelBrand>> getFuelBrands() async {
+    sp.Finder finder;
+
+    var store = intMapStoreFactory.store('fuelBrands');
+    var records = await store.find(await getDb(),);
+    pp('$mm ... getFuelBrands: found: ${records.length}');
+
+    List<FuelBrand> brands = [];
+    for (var rec in records) {
+      var brand = FuelBrand.fromJson(rec.value);
+      brands.add(brand);
+    }
+    pp('$mm brands retrieved from cache: ${brands.length}');
+    return brands;
+  }
+
   Future<Vehicle?> getVehicle(String associationId, String vehicleId) async {
 
     List<Vehicle> vehicles = await getVehicles(associationId);

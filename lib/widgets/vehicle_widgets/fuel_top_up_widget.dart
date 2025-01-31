@@ -12,8 +12,7 @@ import '../../utils/prefs.dart';
 
 class FuelTopUpWidget extends StatefulWidget {
   const FuelTopUpWidget(
-      {Key? key, required this.vehicle, required this.isLandscape})
-      : super(key: key);
+      {super.key, required this.vehicle, required this.isLandscape});
 
   final Vehicle vehicle;
   final bool isLandscape;
@@ -39,19 +38,19 @@ class FuelTopUpWidgetState extends State<FuelTopUpWidget>
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
-    _getFuelBrands();
+    _getFuelBrands(false);
   }
 
   List<FuelTopUp> fuelTopUps = [];
   List<FuelBrand> fuelBrands = [];
   FuelBrand? fuelBrand;
 
-  _getFuelBrands() async {
+  _getFuelBrands(bool refresh) async {
     setState(() {
       busy = true;
     });
     try {
-      fuelBrands = await listApiDog.getFuelBrands();
+      fuelBrands = await listApiDog.getFuelBrands(refresh);
       pp('$mm ... fuelBrands found : ${fuelBrands.length}');
     } catch (e, s) {
       pp('$e $s');

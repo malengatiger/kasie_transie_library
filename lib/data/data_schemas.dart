@@ -271,6 +271,8 @@ class AssociationData {
   List<AmbassadorPassengerCount> passengerCounts = [];
   List<VehicleArrival> vehicleArrivals = [];
   List<VehicleTelemetry> vehicleTelemetry = [];
+  List<FuelTopUp> fuelTopUps = [];
+
   String? associationName, associationId;
 
   AssociationData(
@@ -286,7 +288,7 @@ class AssociationData {
       this.rankFeeCashCheckIns,
       this.passengerCounts,
       this.vehicleArrivals,
-      this.vehicleTelemetry,
+      this.vehicleTelemetry, this.fuelTopUps,
       this.associationName,
       this.associationId);
 
@@ -308,6 +310,8 @@ class VehicleData {
   List<AmbassadorPassengerCount> passengerCounts = [];
   List<VehicleArrival> vehicleArrivals = [];
   List<VehicleTelemetry> vehicleTelemetry = [];
+  List<FuelTopUp> fuelTopUps = [];
+
   String? vehicleId, associationId;
 
   VehicleData(
@@ -320,6 +324,7 @@ class VehicleData {
       this.passengerCounts,
       this.vehicleArrivals,
       this.vehicleTelemetry,
+      this.fuelTopUps,
       this.vehicleId,
       this.associationId);
 
