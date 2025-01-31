@@ -101,9 +101,7 @@ class DeviceLocationBloc {
     }
     pp('$mm total hash values: ${hash.values.length}');
     var result = hash.values.toList();
-    // for (var r in result) {
-    //   pp('$mm getRouteDistances: route distance: ${r.distance} \t - ${r.routePoint.routeName}');
-    // }
+
     List<DistanceBag> finalDistanceBags = [];
     for (var r in result) {
       if (r.distance <= limitMetres) {

@@ -82,8 +82,9 @@ class FuelTopUpWidgetState extends State<FuelTopUpWidget>
           vehicleReg: widget.vehicle.vehicleReg!,
           fuelBrandId: fuelBrand!.fuelBrandId,
           brandName: fuelBrand!.brandName,
-          userId: widget.isLandscape? null: user!.userId,
-          userName:  widget.isLandscape? null: '${user!.firstName} ${user.lastName}',
+          userId: widget.isLandscape ? null : user!.userId,
+          userName:
+              widget.isLandscape ? null : '${user!.firstName} ${user.lastName}',
           associationId: widget.vehicle.associationId,
           associationName: widget.vehicle.associationName,
           amount: amount,
@@ -284,8 +285,8 @@ class FuelTopUpWidgetState extends State<FuelTopUpWidget>
         ])));
   }
 
-  final TextEditingController litresController = TextEditingController(),
-      amountController = TextEditingController();
+  final TextEditingController litresController = TextEditingController(text: '0'),
+      amountController = TextEditingController(text:'0.00');
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 }
 
@@ -472,11 +473,10 @@ class FuelFormLandscape extends StatelessWidget {
                   },
                   child: Padding(
                     padding: EdgeInsets.all(8),
-                    child:
-                        Text('Submit TopUp', style: myTextStyle(color: Colors.white)),
+                    child: Text('Submit TopUp',
+                        style: myTextStyle(color: Colors.white)),
                   ),
                 ),
-
               ],
             )));
   }

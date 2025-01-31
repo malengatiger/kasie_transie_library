@@ -365,7 +365,8 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                       style: myTextStyle(fontSize: 36, weight: FontWeight.w900),
                     ),
                     IconButton(onPressed: (){
-                      NavigationUtils.navigateTo(context: context, widget: FuelTopUpWidget(vehicle: widget.vehicle));
+                      NavigationUtils.navigateTo(context: context, 
+                          widget: FuelTopUpWidget(vehicle: widget.vehicle, isLandscape: false,));
                     }, icon: FaIcon(FontAwesomeIcons.gasPump, color: Colors.pink))
                   ],
                 ),

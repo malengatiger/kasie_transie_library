@@ -335,9 +335,9 @@ class PeriodWidget extends StatelessWidget {
     var end = df.format(DateTime.parse(endDate!));
 
     return Padding(
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.all(8),
         child: SizedBox(
-          height: 48,
+          height: 40,
           child: Column(
             children: [
               Row(
@@ -346,7 +346,7 @@ class PeriodWidget extends StatelessWidget {
                     width: 60,
                     child: Text('Starting',
                         style: myTextStyle(
-                            color: Colors.grey, weight: FontWeight.w900)),
+                            color: Colors.grey.shade400, weight: FontWeight.w900)),
                   ),
                   Text(start,
                       style: myTextStyle(
@@ -360,7 +360,7 @@ class PeriodWidget extends StatelessWidget {
                     child: Text(
                       'Ending',
                       style: myTextStyle(
-                          color: Colors.grey, weight: FontWeight.w900),
+                          color: Colors.grey.shade400, weight: FontWeight.w900),
                     ),
                   ),
                   Text(end,
