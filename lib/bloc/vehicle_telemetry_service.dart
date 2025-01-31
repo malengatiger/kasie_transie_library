@@ -38,8 +38,6 @@ class VehicleTelemetryService {
     });
     pp('\n\n$mm  VehicleTelemetry Timer initialized for 🌀 $minutes minutes per tick🌀');
 
-    //create initial telemetry record
-    //createTelemetry();
   }
 
   Future createTelemetry() async {
@@ -62,7 +60,7 @@ class VehicleTelemetryService {
         routeData: routeData!, limitMetres: 1000);
     if (routes.isNotEmpty) {
       route = routes.first;
-      pp('$mm nearest route: ${route.toJson()}');
+      pp('$mm nearest route: ${route.name}');
     }
     var landmarkDistanceBags =
         await locationBloc.getRouteLandmarkDistances(routeData: routeData!);
@@ -101,10 +99,10 @@ class VehicleTelemetryService {
         speed: loc.speed,
         speedAccuracy: loc.speedAccuracy);
 
-    pp('$mm Telemetry record to be sent: ${tm.toJson()}');
+    pp('$mm Telemetry record to be sent: ${tm.vehicleReg}');
     var res = await dataApiDog.addVehicleTelemetry(tm);
     _telemetryController.sink.add(tm);
-    pp('\n\n$mm Telemetry sent to stream: ${res.toJson()}\n\n');
+    pp('\n\n$mm Telemetry sent to stream: ${res.vehicleReg}\n\n');
   }
 
   Future<List<lib.VehicleTelemetry>> getTelemetry(

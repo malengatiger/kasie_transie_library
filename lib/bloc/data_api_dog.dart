@@ -512,7 +512,7 @@ class DataApiDog {
     final res = await _callPost(cmd, bag);
     final lr = VehicleTelemetry.fromJson(res);
 
-    pp('$mm VehicleTelemetry added to database: $res');
+    pp('$mm VehicleTelemetry added to database: ${lr.vehicleReg}');
     return lr;
   }
 
@@ -643,14 +643,14 @@ class DataApiDog {
     final bag = event.toJson();
     final cmd = '${url}dispatch/addVehicleArrival';
     final res = await _callPost(cmd, bag);
-    pp('$mm VehicleArrival added to database: ${res}');
+    pp('$mm VehicleArrival added to database');
   }
 
   Future addVehicleDeparture(VehicleDeparture event) async {
     final bag = event.toJson();
     final cmd = '${url}dispatch/addVehicleDeparture';
     final res = await _callPost(cmd, bag);
-    pp('$mm VehicleDeparture added to database: $res');
+    pp('$mm VehicleDeparture added to database');
   }
 
   Future addVehicleHeartbeat(VehicleHeartbeat event) async {
