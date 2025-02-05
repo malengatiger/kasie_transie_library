@@ -1022,10 +1022,9 @@ Future kasieFirebaseMessagingBackgroundHandler(fb.RemoteMessage message) async {
   final payload = message.data;
   final type = getMessageType(message);
   final mData = payload['data'];
-  pp("$mxx 🍎🍎🍎🍎locationRequest 🍎🍎🍎🍎mData: $mData");
 
   pp("$mxx 🍎🍎🍎🍎handle message in background! NO-OP except for locationRequest! 🍎🍎🍎🍎type: $type");
-  pp("$mxx 🍎🍎🍎🍎locationRequest 🍎🍎🍎🍎mData: $mData");
+  pp("$mxx 🍎🍎🍎🍎message type: $type");
 
   try {
     switch (type) {

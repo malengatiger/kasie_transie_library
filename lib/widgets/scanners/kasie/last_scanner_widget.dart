@@ -171,7 +171,7 @@ class LastScannerWidgetState extends State<LastScannerWidget> {
                         result!.rawContent,
                         style: myTextStyle(),
                       ),
-              ],
+            ],
             ),
           ),
         ),
