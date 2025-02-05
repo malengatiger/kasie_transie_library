@@ -6,10 +6,21 @@ import 'package:flutter/services.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class LastScannerWidget extends StatefulWidget {
-  const LastScannerWidget({super.key, required this.onScanned});
+import '../../../data/data_schemas.dart';
+import '../../../data/ticket.dart';
 
-  final Function(dynamic) onScanned;
+class LastScannerWidget extends StatefulWidget {
+  const LastScannerWidget(
+      {super.key,
+      required this.onVehicleScanned,
+      required this.onCommuterScanned,
+      required this.onCommuterTicketScanned,
+      required this.onError});
+
+  final Function(Vehicle) onVehicleScanned;
+  final Function(Commuter) onCommuterScanned;
+  final Function(CommuterTicket) onCommuterTicketScanned;
+  final Function(String) onError;
 
   @override
   State<LastScannerWidget> createState() => LastScannerWidgetState();
@@ -27,18 +38,29 @@ class LastScannerWidgetState extends State<LastScannerWidget> {
   final _selectedCamera = -1;
   final _useAutoFocus = true;
   final _autoEnableFlash = false;
+  static const mm = '🍄🍄🍄🍄LastScannerWidget 🍄';
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero, () async {
-      _numberOfCameras = await BarcodeScanner.numberOfCameras;
-      setState(() {});
-    });
+
     _getPermission();
   }
 
   _getPermission() async {
+    var json = {
+      "vehicleId": "my-vehicle-id",
+      "vehicleReg": "GF 65 GV GP",
+      "associationId": "ass-id",
+      "associationName": "ass-name",
+      "size": 1
+    };
+    pp('$mm ${json.toString()}');
+
+    Future.delayed(Duration.zero, () async {
+      _numberOfCameras = await BarcodeScanner.numberOfCameras;
+      setState(() {});
+    });
     var isGranted = await Permission.camera.isGranted;
     if (!isGranted) {
       await Permission.camera.request();
@@ -48,7 +70,7 @@ class LastScannerWidgetState extends State<LastScannerWidget> {
   }
 
   void _scan() async {
-    debugPrint('\n\n...... 🐬🐬 start scan ...');
+    debugPrint('\n\n$mm ...... 🐬🐬 start scan ...');
     setState(() {});
     try {
       var options = ScanOptions(
@@ -63,13 +85,12 @@ class LastScannerWidgetState extends State<LastScannerWidget> {
 
       result = await BarcodeScanner.scan(options: options);
       debugPrint(
-          '🐬 🐬 🐬 Result: ${result!.type.name} - 🍎🍎 ${result!.rawContent} 🍎🍎');
+          '$mm 🐬 🐬 🐬 Result: ${result!.type.name} - 🍎🍎 ${result!.rawContent} 🍎🍎');
       var json = jsonDecode(result!.rawContent);
-      myPrettyJsonPrint(json);
-      debugPrint('🐬 🐬 🐬 🍎🍎🍎🍎\n');
-      widget.onScanned(json);
-      if (mounted) {
-        Navigator.of(context).pop(json);
+      // myPrettyJsonPrint(json);
+      debugPrint('$mm 🐬 🐬 🐬 🍎🍎🍎🍎 $json \n');
+      if (result != null) {
+        _processQRCode(json!);
       }
     } on PlatformException catch (e) {
       pp(e);
@@ -77,29 +98,83 @@ class LastScannerWidgetState extends State<LastScannerWidget> {
     setState(() {});
   }
 
+  Map<String, dynamic> _stringToMap(String data) {
+    // 1. Add double quotes around keys
+    String validJson = data.replaceAllMapped(
+        RegExp(r'(\w+):'), (match) => '"${match.group(1)}":');
+
+    // 2. Correctly handle date strings
+    validJson = validJson.replaceAllMapped(
+        RegExp(r'"(\w+)":"(.*?)"'), (match) => '"${match.group(1)}":${match.group(2)}');
+
+
+    // 3. Decode the corrected JSON string
+    return jsonDecode(validJson);
+  }
+
+  void _processQRCode(Map<String, dynamic> mJson) async {
+    pp('$mm .................. _processQRCode: ');
+    myPrettyJsonPrint(mJson);
+    try {
+
+        if (mJson['vehicleId'] != null) {
+          var car = Vehicle.fromJson(mJson!);
+          pp('$mm vehicle scanned: ${car.toJson()}');
+          widget.onVehicleScanned(car);
+          Navigator.of(context).pop(car);
+
+        }
+        if (mJson['commuterId'] != null) {
+          var c = Commuter.fromJson(mJson!);
+          pp('$mm commuter scanned: ${c.toJson()}');
+          widget.onCommuterScanned(c);
+          Navigator.of(context).pop(c);
+
+        }
+        if (mJson['commuterTicketId'] != null) {
+          var c = CommuterTicket.fromJson(mJson!);
+          pp('$mm commuter ticket scanned: ${c.toJson()}');
+          widget.onCommuterTicketScanned(c);
+          Navigator.of(context).pop(c);
+
+        }
+
+      pp('$mm _processQRCode: returning null');
+      setState(() {});
+    } catch (e, s) {
+      pp('$mm ERROR: $e - $s');
+      if (mounted) {
+        showErrorToast(
+            duration: const Duration(seconds: 5),
+            message: 'Fucked up scanner shit:  $e',
+            context: context);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-          child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text('Scan Result',
-                  style: myTextStyle(weight: FontWeight.w900, fontSize: 24)),
-              gapH32,
-              result == null
-                  ? const Text('No scan yet')
-                  : Text(
-                      result!.rawContent,
-                      style: myTextStyle(),
-                    ),
-            ],
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text('Scan Result',
+                    style: myTextStyle(weight: FontWeight.w900, fontSize: 24)),
+                gapH32,
+                result == null
+                    ? const Text('No scan yet')
+                    : Text(
+                        result!.rawContent,
+                        style: myTextStyle(),
+                      ),
+              ],
+            ),
           ),
         ),
-      ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _scan,

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:badges/badges.dart' as bd;
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
@@ -58,17 +57,16 @@ class _CarForDispatchState extends State<CarForDispatch> {
   }
 
   ListApiDog listApiDog = GetIt.instance<ListApiDog>();
+
   void _getCommuterRequests() async {
-
     var date = DateTime.now().toUtc().subtract(const Duration(hours: 1));
-    requests = await listApiDog.getRouteCommuterRequests(routeId: widget.route.routeId!,
-        startDate: date.toIso8601String());
+    requests = await listApiDog.getRouteCommuterRequests(
+        routeId: widget.route.routeId!, startDate: date.toIso8601String());
     if (mounted) {
-      setState(() {
-
-      });
+      setState(() {});
     }
   }
+
   late Timer timer;
 
   void _startTimer() {
@@ -134,26 +132,22 @@ class _CarForDispatchState extends State<CarForDispatch> {
   _scan() async {
     var vehicle = await NavigationUtils.navigateTo(
       context: context,
-      widget: const ScanTaxi(),
+      widget: ScanTaxi(
+        onTaxiScanned: (vehicle) async {
+          pp('$mm  _scan(): ....... vehicle scanned for dispatch: ${vehicle!.vehicleReg} on ${widget.route.name}');
+          _navigateToDispatch(vehicle);
+        },
+      ),
     );
-
-    await fcmService.subscribeForRouteCommuterRequests(
-        routeId: widget.route.routeId!, app: 'Marshal');
-    if (vehicle != null && vehicle is lib.Vehicle) {
-      pp('$mm  _scan(): ....... vehicle scanned for dispatch: ${vehicle!.vehicleReg} on ${widget.route.name}');
-      _navigateToDispatch(vehicle);
-    } else {
-      pp('$mm  _scan(): ... something wrong here : $vehicle');
-      var car = lib.Vehicle.fromJson(vehicle);
-      _navigateToDispatch(car);
-    }
   }
+
   @override
-void dispose() {
+  void dispose() {
     timer.cancel();
     commuterRequestSub.cancel();
     super.dispose();
-}
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -272,13 +266,15 @@ void dispose() {
                     children: [
                       Text(
                         'Passengers on Route',
-                        style: myTextStyle(color: Colors.grey, weight: FontWeight.w900),
+                        style: myTextStyle(
+                            color: Colors.grey, weight: FontWeight.w900),
                       ),
                       gapW8,
                       bd.Badge(
                         badgeContent: Text(
                           '${_getPassengers()}',
-                          style: myTextStyle(color: Colors.white, weight: FontWeight.w900),
+                          style: myTextStyle(
+                              color: Colors.white, weight: FontWeight.w900),
                         ),
                         badgeStyle: bd.BadgeStyle(
                           elevation: 8,
@@ -287,7 +283,8 @@ void dispose() {
                         ),
                       ),
                       gapW8,
-                      Text('Requests', style: myTextStyle(color: Colors.grey, fontSize: 12)),
+                      Text('Requests',
+                          style: myTextStyle(color: Colors.grey, fontSize: 12)),
                       gapW8,
                       bd.Badge(
                         badgeContent: Text(
@@ -302,7 +299,7 @@ void dispose() {
                       ),
                     ],
                   ),
-          )
+                )
               : gapW32,
         ],
       )),
@@ -319,8 +316,9 @@ void dispose() {
 }
 
 class ScanTaxi extends StatefulWidget {
-  const ScanTaxi({super.key});
+  const ScanTaxi({super.key, required this.onTaxiScanned});
 
+  final Function(lib.Vehicle) onTaxiScanned;
   @override
   State<ScanTaxi> createState() => _ScanTaxiState();
 }
@@ -340,20 +338,18 @@ class _ScanTaxiState extends State<ScanTaxi> {
       try {
         await NavigationUtils.navigateTo(
             context: context,
-            widget: LastScannerWidget(onScanned: (json) {
-              pp('$mm ScanTaxi: onScanned; ... will pop');
-              if (json['vehicleId'] != null && json['vehicleReg'] != null) {
-                myPrettyJsonPrint(json);
-                var car = lib.Vehicle.fromJson(json);
-                Navigator.of(context).pop(car);
-              } else {
-                showErrorToast(
-                    duration: const Duration(seconds: 2),
-                    toastGravity: ToastGravity.BOTTOM,
-                    message: 'The QR Code scanned is not a vehicle',
-                    context: context);
-              }
-            }));
+            widget: LastScannerWidget(
+              onVehicleScanned: (json) {
+                pp('$mm _navigateToScanner: onScanned; ... will pop; json: $json');
+                widget.onTaxiScanned(json);
+                Navigator.of(context).pop(json);
+              },
+              onCommuterScanned: (commuter) {},
+              onCommuterTicketScanned: (commuterTicket) {},
+              onError: (err) {
+                pp('$mm onError; $err');
+              },
+            ));
       } catch (e, s) {
         pp('$e $s');
       }

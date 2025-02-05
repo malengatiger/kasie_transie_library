@@ -52,13 +52,12 @@ class CarForRankFeeState extends State<CarForRankFee> {
   _scan() async {
     var json = await NavigationUtils.navigateTo(
       context: context,
-      widget: const ScanTaxi(),
+      widget:  ScanTaxi(onTaxiScanned: (car ) {
+        pp('$mm json scanned for dispatch: ${car.vehicleReg} ');
+        _navigateToRankFee(car);
+      },),
     );
-    if (json != null) {
-      var car = Vehicle.fromJson(json);
-      pp('$mm json scanned for dispatch: ${car.vehicleReg} ');
-      _navigateToRankFee(car);
-    }
+
   }
 
   @override

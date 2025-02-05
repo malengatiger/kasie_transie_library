@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:badges/badges.dart' as bd;
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
@@ -17,11 +19,12 @@ import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/payment/commuter_cash_payment_widget.dart';
 import 'package:kasie_transie_library/widgets/photo_handler.dart';
 import 'package:kasie_transie_library/widgets/scanners/dispatch_helper.dart';
+import 'package:kasie_transie_library/widgets/scanners/kasie/kasie_ai_scanner.dart';
+import 'package:kasie_transie_library/widgets/scanners/kasie/last_scanner_widget.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/fuel_top_up_widget.dart';
 
 import '../messaging/fcm_bloc.dart';
 import 'ambassador/counter.dart';
-import 'package:badges/badges.dart' as bd;
 
 class VehiclePassengerCount extends StatefulWidget {
   const VehiclePassengerCount(
@@ -150,6 +153,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
   }
 
   late Timer timer;
+
   _initializeTimer() async {
     pp('\n\n$mm initialize Timer for ambassador commuters');
     timer = Timer.periodic(Duration(seconds: 60), (timer) {
@@ -195,6 +199,7 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
   String? lastDate;
   int previousPassengersIn = 0;
   late lib.AmbassadorPassengerCount passengerCount;
+
   void _submitCounts() async {
     pp('$mm .. _submitCounts ...');
     setState(() {
@@ -297,6 +302,32 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
             MapViewer(commuterRequests: commuterRequests, route: widget.route));
   }
 
+  Future<void> _navigateToCommuterScan() async {
+    pp('$mm _navigateToCommuterScan ...');
+    if (mounted) {
+      // try {
+      //   await NavigationUtils.navigateTo(
+      //       context: context,
+      //       widget: CommuterScanner(onScanned: (json) {
+      //         pp('$mm Scan : onScanned; ... will pop');
+      //         if (json['commuterId'] != null) {
+      //           myPrettyJsonPrint(json);
+      //           var commuter = lib.Commuter.fromJson(json);
+      //           Navigator.of(context).pop(commuter);
+      //         } else {
+      //           showErrorToast(
+      //               duration: const Duration(seconds: 2),
+      //               toastGravity: ToastGravity.BOTTOM,
+      //               message: 'The QR Code scanned is not a commuter',
+      //               context: context);
+      //         }
+      //       }));
+      // } catch (e, s) {
+      //   pp('$e $s');
+      // }
+    }
+  }
+
   _onPassengersIn(int number) {
     setState(() {
       currentPassengers = currentPassengers + number;
@@ -358,16 +389,24 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       '${widget.vehicle.vehicleReg}',
                       style: myTextStyle(fontSize: 36, weight: FontWeight.w900),
                     ),
-                    IconButton(onPressed: (){
-                      NavigationUtils.navigateTo(context: context, 
-                          widget: FuelTopUpWidget(vehicle: widget.vehicle, isLandscape: false,));
-                    }, icon: FaIcon(FontAwesomeIcons.gasPump, color: Colors.pink))
+                    IconButton(
+                        onPressed: () {
+                          NavigationUtils.navigateTo(
+                              context: context,
+                              widget: FuelTopUpWidget(
+                                vehicle: widget.vehicle,
+                                isLandscape: false,
+                              ));
+                        },
+                        icon: FaIcon(FontAwesomeIcons.gasPump,
+                            color: Colors.pink))
                   ],
                 ),
                 Text(
@@ -391,16 +430,27 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                 PassengerCounter(
                     title: 'Passengers In',
                     count: 50,
-                    fontSize: 28,
+                    fontSize: 24,
                     onNumberSelected: (number) {
                       _onPassengersIn(number);
                     },
                     color: Colors.blue),
                 gapH8,
+                SizedBox(width:300, child: ElevatedButton(
+                   style: ButtonStyle(
+                     backgroundColor: WidgetStatePropertyAll(Colors.teal),
+                     elevation: WidgetStatePropertyAll(4),
+                   ),
+                    onPressed: () {
+                      _navigateToCommuterScan();
+                    },
+                    child:  Text('Scan Commuter', style: myTextStyle(color: Colors.white),)),),
+                gapH32,
+                gapH16,
                 PassengerCounter(
                     title: 'Passengers Out',
                     count: 50,
-                    fontSize: 28,
+                    fontSize: 24,
                     onNumberSelected: (number) {
                       _onPassengersOut(number);
                     },
@@ -418,13 +468,13 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                               style: myTextStyle(
                                   weight: FontWeight.w900,
                                   fontSize: 18,
-                                  color: Colors.grey),
+                                  color: Colors.grey.shade400),
                             ),
                             gapW32,
                             Text(
                               '$currentPassengers',
                               style: myTextStyle(
-                                  fontSize: 36,
+                                  fontSize: 24,
                                   color: Colors.black,
                                   weight: FontWeight.w900),
                             )

@@ -54,31 +54,18 @@ class _CarForAmbassadorState extends State<CarForAmbassador> {
 
 
   _scan() async {
-    // showToast(
-    //     padding: 20,
-    //     duration: const Duration(seconds: 3),
-    //     backgroundColor: Colors.amber.shade800,
-    //     textStyle: myTextStyle(color: Colors.white),
-    //     message: 'Scanning feature under construction!',
-    //     context: context);
-    // return;
 
     var vehicle = await NavigationUtils.navigateTo(
       context: context,
-      widget: const ScanTaxi(),
+      widget:  ScanTaxi(onTaxiScanned: (vehicle ) {
+        pp('$mm  _scan(): ....... vehicle scanned for ambassador: ${vehicle.vehicleReg}');
+        if (mounted) {
+          pp('$mm  _scan(): ....... popping: ${vehicle.vehicleReg}');
+          Navigator.of(context).pop(vehicle);
+        }
+      },),
     );
-    if (vehicle != null && vehicle is lib.Vehicle) {
-      pp('$mm  _scan(): ....... vehicle scanned for dispatch: ${vehicle!.vehicleReg}');
-      if (mounted) {
-        Navigator.of(context).pop(vehicle);
-      }
-    } else {
-      pp('$mm  _scan(): ... something wrong here : $vehicle');
-      var car = lib.Vehicle.fromJson(vehicle);
-      if (mounted) {
-        Navigator.of(context).pop(car);
-      }
-    }
+
   }
 
   @override

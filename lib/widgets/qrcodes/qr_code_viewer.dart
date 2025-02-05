@@ -12,14 +12,14 @@ class QrCodeViewer extends StatelessWidget {
       body: SafeArea(
         child: Center(
             child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.all(4),
           child: Card(
-              elevation: 8,
+              elevation: 2,
               child: Padding(
-                padding: EdgeInsets.all(16),
+                padding: EdgeInsets.all(4),
                 child: CachedNetworkImage(
                   height: 400,
-                  width: 400,
+                  width: 420,
                   imageUrl: qrCodeUrl,
                 ),
               )),

@@ -27,9 +27,9 @@ class _PassengerCounterState extends State<PassengerCounter> {
   @override
   Widget build(BuildContext context) {
     return Card(
-        elevation: 8,
+        elevation: 4,
         child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: Row(mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(widget.title),
