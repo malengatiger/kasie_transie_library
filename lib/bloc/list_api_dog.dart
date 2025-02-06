@@ -652,6 +652,20 @@ class ListApiDog {
     return list;
   }
 
+  Future<List<CommuterRequest>> getCommuterRequestsFromBackend(
+      String commuterId) async {
+    final cmd = '${url}commuter/getCommuterRequests?commuterId=$commuterId';
+
+    List resp = await _sendHttpGET(cmd);
+    var list = <CommuterRequest>[];
+    for (var json in resp) {
+      list.add(CommuterRequest.fromJson(json));
+    }
+
+    pp('$mm commuter from backend: ${list.length}');
+    return list;
+  }
+
   Future<List<DispatchRecord>> getMarshalDispatchesFromBackend(
       String userId, int days) async {
     final startDate = DateTime.now().toUtc().subtract(Duration(days: days));

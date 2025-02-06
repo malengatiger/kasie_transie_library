@@ -104,9 +104,8 @@ class LastScannerWidgetState extends State<LastScannerWidget> {
         RegExp(r'(\w+):'), (match) => '"${match.group(1)}":');
 
     // 2. Correctly handle date strings
-    validJson = validJson.replaceAllMapped(
-        RegExp(r'"(\w+)":"(.*?)"'), (match) => '"${match.group(1)}":${match.group(2)}');
-
+    validJson = validJson.replaceAllMapped(RegExp(r'"(\w+)":"(.*?)"'),
+        (match) => '"${match.group(1)}":${match.group(2)}');
 
     // 3. Decode the corrected JSON string
     return jsonDecode(validJson);
@@ -116,30 +115,37 @@ class LastScannerWidgetState extends State<LastScannerWidget> {
     pp('$mm .................. _processQRCode: ');
     myPrettyJsonPrint(mJson);
     try {
-
+      if (mJson['vehicleId'] != null ||
+          mJson['commuterId'] != null ||
+          mJson['commuterTicketId'] != null) {
         if (mJson['vehicleId'] != null) {
           var car = Vehicle.fromJson(mJson!);
-          pp('$mm vehicle scanned: ${car.toJson()}');
-          widget.onVehicleScanned(car);
-          Navigator.of(context).pop(car);
 
+          pp('$mm car scanned,  🍀 🍀 🍀 🍀 widget.onVehicleScanned has been called! POP OUT!!');
+          Navigator.of(context).pop(car);
+          pp('$mm vehicle scanned: 🍀 🍀 🍀 🍀 calling widget.onVehicleScanned ... ${car.toJson()}');
+          widget.onVehicleScanned(car);
         }
         if (mJson['commuterId'] != null) {
           var c = Commuter.fromJson(mJson!);
-          pp('$mm commuter scanned: ${c.toJson()}');
-          widget.onCommuterScanned(c);
-          Navigator.of(context).pop(c);
 
+          pp('$mm commuter scanned,  🍀 🍀 🍀 🍀 widget.onCommuterScanned has been called! POP OUT!!');
+          Navigator.of(context).pop(c);
+          pp('$mm commuter scanned,  🍀 🍀 🍀 🍀 calling widget.onCommuterScanned ...: ${c.toJson()}');
+          widget.onCommuterScanned(c);
         }
         if (mJson['commuterTicketId'] != null) {
           var c = CommuterTicket.fromJson(mJson!);
           pp('$mm commuter ticket scanned: ${c.toJson()}');
           widget.onCommuterTicketScanned(c);
           Navigator.of(context).pop(c);
-
         }
+      } else {
+        pp('$mm .................. _processQRCode: 😈 😈 😈 😈 unknown code');
+        widget.onError('Unknown QR code');
+        Navigator.of(context).pop();
+      }
 
-      pp('$mm _processQRCode: returning null');
       setState(() {});
     } catch (e, s) {
       pp('$mm ERROR: $e - $s');
@@ -155,32 +161,30 @@ class LastScannerWidgetState extends State<LastScannerWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text('Scan Result',
-                    style: myTextStyle(weight: FontWeight.w900, fontSize: 24)),
-                gapH32,
-                result == null
-                    ? const Text('No scan yet')
-                    : Text(
-                        result!.rawContent,
-                        style: myTextStyle(),
-                      ),
-            ],
+          child: ElevatedButton(
+            style: ButtonStyle(
+              elevation: WidgetStatePropertyAll(16),
+              backgroundColor: WidgetStatePropertyAll(Colors.green.shade600),
             ),
-          ),
+            onPressed: () {
+              _scan();
+            },
+            child: Padding(padding: EdgeInsets.all(16), child: Text(
+              'Start Scanner',
+              style: myTextStyle(weight: FontWeight.w300, fontSize: 28, color: Colors.white ),
+            ),)
+          )
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _scan,
-        tooltip: 'Scan QR Code',
-        child: const Icon(Icons.scanner),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: _scan,
+      //   tooltip: 'Scan QR Code',
+      //   child: const Icon(Icons.scanner),
+      // ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
