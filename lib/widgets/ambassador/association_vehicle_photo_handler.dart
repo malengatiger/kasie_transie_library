@@ -62,6 +62,7 @@ class AssociationVehiclePhotoHandlerState
         vehicle = await NavigationUtils.navigateTo(
             context: context,
             widget: VehicleSearch(
+              showGrid: false,
               associationId: user!.associationId!,
             ));
         imageFiles.clear();

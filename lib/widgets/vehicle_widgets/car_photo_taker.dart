@@ -55,6 +55,7 @@ class CarPhotoTakerState extends State<CarPhotoTaker>
     vehicle = await NavigationUtils.navigateTo(
         context: context,
         widget: VehicleSearch(
+          showGrid: true,
           associationId: user!.associationId!,
         ));
     if (vehicle != null) {

@@ -14,9 +14,11 @@ class VehicleSearch extends StatefulWidget {
   const VehicleSearch({
     super.key,
     required this.associationId,
+    required this.showGrid,
   });
 
   final String associationId;
+  final bool showGrid;
 
   @override
   State<VehicleSearch> createState() => _VehicleSearchState();
@@ -38,7 +40,7 @@ class _VehicleSearchState extends State<VehicleSearch> {
   @override
   void initState() {
     super.initState();
-    _getCars(true);
+    _getCars(false);
   }
 
   final _carPlates = <String>[];
@@ -51,7 +53,7 @@ class _VehicleSearchState extends State<VehicleSearch> {
 
     try {
       cars =
-      await listApiDog.getAssociationCars(widget.associationId!, refresh);
+          await listApiDog.getAssociationCars(widget.associationId!, refresh);
       cars.sort((a, b) => a.vehicleReg!.compareTo(b.vehicleReg!));
       _setCarPlates();
     } catch (e, s) {
@@ -82,8 +84,7 @@ class _VehicleSearchState extends State<VehicleSearch> {
         return car;
       }
     }
-    pp('$mm ..................................${E.redDot} ${E
-        .redDot} DID NOT FIND $carPlate');
+    pp('$mm ..................................${E.redDot} ${E.redDot} DID NOT FIND $carPlate');
 
     return null;
   }
@@ -101,8 +102,7 @@ class _VehicleSearchState extends State<VehicleSearch> {
     }
     carsToDisplay.clear();
 
-    pp('$mm ...  filtering cars that contain: $text from ${_carPlates
-        .length} car plates');
+    pp('$mm ...  filtering cars that contain: $text from ${_carPlates.length} car plates');
     for (var carPlate in _carPlates) {
       if (carPlate.toLowerCase().contains(text.toLowerCase())) {
         var car = _findVehicle(carPlate);
@@ -123,108 +123,133 @@ class _VehicleSearchState extends State<VehicleSearch> {
         appBar: AppBar(
           title: const Text('Find Taxi'),
           actions: [
-            IconButton(onPressed: () {
-              _getCars(true);
-            }, icon: const FaIcon(FontAwesomeIcons.arrowsRotate))
+            IconButton(
+                onPressed: () {
+                  _getCars(true);
+                },
+                icon: const FaIcon(FontAwesomeIcons.arrowsRotate))
           ],
         ),
         backgroundColor: Colors.grey[50],
         body: SafeArea(
             child: Stack(
+          children: [
+            Column(
               children: [
-                Column(
+                vehicle == null
+                    ? gapH32
+                    : Text(
+                        '${vehicle!.vehicleReg}',
+                        style: myTextStyleMediumLarge(context, 28),
+                      ),
+                gapH8,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    vehicle == null
-                        ? gapH32
-                        : Text(
-                      '${vehicle!.vehicleReg}',
-                      style: myTextStyleMediumLarge(context, 28),
-                    ),
-                    gapH8,
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        SizedBox(
-                          width: 300,
-                          child: TextField(
-                            controller: _textEditingController,
-                            onChanged: (text) {
-                              pp(' ........... changing to: $text');
-                              _runFilter(text);
-                            },
-                            decoration: InputDecoration(
-                                label: Text(
-                                  search,
-                                  style: myTextStyle(),
-                                ),
-                                icon: Icon(
-                                  Icons.search,
-                                  color: Theme
-                                      .of(context)
-                                      .primaryColor,
-                                ),
-                                border: const OutlineInputBorder(
-                                    gapPadding: 2.0),
-                                hintText: searchVehicles,
-                                hintStyle: myTextStyleSmallWithColor(
-                                    context, Theme
-                                    .of(context)
-                                    .primaryColor)),
-                          ),
-                        ),
-                        gapW32
-                      ],
-                    ),
-                    Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: bd.Badge(
-                            badgeContent: Text(
-                              '${carsToDisplay.length}',
-                              style: const TextStyle(color: Colors.white),
+                    SizedBox(
+                      width: 300,
+                      child: TextField(
+                        controller: _textEditingController,
+                        onChanged: (text) {
+                          pp(' ........... changing to: $text');
+                          _runFilter(text);
+                        },
+                        decoration: InputDecoration(
+                            label: Text(
+                              search,
+                              style: myTextStyle(),
                             ),
-                            badgeStyle: const bd.BadgeStyle(
-                                elevation: 16.0, padding: EdgeInsets.all(16.0)),
-                            position: bd.BadgePosition.topEnd(top: -64, end: 4),
-                            child: GridView.builder(
-                                gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 3),
-                                itemCount: carsToDisplay.length,
-                                itemBuilder: (_, index) {
-                                  var c = carsToDisplay[index];
-                                  return GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        vehicle = c;
-                                      });
-                                      Navigator.pop(context, vehicle);
-                                    },
-                                    child: Card(
-                                      // color: Colors.black26,
-                                      elevation: 8,
-                                      child: Center(
-                                          child: Text(
-                                            '${c.vehicleReg}',
-                                            style: myTextStyle(fontSize: 15,
-                                                weight: FontWeight.bold,
-                                                color: Colors.black),
-                                          )),
-                                    ),
-                                  );
-                                }),
-                          ),
-                        )),
-                    // gapH32,
-
+                            icon: Icon(
+                              Icons.search,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                            border: const OutlineInputBorder(gapPadding: 2.0),
+                            hintText: searchVehicles,
+                            hintStyle: myTextStyleSmallWithColor(
+                                context, Theme.of(context).primaryColor)),
+                      ),
+                    ),
+                    gapW32
                   ],
                 ),
-                busy
-                    ? const Positioned(child: Center(
-                    child: TimerWidget(
-                        title: 'Loading vehicles ...', isSmallSize: true)))
-                    : gapH4,
+                Expanded(
+                    child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: bd.Badge(
+                    badgeContent: Text(
+                      '${carsToDisplay.length}',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    badgeStyle: const bd.BadgeStyle(
+                        elevation: 16.0, padding: EdgeInsets.all(16.0)),
+                    position: bd.BadgePosition.topEnd(top: -64, end: 4),
+                    child: widget.showGrid
+                        ? GridView.builder(
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3),
+                            itemCount: carsToDisplay.length,
+                            itemBuilder: (_, index) {
+                              var c = carsToDisplay[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    vehicle = c;
+                                  });
+                                  Navigator.pop(context, vehicle);
+                                },
+                                child: Card(
+                                  // color: Colors.black26,
+                                  elevation: 8,
+                                  child: Center(
+                                      child: Text(
+                                    '${c.vehicleReg}',
+                                    style: myTextStyle(
+                                        fontSize: 15,
+                                        weight: FontWeight.bold,
+                                        color: Colors.black),
+                                  )),
+                                ),
+                              );
+                            })
+                        : ListView.builder(
+                            itemCount: carsToDisplay.length,
+                            itemBuilder: (_, index) {
+                              var c = carsToDisplay[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    vehicle = c;
+                                  });
+                                  Navigator.pop(context, c);
+                                },
+                                child: Card(
+                                    // color: Colors.black26,
+                                    elevation: 8,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(16),
+                                      child: Text(
+                                        '${c.vehicleReg}',
+                                        style: myTextStyle(
+                                            fontSize: 15,
+                                            weight: FontWeight.bold,
+                                            color: Colors.black),
+                                      ),
+                                    )),
+                              );
+                            }),
+                  ),
+                )),
+                // gapH32,
               ],
-            )));
+            ),
+            busy
+                ? const Positioned(
+                    child: Center(
+                        child: TimerWidget(
+                            title: 'Loading vehicles ...', isSmallSize: true)))
+                : gapH4,
+          ],
+        )));
   }
 }

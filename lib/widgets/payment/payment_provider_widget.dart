@@ -94,7 +94,7 @@ class PaymentProviderWidgetState extends State<PaymentProviderWidget>
     var user = prefs.getUser();
 
     final PaymentProvider paymentProvider = PaymentProvider(
-      paymentProviderId: const UuidV4().toString(),
+      paymentProviderId: const UuidV4().generate(),
       created: DateTime.now().toUtc().toIso8601String(),
       paymentProviderName: providerNameController.text,
       baseUrl: baseUrlController.text,

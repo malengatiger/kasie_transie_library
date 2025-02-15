@@ -717,16 +717,19 @@ class DataApiDog {
     try {
       final res = await _callPost(cmd, bag);
       pp('$mm Raw response: $res');
-      if (res == null) {}
+      if (res == null) {
+        throw Exception('Null response');
+      }
       final newRoute = Route.fromJson(res);
-
       pp('$mm new route added to database ...  💙 💙 💙 check!');
+      myPrettyJsonPrint(newRoute.toJson());
       pp('$mm add new route to cache ...  💙 💙 💙 check!');
       var list = await semCache.saveRoute(route: newRoute);
 
-      var dog = GetIt.instance<ListApiDog>();
-      pp('$mm putting routes on stream ... $list routes');
-      dog.putRouteInStream(list);
+      pp('$mm '
+          ' routes on cache ... ${list.length} route datas');
+      // var dog = GetIt.instance<ListApiDog>();
+      // dog.putRouteInStream(list.);
 
       return route;
     } catch (e, s) {
@@ -826,19 +829,23 @@ class DataApiDog {
     _routeLandmarkController.sink.add(route);
   }
 
-  Future<RouteLandmark> addRouteLandmark(
+  Future<List<RouteLandmark>> addRouteLandmark(
       RouteLandmark route, String associationId) async {
+    List<RouteLandmark> marks = [];
     final bag = route.toJson();
     final cmd = '${url}routes/addRouteLandmark';
-    final res = await _callPost(cmd, bag);
-    pp('$mm RouteLandmark added to database ...');
-    myPrettyJsonPrint(res);
-    final r = RouteLandmark.fromJson(res);
+    final list = await _callPost(cmd, bag);
+    pp('$mm RouteLandmark added to database ... ${list.length}');
+
+    for (var l in list) {
+      final r = RouteLandmark.fromJson(l);
+      marks.add(r);
+    }
 
     semCache.saveRouteLandmarks(
-        routeId: route.routeId!, associationId: associationId, landmarks: [r]);
-    _routeLandmarkController.sink.add(r);
-    return r;
+        routeId: route.routeId!, associationId: associationId, landmarks: marks);
+    _routeLandmarkController.sink.add(marks.last);
+    return marks;
   }
 
   Future<List<RouteLandmark>> updateAssociationRouteLandmarks(

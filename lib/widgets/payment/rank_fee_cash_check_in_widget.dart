@@ -68,7 +68,7 @@ class RankFeeCashCheckInWidgetState extends State<RankFeeCashCheckInWidget>
     DeviceLocationBloc bloc = GetIt.instance<DeviceLocationBloc>();
     var loc = await bloc.getLocation();
     var ccp = CommuterCashCheckIn(
-        commuterCashCheckInId: const UuidV4().toString(),
+        commuterCashCheckInId: const UuidV4().generate(),
         vehicleId: widget.vehicle.vehicleId,
         vehicleReg: widget.vehicle.vehicleReg,
         associationId: widget.vehicle.associationId,

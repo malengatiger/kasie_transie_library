@@ -95,7 +95,6 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
           }
         }
         widget.onGoodSignIn();
-
       } else {
         widget.onSignInError();
       }
@@ -144,6 +143,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
                               child: TextFormField(
                                 controller: emailController,
                                 style: myTextStyle(fontSize: 18),
+                                autofocus: true,
                                 decoration: InputDecoration(
                                   border: const OutlineInputBorder(),
                                   label: const Text('Email Address'),

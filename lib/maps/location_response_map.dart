@@ -29,7 +29,7 @@ class LocationResponseMapState extends State<LocationResponseMap>
   final Completer<GoogleMapController> _googleMapCompleter = Completer();
   late GoogleMapController googleMapController;
   CameraPosition initialCameraPosition =
-      const CameraPosition(target: LatLng(-25.760, 27.852), zoom: 15);
+      const CameraPosition(target: LatLng(-25.760, 27.852), zoom: 10);
 
   var telemetry = <lib.VehicleTelemetry>[];
   lib.VehicleData? vehicleData;
@@ -322,7 +322,8 @@ class LocationResponseMapState extends State<LocationResponseMap>
 
   Future<void> _zoomToPosition(LatLng latLng) async {
     pp('$mm _zoomToPosition: latitude: ${latLng.latitude} longitude: ${latLng.longitude}');
-    var cameraPos = CameraPosition(target: latLng, zoom: 16);
+    var cameraPos =
+        CameraPosition(target: latLng, zoom: 8);
     try {
       await googleMapController
           .animateCamera(CameraUpdate.newCameraPosition(cameraPos));

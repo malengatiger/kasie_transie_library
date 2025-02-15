@@ -458,8 +458,8 @@ class SemCache {
           cities: []);
       ard.routeDataList.add(rd);
       await saveAssociationRouteData(ard);
+      return ard.routeDataList;
     }
-    pp('$mm route added to cache');
   }
 
   Future<List<Route>> getRoutes({required String associationId}) async {

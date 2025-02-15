@@ -277,11 +277,11 @@ class _CitySearchState extends State<CitySearch> {
                   style: const TextStyle(color: Colors.white),
                 ),
                 badgeStyle: const bd.BadgeStyle(
-                    padding: EdgeInsets.all(8.0), badgeColor: Colors.blue),
+                    padding: EdgeInsets.all(16.0), badgeColor: Colors.blue),
                 child: GridView.builder(
                     gridDelegate:
                     const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2, mainAxisExtent: 48),
+                        crossAxisCount: 5, mainAxisExtent: 48),
                     itemCount: _citiesToDisplay.length,
                     itemBuilder: (ctx, index) {
                       var city = _citiesToDisplay.elementAt(index);

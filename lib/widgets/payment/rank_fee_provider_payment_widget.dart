@@ -97,7 +97,7 @@ class RankFeeProviderPaymentWidgetState
     var loc = await bloc.getLocation();
     var user = prefs.getUser();
     var payment = RankFeeProviderPayment(
-      rankFeeProviderPaymentId: const UuidV4().toString(),
+      rankFeeProviderPaymentId: const UuidV4().generate(),
       paymentProvider: paymentProvider!,
       vehicleId: widget.vehicle.vehicleId,
       vehicleReg: widget.vehicle.vehicleReg,

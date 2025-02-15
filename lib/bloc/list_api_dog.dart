@@ -528,6 +528,9 @@ class ListApiDog {
         '${url}routes/getAssociationRouteData?associationId=$associationId';
     try {
       var resp = await _sendHttpGET(cmd);
+      if (resp == null) {
+        return null;
+      }
       routeData = AssociationRouteData.fromJson(resp);
       pp('$mm getAssociationRouteData: ... routes: ${routeData.routeDataList.length}');
       await semCache.saveAssociationRouteData(routeData);
@@ -536,7 +539,7 @@ class ListApiDog {
 
       return routeData;
     } catch (e, s) {
-      pp('$mm ERROR in getAssociationRouteData: $e \n$s');
+      pp('$mm ERROR 😈😈😈😈 in getAssociationRouteData: $e \n$s');
       throw Exception('ERROR loading Association Route Data: $e');
     }
   }

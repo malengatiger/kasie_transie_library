@@ -9,13 +9,14 @@ class PassengerCounter extends StatefulWidget {
       required this.onNumberSelected,
       required this.color,
       required this.title,
-      required this.count, required this.fontSize});
+      required this.count, required this.fontSize, this.elevation});
 
   final Function(int) onNumberSelected;
   final Color color;
   final String title;
   final int count;
   final double fontSize;
+  final double? elevation;
 
   @override
   State<PassengerCounter> createState() => _PassengerCounterState();
@@ -27,7 +28,7 @@ class _PassengerCounterState extends State<PassengerCounter> {
   @override
   Widget build(BuildContext context) {
     return Card(
-        elevation: 4,
+        elevation: widget.elevation?? 4,
         child: Padding(
             padding: const EdgeInsets.all(8),
             child: Row(mainAxisAlignment: MainAxisAlignment.end,

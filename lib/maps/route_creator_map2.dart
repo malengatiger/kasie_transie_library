@@ -10,6 +10,7 @@ import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../bloc/data_api_dog.dart';
 import '../bloc/list_api_dog.dart';
@@ -48,7 +49,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
 
   final CameraPosition _myCurrentCameraPosition =
       const CameraPosition(target: LatLng(-26.5, 27.6), zoom: 14.6);
-  static const mm = '💟💟💟 RouteCreatorMap2: 💪💪';
+  static const mm = '💟💟💟💟 RouteCreatorMap2: 💟💟';
   final _key = GlobalKey<ScaffoldState>();
   late GoogleMapController googleMapController;
   bool busy = false;
@@ -78,8 +79,15 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
   void initState() {
     super.initState();
     color = getColor(widget.route.color!);
+    _getPermission();
   }
 
+  _getPermission() async {
+    var granted = await Permission.location.isGranted;
+    if (!granted) {
+      await Permission.locationWhenInUse.request();
+    }
+  }
   Future _setTexts() async {
     final c = prefs.getColorAndLocale();
     deleteRoutePoints =
@@ -99,8 +107,8 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
     timer?.cancel();
     try {
       await _setTexts();
-      await getRoutePoints(refresh);
-      await getRouteLandmarks(refresh);
+      await _getRoutePoints(refresh);
+      await _getRouteLandmarks(refresh);
       startTimer();
       if (routeLandmarks.isNotEmpty) {
         var last = routeLandmarks.last;
@@ -119,7 +127,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
     });
   }
 
-  Future getRouteLandmarks(bool refresh) async {
+  Future _getRouteLandmarks(bool refresh) async {
     try {
       routeLandmarks = await listApiDog.getRouteLandmarks(
           widget.route.routeId!, refresh, widget.route.associationId!);
@@ -176,32 +184,11 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
     setState(() {});
 
   }
+
   Future<void> _animateCamera(LatLng latLng, {double? zoom}) async {
     var cameraPos = CameraPosition(target: latLng, zoom: zoom ?? defaultZoom);
     final GoogleMapController controller = await _mapController.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
-  }
-  Future getRoutePoints(bool refresh) async {
-    pp('$mm .... getRoutePoints ... refresh $refresh');
-    try {
-      pp('$mm getting existing RoutePoints ....... refresh: $refresh');
-      setState(() {
-        busy = true;
-      });
-      existingRoutePoints = await listApiDog.getRoutePoints(
-          widget.route.routeId!, refresh, widget.route.associationId!);
-      pp('$mm .......... existingRoutePoints ....  🍎 '
-          '${existingRoutePoints.length} points');
-      routePointIndex = existingRoutePoints.length;
-      if (existingRoutePoints.isNotEmpty) {
-        _addPolyLine();
-      }
-    } catch (e, stack) {
-      pp('$mm ERROR: $e - $stack');
-    }
-    setState(() {
-      busy = false;
-    });
   }
 
   void _addPolyLine() {
@@ -253,11 +240,11 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
     super.dispose();
   }
 
-  Future<void> _zoomToStartCity() async {
+  Future<void> _zoomToEndCity() async {
     if (widget.route.routeStartEnd != null) {
       final latLng = LatLng(
-          widget.route.routeStartEnd!.startCityPosition!.coordinates.last,
-          widget.route.routeStartEnd!.startCityPosition!.coordinates.first);
+          widget.route.routeStartEnd!.endCityPosition!.coordinates.last,
+          widget.route.routeStartEnd!.endCityPosition!.coordinates.first);
       var cameraPos = CameraPosition(target: latLng, zoom: 13.0);
       final GoogleMapController controller = await _mapController.future;
       controller.animateCamera(CameraUpdate.newCameraPosition(cameraPos));
@@ -266,6 +253,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
   }
 
   DeviceLocationBloc locationBloc = GetIt.instance<DeviceLocationBloc>();
+
   bool checkDistance(LatLng latLng) {
     double? mLat, mLng;
     lib.RoutePoint? prev;
@@ -423,7 +411,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
               pp('\n$mm ..... Google Map has been created and is ready to have shit placed on iit!\n');
               _mapController.complete(controller);
               googleMapController = controller;
-              _zoomToStartCity();
+              _zoomToEndCity();
               _getPointsAndLandmarks(true);
             },
           ),
@@ -439,7 +427,7 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
                         setState(() {
                           isHybrid = !isHybrid;
                         });
-                        getRoutePoints(true);
+                        _getRoutePoints(true);
                       },
                       icon: Icon(
                         Icons.album_outlined,
@@ -558,5 +546,30 @@ class RouteCreatorMap2State extends State<RouteCreatorMap2> {
                 ))
               : const SizedBox(),
         ]));
+  }
+
+  Future _getRoutePoints(bool refresh) async {
+    pp('$mm .... getRoutePoints ... refresh $refresh');
+    try {
+      pp('$mm getting existing RoutePoints ....... refresh: $refresh');
+      setState(() {
+        busy = true;
+      });
+      existingRoutePoints = await listApiDog.getRoutePoints(
+          widget.route.routeId!, refresh, widget.route.associationId!);
+      existingRoutePoints.sort((a,b) => a.index!.compareTo(b.index!));
+      pp('$mm .......... existingRoutePoints ....  🍎 '
+          '${existingRoutePoints.length} points');
+      routePointIndex = existingRoutePoints.length;
+      rpList.addAll(existingRoutePoints);
+      if (existingRoutePoints.isNotEmpty) {
+        _addPolyLine();
+      }
+    } catch (e, stack) {
+      pp('$mm ERROR: $e - $stack');
+    }
+    setState(() {
+      busy = false;
+    });
   }
 }

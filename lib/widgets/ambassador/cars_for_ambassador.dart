@@ -42,6 +42,7 @@ class _CarForAmbassadorState extends State<CarForAmbassador> {
     var vehicle = await NavigationUtils.navigateTo(
       context: context,
       widget: VehicleSearch(
+        showGrid: false,
         associationId: widget.associationId,
       ),
     );

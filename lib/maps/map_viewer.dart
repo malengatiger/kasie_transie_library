@@ -37,7 +37,7 @@ class MapViewerState extends State<MapViewer> {
   final Completer<GoogleMapController> _mapController = Completer();
   late GoogleMapController googleMapController;
   CameraPosition? _myCurrentCameraPosition;
-  static const mm = '😡😡😡😡😡😡😡 MapViewer: 💪 ';
+  static const mm = '😡😡😡😡😡😡😡 MapViewer: 😡😡 ';
   ListApiDog listApiDog = GetIt.instance<ListApiDog>();
   Prefs prefs = GetIt.instance<Prefs>();
   DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
@@ -74,9 +74,10 @@ class MapViewerState extends State<MapViewer> {
     setState(() {
       busy = true;
     });
-    pp('\n\n$mm getting route data for ${widget.route.name}');
+
+    pp('\n\n$mm ..... getting route data for ${widget.route.name}');
     routeData = await listApiDog.getSingleRouteData(routeId: widget.route.routeId!,
-        associationId: widget.route.associationId!, refresh: false);
+        associationId: widget.route.associationId!, refresh: true);
 
     if (routeData != null) {
       pp('$mm route data found: ${routeData?.landmarks.length} landmarks');
@@ -125,12 +126,14 @@ class MapViewerState extends State<MapViewer> {
     for (var landmark in routeLandmarks) {
       final latLng = LatLng(landmark.position!.coordinates.last,
           landmark.position!.coordinates.first);
+      pp('$mm  ... latLng: $latLng} ... ');
 
       final icon = await getMarkerBitmap(72,
           text: '${landmarkIndex + 1}',
           color: widget.route.color ?? 'black',
           fontSize: 14,
           fontWeight: FontWeight.w900);
+      pp('$mm  ... landmarkIndex: $landmarkIndex} ... adding marker');
 
       _markers.add(Marker(
           markerId: MarkerId('${landmark.landmarkId}'),
@@ -154,6 +157,9 @@ class MapViewerState extends State<MapViewer> {
     if (widget.commuterRequests != null && widget.commuterRequests!.isNotEmpty) {
       await _setCommuterRequests();
     }
+    setState(() {
+
+    });
   }
   int _getPassengers() {
     var cnt = 0;
@@ -318,6 +324,9 @@ class MapViewerState extends State<MapViewer> {
         polylineId: PolylineId(DateTime.now().toIso8601String()));
 
     _polyLines.add(polyLine);
+    setState(() {
+
+    });
   }
 
   String waitingForGPS = 'waiting for mapping ...';
@@ -326,8 +335,6 @@ class MapViewerState extends State<MapViewer> {
 
   @override
   Widget build(BuildContext context) {
-    // pp('$mm .......... build ... markers: ${_markers.length} polyline: ${_polyLines.length}');
-
     return Scaffold(
         key: _key,
         body: _myCurrentCameraPosition == null

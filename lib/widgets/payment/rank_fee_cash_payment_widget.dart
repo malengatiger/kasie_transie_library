@@ -67,7 +67,7 @@ class RankFeeCashPaymentWidgetState extends State<RankFeeCashPaymentWidget>
     DeviceLocationBloc bloc = GetIt.instance<DeviceLocationBloc>();
     var loc = await bloc.getLocation();
     var rfPayment = RankFeeCashPayment(
-        rankFeeCashPaymentId: const UuidV4().toString(),
+        rankFeeCashPaymentId: const UuidV4().generate(),
         vehicleId: widget.vehicle.vehicleId,
         vehicleReg: widget.vehicle.vehicleReg,
         associationId: widget.vehicle.associationId,
@@ -154,6 +154,7 @@ class RankFeeCashPaymentForm extends StatelessWidget {
           ),
           TextFormField(
             keyboardType: TextInputType.number,
+            autofocus: true,
             decoration: const InputDecoration(
               hintText: "Please enter amount",
               label: Text('Amount'),

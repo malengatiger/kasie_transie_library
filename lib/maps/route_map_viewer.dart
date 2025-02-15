@@ -38,7 +38,7 @@ class RouteMapViewerState extends State<RouteMapViewer> {
   final Completer<GoogleMapController> _mapController = Completer();
   late GoogleMapController googleMapController;
   CameraPosition? _myCurrentCameraPosition;
-  static const mm = '😡😡😡😡😡😡😡 RouteMapViewer: 💪 ';
+  static const mm = '💪💪💪💪💪💪💪💪 RouteMapViewer: 💪 ';
   ListApiDog listApiDog = GetIt.instance<ListApiDog>();
   Prefs prefs = GetIt.instance<Prefs>();
   DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
@@ -89,13 +89,17 @@ class RouteMapViewerState extends State<RouteMapViewer> {
   }
 
   Future _getRouteLandmarks() async {
-    routeLandmarks = routeData!.landmarks;
+    var routeData = await listApiDog.getAssociationRouteData(widget.route.associationId!, true);
+    for (var m in routeData!.routeDataList) {
+      routeLandmarks.addAll(m.landmarks);
+    }
     pp('$mm _getRouteLandmarks ...  route: ${widget.route.routeId!}; found: ${routeLandmarks.length} ');
 
     landmarkIndex = 0;
     for (var landmark in routeLandmarks) {
       final latLng = LatLng(landmark.position!.coordinates.last,
           landmark.position!.coordinates.first);
+      pp('$mm .............. marker latLng: $latLng  ');
 
       final icon = await getMarkerBitmap(72,
           text: '${landmarkIndex + 1}',

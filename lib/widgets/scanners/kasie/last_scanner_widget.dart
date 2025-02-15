@@ -168,7 +168,7 @@ class LastScannerWidgetState extends State<LastScannerWidget> {
           child: ElevatedButton(
             style: ButtonStyle(
               elevation: WidgetStatePropertyAll(16),
-              backgroundColor: WidgetStatePropertyAll(Colors.green.shade600),
+              backgroundColor: WidgetStatePropertyAll(Colors.green.shade700),
             ),
             onPressed: () {
               _scan();

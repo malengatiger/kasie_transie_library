@@ -115,7 +115,7 @@ class CashCheckInWidgetState extends State<CashCheckInWidget>
       var loc = await bloc.getLocation();
       if (widget.isCommuterCash) {
         var ccp = CommuterCashCheckIn(
-            commuterCashCheckInId: const UuidV4().generate().toString(),
+            commuterCashCheckInId: const UuidV4().generate(),
             vehicleId: widget.vehicle?.vehicleId,
             vehicleReg: widget.vehicle?.vehicleReg,
             associationId: user.associationId,
@@ -146,7 +146,7 @@ class CashCheckInWidgetState extends State<CashCheckInWidget>
       }
       if (widget.isRankFeeCash) {
         var ccp = RankFeeCashCheckIn(
-            rankFeeCashCheckInId: const UuidV4().generate().toString(),
+            rankFeeCashCheckInId: const UuidV4().generate(),
             vehicleId: widget.vehicle?.vehicleId,
             vehicleReg: widget.vehicle?.vehicleReg,
             associationId: user!.associationId,

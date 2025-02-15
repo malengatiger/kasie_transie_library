@@ -189,6 +189,7 @@ class CommuterCashPaymentForm extends StatelessWidget {
             children: [
               TextFormField(
                 controller: amountController,
+                autofocus: true,
                 keyboardType: const TextInputType.numberWithOptions(
                     signed: false, decimal: true),
                 style: myTextStyle(fontSize: 28, weight: FontWeight.w900),

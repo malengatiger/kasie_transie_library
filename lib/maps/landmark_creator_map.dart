@@ -114,9 +114,13 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
     setState(() {
       busy = true;
     });
-    try {
-      await _getRouteLandmarks(refresh);
+    pp('\n\n$mm ........... _getPointsAndLandmarks ...  ${E.appleRed} ');
+
+        try {
       await _getRoutePoints(refresh);
+      await _getRouteLandmarks(refresh);
+      _zoomToStartCity();
+
     } catch (e) {
       pp(e);
     }
@@ -127,8 +131,14 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
 
   Future _getRouteLandmarks(bool refresh) async {
     routeLandmarks = await listApiDog.getRouteLandmarks(
-        widget.route.routeId!, true, widget.route.associationId!);
-    pp('\n\n$mm RouteLandmarks ...  ${E.appleRed} '
+        widget.route.routeId!, refresh, widget.route.associationId!);
+    pp('$mm _getRouteLandmarks: : landmarks: ${routeLandmarks.length}');
+
+    for (var m in routeLandmarks) {
+      pp('$mm landmark: ${m.toJson()}');
+    }
+
+    pp('\n\n$mm ........... RouteLandmarks ...  ${E.appleRed} '
         'route: ${widget.route.name}; found: ${routeLandmarks.length} refresh: $refresh');
     await _putLandmarksOnMap();
   }
@@ -149,25 +159,35 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
           fontSize: 16,
           fontWeight: FontWeight.w900);
 
-      final latLng = LatLng(routeLandmark.position!.coordinates.last,
-          routeLandmark.position!.coordinates.first);
+      final latLng = LatLng(
+        routeLandmark.position!.coordinates.last,
+        routeLandmark.position!.coordinates.first,
+      );
+      pp('$mm ..._putLandmarksOnMap: latLng: ${latLng}');
+
       _markers.add(Marker(
-          markerId: MarkerId('${routeLandmark.landmarkId}'),
-          icon: ic2,
+        markerId: MarkerId('${routeLandmark.landmarkId}'),
+        icon: ic2,
+        onTap: () {
+          pp('$mm .............. routeLandmark marker tapped, index: $index $latLng');
+        },
+        infoWindow: InfoWindow(
+          snippet: 'This routeLandmark is part of the route.',
+          title: '🔵 ${routeLandmark.landmarkName}',
           onTap: () {
-            pp('$mm .............. routeLandmark marker tapped, index: $index $latLng');
+            pp('$mm ............. infoWindow tapped, point index: $index '
+                '... confirm delete! ${routeLandmark.landmarkName}');
+            _confirmDelete(routeLandmark);
           },
-          infoWindow: InfoWindow(
-              snippet: 'This routeLandmark is part of the route.',
-              title: '🔵 ${routeLandmark.landmarkName}',
-              onTap: () {
-                pp('$mm ............. infoWindow tapped, point index: $index '
-                    '... confirm delete! ${routeLandmark.landmarkName}');
-                _confirmDelete(routeLandmark);
-              }),
-          position: latLng));
+        ),
+        position: latLng,
+      ));
+
       landmarkIndex++;
     }
+    // Trigger UI update after adding all markers
+    setState(() {});
+
 
     var last = routeLandmarks.last;
     final latLng = LatLng(
@@ -219,16 +239,16 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
       points: mPoints,
       polylineId: PolylineId(DateTime.now().toIso8601String()),
       consumeTapEvents: true,
-      // onTap: () {
-      //   pp('$mm polyline tapped .... find underlying routePoint');
-      // },
+      onTap: () {
+        pp('$mm polyline tapped .... find underlying routePoint');
+      },
     );
 
     _polyLines.add(polyLine);
     //
-    var last = existingRoutePoints.first;
+    var first = existingRoutePoints.first;
     final latLng = LatLng(
-        last.position!.coordinates.last, last.position!.coordinates.first);
+        first.position!.coordinates.last, first.position!.coordinates.first);
     totalPoints = existingRoutePoints.length;
     // routePointIndex = existingRoutePoints.length;
 
@@ -243,12 +263,6 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   }
 
   bool _showLandmark = false;
-
-  void _clearMap() {
-    _polyLines.clear();
-    _markers.clear();
-    setState(() {});
-  }
 
   @override
   void dispose() {
@@ -340,8 +354,9 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
         position: LatLng(routePointForLandmark!.position!.coordinates.last,
             routePointForLandmark!.position!.coordinates.first)));
 
-    setState(() {});
-
+    setState(() {
+      _showLandmark = false;
+    });
     var latLng = LatLng(routePointForLandmark!.position!.coordinates.last,
         routePointForLandmark!.position!.coordinates.first);
     _animateCamera(latLng, defaultZoom + 2.0);
@@ -415,7 +430,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
           landmarkName: landmarkName!,
           index: landmarkIndex,
           created: DateTime.now().toUtc().toIso8601String(),
-          landmarkId: const UuidV4().toString(),
+          landmarkId: const UuidV4().generate(),
           routePointId: routePointForLandmark!.routePointId!,
           routePointIndex: routePointForLandmark!.index!,
           associationId: widget.route.associationId!,
@@ -467,7 +482,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
   lib.RoutePoint? routePointForLandmark;
 
   void findRoutePoint(LatLng latLng) {
-    pp('$mm findRoutePoint ... $latLng');
+    pp('\n\n$mm findRoutePoint ... $latLng');
     if (existingRoutePoints.isEmpty) {
       showErrorToast(message: 'The route has not been mapped yet', context: context);
       return;
@@ -493,7 +508,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
         key: _key,
         body: _myCurrentCameraPosition == null
             ? const Center(
-                child: TimerWidget(title: 'Waiting for GPS', isSmallSize: true),
+                child: TimerWidget(title: 'Waiting for Mapping ...', isSmallSize: true),
               )
             : Stack(children: [
                 GoogleMap(
@@ -508,13 +523,12 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
                     findRoutePoint(latLng);
                   },
                   onTap: (latLng) {
-                    pp('$mm on map tapped: $latLng');
+                    pp('$mm ....... on map tapped: $latLng');
                     findRoutePoint(latLng);
                   },
                   onMapCreated: (GoogleMapController controller) async {
                     _mapController.complete(controller);
                     googleMapController = controller;
-                    _zoomToStartCity();
                     _getPointsAndLandmarks(true);
                   },
                 ),
@@ -688,6 +702,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
                                           landmarkName =
                                               nameEditController.value.text;
                                           _addNewLandmark();
+
                                         }
                                       },
                                       child: const Padding(

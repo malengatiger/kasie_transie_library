@@ -11,6 +11,7 @@ import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/tiny_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
+import '../bloc/list_api_dog.dart';
 import 'calculated_distances_widget.dart';
 import 'color_pad.dart';
 
@@ -79,6 +80,7 @@ class _RouteInfoWidgetState extends State<RouteInfoWidget> {
   }
 
   SemCache semCache = GetIt.instance<SemCache>();
+  ListApiDog listApiDog =  GetIt.instance<ListApiDog>();
 
   Future _getData(String? routeId) async {
     pp('$mm _getData ..... numberOfLandmarks, '
@@ -391,7 +393,7 @@ class DetailsWidget extends StatelessWidget {
         ),
        gapH32,
         Text(
-          route.userName?? '',
+          route.associationName?? '',
           style: myTextStyleMediumBoldGrey(context),
         ),
         gapH32,
@@ -439,7 +441,7 @@ class DetailsWidget extends StatelessWidget {
                   children: [
                     Text(
                       numberOfLandmarks.toString(),
-                      style: myTextStyleMediumLarge(context, 32),
+                      style: myTextStyleMediumLarge(context, 36),
                     ),
                     Text(
                       routeLandmarks,
@@ -455,7 +457,7 @@ class DetailsWidget extends StatelessWidget {
                   children: [
                     Text(
                       fmt.format(numberOfPoints),
-                      style: myTextStyleMediumLarge(context, 32),
+                      style: myTextStyleMediumLarge(context, 36),
                     ),
                     Text(
                       routePointsMapped,

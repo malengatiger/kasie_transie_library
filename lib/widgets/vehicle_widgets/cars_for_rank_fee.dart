@@ -26,6 +26,7 @@ class CarForRankFeeState extends State<CarForRankFee> {
     var vehicle = await NavigationUtils.navigateTo(
       context: context,
       widget: VehicleSearch(
+        showGrid: true,
         associationId: widget.associationId,
       ),
     );

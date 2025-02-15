@@ -67,9 +67,9 @@ class MappingToolbarState extends State<MappingToolbar>
     setState(() {
       busy = true;
     });
-    pp('\n\n$mm delete last 5 points from ${widget.routePoints.length} ...');
+    pp('\n\n$mm delete last  point from ${widget.routePoints.length} ...');
     try {
-      List<RoutePoint> routePoints = getLastFiveRoutePoints(widget.routePoints);
+      List<RoutePoint> routePoints = getLastRoutePoint(widget.routePoints);
       pp('$mm points to delete: ${routePoints.length} ...');
       if (routePoints.isEmpty) {
         showToast(message: 'No route points to delete', context: context);
@@ -110,11 +110,11 @@ class MappingToolbarState extends State<MappingToolbar>
     });
   }
 
-  List<RoutePoint> getLastFiveRoutePoints(List<RoutePoint> routePoints) {
-    if (routePoints.length >= 5) {
-      return routePoints.sublist(routePoints.length - 5);
+  List<RoutePoint> getLastRoutePoint(List<RoutePoint> routePoints) {
+    if (routePoints.isNotEmpty) {
+      return routePoints.sublist(routePoints.length - 1);
     } else {
-      return routePoints;
+      return [];
     }
   }
 

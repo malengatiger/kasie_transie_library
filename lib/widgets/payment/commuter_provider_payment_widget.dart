@@ -96,7 +96,7 @@ class CommuterProviderPaymentWidgetState
     var loc = await bloc.getLocation();
     var user = prefs.getUser();
     var ccp = CommuterProviderPayment(
-      commuterProviderPaymentId: const UuidV4().toString(),
+      commuterProviderPaymentId: const UuidV4().generate(),
       paymentProvider: paymentProvider!,
       vehicleId: widget.vehicle.vehicleId,
       vehicleReg: widget.vehicle.vehicleReg,
