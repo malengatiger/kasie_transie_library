@@ -89,17 +89,18 @@ class RouteMapViewerState extends State<RouteMapViewer> {
   }
 
   Future _getRouteLandmarks() async {
-    var routeData = await listApiDog.getAssociationRouteData(widget.route.associationId!, true);
-    for (var m in routeData!.routeDataList) {
-      routeLandmarks.addAll(m.landmarks);
-    }
+    var routeData =
+      await listApiDog.getSingleRouteData(
+          associationId: widget.route.associationId!,
+          routeId: widget.route.routeId!, refresh: true);
+    routeLandmarks = routeData!.landmarks;
     pp('$mm _getRouteLandmarks ...  route: ${widget.route.routeId!}; found: ${routeLandmarks.length} ');
 
     landmarkIndex = 0;
     for (var landmark in routeLandmarks) {
       final latLng = LatLng(landmark.position!.coordinates.last,
           landmark.position!.coordinates.first);
-      pp('$mm .............. marker latLng: $latLng  ');
+      pp('$mm ............. marker latLng: $latLng  ');
 
       final icon = await getMarkerBitmap(72,
           text: '${landmarkIndex + 1}',

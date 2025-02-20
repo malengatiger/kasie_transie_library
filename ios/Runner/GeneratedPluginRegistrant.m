@@ -198,12 +198,6 @@
 @import shared_preferences_foundation;
 #endif
 
-#if __has_include(<simple_barcode_scanner/SwiftFlutterBarcodeScannerPlugin.h>)
-#import <simple_barcode_scanner/SwiftFlutterBarcodeScannerPlugin.h>
-#else
-@import simple_barcode_scanner;
-#endif
-
 #if __has_include(<sms_autofill/SmsAutoFillPlugin.h>)
 #import <sms_autofill/SmsAutoFillPlugin.h>
 #else
@@ -257,7 +251,6 @@
   [PermissionHandlerPlugin registerWithRegistrar:[registry registrarForPlugin:@"PermissionHandlerPlugin"]];
   [QrMobileVisionPlugin registerWithRegistrar:[registry registrarForPlugin:@"QrMobileVisionPlugin"]];
   [SharedPreferencesPlugin registerWithRegistrar:[registry registrarForPlugin:@"SharedPreferencesPlugin"]];
-  [SwiftFlutterBarcodeScannerPlugin registerWithRegistrar:[registry registrarForPlugin:@"SwiftFlutterBarcodeScannerPlugin"]];
   [SmsAutoFillPlugin registerWithRegistrar:[registry registrarForPlugin:@"SmsAutoFillPlugin"]];
   [SqflitePlugin registerWithRegistrar:[registry registrarForPlugin:@"SqflitePlugin"]];
   [URLLauncherPlugin registerWithRegistrar:[registry registrarForPlugin:@"URLLauncherPlugin"]];

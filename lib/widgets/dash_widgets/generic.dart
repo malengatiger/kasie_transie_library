@@ -11,25 +11,24 @@ class TotalWidget extends StatelessWidget {
       required this.number,
       required this.onTapped,
       this.color,
-      this.fontSize});
+      this.fontSize, this.padding});
 
   final String caption;
   final int number;
   final Function onTapped;
   final double? fontSize;
   final Color? color;
-
+  final double? padding;
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 120,
-      width: 120,
+      height: 160,
+      width: 160,
       child: GestureDetector(
         onTap: () {
           onTapped();
         },
         child: Card(
-          shape: getDefaultRoundedBorder(),
           elevation: 8,
           child: Center(
             child: SizedBox(
@@ -38,6 +37,7 @@ class TotalWidget extends StatelessWidget {
                   caption: caption,
                   number: number,
                   color: color ?? Colors.blue,
+                  padding: padding?? 8,
                   fontSize: fontSize),
             ),
           ),
@@ -53,12 +53,13 @@ class NumberAndCaption extends StatelessWidget {
       required this.caption,
       required this.number,
       this.color,
-      this.fontSize});
+      this.fontSize, this.padding});
 
   final String caption;
   final int number;
   final double? fontSize;
   final Color? color;
+  final double? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -66,13 +67,13 @@ class NumberAndCaption extends StatelessWidget {
     final ThemeData mode = Theme.of(context);
     var num = '';
     if (number >= 1000) {
-      num = '${ fmt.format(number / 1000)} K ';
+      num = '${ (number / 1000).toStringAsFixed(1)} K ';
     } else {
       num = fmt.format(number);
     }
 
     return SizedBox(
-      height: 120,
+      height: 160,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -85,7 +86,8 @@ class NumberAndCaption extends StatelessWidget {
                   fontSize: fontSize ?? 12),
             ),
             badgeStyle: bd.BadgeStyle(
-                badgeColor: color ?? Colors.red, padding: EdgeInsets.all(16)),
+                badgeColor: color ?? Colors.red,
+                padding: EdgeInsets.all(padding?? 16)),
           ),
           const SizedBox(
             height: 4,
@@ -93,7 +95,7 @@ class NumberAndCaption extends StatelessWidget {
           Text(
             caption,
             style: myTextStyleSmall(context),
-          ),
+          )
         ],
       ),
     );
