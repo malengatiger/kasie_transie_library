@@ -172,9 +172,9 @@ class FuelTopUpWidgetState extends State<FuelTopUpWidget>
       ]);
     }
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Fuel TopUp ...'),
-        ),
+        // appBar: AppBar(
+        //   title: const Text('Fuel TopUp ...'),
+        // ),
         body: SafeArea(
             child: Stack(children: [
           Column(
@@ -285,7 +285,7 @@ class FuelTopUpWidgetState extends State<FuelTopUpWidget>
   }
 
   final TextEditingController litresController = TextEditingController(text: '0'),
-      amountController = TextEditingController(text:'0.00');
+      amountController = TextEditingController(text:'0');
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 }
 

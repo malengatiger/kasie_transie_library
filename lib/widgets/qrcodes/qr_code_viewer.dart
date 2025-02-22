@@ -9,6 +9,9 @@ class QrCodeViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("QR Code")
+      ),
       body: SafeArea(
         child: Center(
             child: Padding(
