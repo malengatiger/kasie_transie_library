@@ -397,10 +397,10 @@ class ListApiDog {
 
   Future<List<FuelBrand>> getFuelBrands(bool refresh) async {
 
-    List<FuelBrand> brands = await semCache.getFuelBrands();
-    if (!refresh && brands.isNotEmpty) {
-      return brands;
-    }
+    // List<FuelBrand> brands = await semCache.getFuelBrands();
+    // if (!refresh && brands.isNotEmpty) {
+    //   return brands;
+    // }
 
     final cmd =
         '${url}vehicle/getFuelBrands';
@@ -409,7 +409,7 @@ class ListApiDog {
     for (var brandJson in resp) {
       list.add(FuelBrand.fromJson(brandJson));
     }
-    await semCache.saveFuelBrands(brands);
+    //await semCache.saveFuelBrands(list);
     pp('$mm found FuelBrands from backend: ${list.length}');
     return list;
   }

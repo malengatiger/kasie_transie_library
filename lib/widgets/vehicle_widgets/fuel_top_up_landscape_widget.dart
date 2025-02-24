@@ -8,28 +8,32 @@ import 'package:kasie_transie_library/data/data_schemas.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 
+import '../../bloc/sem_cache.dart';
 import '../../utils/prefs.dart';
 
-class FuelTopUpLandscapeWidget extends StatefulWidget {
-  const FuelTopUpLandscapeWidget({
+class TopUpFuel extends StatefulWidget {
+  const TopUpFuel({
     super.key,
     required this.vehicle,
+    required this.isLandscape,
   });
 
   final Vehicle vehicle;
+  final bool isLandscape;
 
   @override
-  FuelTopUpLandscapeWidgetState createState() =>
-      FuelTopUpLandscapeWidgetState();
+  TopUpFuelState createState() => TopUpFuelState();
 }
 
-class FuelTopUpLandscapeWidgetState extends State<FuelTopUpLandscapeWidget>
+class TopUpFuelState extends State<TopUpFuel>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  static const mm = '🖐🖐🏽🖐🏽🖐🏽🖐🏽🖐🏽 FuelTopUpLandscapeWidget: 🖐🏽🖐🏽';
+  static const mm = '🖐🖐🏽🖐🏽🖐🏽🖐🏽🖐🏽 TopUpFuel: 🖐🏽🖐🏽';
 
   ListApiDog listApiDog = GetIt.instance<ListApiDog>();
   DataApiDog dataApiDog = GetIt.instance<DataApiDog>();
+  SemCache semCache = GetIt.instance<SemCache>();
+
   Prefs prefs = GetIt.instance<Prefs>();
   DeviceLocationBloc dlb = GetIt.instance<DeviceLocationBloc>();
 
@@ -128,86 +132,205 @@ class FuelTopUpLandscapeWidgetState extends State<FuelTopUpLandscapeWidget>
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeRight,
-      DeviceOrientation.landscapeLeft,
-    ]);
+    if (widget.isLandscape) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeRight,
+        DeviceOrientation.landscapeLeft,
+      ]);
+    }
 
-    return Scaffold(
-        appBar: AppBar(title: Text('Taxi Fuel TopUp')),
-        body: Stack(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(16),
-              child: ListView.builder(
-                  itemCount: fuelBrands.length,
-                  itemBuilder: (_, index) {
-                    var fb = fuelBrands[index];
-                    return Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {});
-                          },
-                          child:
-                              Image.network(fb.logoUrl!, height: 64, width: 64),
-                        ),
-                        gapW32,
-                        SizedBox(
-                          width: 160,
-                          child: TextFormField(
-                            controller: litreControllers[index],
-                            keyboardType:
-                                TextInputType.numberWithOptions(decimal: true),
-                            style: myTextStyleBold(fontSize: 16),
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                              hintText: 'Please enter litres',
-                              label: Text('Litres of Fuel'),
+    double dataFilledIn(int index) {
+      var ok1 = double.parse(amountControllers[index].text );
+      var ok2 = double.parse(litreControllers[index].text );
+      var checker = 0;
+      if (ok1 > 0) {
+        checker++;
+      }
+      if (ok2 > 0) {
+        checker++;
+      }
+      if (checker == 2) {
+        return 120;
+      }
+
+      return 72.0;
+    }
+
+    return widget.isLandscape
+        ? Scaffold(
+            appBar: AppBar(title: Text('Taxi Fuel TopUp')),
+            body: Stack(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(16),
+                  child: ListView.builder(
+                      itemCount: fuelBrands.length,
+                      itemBuilder: (_, index) {
+                        var fb = fuelBrands[index];
+                        return Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {});
+                              },
+                              child: Image.network(fb.logoUrl!,
+                                  height: 64, width: 64),
                             ),
-                          ),
-                        ),
-                        gapW32,
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {});
-                          },
-                          child: SizedBox(
-                            width: 160,
-                            child: TextFormField(
-                              controller: amountControllers[index],
-                              keyboardType: TextInputType.numberWithOptions(
-                                  decimal: true),
-                              style: myTextStyleBold(fontSize: 16),
-                              decoration: InputDecoration(
+                            gapW32,
+                            SizedBox(
+                              width: 120,
+                              child: TextFormField(
+                                controller: litreControllers[index],
+                                keyboardType: TextInputType.numberWithOptions(
+                                    decimal: true),
+                                style: myTextStyleBold(fontSize: 16),
+                                decoration: InputDecoration(
                                   border: OutlineInputBorder(),
-                                  hintText: 'Please enter amount',
-                                  label: Text('Total Amount')),
+                                  hintText: 'Please enter litres',
+                                  label: Text('Litres of Fuel'),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        gapW32,
-                        if (double.parse(amountControllers[index].text) > 0 &&
-                            double.parse(litreControllers[index].text) > 0)
-                          ElevatedButton(
-                            style: ButtonStyle(
-                                elevation: WidgetStatePropertyAll(12),
-                                backgroundColor:
-                                    WidgetStatePropertyAll(Colors.blue)),
-                            onPressed: () {
-                              _submit(fb, index);
-                            },
-                            child: Padding(
-                              padding: EdgeInsets.all(8),
-                              child: Text('Submit TopUp',
-                                  style: myTextStyle(color: Colors.white)),
+                            gapW32,
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {});
+                              },
+                              child: SizedBox(
+                                width: 120,
+                                child: TextFormField(
+                                  controller: amountControllers[index],
+                                  keyboardType: TextInputType.numberWithOptions(
+                                      decimal: true),
+                                  style: myTextStyleBold(fontSize: 16),
+                                  decoration: InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      hintText: 'Please enter amount',
+                                      label: Text('Total Amount')),
+                                ),
+                              ),
                             ),
-                          ),
-                      ],
-                    );
-                  }),
+                            gapW32,
+                            if (double.parse(amountControllers[index].text) >
+                                    0 &&
+                                double.parse(litreControllers[index].text) > 0)
+                              ElevatedButton(
+                                style: ButtonStyle(
+                                    elevation: WidgetStatePropertyAll(8),
+                                    backgroundColor:
+                                        WidgetStatePropertyAll(Colors.blue)),
+                                onPressed: () {
+                                  _submit(fb, index);
+                                },
+                                child: Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: Text('Submit TopUp',
+                                      style: myTextStyle(color: Colors.white)),
+                                ),
+                              ),
+                          ],
+                        );
+                      }),
+                ),
+              ],
             ),
-          ],
-        ));
+          )
+        : Scaffold(
+            appBar: AppBar(title: Text('Taxi Fuel TopUp')),
+            body: Stack(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(16),
+                  child: ListView.builder(
+                      itemCount: fuelBrands.length,
+                      itemBuilder: (_, index) {
+                        var fb = fuelBrands[index];
+                        return Card(
+                            elevation: 4,
+                            child: SizedBox(
+                                height:  dataFilledIn(index),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              showSubmit = true;
+                                            });
+                                          },
+                                          child: Image.network(fb.logoUrl!,
+                                              height: 64, width: 64),
+                                        ),
+                                        gapW8,
+                                        SizedBox(
+                                          width: 80,
+                                          child: TextFormField(
+                                            controller: litreControllers[index],
+                                            keyboardType:
+                                                TextInputType.numberWithOptions(
+                                                    decimal: true),
+                                            style:
+                                                myTextStyleBold(fontSize: 16),
+                                            decoration: InputDecoration(
+                                              border: OutlineInputBorder(),
+                                              hintText: 'Please enter litres',
+                                              label: Text('Litres'),
+                                            ),
+                                          ),
+                                        ),
+                                        gapW8,
+                                        GestureDetector(
+                                          onTap: () {
+                                            setState(() {});
+                                          },
+                                          child: SizedBox(
+                                            width: 80,
+                                            child: TextFormField(
+                                              controller:
+                                                  amountControllers[index],
+                                              keyboardType: TextInputType
+                                                  .numberWithOptions(
+                                                      decimal: true),
+                                              style:
+                                                  myTextStyleBold(fontSize: 16),
+                                              decoration: InputDecoration(
+                                                  border: OutlineInputBorder(),
+                                                  hintText:
+                                                      'Please enter amount',
+                                                  label: Text('Amount')),
+                                            ),
+                                          ),
+                                        ),
+                                        showSubmit
+                                            ? ElevatedButton(
+                                          style: ButtonStyle(
+                                              elevation:
+                                              WidgetStatePropertyAll(8),
+                                              backgroundColor:
+                                              WidgetStatePropertyAll(
+                                                  Colors.blue)),
+                                          onPressed: () {
+                                            _submit(fb, index);
+                                          },
+                                          child: Padding(
+                                            padding: EdgeInsets.all(8),
+                                            child: Text('Submit',
+                                                style: myTextStyle(
+                                                    color: Colors.white)),
+                                          ),
+                                        )
+                                            : gapW32,
+                                      ],
+                                    ),
+                                  ],
+                                )));
+                      }),
+                ),
+              ],
+            ),
+          );
   }
+
+  bool showSubmit = false;
 }
