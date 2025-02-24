@@ -4,7 +4,7 @@ import 'package:geofence_service/geofence_service.dart' as geo;
 import 'package:get_it/get_it.dart';
 import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
-import 'package:uuid/v4.dart';
+import 'package:uuid/uuid.dart';
 
 import '../data/data_schemas.dart';
 import '../utils/emojis.dart';
@@ -255,7 +255,7 @@ class TheGreatGeofencer {
 
     prevGeofences.add(PreviousGeofence(geofence, DateTime.now()));
     final m = VehicleArrival(
-      vehicleArrivalId: const UuidV4().generate(),
+      vehicleArrivalId: const Uuid().v4().toString(),
       associationId: _vehicle!.associationId,
       associationName: _vehicle!.associationName,
       created: DateTime.now().toUtc().toIso8601String(),
@@ -302,7 +302,7 @@ class TheGreatGeofencer {
       'longitude': geofence.longitude,
     });
     final m = VehicleDeparture(
-      vehicleDepartureId: const UuidV4().generate(),
+      vehicleDepartureId: const Uuid().v4().toString(),
       associationId: _vehicle!.associationId,
       associationName: _vehicle!.associationName,
       created: DateTime.now().toUtc().toIso8601String(),

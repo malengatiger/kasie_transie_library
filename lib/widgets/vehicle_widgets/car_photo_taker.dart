@@ -87,7 +87,7 @@ class CarPhotoTakerState extends State<CarPhotoTaker>
                   children: [
                     ElevatedButton(
                         style: const ButtonStyle(
-                          elevation: WidgetStatePropertyAll(8),
+                          elevation: MaterialStatePropertyAll(8),
                         ),
                         onPressed: () {
                           _navigateToVehicleSearch();

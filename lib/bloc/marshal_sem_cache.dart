@@ -1,17 +1,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
+import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart' as sp;
 import 'package:sembast_web/sembast_web.dart' as sw;
-import 'package:sembast_web/sembast_web.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
 import '../data/route_data.dart';
 
 class MarshalSemCache {
-  late sp.Database dbPhone;
-  late sw.Database dbWeb;
+  late Database dbPhone;
+  late Database dbWeb;
   static String dbPath = 'kasie.db';
 
   MarshalSemCache() {
@@ -23,7 +23,7 @@ class MarshalSemCache {
   void initializeDatabase() async {
     pp('\n\n$mm initialize 🔵️ Local Database 🔵️: set up for platform ...');
     if (kIsWeb) {
-      sw.DatabaseFactory dbFactoryWeb = sw.databaseFactoryWeb;
+      DatabaseFactory dbFactoryWeb = sw.databaseFactoryWeb;
       dbWeb = await dbFactoryWeb.openDatabase(dbPath);
       pp('$mm cache database set up for web. (1)');
     } else {
@@ -38,7 +38,7 @@ class MarshalSemCache {
   //
   Future getDb() async {
     if (kIsWeb) {
-      sw.DatabaseFactory dbFactoryWeb = sw.databaseFactoryWeb;
+      DatabaseFactory dbFactoryWeb = sw.databaseFactoryWeb;
       dbWeb = await dbFactoryWeb.openDatabase(dbPath);
       return dbWeb;
     } else {

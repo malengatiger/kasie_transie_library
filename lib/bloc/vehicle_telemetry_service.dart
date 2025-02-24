@@ -7,7 +7,7 @@ import 'package:kasie_transie_library/data/route_data.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
-import 'package:uuid/v4.dart';
+import 'package:uuid/uuid.dart';
 
 import 'list_api_dog.dart';
 
@@ -71,7 +71,7 @@ class VehicleTelemetryService {
     var car = prefs.getCar();
     var loc = await locationBloc.getLocation();
     var tm = lib.VehicleTelemetry(
-        vehicleTelemetryId: const UuidV4().generate(),
+        vehicleTelemetryId: const Uuid().v4().toString(),
         vehicleId: car!.vehicleId!,
         created: DateTime.now().toUtc().toIso8601String(),
         vehicleReg: car.vehicleReg,

@@ -185,12 +185,12 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
                                     width: 300,
                                     height: 60,
                                     child: ElevatedButton(
-                                        style: const ButtonStyle(
+                                        style:  ButtonStyle(
                                           backgroundColor:
-                                              WidgetStatePropertyAll(
+                                              MaterialStatePropertyAll(
                                                   Colors.pink),
                                           elevation:
-                                              WidgetStatePropertyAll<double>(
+                                              MaterialStatePropertyAll<double>(
                                                   8.0),
                                         ),
                                         onPressed: () {

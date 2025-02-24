@@ -4,7 +4,7 @@ import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/data/commuter_cash_payment.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
-import 'package:uuid/v4.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../data/data_schemas.dart' as lib;
 import '../../data/rank_fee_cash_payment.dart';
@@ -67,7 +67,7 @@ class RankFeeCashPaymentWidgetState extends State<RankFeeCashPaymentWidget>
     DeviceLocationBloc bloc = GetIt.instance<DeviceLocationBloc>();
     var loc = await bloc.getLocation();
     var rfPayment = RankFeeCashPayment(
-        rankFeeCashPaymentId: const UuidV4().generate(),
+        rankFeeCashPaymentId: const Uuid().v4().toString(),
         vehicleId: widget.vehicle.vehicleId,
         vehicleReg: widget.vehicle.vehicleReg,
         associationId: widget.vehicle.associationId,
@@ -170,8 +170,8 @@ class RankFeeCashPaymentForm extends StatelessWidget {
           gapH32,
           ElevatedButton(
               style: const ButtonStyle(
-                elevation: WidgetStatePropertyAll(8),
-                padding: WidgetStatePropertyAll(EdgeInsets.all(16)),
+                elevation: MaterialStatePropertyAll(8),
+                padding: MaterialStatePropertyAll(EdgeInsets.all(16)),
               ),
               onPressed: () {
                 onSubmit();

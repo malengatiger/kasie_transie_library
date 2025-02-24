@@ -14,8 +14,7 @@ import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/payment_provider_handler.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:uuid/v4.dart';
-
+import 'package:uuid/uuid.dart';
 import '../../bloc/data_api_dog.dart';
 import '../../bloc/list_api_dog.dart';
 import '../../data/payment_provider.dart';
@@ -153,7 +152,7 @@ class RankFeeSenderState extends State<RankFeeSender>
     lib.RouteLandmark? mark = await findNearestLandmark(loc);
     if (paymentProvider != null) {
       var rfpp = RankFeeProviderPayment(
-          rankFeeProviderPaymentId: const UuidV4().generate(),
+          rankFeeProviderPaymentId: const Uuid().v4().toString(),
           vehicleId: widget.vehicle.vehicleId,
           vehicleReg: widget.vehicle.vehicleReg,
           associationId: widget.vehicle.associationId,
@@ -198,7 +197,7 @@ class RankFeeSenderState extends State<RankFeeSender>
       });
 
       rankFeePayment = RankFeeCashPayment(
-          rankFeeCashPaymentId: const UuidV4().generate(),
+          rankFeeCashPaymentId: const Uuid().v4().toString(),
           userId: user!.userId,
           userName: '${user!.firstName} ${user!.lastName}',
           created: DateTime.now().toUtc().toIso8601String(),
@@ -398,8 +397,8 @@ class RankFeeSenderState extends State<RankFeeSender>
                       : ElevatedButton(
                           style: const ButtonStyle(
                               backgroundColor:
-                                  WidgetStatePropertyAll(Colors.blue),
-                              elevation: WidgetStatePropertyAll(8.0)),
+                                  MaterialStatePropertyAll(Colors.blue),
+                              elevation: MaterialStatePropertyAll(8.0)),
                           onPressed: () {
                             _sendRankFee();
                           },

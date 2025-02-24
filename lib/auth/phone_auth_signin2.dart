@@ -407,10 +407,9 @@ class PhoneAuthSigninState extends State<PhoneAuthSignin>
                                                   )
                                                 : ElevatedButton(
                                                     onPressed: _processSignIn,
-                                                    style: ButtonStyle(
+                                                    style: const ButtonStyle(
                                                       elevation:
-                                                          WidgetStateProperty
-                                                              .all<double>(8.0),
+                                                      MaterialStatePropertyAll(8.0),
                                                     ),
                                                     child: Padding(
                                                       padding:

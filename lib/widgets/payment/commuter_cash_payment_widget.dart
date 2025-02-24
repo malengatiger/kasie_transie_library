@@ -4,7 +4,7 @@ import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/data/commuter_cash_payment.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
-import 'package:uuid/v4.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../data/data_schemas.dart' as lib;
 import '../../utils/device_location_bloc.dart';
@@ -70,7 +70,7 @@ class CommuterCashPaymentWidgetState extends State<CommuterCashPaymentWidget>
       DeviceLocationBloc bloc = GetIt.instance<DeviceLocationBloc>();
       var loc = await bloc.getLocation();
       var payment = CommuterCashPayment(
-          commuterCashPaymentId: const UuidV4().generate(),
+          commuterCashPaymentId: const Uuid().v4().toString(),
           tripId: widget.trip.tripId,
           vehicleId: widget.vehicle.vehicleId,
           vehicleReg: widget.vehicle.vehicleReg,
@@ -232,9 +232,9 @@ class CommuterCashPaymentForm extends StatelessWidget {
                 width: 300,
                 child: ElevatedButton(
                     style: const ButtonStyle(
-                      elevation: WidgetStatePropertyAll(8),
-                      backgroundColor: WidgetStatePropertyAll(Colors.blue),
-                      padding: WidgetStatePropertyAll(EdgeInsets.all(8)),
+                      elevation: MaterialStatePropertyAll(8),
+                      backgroundColor: MaterialStatePropertyAll(Colors.blue),
+                      padding: MaterialStatePropertyAll(EdgeInsets.all(8)),
                     ),
                     onPressed: () {
                       onSubmit();

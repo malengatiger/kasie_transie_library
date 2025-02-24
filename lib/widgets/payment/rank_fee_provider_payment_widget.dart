@@ -6,7 +6,7 @@ import 'package:kasie_transie_library/data/commuter_provider_payment.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
-import 'package:uuid/v4.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../data/data_schemas.dart' as lib;
 import '../../data/payment_provider.dart';
@@ -97,7 +97,7 @@ class RankFeeProviderPaymentWidgetState
     var loc = await bloc.getLocation();
     var user = prefs.getUser();
     var payment = RankFeeProviderPayment(
-      rankFeeProviderPaymentId: const UuidV4().generate(),
+      rankFeeProviderPaymentId: const Uuid().v4().toString(),
       paymentProvider: paymentProvider!,
       vehicleId: widget.vehicle.vehicleId,
       vehicleReg: widget.vehicle.vehicleReg,
@@ -197,7 +197,7 @@ class RankFeeProviderPaymentForm extends StatelessWidget {
           gapH32,
           ElevatedButton(
               style: const ButtonStyle(
-                elevation: WidgetStatePropertyAll(8),padding: WidgetStatePropertyAll(EdgeInsets.all(16)),
+                elevation: MaterialStatePropertyAll(8),padding: MaterialStatePropertyAll(EdgeInsets.all(16)),
               ),
               onPressed: () {
                 onSubmit();

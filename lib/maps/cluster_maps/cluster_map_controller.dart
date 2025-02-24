@@ -407,7 +407,7 @@ class ClusterMapControllerState extends State<ClusterMapController> with Automat
                           width:  type == 'phone'?280:320,
                           child: ElevatedButton.icon(
                               style: const ButtonStyle(
-                                elevation: WidgetStatePropertyAll(12.0),
+                                elevation: MaterialStatePropertyAll(12.0),
                               ),
                               onPressed: () {
                                 _navigateToAssociationMap();

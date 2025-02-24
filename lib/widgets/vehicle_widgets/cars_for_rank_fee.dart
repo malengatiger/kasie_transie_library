@@ -104,8 +104,8 @@ class CarForRankFeeState extends State<CarForRankFee> {
                   width: 300,
                   child: ElevatedButton(
                       style: const ButtonStyle(
-                          elevation: WidgetStatePropertyAll(8),
-                          backgroundColor: WidgetStatePropertyAll(Colors.blue)),
+                          elevation: MaterialStatePropertyAll(8),
+                          backgroundColor: MaterialStatePropertyAll(Colors.blue)),
                       onPressed: _search,
                       child: Padding(
                         padding: const EdgeInsets.all(12),
@@ -125,9 +125,9 @@ class CarForRankFeeState extends State<CarForRankFee> {
                   child: ElevatedButton(
                       onPressed: _scan,
                       style: const ButtonStyle(
-                          elevation: WidgetStatePropertyAll(8),
+                          elevation: MaterialStatePropertyAll(8),
                           backgroundColor:
-                              WidgetStatePropertyAll(Colors.green)),
+                              MaterialStatePropertyAll(Colors.green)),
                       child: Padding(
                         padding: const EdgeInsets.all(12),
                         child: Text(
@@ -146,7 +146,7 @@ class CarForRankFeeState extends State<CarForRankFee> {
             right: 32,
             bottom: 16,
             child: ElevatedButton(
-              style: const ButtonStyle(elevation: WidgetStatePropertyAll(4)),
+              style: const ButtonStyle(elevation: MaterialStatePropertyAll(4)),
               onPressed: () {
                 Navigator.of(context).pop();
               },

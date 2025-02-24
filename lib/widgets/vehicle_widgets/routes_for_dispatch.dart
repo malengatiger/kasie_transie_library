@@ -250,7 +250,7 @@ class RoutesForDispatchState extends State<RoutesForDispatch>
                                           padding: const EdgeInsets.symmetric(
                                               vertical: 2),
                                           child: Card(
-                                            elevation: 8,
+                                            elevation: 2,
                                             child: Padding(
                                                 padding:
                                                     const EdgeInsets.all(16),

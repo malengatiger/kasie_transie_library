@@ -10,7 +10,7 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
 import 'package:native_device_orientation/native_device_orientation.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:uuid/v4.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../data/commuter_cash_check_in.dart';
 import '../../data/data_schemas.dart' as lib;
@@ -115,7 +115,7 @@ class CashCheckInWidgetState extends State<CashCheckInWidget>
       var loc = await bloc.getLocation();
       if (widget.isCommuterCash) {
         var ccp = CommuterCashCheckIn(
-            commuterCashCheckInId: const UuidV4().generate(),
+            commuterCashCheckInId: const Uuid().v4().toString(),
             vehicleId: widget.vehicle?.vehicleId,
             vehicleReg: widget.vehicle?.vehicleReg,
             associationId: user.associationId,
@@ -146,7 +146,7 @@ class CashCheckInWidgetState extends State<CashCheckInWidget>
       }
       if (widget.isRankFeeCash) {
         var ccp = RankFeeCashCheckIn(
-            rankFeeCashCheckInId: const UuidV4().generate(),
+            rankFeeCashCheckInId: const Uuid().v4().toString(),
             vehicleId: widget.vehicle?.vehicleId,
             vehicleReg: widget.vehicle?.vehicleReg,
             associationId: user!.associationId,
@@ -403,9 +403,9 @@ class CashCheckInForm extends StatelessWidget {
               width: 300,
               child: ElevatedButton(
                 style: const ButtonStyle(
-                    elevation: WidgetStatePropertyAll(8),
-                    padding: WidgetStatePropertyAll(EdgeInsets.all(16)),
-                    backgroundColor: WidgetStatePropertyAll(Colors.grey)),
+                    elevation: MaterialStatePropertyAll(8),
+                    padding: MaterialStatePropertyAll(EdgeInsets.all(16)),
+                    backgroundColor: MaterialStatePropertyAll(Colors.grey)),
                 onPressed: () {
                   onReceiptPhoto();
                 },
@@ -419,9 +419,9 @@ class CashCheckInForm extends StatelessWidget {
                   width: 300,
                   child: ElevatedButton(
                     style: const ButtonStyle(
-                        elevation: WidgetStatePropertyAll(8),
-                        padding: WidgetStatePropertyAll(EdgeInsets.all(16)),
-                        backgroundColor: WidgetStatePropertyAll(Colors.blue)),
+                        elevation: MaterialStatePropertyAll(8),
+                        padding: MaterialStatePropertyAll(EdgeInsets.all(16)),
+                        backgroundColor: MaterialStatePropertyAll(Colors.blue)),
                     onPressed: () {
                       onSubmit();
                     },

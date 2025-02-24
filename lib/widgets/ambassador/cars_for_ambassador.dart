@@ -101,8 +101,8 @@ class _CarForAmbassadorState extends State<CarForAmbassador> {
                   width: 300,
                   child: ElevatedButton(
                       style: const ButtonStyle(
-                          elevation: WidgetStatePropertyAll(8),
-                          backgroundColor: WidgetStatePropertyAll(Colors.blue)),
+                          elevation: MaterialStatePropertyAll(8),
+                          backgroundColor: MaterialStatePropertyAll(Colors.blue)),
                       onPressed: _search,
                       child: Padding(
                         padding: const EdgeInsets.all(12),
@@ -122,8 +122,8 @@ class _CarForAmbassadorState extends State<CarForAmbassador> {
                   child: ElevatedButton(
                       onPressed: _scan,
                       style: const ButtonStyle(
-                          elevation: WidgetStatePropertyAll(8),
-                          backgroundColor: WidgetStatePropertyAll(
+                          elevation: MaterialStatePropertyAll(8),
+                          backgroundColor: MaterialStatePropertyAll(
                               Colors.green)),
                       child: Padding(
                         padding: const EdgeInsets.all(12),

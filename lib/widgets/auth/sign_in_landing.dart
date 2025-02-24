@@ -61,9 +61,9 @@ class SignInLanding extends StatelessWidget {
           width: 240,
           child: ElevatedButton(
             style: ButtonStyle(
-              elevation: const WidgetStatePropertyAll(4.0),
+              elevation: const MaterialStatePropertyAll(4.0),
               backgroundColor:
-                  WidgetStatePropertyAll(Theme.of(context).primaryColorLight),
+              MaterialStatePropertyAll(Theme.of(context).primaryColorLight),
             ),
             onPressed: () {
               onNavigateToColor();
@@ -86,9 +86,9 @@ class SignInLanding extends StatelessWidget {
                 onNavigateToPhoneAuth();
               },
               style: ButtonStyle(
-                elevation: const WidgetStatePropertyAll(8.0),
+                elevation: const MaterialStatePropertyAll(8.0),
                 backgroundColor:
-                    WidgetStatePropertyAll(Theme.of(context).primaryColor),
+                MaterialStatePropertyAll(Theme.of(context).primaryColor),
               ),
               label: Padding(
                 padding: const EdgeInsets.all(24.0),
@@ -109,9 +109,9 @@ class SignInLanding extends StatelessWidget {
                 onNavigateToEmailAuth();
               },
               style: ButtonStyle(
-                elevation: const WidgetStatePropertyAll(8.0),
+                elevation: const MaterialStatePropertyAll(8.0),
                 backgroundColor:
-                    WidgetStatePropertyAll(Theme.of(context).primaryColor),
+                    MaterialStatePropertyAll(Theme.of(context).primaryColor),
               ),
               label: Padding(
                 padding: const EdgeInsets.all(24.0),

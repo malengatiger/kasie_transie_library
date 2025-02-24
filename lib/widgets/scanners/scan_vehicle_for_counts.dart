@@ -6,12 +6,12 @@ import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/utils/navigator_utils.dart';
 import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/route_list_minimum.dart';
+import 'package:kasie_transie_library/widgets/scanners/kasie/last_scanner_widget.dart';
 import 'package:kasie_transie_library/widgets/vehicle_passenger_count.dart';
 import 'package:page_transition/page_transition.dart';
 
 import '../../bloc/list_api_dog.dart';
 import '../../utils/emojis.dart';
-import 'kasie/kasie_ai_scanner.dart';
 
 class ScanVehicleForCounts extends StatefulWidget {
   const ScanVehicleForCounts({super.key, required this.trip});
@@ -92,12 +92,13 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
     pp('$mm ........ navigate to VehicleMediaHandler ... ${E.redDot} for car: ${vehicle!.vehicleReg}');
 
     NavigationUtils.navigateTo(
-        context: context,
-        widget: VehiclePassengerCount(
-          vehicle: vehicle!,
-          route: selectedRoute!, trip: widget.trip,
-        ),
-        );
+      context: context,
+      widget: VehiclePassengerCount(
+        vehicle: vehicle!,
+        route: selectedRoute!,
+        trip: widget.trip,
+      ),
+    );
 
     setState(() {
       showStartButton = false;
@@ -168,17 +169,18 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
   }
 
   void _navigateToScan() async {
-    final mCar = await NavigationUtils.navigateTo(
-        context: context,
-        widget: KasieAIScanner(onScanned: (json ) {
-          onCarScanned(lib.Vehicle.fromJson(json));
-        },),
-        );
-    if (mCar != null) {
-      vehicle = lib.Vehicle.fromJson(mCar);
-      pp('$mm ... back from on car scanned: ${vehicle!.vehicleReg}');
-      setState(() {});
-    }
+    NavigationUtils.navigateTo(
+      context: context,
+      widget: LastScannerWidget(
+        onVehicleScanned: (json) {
+          onCarScanned(json);
+        },
+        onCommuterScanned: (commuter) {},
+        onCommuterTicketScanned: (commuterTicket) {},
+        onError: (err) {},
+      ),
+    );
+
   }
 
   @override
@@ -303,7 +305,7 @@ class ScanVehicleForCountsState extends State<ScanVehicleForCounts>
                                     ? ElevatedButton(
                                         style: const ButtonStyle(
                                             elevation:
-                                                WidgetStatePropertyAll(8.0)),
+                                                MaterialStatePropertyAll(8.0)),
                                         onPressed: () {
                                           navigateToPassengerCount();
                                         },

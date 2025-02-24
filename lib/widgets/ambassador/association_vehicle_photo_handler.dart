@@ -150,9 +150,9 @@ class AssociationVehiclePhotoHandlerState
                       width: 200,
                       child: ElevatedButton(
                         style: const ButtonStyle(
-                            elevation: WidgetStatePropertyAll(8),
+                            elevation: MaterialStatePropertyAll(8),
                             backgroundColor:
-                                WidgetStatePropertyAll(Colors.black26)),
+                            MaterialStatePropertyAll(Colors.black26)),
                         onPressed: () {
                           _navigateToPhotoHandler();
                         },

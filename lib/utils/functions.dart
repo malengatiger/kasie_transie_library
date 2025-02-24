@@ -68,22 +68,7 @@ TextStyle myTextStyleBold({Color? color, double? fontSize, }) {
     color: Colors.black,
   );
 }
-TextStyle myNumberThickStyle(
-    {Color? color, double? fontSize, FontWeight? weight}) {
-  if (color != null) {
-    return GoogleFonts.protestStrike(
-      fontWeight: weight ?? FontWeight.normal,
-      fontSize: fontSize ?? 14,
-      color: color,
-    );
-  }
 
-  return GoogleFonts.protestStrike(
-    fontWeight: weight ?? FontWeight.normal,
-    fontSize: fontSize ?? 14,
-    color: color,
-  );
-}
 
 TextStyle myNumberNormalStyle(
     {Color? color, double? fontSize, FontWeight? weight}) {

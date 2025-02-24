@@ -11,7 +11,7 @@ import 'package:kasie_transie_library/widgets/vehicle_media_handler.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../utils/emojis.dart';
-import 'kasie/kasie_ai_scanner.dart';
+import 'kasie/last_scanner_widget.dart';
 
 class ScanVehicleForOwner extends StatefulWidget {
   const ScanVehicleForOwner({super.key});
@@ -65,7 +65,8 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
       if (mounted) {
         showSnackBar(
             duration: const Duration(seconds: 15),
-            message: 'Camera permission is required', context: context);
+            message: 'Camera permission is required',
+            context: context);
       }
     }
   }
@@ -92,7 +93,8 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
           ownerName: user.name,
           passengerCapacity: vehicle!.passengerCapacity,
           qrCodeUrl: vehicle!.qrCodeUrl,
-          year: vehicle!.year, fcmToken: '',
+          year: vehicle!.year,
+          fcmToken: '',
         );
         pp('$mm updated owner vehicle ${E.redDot}');
         myPrettyJsonPrint(updatedVehicle.toJson());
@@ -103,7 +105,8 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
       if (mounted) {
         showSnackBar(
             backgroundColor: Colors.green.shade700,
-            message: 'Car updated OK', context: context);
+            message: 'Car updated OK',
+            context: context);
       }
     } catch (e) {
       pp(e);
@@ -188,9 +191,14 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
                   onTap: () {
                     pp('$mm .... will try to restart a scan ...');
                   },
-                  child: KasieAIScanner(onScanned: (json ) {
-                    onCarScanned(lib.Vehicle.fromJson(json));
-                  },),
+                  child: LastScannerWidget(
+                    onVehicleScanned: (car) {
+                      onCarScanned(car);
+                    },
+                    onCommuterScanned: (commuter) {},
+                    onCommuterTicketScanned: (commuterTicket) {},
+                    onError: (String) {},
+                  ),
                 ),
                 const SizedBox(
                   height: 8,
@@ -235,13 +243,14 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
                                     height: 20,
                                     width: 20,
                                     child: CircularProgressIndicator(
-                                      strokeWidth: 4, backgroundColor: Colors.pink,
+                                      strokeWidth: 4,
+                                      backgroundColor: Colors.pink,
                                     ),
                                   )
                                 : ElevatedButton(
                                     style: const ButtonStyle(
                                         elevation:
-                                            WidgetStatePropertyAll(8.0)),
+                                            MaterialStatePropertyAll(8.0)),
                                     onPressed: () {
                                       updateCar();
                                     },
@@ -256,7 +265,7 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
                             ),
                             ElevatedButton(
                                 style: const ButtonStyle(
-                                    elevation: WidgetStatePropertyAll(8.0)),
+                                    elevation: MaterialStatePropertyAll(8.0)),
                                 onPressed: () {
                                   navigateToMedia();
                                 },
@@ -268,17 +277,18 @@ class ScanVehicleForOwnerState extends State<ScanVehicleForOwner>
                                 )),
                           ],
                         )
-                      : Row(mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
                               noVehicleScanned == null
                                   ? 'No Vehicle Scanned yet'
                                   : noVehicleScanned!,
                               style: myTextStyleMediumLargeWithColor(
                                   context, Colors.grey.shade700, 20),
                             ),
-                        ],
-                      ),
+                          ],
+                        ),
                 ],
               ),
             ),

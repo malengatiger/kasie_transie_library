@@ -6,7 +6,7 @@ import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 
 import '../../bloc/list_api_dog.dart';
-import 'kasie/kasie_ai_scanner.dart';
+import 'kasie/last_scanner_widget.dart';
 
 
 class ScanVehicleForInstall extends StatefulWidget {
@@ -117,9 +117,14 @@ class ScanVehicleForInstallState extends State<ScanVehicleForInstall>
                       onTap: () {
                         pp('$mm .... will try to restart a scan ...');
                       },
-                      child: KasieAIScanner(onScanned: (json ) {
-                        onCarScanned(lib.Vehicle.fromJson(json));
-                      },),
+                      child: LastScannerWidget(
+                        onVehicleScanned: (json) {
+                          onCarScanned(json);
+                        },
+                        onCommuterScanned: (commuter) {},
+                        onCommuterTicketScanned: (commuterTicket) {},
+                        onError: (err) {},
+                      ),
                     ),
                     const SizedBox(
                       height: 48,

@@ -392,8 +392,8 @@ class FuelForm extends StatelessWidget {
                 gapH32,
                 ElevatedButton(
                   style: ButtonStyle(
-                      elevation: WidgetStatePropertyAll(12),
-                      backgroundColor: WidgetStatePropertyAll(Colors.blue)),
+                      elevation: MaterialStatePropertyAll(12),
+                      backgroundColor: MaterialStatePropertyAll(Colors.blue)),
                   onPressed: () {
                     onSubmit();
                   },
@@ -465,8 +465,8 @@ class FuelFormLandscape extends StatelessWidget {
                 ),
                 ElevatedButton(
                   style: ButtonStyle(
-                      elevation: WidgetStatePropertyAll(12),
-                      backgroundColor: WidgetStatePropertyAll(Colors.blue)),
+                      elevation: MaterialStatePropertyAll(12),
+                      backgroundColor: MaterialStatePropertyAll(Colors.blue)),
                   onPressed: () {
                     onSubmit();
                   },

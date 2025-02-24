@@ -4,7 +4,7 @@ import 'package:kasie_transie_library/bloc/data_api_dog.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
 import 'package:kasie_transie_library/widgets/country_selection.dart';
 import 'package:kasie_transie_library/widgets/timer_widget.dart';
-import 'package:uuid/v4.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../bloc/list_api_dog.dart';
 import '../../data/data_schemas.dart';
@@ -94,7 +94,7 @@ class PaymentProviderWidgetState extends State<PaymentProviderWidget>
     var user = prefs.getUser();
 
     final PaymentProvider paymentProvider = PaymentProvider(
-      paymentProviderId: const UuidV4().generate(),
+      paymentProviderId: const Uuid().v4().toString(),
       created: DateTime.now().toUtc().toIso8601String(),
       paymentProviderName: providerNameController.text,
       baseUrl: baseUrlController.text,
@@ -215,8 +215,8 @@ class PaymentProviderForm extends StatelessWidget {
           gapH32,
           ElevatedButton(
               style: const ButtonStyle(
-                elevation: WidgetStatePropertyAll(8),
-                padding: WidgetStatePropertyAll(EdgeInsets.all(16)),
+                elevation: MaterialStatePropertyAll(8),
+                padding: MaterialStatePropertyAll(EdgeInsets.all(16)),
               ),
               onPressed: () {
                 onSubmit();

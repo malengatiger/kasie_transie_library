@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:badges/badges.dart' as bd;
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
@@ -19,8 +18,6 @@ import 'package:kasie_transie_library/utils/prefs.dart';
 import 'package:kasie_transie_library/widgets/payment/commuter_cash_payment_widget.dart';
 import 'package:kasie_transie_library/widgets/photo_handler.dart';
 import 'package:kasie_transie_library/widgets/scanners/dispatch_helper.dart';
-import 'package:kasie_transie_library/widgets/scanners/kasie/kasie_ai_scanner.dart';
-import 'package:kasie_transie_library/widgets/scanners/kasie/last_scanner_widget.dart';
 import 'package:kasie_transie_library/widgets/vehicle_widgets/fuel_top_up_widget.dart';
 
 import '../messaging/fcm_bloc.dart';
@@ -438,8 +435,8 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                 gapH8,
                 SizedBox(width:300, child: ElevatedButton(
                    style: ButtonStyle(
-                     backgroundColor: WidgetStatePropertyAll(Colors.teal),
-                     elevation: WidgetStatePropertyAll(4),
+                     backgroundColor: MaterialStatePropertyAll(Colors.teal),
+                     elevation: MaterialStatePropertyAll(4),
                    ),
                     onPressed: () {
                       _navigateToCommuterScan();
@@ -485,8 +482,8 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                   width: 300,
                   child: ElevatedButton(
                     style: const ButtonStyle(
-                        backgroundColor: WidgetStatePropertyAll(Colors.blue),
-                        elevation: WidgetStatePropertyAll(8)),
+                        backgroundColor: MaterialStatePropertyAll(Colors.blue),
+                        elevation: MaterialStatePropertyAll(8)),
                     onPressed: () {
                       _submitCounts();
                     },
@@ -503,8 +500,8 @@ class VehiclePassengerCountState extends State<VehiclePassengerCount>
                   width: 300,
                   child: ElevatedButton(
                     style: const ButtonStyle(
-                        backgroundColor: WidgetStatePropertyAll(Colors.grey),
-                        elevation: WidgetStatePropertyAll(2)),
+                        backgroundColor: MaterialStatePropertyAll(Colors.grey),
+                        elevation: MaterialStatePropertyAll(2)),
                     onPressed: () {
                       _tripHasEnded();
                     },

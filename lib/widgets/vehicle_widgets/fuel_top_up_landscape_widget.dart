@@ -216,9 +216,9 @@ class TopUpFuelState extends State<TopUpFuel>
                                 double.parse(litreControllers[index].text) > 0)
                               ElevatedButton(
                                 style: ButtonStyle(
-                                    elevation: WidgetStatePropertyAll(8),
+                                    elevation: MaterialStatePropertyAll(8),
                                     backgroundColor:
-                                        WidgetStatePropertyAll(Colors.blue)),
+                                        MaterialStatePropertyAll(Colors.blue)),
                                 onPressed: () {
                                   _submit(fb, index);
                                 },
@@ -306,9 +306,9 @@ class TopUpFuelState extends State<TopUpFuel>
                                             ? ElevatedButton(
                                           style: ButtonStyle(
                                               elevation:
-                                              WidgetStatePropertyAll(8),
+                                              MaterialStatePropertyAll(8),
                                               backgroundColor:
-                                              WidgetStatePropertyAll(
+                                              MaterialStatePropertyAll(
                                                   Colors.blue)),
                                           onPressed: () {
                                             _submit(fb, index);

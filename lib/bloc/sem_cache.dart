@@ -1,17 +1,19 @@
 import 'package:flutter/foundation.dart';
 import 'package:kasie_transie_library/data/data_schemas.dart';
+import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart' as sp;
-import 'package:sembast_web/sembast_web.dart' as sw;
-import 'package:sembast_web/sembast_web.dart';
+import 'package:sembast/sembast_io.dart';
+import 'package:sembast_web/sembast_web.dart' as web;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:sembast_web/sembast_web.dart';
 
 import '../data/route_data.dart';
 import '../utils/functions.dart'; // Import the path package
 
 class SemCache {
-  late sp.Database dbPhone;
-  late sw.Database dbWeb;
+  late Database dbPhone;
+  late Database dbWeb;
   static String dbPath = 'kasie.db';
 
   SemCache() {
@@ -23,14 +25,14 @@ class SemCache {
   void initializeDatabase() async {
     pp('\n\n$mm initialize 🔵️ Local Database 🔵️: set up for platform ...');
     if (kIsWeb) {
-      sw.DatabaseFactory dbFactoryWeb = sw.databaseFactoryWeb;
+      DatabaseFactory dbFactoryWeb = databaseFactoryWeb;
       dbWeb = await dbFactoryWeb.openDatabase(dbPath);
       // pp('$mm cache database set up for web. (1)');
     } else {
       final dir = await getApplicationDocumentsDirectory();
       await dir.create(recursive: true);
       final dPath = p.join(dir.path, dbPath);
-      dbPhone = await sp.databaseFactoryIo.openDatabase(dPath);
+      dbPhone = await databaseFactoryIo.openDatabase(dPath);
       // pp('$mm cache database set up for phone');
     }
   }
@@ -38,14 +40,14 @@ class SemCache {
   //
   Future getDb() async {
     if (kIsWeb) {
-      sw.DatabaseFactory dbFactoryWeb = sw.databaseFactoryWeb;
+      DatabaseFactory dbFactoryWeb = databaseFactoryWeb;
       dbWeb = await dbFactoryWeb.openDatabase(dbPath);
       return dbWeb;
     } else {
       final dir = await getApplicationDocumentsDirectory();
       await dir.create(recursive: true);
       final dPath = p.join(dir.path, dbPath);
-      dbPhone = await sp.databaseFactoryIo.openDatabase(dPath);
+      dbPhone = await databaseFactoryIo.openDatabase(dPath);
 
       return dbPhone;
     }
@@ -213,13 +215,13 @@ class SemCache {
   }
 
   Future<List<Vehicle>> getVehicles(String associationId) async {
-    sp.Finder finder;
+    Finder finder;
     if (kIsWeb) {
       finder =
-          sw.Finder(filter: sw.Filter.equals('associationId', associationId));
+          Finder(filter: Filter.equals('associationId', associationId));
     } else {
       finder =
-          sp.Finder(filter: sp.Filter.equals('associationId', associationId));
+          Finder(filter: Filter.equals('associationId', associationId));
     }
     var store = intMapStoreFactory.store('vehicles');
     var records = await store.find(await getDb(), finder: finder);
@@ -245,7 +247,7 @@ class SemCache {
   }
 
   Future<List<FuelBrand>> getFuelBrands() async {
-    sp.Finder finder;
+    Finder finder;
 
     var store = intMapStoreFactory.store('fuelBrands');
     var records = await store.find(await getDb(),);
@@ -355,8 +357,8 @@ class SemCache {
   Future<AssociationRouteData?> getAssociationRouteData(
       String associationId) async {
     var store = intMapStoreFactory.store('routeData');
-    sw.Finder finder = sw.Finder(
-        filter: sw.Filter.equals('associationId', associationId), limit: 1);
+    Finder finder = Finder(
+        filter: Filter.equals('associationId', associationId), limit: 1);
     var records = await store.find(await getDb());
 
     if (records.isNotEmpty) {
@@ -371,8 +373,8 @@ class SemCache {
   Future<RouteData?> getRouteDataByRoute(
       String associationId, String routeId) async {
     var store = intMapStoreFactory.store('routeData');
-    sw.Finder finder = sw.Finder(
-        filter: sw.Filter.equals('associationId', associationId), limit: 1);
+    Finder finder = Finder(
+        filter: Filter.equals('associationId', associationId), limit: 1);
     var records = await store.find(await getDb());
 
     if (records.isNotEmpty) {

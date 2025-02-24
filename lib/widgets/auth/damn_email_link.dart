@@ -26,7 +26,7 @@ Future<void> initializeEmailLinkProvider(fb_auth.ActionCodeSettings action) asyn
   emailLinkAuthProvider = fbui.EmailLinkAuthProvider(
     actionCodeSettings: action,
   );
-  emailLinkAuthProvider.auth = fb_auth.FirebaseAuth.instance;
+  var auth = fb_auth.FirebaseAuth.instance;
 
   fbui.FirebaseUIAuth.configureProviders([
     emailLinkAuthProvider,

@@ -248,10 +248,10 @@ class FuelWizardState extends State<FuelWizard>
                                                 },
                                                 style: ButtonStyle(
                                                   backgroundColor:
-                                                      WidgetStatePropertyAll(
+                                                      MaterialStatePropertyAll(
                                                           Colors.pink),
                                                   elevation:
-                                                      WidgetStatePropertyAll(
+                                                      MaterialStatePropertyAll(
                                                           8.0),
                                                 ),
                                                 child: Text(

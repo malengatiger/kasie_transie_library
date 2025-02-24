@@ -9,7 +9,7 @@ import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/functions.dart';
-import 'package:uuid/v4.dart';
+import 'package:uuid/uuid.dart';
 
 import '../bloc/data_api_dog.dart';
 import '../bloc/list_api_dog.dart';
@@ -430,7 +430,7 @@ class LandmarkCreatorMapState extends State<LandmarkCreatorMap> {
           landmarkName: landmarkName!,
           index: landmarkIndex,
           created: DateTime.now().toUtc().toIso8601String(),
-          landmarkId: const UuidV4().generate(),
+          landmarkId: const Uuid().v4().toString(),
           routePointId: routePointForLandmark!.routePointId!,
           routePointIndex: routePointForLandmark!.index!,
           associationId: widget.route.associationId!,
