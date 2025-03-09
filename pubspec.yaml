@@ -93,6 +93,7 @@ dependencies:
   currency_formatter: any
   file_picker: any
   flutter_data_table: any
+  firebase_messaging_web: ^3.10.4
 
 
   google_mlkit_commons: any

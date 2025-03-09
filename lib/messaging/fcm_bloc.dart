@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart' as fb;
 import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:flutter/foundation.dart';
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
@@ -56,7 +57,7 @@ class FCMService {
   late ErrorHandler errorHandler;
 
   Future initialize() async {
-    pp('\n\n$mm ... FirebaseMessaging initialize starting ... ');
+    pp('\n\n$mm ... FCMService initialize starting ... ');
     listApiDog = GetIt.instance<ListApiDog>();
     prefs = GetIt.instance<Prefs>();
     dataApiDog = GetIt.instance<DataApiDog>();
@@ -77,7 +78,7 @@ class FCMService {
       sound: true,
     );
 
-    pp('$mm FCM : User granted permission?, authorizationStatus: ${notificationSettings.authorizationStatus}');
+    pp('$mm FCMService : User granted permission?, authorizationStatus: ${notificationSettings.authorizationStatus}');
 
     firebaseMessaging.setAutoInitEnabled(true);
     firebaseMessaging.onTokenRefresh.listen((newToken) {
@@ -118,7 +119,7 @@ class FCMService {
 
     LocalNotificationService.initialize();
 
-    pp("\n\n$mm FCM : FIREBASE MESSAGING initialization done! "
+    pp("\n\n$mm FCMService : FIREBASE MESSAGING initialization done! "
         "- ${E.nice} ${E.nice} ${E.nice} "
         " apps will subscribe to topics in a bit! ...........................");
   }
@@ -153,7 +154,7 @@ class FCMService {
     pp('$newMM ..... FCM: subscribed to topic appError');
   }
 
-  Future<void> subscribeForDemoDriver(String app) async {
+  Future<void> subscribeForCarDemo(String app) async {
     String? associationId;
     appName = app;
     newMM = '$newMM$app 🔷🔷';
@@ -164,33 +165,60 @@ class FCMService {
     } else {
       return;
     }
+
     //
-    await firebaseMessaging
-        .subscribeToTopic('${Constants.commuterRequest}$associationId');
-    pp('$newMM ..... FCM: subscribed to ${Constants.commuterRequest}$associationId');
+    pp('$newMM ..... FCMService: subscribed to ${Constants.commuterRequest}$associationId');
     //
     await firebaseMessaging
         .subscribeToTopic('${Constants.heartbeat}$associationId');
-    pp('$newMM ..... FCM: subscribed to ${Constants.heartbeat}$associationId');
+    pp('$newMM ..... FCMService: subscribed to ${Constants.heartbeat}$associationId');
 //
     await firebaseMessaging
         .subscribeToTopic('${Constants.dispatchRecord}$associationId');
-    pp('$newMM ..... FCM: subscribed to ${Constants.dispatchRecord}$associationId');
+    pp('$newMM ..... FCMService: subscribed to ${Constants.dispatchRecord}$associationId');
     //
     await firebaseMessaging
         .subscribeToTopic('${Constants.passengerCount}$associationId');
-    pp('$newMM ..... FCM: subscribed to ${Constants.passengerCount}$associationId');
+    pp('$newMM ..... FCMService: subscribed to ${Constants.passengerCount}$associationId');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.commuterCashPayment}$associationId');
+    pp('$newMM ..... FCMService: subscribed to ${Constants.commuterCashPayment}$associationId');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.trips}$associationId');
+    pp('$newMM ..... FCMService: subscribed to ${Constants.trips}$associationId');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.commuterCashCheckIn}$associationId');
+    pp('$newMM ..... FCMService: subscribed to ${Constants.commuterCashCheckIn}$associationId');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.rankFeeCashCheckIn}$associationId');
+    pp('$newMM ..... FCMService: subscribed to ${Constants.rankFeeCashCheckIn}$associationId');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.rankFeeCashPayment}$associationId');
+    pp('$newMM ..... FCMService: subscribed to ${Constants.rankFeeCashPayment}$associationId');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.locationRequest}$associationId');
+    pp('$newMM ..... FCMService: subscribed to ${Constants.locationRequest}$associationId');
+
+    await firebaseMessaging
+        .subscribeToTopic('${Constants.locationResponse}$associationId');
+    pp('$newMM ..... FCMService: subscribed to ${Constants.locationResponse}$associationId');
 
     await firebaseMessaging
         .subscribeToTopic('${Constants.vehicleArrival}$associationId');
-    pp('$newMM ..... FCM: subscribed to ${Constants.vehicleArrival}$associationId');
+    pp('$newMM ..... FCMService: subscribed to ${Constants.vehicleArrival}$associationId');
     //
     await firebaseMessaging
         .subscribeToTopic('${Constants.vehicleDeparture}$associationId');
-    pp('$newMM ..... FCM: subscribed to ${Constants.vehicleDeparture}$associationId');
+    pp('$newMM ..... FCMService: subscribed to ${Constants.vehicleDeparture}$associationId');
     //
     pp('$newMM .............................................'
-        ' FCM: subscribed to all ${E.pear} 5 (five) DemoDriver FCM topics\n\n');
+        ' FCMService: subscribed to all ${E.pear} 5 (five) DemoDriver FCM topics\n\n');
   }
 
   Future<void> subscribeForCar(Vehicle car, String app) async {
@@ -836,7 +864,7 @@ class FCMService {
       try {
         pp('$newMM sending location response! ${E.blueDot}');
         final result = await dataApiDog.addLocationResponseError(resp);
-        _locationResponseErrorStreamController .sink.add(resp);
+        _locationResponseErrorStreamController.sink.add(resp);
         pp('$newMM location response successfully sent! } ');
         myPrettyJsonPrint(result.toJson());
       } catch (e) {
@@ -1132,12 +1160,10 @@ void sendLocationResponseError(
     final result = await _sendLocationResponseError(resp);
     pp('$mxx background location error response successfully sent! ${E.leaf} ');
     myPrettyJsonPrint(result);
-
   } catch (e) {
     pp(e);
   }
 }
-
 
 Future _sendLocationResponseError(lib.LocationResponseError resp) async {
   pp('$mxx _sendLocationResponseError: 🔆🔆🔆 ...... fcm token : 💙 ${resp.fcmToken}  💙');

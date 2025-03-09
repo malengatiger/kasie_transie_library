@@ -95,6 +95,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
           }
         }
         widget.onGoodSignIn();
+        Navigator.of(context).pop();
       } else {
         widget.onSignInError();
       }

@@ -16,9 +16,11 @@ import 'package:kasie_transie_library/utils/route_distance_calculator.dart';
 import 'package:kasie_transie_library/utils/zip_handler.dart';
 
 import '../data/big_bag.dart';
+import '../data/commuter_cash_payment.dart';
 import '../data/data_schemas.dart';
 import '../data/example_file.dart';
 import '../data/payment_provider.dart';
+import '../data/rank_fee_cash_payment.dart';
 import '../data/route_bag.dart';
 import '../isolates/local_finder.dart';
 import '../utils/emojis.dart';
@@ -583,6 +585,20 @@ class ListApiDog {
     return 0;
   }
 
+  Future startCarDemo({required Route route, required Vehicle car, required User ambassador, required User marshal, required String associationId}) async {
+
+    final cmd = '${url}internal/startCarDemo?'
+        'routeId=${route.routeId}'
+        '&vehicleId=${car.vehicleId}'
+        '&ambassadorId=${ambassador.userId}'
+        '&marshalId=${marshal.userId}'
+        '&associationId=$associationId';
+
+    var resp = await _sendHttpGET(cmd);
+
+    pp('$mm response: $resp');
+    return resp;
+  }
   Future<List<Vehicle>> getAssociationCars(
       String associationId, bool refresh) async {
     semCache = GetIt.instance<SemCache>();
@@ -945,16 +961,48 @@ class ListApiDog {
 
   Future<List<AmbassadorPassengerCount>> getRoutePassengerCounts(
       {required String routeId,
-      required bool refresh,
       required String startDate}) async {
     var localList = <AmbassadorPassengerCount>[];
 
     try {
       final url =
-          '${KasieEnvironment.getUrl()}getRoutePassengerCounts?routeId=$routeId'
+          '${KasieEnvironment.getUrl()}dispatch/getRoutePassengerCounts?routeId=$routeId'
           '&startDate=$startDate';
       localList = await _getPassengerCountsFromBackend(url: url);
       pp('$mm AmbassadorPassengerCounts from backend:: ${localList.length}');
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
+
+  Future<List<CommuterCashPayment>> getRouteCommuterCashPayments(
+      {required String routeId,
+        required String startDate}) async {
+    var localList = <CommuterCashPayment>[];
+
+    try {
+      final url =
+          '${KasieEnvironment.getUrl()}dispatch/getRouteCommuterCashPayments?routeId=$routeId'
+          '&startDate=$startDate';
+      localList = await _getCommuterCashFromBackend(url: url);
+      pp('$mm CommuterCashPayment from backend:: ${localList.length}');
+    } catch (e) {
+      pp(e);
+    }
+    return localList;
+  }
+  Future<List<Trip>> getRouteTrips(
+      {required String routeId,
+        required String startDate}) async {
+    var localList = <Trip>[];
+
+    try {
+      final url =
+          '${KasieEnvironment.getUrl()}dispatch/getRouteTrips?routeId=$routeId'
+          '&startDate=$startDate';
+      localList = await _getTripsFromBackend(url: url);
+      pp('$mm Trips from backend:: ${localList.length}');
     } catch (e) {
       pp(e);
     }
@@ -987,7 +1035,7 @@ class ListApiDog {
 
     try {
       final url =
-          '${KasieEnvironment.getUrl()}getRouteVehicleArrivals?routeId=$routeId'
+          '${KasieEnvironment.getUrl()}dispatch/getRouteVehicleArrivals?routeId=$routeId'
           '&startDate=$startDate';
       localList = await _getVehicleArrivalsFromBackend(url: url);
       pp('$mm VehicleArrivals from backend:: ${localList.length}');
@@ -1106,6 +1154,42 @@ class ListApiDog {
     return list;
   }
 
+  Future<List<CommuterCashPayment>> _getCommuterCashFromBackend(
+      {required String url}) async {
+    final list = <CommuterCashPayment>[];
+    List resp = await _sendHttpGET(url);
+    for (var value in resp) {
+      var r = CommuterCashPayment.fromJson(value);
+      list.add(r);
+    }
+
+    pp('$mm CommuterCashPayments found: ${list.length}');
+    return list;
+  }
+  Future<List<Trip>> _getTripsFromBackend(
+      {required String url}) async {
+    final list = <Trip>[];
+    List resp = await _sendHttpGET(url);
+    for (var value in resp) {
+      var r = Trip.fromJson(value);
+      list.add(r);
+    }
+
+    pp('$mm Trips found: ${list.length}');
+    return list;
+  }
+  Future<List<RankFeeCashPayment>> _getRankFeeCashFromBackend(
+      {required String url}) async {
+    final list = <RankFeeCashPayment>[];
+    List resp = await _sendHttpGET(url);
+    for (var value in resp) {
+      var r = RankFeeCashPayment.fromJson(value);
+      list.add(r);
+    }
+
+    pp('$mm RankFeeCashPayment found: ${list.length}');
+    return list;
+  }
   Future<List<VehiclePhoto>> _getVehiclePhotosFromBackend(
       {required String vehicleId}) async {
     final list = <VehiclePhoto>[];

@@ -88,6 +88,7 @@ class DataApiDog {
   }
 
   init() async {
+    pp('$mm initializing ....');
     await Future.delayed(const Duration(seconds: 1));
     var p = await SharedPreferences.getInstance();
     errorHandler = ErrorHandler(DeviceLocationBloc(), Prefs(p));
@@ -96,6 +97,7 @@ class DataApiDog {
     prefs = Prefs(await SharedPreferences.getInstance());
     semCache = SemCache();
     client = http.Client();
+    pp('$mm initializing complete!!');
   }
 
   void listen() {
@@ -349,6 +351,15 @@ class DataApiDog {
     throw Exception('receipt photo file upload failed');
   }
 
+  Future addAssociationToken(
+  {required String associationId, required String token, required String userId}
+      ) async {
+    url = KasieEnvironment.getUrl();
+    final cmd = '${url}association/addAssociationToken?associationId=$associationId&token=$token&userId=$userId';
+    var res = await _sendHttpGET(cmd);
+    pp('$mm AssociationToken added to Atlas: $res');
+    return res;
+  }
   Future<List<RouteAssignment>> addRouteAssignments(
       RouteAssignmentList assignments) async {
     final bag = assignments.toJson();
