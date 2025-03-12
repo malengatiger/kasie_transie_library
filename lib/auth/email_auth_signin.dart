@@ -94,8 +94,11 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
             prefs.saveSettings(s);
           }
         }
+        pp('$mm calling widget.onGoodSignIn ...');
         widget.onGoodSignIn();
-        Navigator.of(context).pop();
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
       } else {
         widget.onSignInError();
       }
@@ -186,7 +189,7 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
                                     width: 300,
                                     height: 60,
                                     child: ElevatedButton(
-                                        style:  ButtonStyle(
+                                        style: ButtonStyle(
                                           backgroundColor:
                                               MaterialStatePropertyAll(
                                                   Colors.pink),
