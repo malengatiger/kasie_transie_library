@@ -34,37 +34,41 @@ class NavigationUtils {
     pp('NavigationUtils: .... navigating to widget: ${widget.toString()}');
     return await Navigator.push(
       context,
-      PageTransition(
-        child: widget,
-        type: transitionType ?? PageTransitionType.rightToLeft,
-        alignment: Alignment.bottomLeft,
-        curve: Curves.bounceIn,
-        duration: duration ?? const Duration(milliseconds: 1000),
-        settings: RouteSettings(name: widget.toStringShort()),
-      ),
+      MaterialPageRoute(builder: (context) => widget
+          // PageTransition(
+          //   child: widget,
+          //   type: transitionType ?? PageTransitionType.rightToLeft,
+          //   alignment: Alignment.bottomLeft,
+          //   curve: Curves.bounceIn,
+          //   duration: duration ?? const Duration(milliseconds: 1000),
+          //   settings: RouteSettings(name: widget.toStringShort()),
+          ),
     );
   }
-  static Future  navigateNormal(BuildContext context, Widget widget) async {
+
+  static Future navigateNormal(BuildContext context, Widget widget) async {
     pp('NavigationUtils: .... navigateNormal to widget: ${widget.toString()}');
 
     Navigator.push(
       context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => widget,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(-1.0, 0.0);
-          const end = Offset.zero;
-          const curve = Curves.easeInOut;
+      MaterialPageRoute(builder: (context) => widget
 
-          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-          var offsetAnimation = animation.drive(tween);
-
-          return SlideTransition(
-            position: offsetAnimation,
-            child: child,
-          );
-        },
-      ),
+          // PageRouteBuilder(
+          //   pageBuilder: (context, animation, secondaryAnimation) => widget,
+          //   transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          //     const begin = Offset(-1.0, 0.0);
+          //     const end = Offset.zero;
+          //     const curve = Curves.easeInOut;
+          //
+          //     var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          //     var offsetAnimation = animation.drive(tween);
+          //
+          //     return SlideTransition(
+          //       position: offsetAnimation,
+          //       child: child,
+          //     );
+          //   },
+          ),
     );
     return 1;
   }

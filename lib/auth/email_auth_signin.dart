@@ -94,13 +94,16 @@ class EmailAuthSigninState extends State<EmailAuthSignin>
             prefs.saveSettings(s);
           }
         }
-        pp('$mm calling widget.onGoodSignIn ...');
+        pp('$mm .... calling widget.onGoodSignIn ...');
         widget.onGoodSignIn();
         if (mounted) {
           Navigator.of(context).pop();
         }
       } else {
         widget.onSignInError();
+        if (mounted) {
+          showErrorToast(message: 'SignIn failed', context: context);
+        }
       }
     } catch (e) {
       pp(e);

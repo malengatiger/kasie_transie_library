@@ -262,6 +262,10 @@ class ListApiDog {
         '${url}association/getAssociationById?associationId=$associationId';
     try {
       final resp = await _sendHttpGET(cmd);
+      pp('$mm getAssociationById found: $resp');
+      if (resp == null) {
+        return null;
+      }
       final ass = Association.fromJson(resp);
       pp('$mm getAssociationById found: ${ass.associationName} ');
       myPrettyJsonPrint(resp);
