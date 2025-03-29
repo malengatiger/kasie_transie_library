@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:kasie_transie_library/data/data_schemas.dart' as lib;
-import 'package:kasie_transie_library/messaging/local_notif.dart';
 import 'package:kasie_transie_library/utils/device_location_bloc.dart';
 import 'package:kasie_transie_library/utils/emojis.dart';
 import 'package:kasie_transie_library/utils/environment.dart';
@@ -117,7 +116,7 @@ class FCMService {
       pp('$mm onMessageOpenedApp:  $red A new onMessageOpenedApp event was published! ${message.data}');
     });
 
-    LocalNotificationService.initialize();
+    //LocalNotificationService.initialize();
 
     pp("\n\n$mm FCMService : FIREBASE MESSAGING initialization done! "
         "- ${E.nice} ${E.nice} ${E.nice} "
